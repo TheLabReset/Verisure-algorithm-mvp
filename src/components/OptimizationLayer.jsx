@@ -1,8 +1,39 @@
 import { TrendingUp, BarChart3, RefreshCw, Award, Target, Users, Heart, Zap, AlertCircle, CreditCard, Bell, Globe, FileText, CheckCircle, Lightbulb, Activity, UserPlus, Calendar, Store } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { ResponsiveFunnel } from '@nivo/funnel';
 import { PERFORMANCE_KPIS, ALERTS, COMPETITOR_INSIGHTS, CRM_MOCKUP } from '../data/mockData';
 import { LAYER_CONFIG, CRM_CONFIG } from '../data/config';
 import { formatES, formatThousands, formatMoney, formatPercent, formatCompact } from '../utils/format';
+
+// Custom SVG layer para el funnel: renderiza el valor real (no el inflado)
+// sobre cada sección, en lugar de las labels default de nivo.
+const FunnelValueLabels = ({ parts }) => {
+  if (!parts || !parts.length) return null;
+  return (
+    <g>
+      {parts.map((part) => {
+        const realVal = part.data.realValue;
+        if (realVal == null) return null;
+        return (
+          <text
+            key={part.data.id}
+            x={part.x}
+            y={part.y}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#ffffff"
+            fontSize={14}
+            fontWeight={700}
+            stroke="#00000055"
+            strokeWidth={0.5}
+          >
+            {Number(realVal).toLocaleString('es-PE')}
+          </text>
+        );
+      })}
+    </g>
+  );
+};
 
 export default function OptimizationLayer() {
   // Helper function to get monthly period (1st to today)
@@ -35,12 +66,26 @@ export default function OptimizationLayer() {
 
   // Funnel de conversión Powerpay - Journey del usuario
   const funnelSteps = [
-    { stage: 'Alcance', value: 1800000, conversionRate: 1.5, IconComponent: Users, bgColor: 'bg-fitzone-purple' },
-    { stage: 'Visitas Web', value: 27000, conversionRate: 68.5, IconComponent: Globe, bgColor: 'bg-fitzone-darkPurple' },
-    { stage: 'Visitas a Tiendas', value: 18500, conversionRate: 7.8, IconComponent: Store, bgColor: 'bg-fitzone-cyan' },
-    { stage: 'Registros Iniciados', value: 1450, conversionRate: 72.4, IconComponent: Activity, bgColor: 'bg-fitzone-emerald' },
-    { stage: 'Cuentas Creadas', value: 1050, conversionRate: null, IconComponent: CheckCircle, bgColor: 'bg-green-500' }
+    { stage: 'Alcance', value: 1800000, conversionRate: 1.5 },
+    { stage: 'Visitas Web', value: 27000, conversionRate: 68.5 },
+    { stage: 'Visitas a Tiendas', value: 18500, conversionRate: 7.8 },
+    { stage: 'Registros Iniciados', value: 1450, conversionRate: 72.4 },
+    { stage: 'Cuentas Creadas', value: 1050, conversionRate: null }
   ];
+
+  // Paleta del funnel: gradiente morado Powerpay → cyan → amber (cierre)
+  const funnelColors = ['#9D4FD9', '#7B2CBF', '#5A1F8E', '#06B6D4', '#F4B842'];
+
+  // Inflado visual: nivo necesita un mínimo del 15% del valor máximo para que
+  // las secciones pequeñas no desaparezcan. realValue conserva el valor real.
+  const funnelMaxVal = Math.max(...funnelSteps.map(s => s.value));
+  const funnelMinVisual = Math.round(funnelMaxVal * 0.15);
+  const funnelChartData = funnelSteps.map(step => ({
+    id: step.stage,
+    value: Math.max(step.value, funnelMinVisual),
+    label: step.stage,
+    realValue: step.value,
+  }));
 
   return (
     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
@@ -192,6 +237,7 @@ export default function OptimizationLayer() {
               <Tooltip
                 contentStyle={{ backgroundColor: '#1A0F26', border: '1px solid #7B2CBF', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
                 labelStyle={{ fontWeight: 'bold', marginBottom: '8px', color: '#7B2CBF' }}
+                itemStyle={{ color: '#fff' }}
               />
               <Line yAxisId="left" type="monotone" dataKey="leads" stroke="#7B2CBF" strokeWidth={2} dot={{ r: 3 }} />
               <Line yAxisId="right" type="monotone" dataKey="engagement" stroke="#06B6D4" strokeWidth={2} dot={{ r: 3 }} />
@@ -223,7 +269,14 @@ export default function OptimizationLayer() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: '#1A0F26', border: '1px solid #7B2CBF', borderRadius: '8px', color: '#fff', fontSize: '12px' }} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#1A0F26', border: '1px solid #7B2CBF', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+                  itemStyle={{ color: '#fff' }}
+                  formatter={(value, name, props) => {
+                    const channel = channelData.find(c => c.name === name);
+                    return [`${value}% (${channel?.leads ?? '-'} leads)`, name];
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -251,63 +304,87 @@ export default function OptimizationLayer() {
         </div>
       </div>
 
-      {/* Funnel de Conversion - Responsive */}
+      {/* Funnel de Conversion - Powerpay con @nivo/funnel vertical */}
       <div className="bg-fitzone-slate rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 lg:p-6 border border-fitzone-purple/20">
         <h3 className="text-sm sm:text-base font-bold text-white mb-4 sm:mb-6">Funnel de Conversión Powerpay</h3>
 
-        {/* Mobile: Vertical Stack, Desktop: Horizontal Flow */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 sm:gap-3 lg:gap-3 overflow-x-auto pb-2 lg:pb-4">
-          {funnelSteps.map((step, idx) => (
-            <div key={idx} className="flex flex-row lg:flex-row items-center gap-2 sm:gap-3 flex-shrink-0">
-              {/* Step Card */}
-              <div className={`${step.bgColor} rounded-lg sm:rounded-xl p-3 sm:p-4 text-white shadow-md flex-1 lg:flex-initial lg:min-w-[120px] xl:min-w-[140px]`}>
-                <div className="flex lg:flex-col items-center lg:text-center gap-3 lg:gap-0">
-                  <div className="flex-shrink-0 lg:mb-2">
-                    <step.IconComponent className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Funnel + stage labels — 2 columnas en desktop */}
+          <div className="lg:col-span-2">
+            <div style={{ height: 460 }}>
+              <ResponsiveFunnel
+                data={funnelChartData}
+                direction="vertical"
+                margin={{ top: 10, right: 20, bottom: 10, left: 20 }}
+                colors={funnelColors}
+                borderWidth={0}
+                enableLabel={false}
+                layers={['separators', 'parts', FunnelValueLabels, 'annotations']}
+                spacing={4}
+                shapeBlending={0.7}
+                valueFormat={v => v.toLocaleString('es-PE')}
+                motionConfig="gentle"
+                tooltip={({ part }) => (
+                  <div style={{
+                    background: '#1A0F26',
+                    color: '#fff',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #7B2CBF',
+                    fontSize: '13px',
+                  }}>
+                    <strong>{part.data.label}</strong>
+                    <br />
+                    {Number(part.data.realValue).toLocaleString('es-PE')}
                   </div>
-                  <div className="flex-1 lg:flex-initial">
-                    <p className="text-xs font-medium text-white/80 uppercase tracking-wide mb-0.5 sm:mb-1">{step.stage}</p>
-                    <p className="text-base sm:text-lg font-bold">{formatThousands(step.value)}</p>
-                  </div>
-                  {/* Mobile: Show conversion rate inline */}
-                  {idx < funnelSteps.length - 1 && (
-                    <div className="lg:hidden flex-shrink-0 text-right">
-                      <span className="text-xs sm:text-sm font-bold bg-white/20 px-2 py-1 rounded">{formatPercent(step.conversionRate)}</span>
+                )}
+              />
+            </div>
+
+            {/* Stage labels debajo del funnel */}
+            <div className="mt-4 space-y-1.5">
+              {funnelSteps.map((step, idx) => {
+                const next = funnelSteps[idx + 1];
+                const stepRate = next ? (next.value / step.value) * 100 : null;
+                return (
+                  <div key={step.stage} className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md hover:bg-fitzone-charcoal/50 transition-colors">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: funnelColors[idx] }} />
+                      <span className="text-xs sm:text-sm font-medium text-white truncate">{step.stage}</span>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Arrow with conversion rate - Desktop only */}
-              {idx < funnelSteps.length - 1 && (
-                <div className="hidden lg:flex flex-col items-center justify-center min-w-[50px] xl:min-w-[60px]">
-                  <div className="text-xs xl:text-sm font-bold text-fitzone-purple mb-1">{formatPercent(step.conversionRate)}</div>
-                  <svg className="w-6 h-6 xl:w-8 xl:h-8 text-fitzone-textGray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </div>
-              )}
+                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-bold text-white tabular-nums">{formatThousands(step.value)}</span>
+                      {stepRate != null && (
+                        <span className="text-[10px] sm:text-xs text-fitzone-textGray tabular-nums w-14 text-right">→ {formatES(stepRate, 1)}%</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
+          </div>
 
-        {/* Summary Stats */}
-        <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-fitzone-purple/20">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            <div className="bg-fitzone-purple/10 rounded-lg p-3 border border-fitzone-purple/20">
+          {/* Métricas laterales — 1 columna */}
+          <div className="space-y-3 sm:space-y-4">
+            <div className="bg-fitzone-purple/10 rounded-lg p-3 sm:p-4 border border-fitzone-purple/20">
               <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Conversión Global</p>
-              <p className="text-lg sm:text-xl font-bold text-fitzone-purple">0,058%</p>
-              <p className="text-xs text-fitzone-textGray">Alcance - Cuentas Creadas</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-lightPurple">0,058%</p>
+              <p className="text-xs text-fitzone-textGray mt-1">Alcance → Cuentas Creadas</p>
             </div>
-            <div className="bg-fitzone-emerald/10 rounded-lg p-3 border border-fitzone-emerald/20">
-              <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Registro - KYC</p>
-              <p className="text-lg sm:text-xl font-bold text-fitzone-emerald">72,4%</p>
-              <p className="text-xs text-fitzone-textGray">Validación de identidad</p>
+            <div className="bg-fitzone-emerald/10 rounded-lg p-3 sm:p-4 border border-fitzone-emerald/20">
+              <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Registro → KYC</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-emerald">72,4%</p>
+              <p className="text-xs text-fitzone-textGray mt-1">Validación de identidad</p>
             </div>
-            <div className="bg-fitzone-cyan/10 rounded-lg p-3 border border-fitzone-cyan/20">
-              <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Tasa Conversión Web</p>
-              <p className="text-lg sm:text-xl font-bold text-fitzone-cyan">5,4%</p>
-              <p className="text-xs text-fitzone-textGray">Tiendas - Registros</p>
+            <div className="bg-fitzone-cyan/10 rounded-lg p-3 sm:p-4 border border-fitzone-cyan/20">
+              <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Web → Registros</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-cyan">5,4%</p>
+              <p className="text-xs text-fitzone-textGray mt-1">Visitas web a registros</p>
+            </div>
+            <div className="bg-fitzone-amber/10 rounded-lg p-3 sm:p-4 border border-fitzone-amber/20">
+              <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Mayor caída</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-amber">98,5%</p>
+              <p className="text-xs text-fitzone-textGray mt-1">Alcance → Visitas Web</p>
             </div>
           </div>
         </div>
