@@ -1,41 +1,152 @@
 {
-  "timestamp": "2026-01-21T08:30:00.000Z",
+  "timestamp": "2026-05-04T17:02:08.274Z",
   "region": "PE",
-  "category": "Health & Fitness",
+  "category": "Finance",
   "source": "Google Trends (Curated Fallback)",
-  "client": "FitZone Peru - Cadena de Gimnasios",
+  "client": "Powerpay",
   "keywords": [
     {
-      "keyword": "gimnasio lima",
-      "average_interest": 92,
+      "keyword": "cuotas sin intereses",
+      "average_interest": 86,
       "trend": "rising",
       "peak_score": 100,
-      "growth_3m": "+85%",
+      "growth_3m": "+42%",
       "top_regions": {
         "Lima": 100,
-        "Callao": 78,
-        "Arequipa": 45,
-        "Trujillo": 38,
-        "Cusco": 32
+        "Arequipa": 68,
+        "Trujillo": 55,
+        "Chiclayo": 48,
+        "Piura": 42
       },
       "rising_queries": [
-        "gimnasio cerca de mi",
-        "gimnasio 24 horas lima",
-        "gimnasio barato lima"
+        "cuotas sin intereses peru",
+        "comprar en cuotas sin intereses",
+        "cuotas 0 interes"
       ],
       "related_topics": [
         {
-          "title": "Smart Fit",
+          "title": "Cuotéalo",
           "type": "Brand",
-          "value": 95
+          "value": 80
         },
         {
-          "title": "b2 Gimnasios",
+          "title": "Yape",
           "type": "Brand",
-          "value": 68
+          "value": 78
         },
         {
-          "title": "FitZone",
+          "title": "Powerpay",
+          "type": "Brand",
+          "value": 62
+        }
+      ],
+      "source": "curated"
+    },
+    {
+      "keyword": "pagar en cuotas",
+      "average_interest": 78,
+      "trend": "rising",
+      "peak_score": 92,
+      "growth_3m": "+28%",
+      "top_regions": {
+        "Lima": 100,
+        "Arequipa": 70,
+        "Trujillo": 58,
+        "Chiclayo": 50,
+        "Cusco": 42
+      },
+      "rising_queries": [
+        "pagar en cuotas con tarjeta",
+        "pagar compras en cuotas",
+        "como pagar en cuotas"
+      ],
+      "related_topics": [
+        {
+          "title": "Tarjeta de crédito",
+          "type": "Topic",
+          "value": 88
+        },
+        {
+          "title": "BNPL",
+          "type": "Topic",
+          "value": 72
+        },
+        {
+          "title": "Tarjeta de débito",
+          "type": "Topic",
+          "value": 60
+        }
+      ],
+      "source": "curated"
+    },
+    {
+      "keyword": "comprar en cuotas",
+      "average_interest": 82,
+      "trend": "rising",
+      "peak_score": 95,
+      "growth_3m": "+35%",
+      "top_regions": {
+        "Lima": 100,
+        "Arequipa": 72,
+        "Trujillo": 60,
+        "Chiclayo": 55,
+        "Piura": 50
+      },
+      "rising_queries": [
+        "comprar laptop en cuotas",
+        "comprar celular en cuotas",
+        "comprar electrodomesticos en cuotas"
+      ],
+      "related_topics": [
+        {
+          "title": "Cyber Wow",
+          "type": "Event",
+          "value": 90
+        },
+        {
+          "title": "Black Friday",
+          "type": "Event",
+          "value": 82
+        },
+        {
+          "title": "Cyber Days",
+          "type": "Event",
+          "value": 78
+        }
+      ],
+      "source": "curated"
+    },
+    {
+      "keyword": "comprar ahora pagar despues",
+      "average_interest": 70,
+      "trend": "rising",
+      "peak_score": 88,
+      "growth_3m": "+48%",
+      "top_regions": {
+        "Lima": 100,
+        "Arequipa": 65,
+        "Trujillo": 52,
+        "Chiclayo": 48,
+        "Cusco": 40
+      },
+      "rising_queries": [
+        "que es buy now pay later",
+        "bnpl peru",
+        "comprar y pagar despues sin intereses"
+      ],
+      "related_topics": [
+        {
+          "title": "Powerpay",
+          "type": "Brand",
+          "value": 75
+        },
+        {
+          "title": "Cuotéalo",
+          "type": "Brand",
+          "value": 70
+        },
+        {
+          "title": "aCuotaz",
           "type": "Brand",
           "value": 45
         }
@@ -43,186 +154,75 @@
       "source": "curated"
     },
     {
-      "keyword": "membresia gimnasio",
-      "average_interest": 78,
+      "keyword": "powerpay",
+      "average_interest": 64,
       "trend": "rising",
-      "peak_score": 95,
+      "peak_score": 82,
       "growth_3m": "+62%",
       "top_regions": {
         "Lima": 100,
-        "Callao": 72,
-        "Arequipa": 48,
-        "Cusco": 35,
-        "Piura": 32
+        "Arequipa": 60,
+        "Trujillo": 48,
+        "Chiclayo": 42,
+        "Piura": 38
       },
       "rising_queries": [
-        "membresia gimnasio precio",
-        "membresia sin permanencia",
-        "membresia gimnasio promocion"
+        "powerpay como funciona",
+        "powerpay opiniones",
+        "powerpay registrarme"
       ],
       "related_topics": [
         {
-          "title": "Plan mensual",
-          "type": "Product",
-          "value": 88
-        },
-        {
-          "title": "Plan anual",
-          "type": "Product",
-          "value": 72
-        },
-        {
-          "title": "Pase libre",
-          "type": "Product",
-          "value": 65
-        }
-      ],
-      "source": "curated"
-    },
-    {
-      "keyword": "crossfit lima",
-      "average_interest": 68,
-      "trend": "rising",
-      "peak_score": 82,
-      "growth_3m": "+45%",
-      "top_regions": {
-        "Lima": 100,
-        "Miraflores": 92,
-        "San Isidro": 85,
-        "Surco": 78,
-        "La Molina": 72
-      },
-      "rising_queries": [
-        "crossfit para principiantes",
-        "crossfit precio",
-        "box crossfit lima"
-      ],
-      "related_topics": [
-        {
-          "title": "HIIT",
-          "type": "Activity",
-          "value": 82
-        },
-        {
-          "title": "Funcional",
-          "type": "Activity",
-          "value": 78
-        },
-        {
-          "title": "WOD",
-          "type": "Topic",
-          "value": 65
-        }
-      ],
-      "source": "curated"
-    },
-    {
-      "keyword": "personal trainer lima",
-      "average_interest": 72,
-      "trend": "rising",
-      "peak_score": 88,
-      "growth_3m": "+38%",
-      "top_regions": {
-        "Lima": 100,
-        "San Isidro": 88,
-        "Miraflores": 85,
-        "La Molina": 75,
-        "Surco": 72
-      },
-      "rising_queries": [
-        "personal trainer precio",
-        "entrenador personal lima",
-        "personal trainer online"
-      ],
-      "related_topics": [
-        {
-          "title": "Nutricion",
-          "type": "Service",
+          "title": "BBVA",
+          "type": "Brand",
           "value": 85
         },
         {
-          "title": "Plan de entrenamiento",
-          "type": "Service",
-          "value": 80
-        },
-        {
-          "title": "Resultados",
+          "title": "Cuotas sin intereses",
           "type": "Topic",
-          "value": 75
-        }
-      ],
-      "source": "curated"
-    },
-    {
-      "keyword": "bajar de peso gimnasio",
-      "average_interest": 88,
-      "trend": "rising",
-      "peak_score": 100,
-      "growth_3m": "+92%",
-      "top_regions": {
-        "Lima": 100,
-        "Callao": 82,
-        "Arequipa": 65,
-        "Trujillo": 58,
-        "Chiclayo": 52
-      },
-      "rising_queries": [
-        "como bajar de peso rapido",
-        "rutina para bajar de peso",
-        "cardio para quemar grasa"
-      ],
-      "related_topics": [
-        {
-          "title": "Propositos 2026",
-          "type": "Topic",
-          "value": 95
-        },
-        {
-          "title": "Transformacion",
-          "type": "Topic",
-          "value": 88
-        },
-        {
-          "title": "Dieta",
-          "type": "Topic",
-          "value": 82
-        }
-      ],
-      "source": "curated"
-    },
-    {
-      "keyword": "clases de spinning",
-      "average_interest": 65,
-      "trend": "stable",
-      "peak_score": 78,
-      "growth_3m": "+22%",
-      "top_regions": {
-        "Lima": 100,
-        "Miraflores": 88,
-        "San Borja": 75,
-        "Surco": 70,
-        "Magdalena": 65
-      },
-      "rising_queries": [
-        "spinning beneficios",
-        "spinning para bajar de peso",
-        "clases spinning lima"
-      ],
-      "related_topics": [
-        {
-          "title": "Ciclismo indoor",
-          "type": "Activity",
-          "value": 78
-        },
-        {
-          "title": "Cardio",
-          "type": "Activity",
           "value": 72
         },
         {
-          "title": "Clases grupales",
-          "type": "Service",
-          "value": 68
+          "title": "Tarjeta de crédito",
+          "type": "Topic",
+          "value": 65
+        }
+      ],
+      "source": "curated"
+    },
+    {
+      "keyword": "cuotealo",
+      "average_interest": 75,
+      "trend": "stable",
+      "peak_score": 90,
+      "growth_3m": "+15%",
+      "top_regions": {
+        "Lima": 100,
+        "Arequipa": 70,
+        "Trujillo": 55,
+        "Chiclayo": 50,
+        "Cusco": 45
+      },
+      "rising_queries": [
+        "cuotealo bcp",
+        "cuotealo como funciona",
+        "alternativa a cuotealo"
+      ],
+      "related_topics": [
+        {
+          "title": "BCP",
+          "type": "Brand",
+          "value": 95
+        },
+        {
+          "title": "Cuotas sin tarjeta",
+          "type": "Topic",
+          "value": 78
+        },
+        {
+          "title": "BNPL",
+          "type": "Topic",
+          "value": 65
         }
       ],
       "source": "curated"
@@ -230,11 +230,11 @@
   ],
   "metadata": {
     "method": "Curated data (Apify unavailable)",
-    "note": "Keywords fitness de alto volumen para Lima Peru. Pico estacional de Enero por propositos de ano nuevo.",
+    "note": "Keywords genéricos de alto volumen para BNPL en Perú. Se priorizan términos de marca, intención y comparativos.",
     "timeframe": "today 1-m",
     "apify_keywords": 0,
     "curated_keywords": 6,
-    "market": "Lima Metropolitana (12 distritos)",
-    "product": "Membresias y Servicios Fitness 2026"
+    "market": "Perú nacional digital, foco Lima Metropolitana y principales ciudades",
+    "product": "Powerpay BNPL 2026"
   }
 }

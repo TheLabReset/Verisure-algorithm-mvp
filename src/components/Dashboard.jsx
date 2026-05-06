@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, Search, Target, Zap, Calendar, Dumbbell } from 'lucide-react';
+import { TrendingUp, Search, Target, Zap, Calendar, CreditCard } from 'lucide-react';
 import DataLayer from './DataLayer';
 import DecisionLayer from './DecisionLayer';
 import ExecutionLayer from './ExecutionLayer';
@@ -80,7 +80,7 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-fitzone-purple rounded-xl flex items-center justify-center flex-shrink-0">
-                <Dumbbell className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+                <CreditCard className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
               </div>
               <div className="min-w-0">
                 <h1 className="text-xl sm:text-2xl font-bold truncate">{BRAND_CONFIG.name}</h1>

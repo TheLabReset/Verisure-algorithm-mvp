@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { DollarSign, TrendingUp, Target, Zap, Calendar, PlayCircle, AlertTriangle, Dumbbell, ChevronDown, ChevronUp, MessageCircle, Rocket, CheckCircle, ArrowRight, AlertCircle, FileText, Globe, Star, Lightbulb, CalendarDays } from 'lucide-react';
+import { DollarSign, TrendingUp, Target, Zap, Calendar, PlayCircle, AlertTriangle, Store, ChevronDown, ChevronUp, MessageCircle, Rocket, CheckCircle, ArrowRight, AlertCircle, FileText, Globe, Star, Lightbulb, CalendarDays } from 'lucide-react';
 import { BUDGET_ALLOCATION, SERVICIOS_PERFORMANCE, SEDES_PERFORMANCE } from '../data/mockData';
 import { LAYER_CONFIG } from '../data/config';
+import { formatMoney } from '../utils/format';
 
 export default function ExecutionLayer() {
   // Helper function to get monthly period (1st to today)
@@ -63,7 +64,7 @@ export default function ExecutionLayer() {
               <DollarSign className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold">Presupuesto Mensual FitZone</h3>
+              <h3 className="text-base sm:text-lg lg:text-xl font-bold">Presupuesto Mensual Powerpay</h3>
               <p className="text-white/90 mt-0.5 sm:mt-1 text-xs sm:text-sm">Distribución inteligente por canal digital</p>
             </div>
           </div>
@@ -100,7 +101,7 @@ export default function ExecutionLayer() {
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold text-white">Distribución por Canal Digital</h3>
-            <p className="text-xs sm:text-sm text-fitzone-textGray">Performance y asignación para adquisición de miembros</p>
+            <p className="text-xs sm:text-sm text-fitzone-textGray">Performance y asignación para adquisición de cuentas Powerpay</p>
           </div>
         </div>
 
@@ -115,9 +116,8 @@ export default function ExecutionLayer() {
                       <h4 className="font-bold text-white text-sm sm:text-base">
                         {key === 'meta_ads' ? 'Meta Ads (FB + IG)' :
                          key === 'google_search' ? 'Google Search' :
-                         key === 'tiktok_ads' ? 'TikTok Ads' :
                          key === 'google_display' ? 'Google Display' :
-                         key === 'influencers' ? 'Influencers' : key}
+                         key === 'youtube' ? 'YouTube (Demand Gen)' : key}
                       </h4>
                       <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-1 ${colors.badge} ${colors.text}`}>
                         {getStatusIcon(channel.status)} {channel.status.toUpperCase()}
@@ -196,13 +196,14 @@ export default function ExecutionLayer() {
                     rec.type === 'decrease' ? 'bg-red-500/30 text-red-400' :
                     'bg-fitzone-cyan/30 text-fitzone-cyan'
                   }`}>
-                    {rec.type === 'increase' ? 'AUMENTAR' :
-                     rec.type === 'decrease' ? 'REDUCIR' : 'MANTENER'}
+                    {rec.type === 'increase' ? 'Subida sugerida' :
+                     rec.type === 'decrease' ? 'Bajada sugerida' : 'Sin cambios'}
                   </span>
                   <span className="text-xs sm:text-sm font-semibold text-white uppercase">
-                    {rec.channel === 'tiktok_ads' ? 'TikTok Ads' :
-                     rec.channel === 'meta_ads' ? 'Meta Ads' :
-                     rec.channel === 'google_display' ? 'Google Display' : rec.channel}
+                    {rec.channel === 'meta_ads' ? 'Meta Ads' :
+                     rec.channel === 'google_search' ? 'Google Search' :
+                     rec.channel === 'google_display' ? 'Google Display' :
+                     rec.channel === 'youtube' ? 'YouTube' : rec.channel}
                   </span>
                 </div>
                 {rec.from && rec.to && (
@@ -230,11 +231,11 @@ export default function ExecutionLayer() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-fitzone-purple rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
-              <Dumbbell className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <Store className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-bold text-white">Performance por Servicio</h3>
-              <p className="text-xs sm:text-sm text-fitzone-textGray">Rendimiento de campaña por tipo de membresía</p>
+              <h3 className="text-sm sm:text-base font-bold text-white">Performance por Categoría</h3>
+              <p className="text-xs sm:text-sm text-fitzone-textGray">Rendimiento de campaña por categoría de comercio</p>
             </div>
           </div>
           <button
@@ -266,8 +267,8 @@ export default function ExecutionLayer() {
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <h4 className="font-bold text-white text-sm sm:text-base">{servicio.nombre}</h4>
                   {idx < 2 && (
-                    <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-fitzone-purple/20 text-fitzone-purple flex items-center gap-1">
-                      <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> TOP
+                    <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-fitzone-purple/20 text-fitzone-lightPurple flex items-center gap-1">
+                      <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Destacado
                     </span>
                   )}
                 </div>
@@ -283,7 +284,7 @@ export default function ExecutionLayer() {
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-fitzone-textGray">CPL</span>
-                    <span className="font-semibold text-fitzone-purple">${servicio.cpl}</span>
+                    <span className="font-semibold text-fitzone-purple">{formatMoney(servicio.cpl)}</span>
                   </div>
                 </div>
 
@@ -339,45 +340,46 @@ export default function ExecutionLayer() {
             <h4 className="font-bold text-sm sm:text-base mb-2 sm:mb-3">Mejores horarios del día</h4>
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">5:00 - 8:00 AM (Early birds)</span>
-                <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">+40%</span>
+                <span className="text-white/90 text-xs sm:text-sm">7:00 - 10:00 AM (camino al trabajo)</span>
+                <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">+0%</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">12:00 - 2:00 PM (Lunch)</span>
-                <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">+10%</span>
+                <span className="text-white/90 text-xs sm:text-sm">12:00 - 2:00 PM (almuerzo)</span>
+                <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">+30%</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">6:00 - 9:00 PM (After work)</span>
+                <span className="text-white/90 text-xs sm:text-sm">6:00 - 10:00 PM (tarde-noche)</span>
                 <span className="px-2 py-0.5 sm:py-1 bg-fitzone-emerald/30 rounded text-xs sm:text-sm font-bold w-fit">+60%</span>
               </div>
             </div>
-            <p className="text-[10px] sm:text-xs text-white/70 mt-2 sm:mt-3">Pico máximo: 6-9 PM post-trabajo</p>
+            <p className="text-[10px] sm:text-xs text-white/70 mt-2 sm:mt-3">Pico máximo: 6-10 PM, momento de compra reflexiva</p>
           </div>
 
           <div className="bg-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5">
             <h4 className="font-bold text-sm sm:text-base mb-2 sm:mb-3">Mejores días de la semana</h4>
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">Lunes</span>
+                <span className="text-white/90 text-xs sm:text-sm">Jueves</span>
                 <span className="px-2 py-0.5 sm:py-1 bg-fitzone-emerald/30 rounded text-xs sm:text-sm font-bold w-fit">Muy Alta</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">Martes</span>
-                <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">Alta</span>
+                <span className="text-white/90 text-xs sm:text-sm">Viernes</span>
+                <span className="px-2 py-0.5 sm:py-1 bg-fitzone-emerald/30 rounded text-xs sm:text-sm font-bold w-fit">Muy Alta</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">Sábado AM</span>
-                <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">Media</span>
+                <span className="text-white/90 text-xs sm:text-sm">Sábado</span>
+                <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">Alta</span>
               </div>
             </div>
+            <p className="text-[10px] sm:text-xs text-white/70 mt-2 sm:mt-3">Pago de quincena impulsa el cierre</p>
           </div>
         </div>
 
         <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-white/20 rounded-lg sm:rounded-xl">
           <p className="text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
-            <Lightbulb className="w-3 h-3 sm:w-4 sm:h-4" /> Estacionalidad FitZone:
+            <Lightbulb className="w-3 h-3 sm:w-4 sm:h-4" /> Estacionalidad Powerpay:
           </p>
-          <p className="text-xs sm:text-sm">Enero (pico máximo - propósitos), Feb-Mar (verano), Sep-Nov (pre-verano). Diciembre es el mes más bajo - reducir budget 20%.</p>
+          <p className="text-xs sm:text-sm">Cyber Wow Julio (Fiestas Patrias), Cyber Wow Noviembre y Black Friday concentran los picos más fuertes. Día de la Madre (mayo), Cyber Days (marzo) y Navidad (diciembre) son ventanas secundarias relevantes para escalar inversión.</p>
         </div>
       </div>
     </div>

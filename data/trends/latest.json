@@ -1,228 +1,228 @@
 {
-  "timestamp": "2026-01-05T17:02:08.274Z",
+  "timestamp": "2026-05-04T17:02:08.274Z",
   "region": "PE",
-  "category": "Education",
+  "category": "Finance",
   "source": "Google Trends (Curated Fallback)",
-  "client": "UCSP - Universidad Católica San Pablo",
+  "client": "Powerpay",
   "keywords": [
     {
-      "keyword": "universidad arequipa",
-      "average_interest": 78,
-      "trend": "rising",
-      "peak_score": 92,
-      "growth_3m": "+35%",
-      "top_regions": {
-        "Arequipa": 100,
-        "Puno": 58,
-        "Cusco": 50,
-        "Lima": 42,
-        "Tacna": 38
-      },
-      "rising_queries": [
-        "universidades arequipa ranking",
-        "mejores universidades arequipa",
-        "carreras arequipa"
-      ],
-      "related_topics": [
-        {
-          "title": "UCSP",
-          "type": "University",
-          "value": 85
-        },
-        {
-          "title": "UCSM",
-          "type": "University",
-          "value": 75
-        },
-        {
-          "title": "UNSA",
-          "type": "University",
-          "value": 70
-        }
-      ],
-      "source": "curated"
-    },
-    {
-      "keyword": "estudiar en arequipa",
-      "average_interest": 72,
-      "trend": "rising",
-      "peak_score": 88,
-      "growth_3m": "+28%",
-      "top_regions": {
-        "Arequipa": 100,
-        "Puno": 62,
-        "Cusco": 55,
-        "Tacna": 45,
-        "Moquegua": 40
-      },
-      "rising_queries": [
-        "donde estudiar arequipa",
-        "carreras universitarias arequipa",
-        "becas arequipa"
-      ],
-      "related_topics": [
-        {
-          "title": "Ingeniería",
-          "type": "Field",
-          "value": 80
-        },
-        {
-          "title": "Medicina",
-          "type": "Field",
-          "value": 75
-        },
-        {
-          "title": "Derecho",
-          "type": "Field",
-          "value": 65
-        }
-      ],
-      "source": "curated"
-    },
-    {
-      "keyword": "carreras universitarias peru",
-      "average_interest": 85,
+      "keyword": "cuotas sin intereses",
+      "average_interest": 86,
       "trend": "rising",
       "peak_score": 100,
-      "growth_3m": "+45%",
-      "top_regions": {
-        "Lima": 100,
-        "Arequipa": 72,
-        "Cusco": 65,
-        "Trujillo": 58,
-        "Puno": 52
-      },
-      "rising_queries": [
-        "carreras mejor pagadas peru",
-        "carreras con futuro",
-        "que estudiar peru 2026"
-      ],
-      "related_topics": [
-        {
-          "title": "Ingeniería de Sistemas",
-          "type": "Career",
-          "value": 90
-        },
-        {
-          "title": "Medicina",
-          "type": "Career",
-          "value": 88
-        },
-        {
-          "title": "Administración",
-          "type": "Career",
-          "value": 75
-        }
-      ],
-      "source": "curated"
-    },
-    {
-      "keyword": "ingenieria industrial peru",
-      "average_interest": 76,
-      "trend": "rising",
-      "peak_score": 92,
-      "growth_3m": "+52%",
+      "growth_3m": "+42%",
       "top_regions": {
         "Lima": 100,
         "Arequipa": 68,
-        "Cusco": 55,
-        "Trujillo": 52,
-        "Puno": 48
+        "Trujillo": 55,
+        "Chiclayo": 48,
+        "Piura": 42
       },
       "rising_queries": [
-        "ingenieria industrial campo laboral",
-        "ingenieria industrial sueldo",
-        "mejores universidades ingenieria industrial"
+        "cuotas sin intereses peru",
+        "comprar en cuotas sin intereses",
+        "cuotas 0 interes"
       ],
       "related_topics": [
         {
-          "title": "Industria 4.0",
-          "type": "Topic",
-          "value": 85
+          "title": "Cuotéalo",
+          "type": "Brand",
+          "value": 80
         },
         {
-          "title": "Automatización",
+          "title": "Yape",
+          "type": "Brand",
+          "value": 78
+        },
+        {
+          "title": "Powerpay",
+          "type": "Brand",
+          "value": 62
+        }
+      ],
+      "source": "curated"
+    },
+    {
+      "keyword": "pagar en cuotas",
+      "average_interest": 78,
+      "trend": "rising",
+      "peak_score": 92,
+      "growth_3m": "+28%",
+      "top_regions": {
+        "Lima": 100,
+        "Arequipa": 70,
+        "Trujillo": 58,
+        "Chiclayo": 50,
+        "Cusco": 42
+      },
+      "rising_queries": [
+        "pagar en cuotas con tarjeta",
+        "pagar compras en cuotas",
+        "como pagar en cuotas"
+      ],
+      "related_topics": [
+        {
+          "title": "Tarjeta de crédito",
+          "type": "Topic",
+          "value": 88
+        },
+        {
+          "title": "BNPL",
           "type": "Topic",
           "value": 72
         },
         {
-          "title": "Gestión de calidad",
+          "title": "Tarjeta de débito",
           "type": "Topic",
-          "value": 65
+          "value": 60
         }
       ],
       "source": "curated"
     },
     {
-      "keyword": "medicina peru",
+      "keyword": "comprar en cuotas",
       "average_interest": 82,
-      "trend": "stable",
+      "trend": "rising",
       "peak_score": 95,
-      "growth_3m": "+18%",
+      "growth_3m": "+35%",
       "top_regions": {
         "Lima": 100,
-        "Arequipa": 75,
-        "Cusco": 62,
-        "Trujillo": 58,
-        "Puno": 55
+        "Arequipa": 72,
+        "Trujillo": 60,
+        "Chiclayo": 55,
+        "Piura": 50
       },
       "rising_queries": [
-        "estudiar medicina peru",
-        "mejores universidades medicina",
-        "medicina costo"
+        "comprar laptop en cuotas",
+        "comprar celular en cuotas",
+        "comprar electrodomesticos en cuotas"
       ],
       "related_topics": [
         {
-          "title": "UPCH",
-          "type": "University",
+          "title": "Cyber Wow",
+          "type": "Event",
           "value": 90
         },
         {
-          "title": "San Marcos",
-          "type": "University",
-          "value": 85
+          "title": "Black Friday",
+          "type": "Event",
+          "value": 82
         },
         {
-          "title": "Residencia médica",
-          "type": "Topic",
+          "title": "Cyber Days",
+          "type": "Event",
           "value": 78
         }
       ],
       "source": "curated"
     },
     {
-      "keyword": "derecho peru",
+      "keyword": "comprar ahora pagar despues",
       "average_interest": 70,
-      "trend": "stable",
-      "peak_score": 85,
-      "growth_3m": "+12%",
+      "trend": "rising",
+      "peak_score": 88,
+      "growth_3m": "+48%",
       "top_regions": {
         "Lima": 100,
         "Arequipa": 65,
-        "Cusco": 58,
         "Trujillo": 52,
-        "Puno": 48
+        "Chiclayo": 48,
+        "Cusco": 40
       },
       "rising_queries": [
-        "estudiar derecho peru",
-        "abogado peru",
-        "derecho laboral"
+        "que es buy now pay later",
+        "bnpl peru",
+        "comprar y pagar despues sin intereses"
       ],
       "related_topics": [
         {
-          "title": "Derecho constitucional",
-          "type": "Field",
+          "title": "Powerpay",
+          "type": "Brand",
           "value": 75
         },
         {
-          "title": "Derecho penal",
-          "type": "Field",
+          "title": "Cuotéalo",
+          "type": "Brand",
           "value": 70
         },
         {
-          "title": "Derecho civil",
-          "type": "Field",
-          "value": 68
+          "title": "aCuotaz",
+          "type": "Brand",
+          "value": 45
+        }
+      ],
+      "source": "curated"
+    },
+    {
+      "keyword": "powerpay",
+      "average_interest": 64,
+      "trend": "rising",
+      "peak_score": 82,
+      "growth_3m": "+62%",
+      "top_regions": {
+        "Lima": 100,
+        "Arequipa": 60,
+        "Trujillo": 48,
+        "Chiclayo": 42,
+        "Piura": 38
+      },
+      "rising_queries": [
+        "powerpay como funciona",
+        "powerpay opiniones",
+        "powerpay registrarme"
+      ],
+      "related_topics": [
+        {
+          "title": "BBVA",
+          "type": "Brand",
+          "value": 85
+        },
+        {
+          "title": "Cuotas sin intereses",
+          "type": "Topic",
+          "value": 72
+        },
+        {
+          "title": "Tarjeta de crédito",
+          "type": "Topic",
+          "value": 65
+        }
+      ],
+      "source": "curated"
+    },
+    {
+      "keyword": "cuotealo",
+      "average_interest": 75,
+      "trend": "stable",
+      "peak_score": 90,
+      "growth_3m": "+15%",
+      "top_regions": {
+        "Lima": 100,
+        "Arequipa": 70,
+        "Trujillo": 55,
+        "Chiclayo": 50,
+        "Cusco": 45
+      },
+      "rising_queries": [
+        "cuotealo bcp",
+        "cuotealo como funciona",
+        "alternativa a cuotealo"
+      ],
+      "related_topics": [
+        {
+          "title": "BCP",
+          "type": "Brand",
+          "value": 95
+        },
+        {
+          "title": "Cuotas sin tarjeta",
+          "type": "Topic",
+          "value": 78
+        },
+        {
+          "title": "BNPL",
+          "type": "Topic",
+          "value": 65
         }
       ],
       "source": "curated"
@@ -230,11 +230,11 @@
   ],
   "metadata": {
     "method": "Curated data (Apify unavailable)",
-    "note": "Keywords genéricos de alto volumen. Los brand_keywords son opcionales para scraping separado.",
+    "note": "Keywords genéricos de alto volumen para BNPL en Perú. Se priorizan términos de marca, intención y comparativos.",
     "timeframe": "today 1-m",
     "apify_keywords": 0,
     "curated_keywords": 6,
-    "market": "Sur del Perú (Arequipa, Puno, Cusco, Moquegua, Tacna)",
-    "product": "Pregrado y Posgrado 2026-I"
+    "market": "Perú nacional digital, foco Lima Metropolitana y principales ciudades",
+    "product": "Powerpay BNPL 2026"
   }
 }
