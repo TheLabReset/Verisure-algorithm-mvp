@@ -192,6 +192,7 @@ export default function OptimizationLayer() {
               <Tooltip
                 contentStyle={{ backgroundColor: '#1A0F26', border: '1px solid #7B2CBF', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
                 labelStyle={{ fontWeight: 'bold', marginBottom: '8px', color: '#7B2CBF' }}
+                itemStyle={{ color: '#fff' }}
               />
               <Line yAxisId="left" type="monotone" dataKey="leads" stroke="#7B2CBF" strokeWidth={2} dot={{ r: 3 }} />
               <Line yAxisId="right" type="monotone" dataKey="engagement" stroke="#06B6D4" strokeWidth={2} dot={{ r: 3 }} />
@@ -223,7 +224,14 @@ export default function OptimizationLayer() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: '#1A0F26', border: '1px solid #7B2CBF', borderRadius: '8px', color: '#fff', fontSize: '12px' }} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#1A0F26', border: '1px solid #7B2CBF', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+                  itemStyle={{ color: '#fff' }}
+                  formatter={(value, name, props) => {
+                    const channel = channelData.find(c => c.name === name);
+                    return [`${value}% (${channel?.leads ?? '-'} leads)`, name];
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
