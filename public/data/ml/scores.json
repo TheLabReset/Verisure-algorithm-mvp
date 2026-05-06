@@ -1,23 +1,24 @@
 {
-  "timestamp": "2026-01-21T08:30:00.000Z",
+  "timestamp": "2026-05-04T08:30:00.000Z",
+  "client": "Powerpay",
   "individual": {
     "search": {
       "base": 8.2,
-      "momentum": 0.83,
-      "final": 9.03
+      "momentum": 0.42,
+      "final": 8.4
     },
     "trend": {
-      "base": 7.5,
-      "final": 7.5
+      "base": 7.2,
+      "final": 7.2
     },
     "social": {
-      "sentiment": 7.8,
-      "engagement": 8.5,
-      "final": 8.15
+      "sentiment": 7.6,
+      "engagement": 8.0,
+      "final": 7.8
     },
     "intent": {
-      "conversion_rate": 0.027,
-      "final": 6.5
+      "conversion_rate": 0.0088,
+      "final": 7.1
     }
   },
   "overall": 7.8,
@@ -27,16 +28,16 @@
     "social": 0.20,
     "intent": 0.35
   },
-  "fitzone_opportunity_score": {
+  "powerpay_opportunity_score": {
     "current": 78,
     "components": {
-      "search_interest": 82,
-      "social_engagement": 75,
-      "competitor_gap": 85,
-      "seasonal_index": 92,
-      "conversion_efficiency": 76
+      "search_interest": 84,
+      "social_engagement": 72,
+      "competitor_gap": 76,
+      "seasonal_index": 88,
+      "conversion_efficiency": 71
     },
-    "trend": "+4.8%",
-    "recommendation": "Momento optimo para aumentar inversion. Pico estacional de Enero."
+    "trend": "+5,2%",
+    "recommendation": "Se sugiere reforzar la inversión durante la ventana de Cyber Wow priorizando categorías de tecnología y electrohogar."
   }
 }

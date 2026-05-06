@@ -1,193 +1,200 @@
 {
-  "timestamp": "2025-12-04T22:55:00Z",
+  "timestamp": "2026-05-04T22:55:00Z",
   "source": "Google Analytics 4 (Mock)",
-  "property": "FitZone Peru - Membresías (Demo)",
+  "property": "Powerpay - Cuentas y Cuotas (Demo)",
+  "client": "Powerpay",
   "dateRange": {
-    "start": "2025-11-04",
-    "end": "2025-12-04"
+    "start": "2026-04-04",
+    "end": "2026-05-04"
   },
   "overview": {
-    "totalUsers": 42200,
-    "activeUsers": 35650,
-    "newUsers": 25650,
-    "sessions": 58750,
-    "averageSessionDuration": "4m 15s",
-    "bounceRate": 0.325,
-    "conversions": 980,
-    "conversionRate": 0.023
+    "totalUsers": 142500,
+    "activeUsers": 118600,
+    "newUsers": 92800,
+    "sessions": 165000,
+    "averageSessionDuration": "2m 48s",
+    "bounceRate": 0.412,
+    "conversions": 1450,
+    "conversionRate": 0.0088
   },
   "topPages": [
     {
-      "page": "/admision",
-      "views": 11200,
-      "uniquePageviews": 8500,
-      "avgTimeOnPage": "3m 45s",
-      "exitRate": 0.32,
-      "conversionRate": 0.085
+      "page": "/registrarme",
+      "views": 28500,
+      "uniquePageviews": 22400,
+      "avgTimeOnPage": "3m 48s",
+      "exitRate": 0.22,
+      "conversionRate": 0.058
     },
     {
-      "page": "/carreras/ingenieria-industrial",
-      "views": 7500,
-      "uniquePageviews": 5800,
-      "avgTimeOnPage": "4m 12s",
+      "page": "/como-funciona",
+      "views": 22400,
+      "uniquePageviews": 18200,
+      "avgTimeOnPage": "3m 12s",
       "exitRate": 0.28,
-      "conversionRate": 0.095
+      "conversionRate": 0.042
     },
     {
-      "page": "/carreras/medicina",
-      "views": 7200,
-      "uniquePageviews": 5600,
-      "avgTimeOnPage": "5m 05s",
-      "exitRate": 0.25,
-      "conversionRate": 0.12
-    },
-    {
-      "page": "/becas",
-      "views": 9500,
-      "uniquePageviews": 7200,
-      "avgTimeOnPage": "2m 52s",
-      "exitRate": 0.42,
-      "conversionRate": 0.068
-    },
-    {
-      "page": "/carreras/derecho",
-      "views": 5800,
-      "uniquePageviews": 4500,
-      "avgTimeOnPage": "3m 28s",
+      "page": "/tiendas/tecnologia",
+      "views": 19800,
+      "uniquePageviews": 15600,
+      "avgTimeOnPage": "2m 42s",
       "exitRate": 0.35,
-      "conversionRate": 0.078
+      "conversionRate": 0.038
+    },
+    {
+      "page": "/tiendas/electrohogar",
+      "views": 14600,
+      "uniquePageviews": 11800,
+      "avgTimeOnPage": "2m 35s",
+      "exitRate": 0.38,
+      "conversionRate": 0.034
+    },
+    {
+      "page": "/preguntas-frecuentes",
+      "views": 12200,
+      "uniquePageviews": 9800,
+      "avgTimeOnPage": "4m 05s",
+      "exitRate": 0.32,
+      "conversionRate": 0.018
     }
   ],
   "searchTerms": [
     {
-      "term": "admisión ucsp 2026",
-      "searches": 3450,
-      "resultClicks": 2890,
-      "conversionRate": 0.095,
-      "trend": "rising"
-    },
-    {
-      "term": "carreras ucsp arequipa",
-      "searches": 2280,
-      "resultClicks": 1850,
-      "conversionRate": 0.088,
-      "trend": "rising"
-    },
-    {
-      "term": "medicina ucsp",
-      "searches": 1850,
-      "resultClicks": 1620,
-      "conversionRate": 0.12,
-      "trend": "rising"
-    },
-    {
-      "term": "becas ucsp",
-      "searches": 2150,
-      "resultClicks": 1880,
-      "conversionRate": 0.075,
-      "trend": "rising"
-    },
-    {
-      "term": "examen admisión ucsp",
-      "searches": 1820,
-      "resultClicks": 1520,
+      "term": "powerpay",
+      "searches": 4250,
+      "resultClicks": 3680,
       "conversionRate": 0.085,
+      "trend": "rising"
+    },
+    {
+      "term": "cuotas sin intereses",
+      "searches": 3850,
+      "resultClicks": 3120,
+      "conversionRate": 0.062,
+      "trend": "rising"
+    },
+    {
+      "term": "powerpay como funciona",
+      "searches": 2240,
+      "resultClicks": 1980,
+      "conversionRate": 0.092,
+      "trend": "rising"
+    },
+    {
+      "term": "comprar laptop en cuotas",
+      "searches": 2180,
+      "resultClicks": 1820,
+      "conversionRate": 0.048,
+      "trend": "rising"
+    },
+    {
+      "term": "powerpay registrarme",
+      "searches": 1620,
+      "resultClicks": 1480,
+      "conversionRate": 0.118,
       "trend": "rising"
     }
   ],
   "demographics": {
     "age": {
-      "17-18": 0.35,
-      "19-24": 0.42,
-      "25-34": 0.15,
-      "35-44": 0.06,
-      "45+": 0.02
+      "18-24": 0.18,
+      "25-34": 0.42,
+      "35-44": 0.25,
+      "45-54": 0.10,
+      "55+": 0.05
     },
     "gender": {
-      "male": 0.48,
-      "female": 0.51,
+      "male": 0.52,
+      "female": 0.47,
       "other": 0.01
     },
     "locations": {
-      "Arequipa": 0.70,
-      "Puno": 0.12,
-      "Cusco": 0.08,
-      "Moquegua": 0.04,
-      "Tacna": 0.03,
-      "Lima": 0.02,
-      "Other": 0.01
+      "Lima": 0.60,
+      "Arequipa": 0.10,
+      "Trujillo": 0.07,
+      "Chiclayo": 0.06,
+      "Piura": 0.05,
+      "Cusco": 0.04,
+      "Huancayo": 0.03,
+      "Otros": 0.05
     }
   },
   "deviceCategory": {
-    "mobile": 0.72,
-    "desktop": 0.23,
-    "tablet": 0.05
+    "mobile": 0.82,
+    "desktop": 0.14,
+    "tablet": 0.04
   },
   "leadGeneration": {
-    "totalLeads": 980,
-    "qualifiedLeads": 780,
-    "qualificationRate": 0.796,
-    "charlaRequests": 185,
-    "formSubmissions": 420,
-    "whatsappClicks": 1250,
+    "totalLeads": 1450,
+    "qualifiedLeads": 1050,
+    "qualificationRate": 0.724,
+    "registrosIniciados": 1450,
+    "kycCompletados": 1050,
+    "primeraTransaccion": 95,
     "leadsBySource": [
       {
+        "source": "meta_ads",
+        "leads": 870,
+        "qualified": 645,
+        "avgLeadScore": 76
+      },
+      {
         "source": "google_search",
-        "leads": 295,
-        "qualified": 245,
+        "leads": 365,
+        "qualified": 285,
         "avgLeadScore": 82
       },
       {
-        "source": "meta_ads",
-        "leads": 295,
-        "qualified": 235,
-        "avgLeadScore": 78
-      },
-      {
-        "source": "organic_social",
-        "leads": 175,
-        "qualified": 140,
-        "avgLeadScore": 75
-      },
-      {
-        "source": "youtube",
-        "leads": 125,
-        "qualified": 95,
+        "source": "organic_search",
+        "leads": 105,
+        "qualified": 78,
         "avgLeadScore": 72
       },
       {
+        "source": "google_display",
+        "leads": 75,
+        "qualified": 32,
+        "avgLeadScore": 58
+      },
+      {
         "source": "direct",
-        "leads": 90,
-        "qualified": 65,
-        "avgLeadScore": 68
+        "leads": 35,
+        "qualified": 28,
+        "avgLeadScore": 70
       }
     ]
   },
   "interestAreas": {
-    "ingenieria": {
-      "pageviews": 18500,
-      "avgTimeOnPage": "4m 08s",
-      "bounceRate": 0.28
+    "tecnologia": {
+      "pageviews": 24500,
+      "avgTimeOnPage": "2m 48s",
+      "bounceRate": 0.34
     },
-    "medicina_salud": {
-      "pageviews": 12800,
-      "avgTimeOnPage": "5m 15s",
-      "bounceRate": 0.22
-    },
-    "derecho_ciencias_sociales": {
-      "pageviews": 9500,
-      "avgTimeOnPage": "3m 45s",
-      "bounceRate": 0.32
-    },
-    "becas_financiamiento": {
-      "pageviews": 14200,
-      "avgTimeOnPage": "3m 28s",
+    "electrohogar": {
+      "pageviews": 16800,
+      "avgTimeOnPage": "2m 35s",
       "bounceRate": 0.38
+    },
+    "moda_calzado": {
+      "pageviews": 12400,
+      "avgTimeOnPage": "2m 12s",
+      "bounceRate": 0.42
+    },
+    "entretenimiento_viajes": {
+      "pageviews": 8500,
+      "avgTimeOnPage": "2m 28s",
+      "bounceRate": 0.40
+    },
+    "belleza_salud": {
+      "pageviews": 6200,
+      "avgTimeOnPage": "2m 18s",
+      "bounceRate": 0.45
     }
   },
   "metadata": {
-    "note": "Mock data for MVP demonstration - FitZone (Demo Client)",
-    "actualIntegration": "Requires client GA4 property access",
-    "updateFrequency": "Daily automatic once integrated"
+    "note": "Mock data para MVP - Powerpay (Demo Client)",
+    "actualIntegration": "Requiere acceso al property GA4 del cliente",
+    "updateFrequency": "Diaria automática una vez integrado"
   }
 }

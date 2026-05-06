@@ -7,17 +7,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        // FitZone Brand Colors - Royal Purple (Premium & Elegant)
+        // Powerpay Brand Colors - Morado (BNPL fintech)
         fitzone: {
-          // Primarios - Violeta vibrante
-          purple: '#7C3AED',        // Violeta principal (premium, energía)
-          darkPurple: '#5B21B6',    // Violeta hover/oscuro
-          lightPurple: '#A78BFA',   // Violeta claro (acentos)
+          // Primarios - Morado Powerpay
+          purple: '#7B2CBF',        // Morado oficial Powerpay
+          darkPurple: '#5A1F8E',    // Morado hover/oscuro
+          lightPurple: '#9D4FD9',   // Morado claro (acentos sobre dark)
 
-          // Secundarios - Oscuros (fondos premium)
-          charcoal: '#0F0A1A',      // Negro-morado (fondo principal)
-          slate: '#1A1432',         // Slate morado (cards)
-          darkSlate: '#0A0612',     // Más oscuro (contraste)
+          // Secundarios - Oscuros warm con tinte morado
+          charcoal: '#0F0719',      // Fondo de página (deep warm)
+          slate: '#1A0F26',         // Cards
+          darkSlate: '#0A0411',     // Contraste extra
 
           // Acentos tech/datos
           cyan: '#06B6D4',          // Cyan (datos, tech)
@@ -26,42 +26,47 @@ export default {
           // Éxito/Positivo
           emerald: '#10B981',       // Esmeralda (éxito, crecimiento)
           green: '#22C55E',         // Verde (positivo)
+          lime: '#84CC16',          // Lima (positivo secundario)
 
-          // Alerta/Negativo
+          // Alerta/Advertencia
           red: '#EF4444',           // Rojo (alerta)
-          amber: '#F59E0B',         // Ámbar (advertencia)
+          amber: '#F4B842',         // Ámbar warm (advertencia / CTA secundario)
+
+          // Secundario CTA (ámbar warm Powerpay)
+          orange: '#F4B842',        // Acento CTA secundario
+          darkOrange: '#D89B1F',    // Hover acento secundario
 
           // Neutros
           white: '#FFFFFF',
-          lightGray: '#F5F5F7',
-          textGray: '#9CA3AF',
-          mediumGray: '#6B7280',
+          lightGray: '#F5F0FA',     // Texto claro warm sobre dark
+          textGray: '#B8A8C7',      // Texto muted sobre dark
+          mediumGray: '#6B5973',    // Decorativo
         },
         // Semantic colors
-        success: '#10B981',         // Esmeralda FitZone para éxito
-        warning: '#F59E0B',         // Ámbar
-        error: '#EF4444',           // Rojo
-        info: '#06B6D4',            // Cyan
+        success: '#10B981',
+        warning: '#F4B842',
+        error: '#EF4444',
+        info: '#06B6D4',
       },
       fontFamily: {
         sans: ['Inter', 'Helvetica Neue', 'Arial', 'sans-serif'],
         display: ['Inter', 'Helvetica Neue', 'sans-serif'],
       },
       backgroundImage: {
-        // Gradientes FitZone Royal Purple
-        'gradient-fitzone': 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
-        'gradient-fitzone-dark': 'linear-gradient(135deg, #1A1432 0%, #0F0A1A 100%)',
-        'gradient-fitzone-energy': 'linear-gradient(135deg, #7C3AED 0%, #10B981 100%)',
+        // Gradientes Powerpay Morado
+        'gradient-fitzone': 'linear-gradient(135deg, #7B2CBF 0%, #5A1F8E 100%)',
+        'gradient-fitzone-dark': 'linear-gradient(135deg, #1A0F26 0%, #0F0719 100%)',
+        'gradient-fitzone-energy': 'linear-gradient(135deg, #7B2CBF 0%, #F4B842 100%)',
         'gradient-fitzone-tech': 'linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)',
-        'gradient-fitzone-premium': 'linear-gradient(135deg, #0F0A1A 0%, #1A1432 50%, #7C3AED 100%)',
-        'gradient-hero': 'linear-gradient(180deg, #0F0A1A 0%, #1A1432 100%)',
+        'gradient-fitzone-premium': 'linear-gradient(135deg, #0F0719 0%, #1A0F26 50%, #7B2CBF 100%)',
+        'gradient-hero': 'linear-gradient(180deg, #0F0719 0%, #1A0F26 100%)',
       },
       boxShadow: {
-        'fitzone': '0 20px 50px rgba(124, 58, 237, 0.15)',
-        'fitzone-lg': '0 30px 60px rgba(124, 58, 237, 0.25)',
-        'fitzone-glow': '0 0 30px rgba(124, 58, 237, 0.4)',
+        'fitzone': '0 20px 50px rgba(123, 44, 191, 0.15)',
+        'fitzone-lg': '0 30px 60px rgba(123, 44, 191, 0.25)',
+        'fitzone-glow': '0 0 30px rgba(123, 44, 191, 0.4)',
         'card': '0 4px 20px rgba(0, 0, 0, 0.3)',
-        'card-hover': '0 8px 30px rgba(124, 58, 237, 0.2)',
+        'card-hover': '0 8px 30px rgba(123, 44, 191, 0.2)',
       },
       animation: {
         'fadeIn': 'fadeIn 0.5s ease-in-out',
@@ -84,8 +89,8 @@ export default {
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(124, 58, 237, 0.3)' },
-          '50%': { boxShadow: '0 0 40px rgba(124, 58, 237, 0.6)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(123, 44, 191, 0.3)' },
+          '50%': { boxShadow: '0 0 40px rgba(123, 44, 191, 0.6)' },
         },
         bounceSubtle: {
           '0%, 100%': { transform: 'translateY(0)' },
