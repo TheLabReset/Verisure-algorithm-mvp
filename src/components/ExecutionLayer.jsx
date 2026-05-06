@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DollarSign, TrendingUp, Target, Zap, Calendar, PlayCircle, AlertTriangle, Store, ChevronDown, ChevronUp, MessageCircle, Rocket, CheckCircle, ArrowRight, AlertCircle, FileText, Globe, Star, Lightbulb, CalendarDays } from 'lucide-react';
 import { BUDGET_ALLOCATION, SERVICIOS_PERFORMANCE, SEDES_PERFORMANCE } from '../data/mockData';
 import { LAYER_CONFIG } from '../data/config';
+import { formatMoney } from '../utils/format';
 
 export default function ExecutionLayer() {
   // Helper function to get monthly period (1st to today)
@@ -195,8 +196,8 @@ export default function ExecutionLayer() {
                     rec.type === 'decrease' ? 'bg-red-500/30 text-red-400' :
                     'bg-fitzone-cyan/30 text-fitzone-cyan'
                   }`}>
-                    {rec.type === 'increase' ? 'AUMENTAR' :
-                     rec.type === 'decrease' ? 'REDUCIR' : 'MANTENER'}
+                    {rec.type === 'increase' ? 'Subida sugerida' :
+                     rec.type === 'decrease' ? 'Bajada sugerida' : 'Sin cambios'}
                   </span>
                   <span className="text-xs sm:text-sm font-semibold text-white uppercase">
                     {rec.channel === 'meta_ads' ? 'Meta Ads' :
@@ -266,8 +267,8 @@ export default function ExecutionLayer() {
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <h4 className="font-bold text-white text-sm sm:text-base">{servicio.nombre}</h4>
                   {idx < 2 && (
-                    <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-fitzone-purple/20 text-fitzone-purple flex items-center gap-1">
-                      <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> TOP
+                    <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-fitzone-purple/20 text-fitzone-lightPurple flex items-center gap-1">
+                      <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Destacado
                     </span>
                   )}
                 </div>
@@ -283,7 +284,7 @@ export default function ExecutionLayer() {
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-fitzone-textGray">CPL</span>
-                    <span className="font-semibold text-fitzone-purple">${servicio.cpl}</span>
+                    <span className="font-semibold text-fitzone-purple">{formatMoney(servicio.cpl)}</span>
                   </div>
                 </div>
 

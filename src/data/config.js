@@ -199,18 +199,18 @@ export const CHANNELS_CONFIG = {
 // (reinterpretación de "sedes" para una marca 100% digital con red de comercios)
 // ============================================================================
 export const SEDES_CONFIG = [
-  { id: 1, name: 'Samsung Store', distrito: 'Tecnología', nse: 'A/B', size: 'S/2.500', type: 'Smartphones y TV' },
-  { id: 2, name: 'iShop Perú', distrito: 'Tecnología', nse: 'A', size: 'S/3.800', type: 'Apple Premium' },
-  { id: 3, name: 'Mac Center', distrito: 'Tecnología', nse: 'A/B', size: 'S/3.200', type: 'Apple multi-tienda' },
-  { id: 4, name: 'PC Factory', distrito: 'Tecnología', nse: 'B/C+', size: 'S/2.100', type: 'Computación' },
-  { id: 5, name: 'Sony Store', distrito: 'Electrohogar', nse: 'A/B', size: 'S/2.800', type: 'Audio y video' },
-  { id: 6, name: 'iRobot Perú', distrito: 'Electrohogar', nse: 'A/B', size: 'S/2.300', type: 'Hogar inteligente' },
-  { id: 7, name: 'Aldo & Co.', distrito: 'Moda', nse: 'A/B', size: 'S/650', type: 'Calzado premium' },
-  { id: 8, name: 'Footloose', distrito: 'Moda', nse: 'B/C+', size: 'S/420', type: 'Calzado urbano' },
-  { id: 9, name: 'Coliseum', distrito: 'Deportes', nse: 'B/C+', size: 'S/580', type: 'Indumentaria deportiva' },
-  { id: 10, name: 'Teleticket', distrito: 'Entretenimiento', nse: 'B/C+', size: 'S/380', type: 'Eventos y conciertos' },
-  { id: 11, name: 'NuSkin Perú', distrito: 'Belleza', nse: 'A/B', size: 'S/890', type: 'Skincare premium' },
-  { id: 12, name: 'Thermomix', distrito: 'Hogar', nse: 'A', size: 'S/5.200', type: 'Cocina premium' },
+  { id: 1, nombre: 'Samsung Store', distrito: 'Tecnología', nse: 'A/B', size: 'S/2.500', type: 'Smartphones y TV' },
+  { id: 2, nombre: 'iShop Perú', distrito: 'Tecnología', nse: 'A', size: 'S/3.800', type: 'Apple Premium' },
+  { id: 3, nombre: 'Mac Center', distrito: 'Tecnología', nse: 'A/B', size: 'S/3.200', type: 'Apple multi-tienda' },
+  { id: 4, nombre: 'PC Factory', distrito: 'Tecnología', nse: 'B/C+', size: 'S/2.100', type: 'Computación' },
+  { id: 5, nombre: 'Sony Store', distrito: 'Electrohogar', nse: 'A/B', size: 'S/2.800', type: 'Audio y video' },
+  { id: 6, nombre: 'iRobot Perú', distrito: 'Electrohogar', nse: 'A/B', size: 'S/2.300', type: 'Hogar inteligente' },
+  { id: 7, nombre: 'Aldo & Co.', distrito: 'Moda', nse: 'A/B', size: 'S/650', type: 'Calzado premium' },
+  { id: 8, nombre: 'Footloose', distrito: 'Moda', nse: 'B/C+', size: 'S/420', type: 'Calzado urbano' },
+  { id: 9, nombre: 'Coliseum', distrito: 'Deportes', nse: 'B/C+', size: 'S/580', type: 'Indumentaria deportiva' },
+  { id: 10, nombre: 'Teleticket', distrito: 'Entretenimiento', nse: 'B/C+', size: 'S/380', type: 'Eventos y conciertos' },
+  { id: 11, nombre: 'NuSkin Perú', distrito: 'Belleza', nse: 'A/B', size: 'S/890', type: 'Skincare premium' },
+  { id: 12, nombre: 'Thermomix', distrito: 'Hogar', nse: 'A', size: 'S/5.200', type: 'Cocina premium' },
 ];
 
 // ============================================================================
@@ -239,7 +239,7 @@ export const TARGET_AUDIENCES = [
       },
     ],
     interests: ['Tecnología', 'Lanzamientos', 'Marketplaces', 'Lifestyle digital'],
-    message: 'Compra hoy lo que necesitas, paga cómo te quede mejor',
+    message: 'La libertad de comprar hoy y pagar cómo mejor se acomode',
     channels: {
       'Meta Ads': 55,
       'Google Search': 25,
@@ -251,9 +251,9 @@ export const TARGET_AUDIENCES = [
     conversion_funnel: {
       alcance: 1080000,
       visitas_landing: 16200,
-      formularios: 1944,
-      trials: 1166,
-      miembros: 70,
+      formularios: 870,
+      trials: 630,
+      miembros: 630,
     },
   },
   {
@@ -278,7 +278,7 @@ export const TARGET_AUDIENCES = [
       },
     ],
     interests: ['Electrodomésticos', 'Tecnología premium', 'Viajes', 'Educación familiar'],
-    message: 'Financia lo importante sin tocar la línea de tu tarjeta principal',
+    message: 'Financiamiento para lo importante, sin tocar la línea de tu tarjeta principal',
     channels: {
       'Meta Ads': 45,
       'Google Search': 35,
@@ -290,9 +290,9 @@ export const TARGET_AUDIENCES = [
     conversion_funnel: {
       alcance: 720000,
       visitas_landing: 10800,
-      formularios: 1296,
-      trials: 778,
-      miembros: 44,
+      formularios: 580,
+      trials: 420,
+      miembros: 420,
     },
   },
 ];
@@ -305,7 +305,7 @@ export const OPTIMAL_TIMING = {
     { name: 'Mañana', hours: '7:00 - 10:00', performance: 'medium', multiplier: 1.0, audience: 'Profesionales' },
     { name: 'Mediodía', hours: '12:00 - 14:00', performance: 'high', multiplier: 1.3, audience: 'Oficinistas' },
     { name: 'Tarde-noche', hours: '18:00 - 22:00', performance: 'very_high', multiplier: 1.6, audience: 'Todos' },
-    { name: 'Late night', hours: '22:00 - 00:00', performance: 'high', multiplier: 1.2, audience: 'Joven digital' },
+    { name: 'Madrugada', hours: '22:00 - 00:00', performance: 'high', multiplier: 1.2, audience: 'Joven digital' },
   ],
   weekdays: [
     { name: 'Lunes', performance: 'medium', recommended: true, note: 'Búsqueda y consideración' },

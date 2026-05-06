@@ -1,6 +1,7 @@
 import { Target, Users, MessageSquare, TrendingUp, Lightbulb, Zap, AlertCircle, CreditCard, Flame, BarChart3, CheckCircle, FlaskConical, Calendar, Shield, Store } from 'lucide-react';
 import { OPPORTUNITY_SCORE } from '../data/mockData';
 import { LAYER_CONFIG, KEY_MESSAGES, TARGET_AUDIENCES } from '../data/config';
+import { formatMoney, formatPercent } from '../utils/format';
 
 export default function DecisionLayer() {
   // Helper function to get monthly period (1st to today)
@@ -53,7 +54,7 @@ export default function DecisionLayer() {
   const audiences = TARGET_AUDIENCES.map(aud => ({
     name: aud.name,
     size: aud.size,
-    engagement: `${aud.engagement_rate}%`,
+    engagement: formatPercent(aud.engagement_rate),
     status: 'active',
     description: aud.description + ` - ${aud.interests.slice(0, 3).join(', ')}`,
     message: aud.message,
@@ -166,7 +167,8 @@ export default function DecisionLayer() {
               </div>
               <p className="text-xs sm:text-sm text-white/80 mt-2 sm:mt-3">
                 Confianza: {OPPORTUNITY_SCORE.recommendation.confidence} |
-                Prioridad: {OPPORTUNITY_SCORE.recommendation.priority.toUpperCase()}
+                Prioridad: {OPPORTUNITY_SCORE.recommendation.priority === 'high' ? 'ALTA' :
+                            OPPORTUNITY_SCORE.recommendation.priority === 'medium' ? 'MEDIA' : 'BAJA'}
               </p>
             </div>
           </div>
@@ -198,9 +200,9 @@ export default function DecisionLayer() {
                 <div className="flex items-center gap-2 sm:gap-3">
                   <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
                     rec.priority === 'high'
-                      ? 'bg-fitzone-purple/30 text-fitzone-purple'
+                      ? 'bg-fitzone-purple/30 text-fitzone-lightPurple'
                       : rec.priority === 'medium'
-                      ? 'bg-yellow-500/30 text-yellow-400'
+                      ? 'bg-fitzone-amber/30 text-fitzone-amber'
                       : 'bg-fitzone-cyan/30 text-fitzone-cyan'
                   }`}>
                     {rec.priority === 'high' ? <><Flame className="w-3 h-3" /> ALTA</> :
@@ -246,7 +248,7 @@ export default function DecisionLayer() {
                     <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
                       aud.status === 'active' ? 'bg-fitzone-emerald/20 text-fitzone-emerald' : 'bg-yellow-500/20 text-yellow-400'
                     }`}>
-                      {aud.status === 'active' ? <><CheckCircle className="w-3 h-3" /> ACTIVA</> : <><FlaskConical className="w-3 h-3" /> TESTING</>}
+                      {aud.status === 'active' ? <><CheckCircle className="w-3 h-3" /> ACTIVA</> : <><FlaskConical className="w-3 h-3" /> EN PRUEBA</>}
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-fitzone-textGray">{aud.description}</p>
@@ -264,7 +266,7 @@ export default function DecisionLayer() {
                 </div>
                 <div>
                   <p className="text-xs text-fitzone-textGray">CPL Target</p>
-                  <p className="text-lg sm:text-xl font-bold text-fitzone-purple">${aud.cpl_target}</p>
+                  <p className="text-lg sm:text-xl font-bold text-fitzone-purple">{formatMoney(aud.cpl_target)}</p>
                 </div>
               </div>
 

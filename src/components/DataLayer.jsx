@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, TrendingUp, Video, Share2, CreditCard, RefreshCw, ChevronDown, ChevronUp, BarChart3, Info, Music, Target, DollarSign, Layers, Lightbulb, Users, Globe, MapPin, Eye, Clock, MousePointer, Smartphone, Monitor, ExternalLink, Calendar } from 'lucide-react';
+import { formatES, formatMoney, formatPercent } from '../utils/format';
 
 export default function DataLayer() {
   // Helper function to get current week info
@@ -99,25 +100,29 @@ export default function DataLayer() {
 
   // Calculate scores for fitness metrics
   const calculateScores = () => {
+    const fmt = (v, fallback) => v !== undefined && v !== null
+      ? formatES(Number(v), 1)
+      : fallback;
+
     if (mlData?.scores?.individual) {
       return {
-        overall: mlData.scores.overall?.toFixed(1) || '8.2',
-        search: mlData.scores.individual.search?.final?.toFixed(1) || '8.5',
-        trend: mlData.scores.individual.trend?.final?.toFixed(1) || '7.8',
-        social: mlData.scores.individual.social?.final?.toFixed(1) || '8.0',
-        intent: mlData.scores.individual.intent?.final?.toFixed(1) || '8.8',
+        overall: fmt(mlData.scores.overall, '7,8'),
+        search: fmt(mlData.scores.individual.search?.final, '8,4'),
+        trend: fmt(mlData.scores.individual.trend?.final, '7,2'),
+        social: fmt(mlData.scores.individual.social?.final, '7,8'),
+        intent: fmt(mlData.scores.individual.intent?.final, '7,1'),
         isML: true,
         weights: mlData.scores.weights
       };
     }
 
-    // Mock fitness scores
+    // Mock Powerpay scores
     return {
-      overall: '8.2',
-      search: '8.5',
-      trend: '7.8',
-      social: '8.0',
-      intent: '8.8',
+      overall: '7,8',
+      search: '8,4',
+      trend: '7,2',
+      social: '7,8',
+      intent: '7,1',
       isML: false
     };
   };
@@ -146,7 +151,7 @@ export default function DataLayer() {
       {
         source: 'GA4',
         IconComponent: BarChart3,
-        text: '165K sesiones generaron 1.450 cuentas creadas (registro a KYC del 72%). La página "/registrarme" lidera con 5,8% de tasa de conversión.',
+        text: '165K sesiones derivaron en 1.450 registros iniciados y 1.050 cuentas creadas con KYC validado (tasa registro→KYC de 72%). La página "/registrarme" muestra 5,8% de tasa de conversión.',
       },
     ];
   };
@@ -155,7 +160,7 @@ export default function DataLayer() {
   const multiSourceInsight = {
     source: 'Análisis Multi-Fuente',
     IconComponent: Layers,
-    text: 'Las cuatro fuentes confirman una ventana estacional fuerte hacia Cyber Wow. La combinación de búsquedas en alza (+42%), engagement social sostenido (8,2/10), contenido viral en TikTok y conversiones web en aumento indica momento óptimo para escalar inversión. Se observa una oportunidad de posicionar el mensaje "no consume tu línea de crédito" frente a soluciones que sí lo hacen.',
+    text: 'Las cuatro fuentes coinciden en una ventana estacional fuerte hacia Cyber Wow. La combinación de búsquedas en alza (+42%), engagement social sostenido (8,2/10), contenido relevante en TikTok y conversiones web en aumento sugieren un momento favorable para escalar inversión. Se observa una oportunidad de posicionar el mensaje "no consume tu línea de crédito" como diferenciador.',
     recommendation: 'Se sugiere ampliar Meta Ads en torno a categorías de tecnología y electrohogar y reforzar Search en términos de "cuotas sin intereses" durante Cyber Wow.'
   };
 
@@ -177,21 +182,21 @@ export default function DataLayer() {
 
   // Expanded TikTok hashtags data
   const tiktokHashtags = [
-    { hashtag: '#CuotasSinIntereses', views: '4.2M', posts: '18,5K', growth: '+38%', region: 'Perú', engagement: 8.4 },
-    { hashtag: '#CyberWow', views: '6.8M', posts: '12,2K', growth: '+82%', region: 'Perú', engagement: 9.2 },
-    { hashtag: '#ComprarEnCuotas', views: '1.9M', posts: '8,4K', growth: '+25%', region: 'LATAM', engagement: 7.8 },
+    { hashtag: '#CuotasSinIntereses', views: '4,2M', posts: '18,5K', growth: '+38%', region: 'Perú', engagement: 8.4 },
+    { hashtag: '#CyberWow', views: '6,8M', posts: '12,2K', growth: '+82%', region: 'Perú', engagement: 9.2 },
+    { hashtag: '#ComprarEnCuotas', views: '1,9M', posts: '8,4K', growth: '+25%', region: 'LATAM', engagement: 7.8 },
     { hashtag: '#FintechPeru', views: '980K', posts: '5,2K', growth: '+18%', region: 'Perú', engagement: 7.2 },
     { hashtag: '#BNPLPeru', views: '320K', posts: '1,8K', growth: '+95%', region: 'Perú', engagement: 8.0 },
     { hashtag: '#Powerpay', views: '145K', posts: '320', growth: '+72%', region: 'Perú', engagement: 9.0 },
-    { hashtag: '#ShoppingHaul', views: '2.4M', posts: '9,8K', growth: '+22%', region: 'LATAM', engagement: 8.6 },
-    { hashtag: '#FinanzasPersonales', views: '1.2M', posts: '6,5K', growth: '+34%', region: 'LATAM', engagement: 7.5 },
+    { hashtag: '#ShoppingHaul', views: '2,4M', posts: '9,8K', growth: '+22%', region: 'LATAM', engagement: 8.6 },
+    { hashtag: '#FinanzasPersonales', views: '1,2M', posts: '6,5K', growth: '+34%', region: 'LATAM', engagement: 7.5 },
   ];
 
   // Expanded TikTok sounds
   const tiktokSounds = [
-    { name: 'Oh No Oh No (Kreepa remix LATAM)', type: 'Comedia', usage: '2.1M', trend: '+12%' },
+    { name: 'Oh No Oh No (Kreepa remix LATAM)', type: 'Comedia', usage: '2,1M', trend: '+12%' },
     { name: 'Aesthetic shopping vibes', type: 'Lifestyle', usage: '650K', trend: '+28%' },
-    { name: 'Una noche en Medellín sped-up', type: 'Trend joven', usage: '3.2M', trend: '+15%' },
+    { name: 'Una noche en Medellín sped-up', type: 'Trend joven', usage: '3,2M', trend: '+15%' },
     { name: 'Money Money Money (TikTok flip)', type: 'Finanzas', usage: '720K', trend: '+8%' },
     { name: 'Voiceover narrativo PE', type: 'Storytime', usage: '180K', trend: '+42%' },
     { name: 'Cyber Wow beat genérico Perú', type: 'Estacional', usage: '320K', trend: '+95%' },
@@ -209,10 +214,10 @@ export default function DataLayer() {
 
   // Meta ad performance
   const metaAdPerformance = [
-    { campaign: 'Cyber Wow - Tecnología y Electrohogar', platform: 'Instagram', reach: 850000, clicks: 12500, ctr: 1.47, cpl: 8.33, status: 'Activo' },
-    { campaign: 'Línea de Crédito Libre - Adulto', platform: 'Facebook', reach: 420000, clicks: 5800, ctr: 1.38, cpl: 10.32, status: 'Activo' },
-    { campaign: 'Brand + Genérico Cuotas', platform: 'Instagram', reach: 380000, clicks: 9200, ctr: 2.42, cpl: 9.27, status: 'Activo' },
-    { campaign: 'Retargeting Comercios Partners', platform: 'Facebook', reach: 180000, clicks: 2200, ctr: 1.22, cpl: 9.23, status: 'Activo' },
+    { campaign: 'Cyber Wow - Tecnología y Electrohogar', platform: 'Instagram', reach: 850000, clicks: 12500, ctr: 1.47, cpl: 9.17, status: 'Activo' },
+    { campaign: 'Línea de Crédito Libre - Adulto', platform: 'Facebook', reach: 420000, clicks: 5800, ctr: 1.38, cpl: 11.16, status: 'Activo' },
+    { campaign: 'Brand + Genérico Cuotas', platform: 'Instagram', reach: 380000, clicks: 9200, ctr: 2.42, cpl: 10.49, status: 'Activo' },
+    { campaign: 'Retargeting Comercios Partners', platform: 'Facebook', reach: 180000, clicks: 2200, ctr: 1.22, cpl: 9.65, status: 'Activo' },
   ];
 
   return (
@@ -244,7 +249,7 @@ export default function DataLayer() {
             <div className="text-right">
               <p className="text-fitzone-textGray text-[10px] sm:text-xs uppercase font-semibold mb-0.5 sm:mb-1">Score Global</p>
               <p className="text-2xl sm:text-3xl font-bold text-fitzone-purple">{scores.overall}</p>
-              <p className="text-[10px] sm:text-xs text-fitzone-textGray">de 10.0</p>
+              <p className="text-[10px] sm:text-xs text-fitzone-textGray">de 10,0</p>
             </div>
             <button
               onClick={loadData}
@@ -648,10 +653,10 @@ export default function DataLayer() {
                           <span className="text-xs sm:text-sm text-white">{ad.clicks.toLocaleString()}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                          <span className={`text-xs sm:text-sm font-bold ${ad.ctr >= 1.5 ? 'text-fitzone-emerald' : 'text-fitzone-amber'}`}>{ad.ctr}%</span>
+                          <span className={`text-xs sm:text-sm font-bold ${ad.ctr >= 1.5 ? 'text-fitzone-emerald' : 'text-fitzone-amber'}`}>{formatPercent(ad.ctr, 2)}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                          <span className={`text-xs sm:text-sm font-bold ${ad.cpl <= 12 ? 'text-fitzone-emerald' : ad.cpl <= 18 ? 'text-fitzone-amber' : 'text-red-400'}`}>${ad.cpl}</span>
+                          <span className={`text-xs sm:text-sm font-bold ${ad.cpl <= 12 ? 'text-fitzone-emerald' : ad.cpl <= 18 ? 'text-fitzone-amber' : 'text-red-400'}`}>{formatMoney(ad.cpl)}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                           <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full ${
@@ -674,13 +679,13 @@ export default function DataLayer() {
       <div className="bg-fitzone-slate rounded-xl shadow-lg overflow-hidden border border-fitzone-purple/10">
         <button
           onClick={() => toggleSection('ga4')}
-          className="w-full bg-fitzone-amber text-white p-3 sm:p-4 flex items-center justify-between hover:brightness-110 transition"
+          className="w-full bg-fitzone-amber text-fitzone-charcoal p-3 sm:p-4 flex items-center justify-between hover:brightness-110 transition"
         >
           <div className="flex items-center gap-2 sm:gap-3">
             <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
             <div className="text-left min-w-0">
               <h3 className="text-sm sm:text-base font-bold">Google Analytics 4</h3>
-              <p className="text-[10px] sm:text-xs text-white/80">Conversión - Score: {scores.intent}/10</p>
+              <p className="text-[10px] sm:text-xs text-fitzone-charcoal/80">Conversión - Score: {scores.intent}/10</p>
             </div>
           </div>
           {expandedSections.ga4 ? <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}

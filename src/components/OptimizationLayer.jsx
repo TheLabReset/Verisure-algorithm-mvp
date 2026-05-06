@@ -2,6 +2,7 @@ import { TrendingUp, BarChart3, RefreshCw, Award, Target, Users, Heart, Zap, Ale
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { PERFORMANCE_KPIS, ALERTS, COMPETITOR_INSIGHTS, CRM_MOCKUP } from '../data/mockData';
 import { LAYER_CONFIG, CRM_CONFIG } from '../data/config';
+import { formatES, formatThousands, formatMoney, formatPercent, formatCompact } from '../utils/format';
 
 export default function OptimizationLayer() {
   // Helper function to get monthly period (1st to today)
@@ -81,14 +82,14 @@ export default function OptimizationLayer() {
             </span>
           </div>
           <h3 className="text-xs sm:text-sm font-medium text-white/80 mb-0.5 sm:mb-1">Cuentas Creadas</h3>
-          <p className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">{PERFORMANCE_KPIS.nuevos_miembros.current.toLocaleString()}</p>
+          <p className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">{formatThousands(PERFORMANCE_KPIS.nuevos_miembros.current)}</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-xs sm:text-sm text-white/70">{PERFORMANCE_KPIS.leads.total.toLocaleString()} registros iniciados</span>
+            <span className="text-xs sm:text-sm text-white/70">{formatThousands(PERFORMANCE_KPIS.leads.total)} registros iniciados</span>
           </div>
           <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/20">
             <div className="flex justify-between text-xs">
               <span className="text-white/70">CPL Promedio</span>
-              <span className="font-bold">${PERFORMANCE_KPIS.leads.cost_per_lead}</span>
+              <span className="font-bold">{formatMoney(PERFORMANCE_KPIS.leads.cost_per_lead)}</span>
             </div>
           </div>
         </div>
@@ -104,14 +105,14 @@ export default function OptimizationLayer() {
             </span>
           </div>
           <h3 className="text-xs sm:text-sm font-medium text-white/80 mb-0.5 sm:mb-1">Alcance Único</h3>
-          <p className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">{(PERFORMANCE_KPIS.reach.unique_reach / 1000000).toFixed(1)}M</p>
+          <p className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">{formatCompact(PERFORMANCE_KPIS.reach.unique_reach)}</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-xs sm:text-sm text-white/70">Impresiones: {(PERFORMANCE_KPIS.reach.impressions / 1000000).toFixed(1)}M</span>
+            <span className="text-xs sm:text-sm text-white/70">Impresiones: {formatCompact(PERFORMANCE_KPIS.reach.impressions)}</span>
           </div>
           <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/20">
             <div className="flex justify-between text-xs">
               <span className="text-white/70">Frecuencia</span>
-              <span className="font-bold">{PERFORMANCE_KPIS.reach.frequency}</span>
+              <span className="font-bold">{formatES(PERFORMANCE_KPIS.reach.frequency)}</span>
             </div>
           </div>
         </div>
@@ -127,15 +128,15 @@ export default function OptimizationLayer() {
             </span>
           </div>
           <h3 className="text-xs sm:text-sm font-medium text-fitzone-charcoal/80 mb-0.5 sm:mb-1">Interacciones Totales</h3>
-          <p className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">{(PERFORMANCE_KPIS.engagement.total_interactions / 1000).toFixed(1)}K</p>
+          <p className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">{formatCompact(PERFORMANCE_KPIS.engagement.total_interactions)}</p>
           <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
             <span className="text-xs sm:text-sm text-fitzone-charcoal/70">Engagement Rate</span>
-            <span className="text-xs bg-fitzone-charcoal/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">{PERFORMANCE_KPIS.engagement.engagement_rate}%</span>
+            <span className="text-xs bg-fitzone-charcoal/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">{formatPercent(PERFORMANCE_KPIS.engagement.engagement_rate)}</span>
           </div>
           <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-fitzone-charcoal/20">
             <div className="flex justify-between text-xs">
               <span className="text-fitzone-charcoal/70">Shares</span>
-              <span className="font-bold">{(PERFORMANCE_KPIS.engagement.shares / 1000).toFixed(1)}K</span>
+              <span className="font-bold">{formatCompact(PERFORMANCE_KPIS.engagement.shares)}</span>
             </div>
           </div>
         </div>
@@ -149,14 +150,14 @@ export default function OptimizationLayer() {
             </span>
           </div>
           <h3 className="text-xs sm:text-sm font-medium text-fitzone-textGray mb-0.5 sm:mb-1">Presupuesto Ejecutado</h3>
-          <p className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2 text-fitzone-purple">${(PERFORMANCE_KPIS.budget.total_spent / 1000).toFixed(1)}K</p>
+          <p className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2 text-fitzone-purple">${formatCompact(PERFORMANCE_KPIS.budget.total_spent)}</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-xs sm:text-sm text-fitzone-textGray">de ${(PERFORMANCE_KPIS.budget.total_budget / 1000).toFixed(0)}K total</span>
+            <span className="text-xs sm:text-sm text-fitzone-textGray">de ${formatCompact(PERFORMANCE_KPIS.budget.total_budget, 0)} total</span>
           </div>
           <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-fitzone-purple/20">
             <div className="flex justify-between text-xs">
               <span className="text-fitzone-textGray">CPC Promedio</span>
-              <span className="font-bold text-fitzone-purple">${PERFORMANCE_KPIS.budget.cost_per_click}</span>
+              <span className="font-bold text-fitzone-purple">{formatMoney(PERFORMANCE_KPIS.budget.cost_per_click)}</span>
             </div>
           </div>
         </div>
@@ -240,7 +241,7 @@ export default function OptimizationLayer() {
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 ml-2 sm:ml-4">
                   <span className="text-xs sm:text-sm font-bold text-white">{channel.leads}</span>
-                  <span className="text-xs sm:text-sm font-bold text-fitzone-charcoal bg-fitzone-purple px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md min-w-[40px] sm:min-w-[48px] text-center">
+                  <span className="text-xs sm:text-sm font-bold text-white bg-fitzone-darkPurple px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md min-w-[40px] sm:min-w-[48px] text-center">
                     {channel.value}%
                   </span>
                 </div>
@@ -266,12 +267,12 @@ export default function OptimizationLayer() {
                   </div>
                   <div className="flex-1 lg:flex-initial">
                     <p className="text-xs font-medium text-white/80 uppercase tracking-wide mb-0.5 sm:mb-1">{step.stage}</p>
-                    <p className="text-base sm:text-lg font-bold">{step.value.toLocaleString()}</p>
+                    <p className="text-base sm:text-lg font-bold">{formatThousands(step.value)}</p>
                   </div>
                   {/* Mobile: Show conversion rate inline */}
                   {idx < funnelSteps.length - 1 && (
                     <div className="lg:hidden flex-shrink-0 text-right">
-                      <span className="text-xs sm:text-sm font-bold bg-white/20 px-2 py-1 rounded">{step.conversionRate}%</span>
+                      <span className="text-xs sm:text-sm font-bold bg-white/20 px-2 py-1 rounded">{formatPercent(step.conversionRate)}</span>
                     </div>
                   )}
                 </div>
@@ -280,7 +281,7 @@ export default function OptimizationLayer() {
               {/* Arrow with conversion rate - Desktop only */}
               {idx < funnelSteps.length - 1 && (
                 <div className="hidden lg:flex flex-col items-center justify-center min-w-[50px] xl:min-w-[60px]">
-                  <div className="text-xs xl:text-sm font-bold text-fitzone-purple mb-1">{step.conversionRate}%</div>
+                  <div className="text-xs xl:text-sm font-bold text-fitzone-purple mb-1">{formatPercent(step.conversionRate)}</div>
                   <svg className="w-6 h-6 xl:w-8 xl:h-8 text-fitzone-textGray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -358,15 +359,15 @@ export default function OptimizationLayer() {
             <div className="space-y-1.5 sm:space-y-2">
               <div className="flex justify-between text-xs sm:text-sm">
                 <span>CPL Target</span>
-                <span className="font-bold">${CRM_CONFIG.cpl_thresholds.adulto_planificador.cpl_target}</span>
+                <span className="font-bold">{formatMoney(CRM_CONFIG.cpl_thresholds.adulto_planificador.cpl_target)}</span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm">
                 <span>Alerta en</span>
-                <span className="font-bold text-yellow-300">${CRM_CONFIG.cpl_thresholds.adulto_planificador.cpl_alert}</span>
+                <span className="font-bold text-yellow-300">{formatMoney(CRM_CONFIG.cpl_thresholds.adulto_planificador.cpl_alert)}</span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm">
                 <span>Pausar en</span>
-                <span className="font-bold text-red-300">${CRM_CONFIG.cpl_thresholds.adulto_planificador.cpl_pause}</span>
+                <span className="font-bold text-red-300">{formatMoney(CRM_CONFIG.cpl_thresholds.adulto_planificador.cpl_pause)}</span>
               </div>
             </div>
           </div>
