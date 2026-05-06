@@ -76,13 +76,17 @@ export default function OptimizationLayer() {
   // Paleta del funnel: gradiente morado Powerpay → cyan → amber (cierre)
   const funnelColors = ['#9D4FD9', '#7B2CBF', '#5A1F8E', '#06B6D4', '#F4B842'];
 
-  // Inflado visual: nivo necesita un mínimo del 15% del valor máximo para que
-  // las secciones pequeñas no desaparezcan. realValue conserva el valor real.
-  const funnelMaxVal = Math.max(...funnelSteps.map(s => s.value));
-  const funnelMinVisual = Math.round(funnelMaxVal * 0.15);
-  const funnelChartData = funnelSteps.map(step => ({
+  // Escala logarítmica: cuando los valores tienen rango muy amplio (1.8M → 1K)
+  // un piso porcentual pega todas las etapas pequeñas al mismo tamaño y las
+  // hace indistinguibles. log10 preserva el orden y deja respirar las
+  // diferencias relativas entre etapas, escalando el visual al rango 175-1000.
+  const funnelLogVals = funnelSteps.map(s => Math.log10(s.value));
+  const funnelLogMin = Math.min(...funnelLogVals);
+  const funnelLogMax = Math.max(...funnelLogVals);
+  const funnelLogRange = funnelLogMax - funnelLogMin || 1;
+  const funnelChartData = funnelSteps.map((step, i) => ({
     id: step.stage,
-    value: Math.max(step.value, funnelMinVisual),
+    value: Math.round(175 + ((funnelLogVals[i] - funnelLogMin) / funnelLogRange) * 825),
     label: step.stage,
     realValue: step.value,
   }));
@@ -309,9 +313,9 @@ export default function OptimizationLayer() {
         <h3 className="text-sm sm:text-base font-bold text-white mb-4 sm:mb-6">Funnel de Conversión Powerpay</h3>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Funnel + stage labels — 2 columnas en desktop */}
+          {/* Funnel — 2 columnas en desktop */}
           <div className="lg:col-span-2">
-            <div style={{ height: 460 }}>
+            <div style={{ height: 540 }}>
               <ResponsiveFunnel
                 data={funnelChartData}
                 direction="vertical"
@@ -319,48 +323,37 @@ export default function OptimizationLayer() {
                 colors={funnelColors}
                 borderWidth={0}
                 enableLabel={false}
-                layers={['separators', 'parts', FunnelValueLabels, 'annotations']}
-                spacing={4}
-                shapeBlending={0.7}
+                layers={['parts', FunnelValueLabels, 'annotations']}
+                spacing={2}
+                shapeBlending={0.65}
                 valueFormat={v => v.toLocaleString('es-PE')}
                 motionConfig="gentle"
-                tooltip={({ part }) => (
-                  <div style={{
-                    background: '#1A0F26',
-                    color: '#fff',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #7B2CBF',
-                    fontSize: '13px',
-                  }}>
-                    <strong>{part.data.label}</strong>
-                    <br />
-                    {Number(part.data.realValue).toLocaleString('es-PE')}
-                  </div>
-                )}
-              />
-            </div>
-
-            {/* Stage labels debajo del funnel */}
-            <div className="mt-4 space-y-1.5">
-              {funnelSteps.map((step, idx) => {
-                const next = funnelSteps[idx + 1];
-                const stepRate = next ? (next.value / step.value) * 100 : null;
-                return (
-                  <div key={step.stage} className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md hover:bg-fitzone-charcoal/50 transition-colors">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: funnelColors[idx] }} />
-                      <span className="text-xs sm:text-sm font-medium text-white truncate">{step.stage}</span>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                      <span className="text-xs sm:text-sm font-bold text-white tabular-nums">{formatThousands(step.value)}</span>
+                tooltip={({ part }) => {
+                  const idx = funnelChartData.findIndex(d => d.id === part.data.id);
+                  const next = funnelSteps[idx + 1];
+                  const stepRate = next ? (next.value / part.data.realValue) * 100 : null;
+                  return (
+                    <div style={{
+                      background: '#1A0F26',
+                      color: '#fff',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #7B2CBF',
+                      fontSize: '13px',
+                    }}>
+                      <strong>{part.data.label}</strong>
+                      <br />
+                      {Number(part.data.realValue).toLocaleString('es-PE')}
                       {stepRate != null && (
-                        <span className="text-[10px] sm:text-xs text-fitzone-textGray tabular-nums w-14 text-right">→ {formatES(stepRate, 1)}%</span>
+                        <>
+                          <br />
+                          <span style={{ color: '#B8A8C7' }}>→ {formatES(stepRate, 1)}% a la siguiente</span>
+                        </>
                       )}
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                }}
+              />
             </div>
           </div>
 
