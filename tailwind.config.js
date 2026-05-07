@@ -42,6 +42,15 @@ export default {
           textGray: '#C7B5A8',      // Texto muted sobre dark
           mediumGray: '#73655A',    // Decorativo
         },
+        // Colores oficiales de plataformas — NO modificar
+        platform: {
+          google:     '#1A73E8',    // Google Trends, Google Search
+          tiktok:     '#010101',    // TikTok oficial (negro)
+          meta:       '#1877F2',    // Meta / Facebook brand blue
+          ga4:        '#E37400',    // Google Analytics 4 oficial
+          youtube:    '#FF0000',    // YouTube oficial
+          instagram:  '#E4405F',    // Instagram oficial
+        },
         // Semantic colors
         success: '#10B981',
         warning: '#F4B842',

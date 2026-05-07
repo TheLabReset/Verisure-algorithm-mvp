@@ -94,7 +94,7 @@
       "youtube": {
         "percentage": 14,
         "amount": 2100,
-        "expected_uplift": "VTR 28,4%",
+        "expected_uplift": "VTR 28.4%",
         "confidence": "high"
       },
       "google_search": {

@@ -26,7 +26,7 @@ const FunnelValueLabels = ({ parts }) => {
             stroke="#00000055"
             strokeWidth={0.5}
           >
-            {Number(realVal).toLocaleString('es-PE')}
+            {Number(realVal).toLocaleString('en-US')}
           </text>
         );
       })}
@@ -321,7 +321,7 @@ export default function OptimizationLayer() {
                 layers={['parts', FunnelValueLabels, 'annotations']}
                 spacing={2}
                 shapeBlending={0.65}
-                valueFormat={v => v.toLocaleString('es-PE')}
+                valueFormat={v => v.toLocaleString('en-US')}
                 motionConfig="gentle"
                 tooltip={({ part }) => {
                   const idx = funnelChartData.findIndex(d => d.id === part.data.id);
@@ -338,7 +338,7 @@ export default function OptimizationLayer() {
                     }}>
                       <strong>{part.data.label}</strong>
                       <br />
-                      {Number(part.data.realValue).toLocaleString('es-PE')}
+                      {Number(part.data.realValue).toLocaleString('en-US')}
                       {stepRate != null && (
                         <>
                           <br />
@@ -356,22 +356,22 @@ export default function OptimizationLayer() {
           <div className="space-y-3 sm:space-y-4">
             <div className="bg-fitzone-purple/10 rounded-lg p-3 sm:p-4 border border-fitzone-purple/20">
               <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Conversión Global</p>
-              <p className="text-xl sm:text-2xl font-bold text-fitzone-lightPurple">0,058%</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-lightPurple">0.058%</p>
               <p className="text-xs text-fitzone-textGray mt-1">Alcance → Consultas</p>
             </div>
             <div className="bg-fitzone-emerald/10 rounded-lg p-3 sm:p-4 border border-fitzone-emerald/20">
               <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Recordación efectiva</p>
-              <p className="text-xl sm:text-2xl font-bold text-fitzone-emerald">38,0%</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-emerald">38.0%</p>
               <p className="text-xs text-fitzone-textGray mt-1">Alcance → Frecuencia 3+</p>
             </div>
             <div className="bg-fitzone-cyan/10 rounded-lg p-3 sm:p-4 border border-fitzone-cyan/20">
               <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Interacción → Web</p>
-              <p className="text-xl sm:text-2xl font-bold text-fitzone-cyan">34,5%</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-cyan">34.5%</p>
               <p className="text-xs text-fitzone-textGray mt-1">Engagement a visitas web</p>
             </div>
             <div className="bg-fitzone-amber/10 rounded-lg p-3 sm:p-4 border border-fitzone-amber/20">
               <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Mayor caída</p>
-              <p className="text-xl sm:text-2xl font-bold text-fitzone-amber">96,2%</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-amber">96.2%</p>
               <p className="text-xs text-fitzone-textGray mt-1">Visitas Web → Consultas</p>
             </div>
           </div>
