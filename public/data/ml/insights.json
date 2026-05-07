@@ -1,29 +1,29 @@
 {
   "generated_at": "2026-05-04T08:30:00.000Z",
-  "client": "Powerpay",
+  "client": "WIN",
   "insights": [
     {
       "id": "ml_trend_momentum",
       "type": "multi_source",
       "priority": "high",
-      "title": "Ventana estacional Cyber Wow detectada",
-      "description": "Las búsquedas de \"cuotas sin intereses\" subieron 42% en el último trimestre, alineadas con el calendario de Cyber Wow.",
-      "action": "Se sugiere reforzar Meta Ads y Search en categorías de tecnología y electrohogar",
-      "confidence": 0.88,
-      "impact_score": 9.0,
+      "title": "Ventana estacional pre Cyber Days detectada",
+      "description": "Las búsquedas de \"internet fibra óptica\" subieron 38% en el último trimestre, alineadas con el calendario de Cyber Days y campañas de fin de año.",
+      "action": "Se sugiere reforzar Meta Ads y YouTube en mensajes de fibra 100% pura y velocidad simétrica",
+      "confidence": 0.86,
+      "impact_score": 8.8,
       "source": "ML Trend Analysis"
     },
     {
       "id": "trend_rising",
       "type": "trend",
       "priority": "high",
-      "title": "Keywords de marca en aceleración",
-      "description": "Powerpay y términos asociados crecen 62% en interés de búsqueda en los últimos tres meses.",
+      "title": "Keywords de marca WIN en aceleración",
+      "description": "WIN y términos asociados crecen 58% en interés de búsqueda en los últimos tres meses, con foco en Lima Metropolitana.",
       "action": "Se recomienda capturar la demanda de marca en Google Search con campaña Brand dedicada",
       "keywords": [
-        "powerpay",
-        "powerpay como funciona",
-        "cuotas sin intereses"
+        "win internet",
+        "win fibra",
+        "win planes lima"
       ],
       "confidence": 0.85,
       "impact_score": 8.6,
@@ -34,8 +34,8 @@
       "type": "social",
       "priority": "medium",
       "title": "Sentimiento social favorable",
-      "description": "El 80% de los topics monitoreados muestra sentimiento positivo en Meta y TikTok.",
-      "action": "Se sugiere amplificar contenido educativo sobre cómo funciona Powerpay",
+      "description": "El 78% de los topics monitoreados muestra sentimiento positivo en Meta y TikTok, con foco en velocidad simétrica y soporte técnico local.",
+      "action": "Se sugiere amplificar contenido educativo sobre fibra 100% óptica y casos de uso reales",
       "confidence": 0.82,
       "impact_score": 8.0,
       "source": "Meta Social Listening"
@@ -45,13 +45,13 @@
       "type": "multi_source",
       "priority": "high",
       "title": "Convergencia entre búsquedas y conversación social",
-      "description": "Cuatro temas aparecen tanto en Google Trends como en redes: cuotas sin intereses, Cyber Wow, tecnología y comparativos BNPL.",
+      "description": "Cuatro temas aparecen tanto en Google Trends como en redes: fibra óptica, velocidad simétrica, gaming y streaming HD.",
       "action": "Se recomienda priorizar estos temas en el calendario editorial",
       "keywords": [
-        "cuotas sin intereses",
-        "cyber wow",
-        "tecnología en cuotas",
-        "comparativas BNPL"
+        "fibra óptica",
+        "velocidad simétrica",
+        "gaming online",
+        "streaming HD"
       ],
       "confidence": 0.90,
       "impact_score": 8.8,
@@ -61,13 +61,13 @@
       "id": "trend_top_keyword",
       "type": "trend",
       "priority": "high",
-      "title": "\"cuotas sin intereses\" lidera las búsquedas",
-      "description": "Con un interés de 86/100 y crecimiento de 42% en el trimestre.",
-      "action": "Se sugiere reforzar la cobertura SEM de esta keyword durante Cyber Wow",
-      "metric": 86,
-      "change": "+42%",
+      "title": "\"internet fibra óptica\" lidera las búsquedas",
+      "description": "Con un interés de 84/100 y crecimiento de 38% en el trimestre.",
+      "action": "Se sugiere reforzar la cobertura SEM y de display de esta keyword durante Cyber Days",
+      "metric": 84,
+      "change": "+38%",
       "confidence": 0.92,
-      "impact_score": 9.2,
+      "impact_score": 9.0,
       "source": "Google Trends"
     },
     {
@@ -75,19 +75,19 @@
       "type": "budget",
       "priority": "medium",
       "title": "Oportunidad de optimización en Meta Ads",
-      "description": "Meta supera el target en CPL con audiencia adulta planificadora.",
-      "action": "Se sugiere subir Meta de 60% a 64% del presupuesto durante la ventana estacional",
+      "description": "Meta supera el target en CPM y CPI con la audiencia Joven Conectado Lima Moderna.",
+      "action": "Se sugiere subir Meta de 54% a 58% del presupuesto durante la ventana estacional",
       "recommendations": [
         {
           "channel": "meta_ads",
-          "from": 60,
-          "to": 64,
-          "expected_uplift": "+95 cuentas creadas/mes"
+          "from": 54,
+          "to": 58,
+          "expected_uplift": "+250.000 personas alcanzadas/mes"
         },
         {
           "channel": "google_display",
-          "from": 8,
-          "to": 6,
+          "from": 12,
+          "to": 10,
           "expected_uplift": "Reasignación a canal de mejor rendimiento"
         }
       ],

@@ -1,123 +1,121 @@
 {
   "timestamp": "2026-05-04T22:55:00Z",
   "source": "Google Analytics 4 (Mock)",
-  "property": "Powerpay - Cuentas y Cuotas (Demo)",
-  "client": "Powerpay",
+  "property": "WIN - Internet Hogar (Demo)",
+  "client": "WIN",
   "dateRange": {
     "start": "2026-04-04",
     "end": "2026-05-04"
   },
   "overview": {
-    "totalUsers": 142500,
-    "activeUsers": 118600,
-    "newUsers": 92800,
-    "sessions": 165000,
-    "averageSessionDuration": "2m 48s",
-    "bounceRate": 0.412,
+    "totalUsers": 198400,
+    "activeUsers": 165200,
+    "newUsers": 142800,
+    "sessions": 245000,
+    "averageSessionDuration": "2m 32s",
+    "bounceRate": 0.384,
     "conversions": 1450,
-    "conversionRate": 0.0088
+    "conversionRate": 0.0059
   },
   "topPages": [
     {
-      "page": "/registrarme",
-      "views": 28500,
-      "uniquePageviews": 22400,
-      "avgTimeOnPage": "3m 48s",
-      "exitRate": 0.22,
-      "conversionRate": 0.058
-    },
-    {
-      "page": "/como-funciona",
-      "views": 22400,
-      "uniquePageviews": 18200,
-      "avgTimeOnPage": "3m 12s",
+      "page": "/",
+      "views": 78400,
+      "uniquePageviews": 64200,
+      "avgTimeOnPage": "2m 48s",
       "exitRate": 0.28,
-      "conversionRate": 0.042
+      "conversionRate": 0.022
     },
     {
-      "page": "/tiendas/tecnologia",
-      "views": 19800,
-      "uniquePageviews": 15600,
-      "avgTimeOnPage": "2m 42s",
-      "exitRate": 0.35,
+      "page": "/planes",
+      "views": 53900,
+      "uniquePageviews": 44800,
+      "avgTimeOnPage": "3m 12s",
+      "exitRate": 0.24,
       "conversionRate": 0.038
     },
     {
-      "page": "/tiendas/electrohogar",
-      "views": 14600,
-      "uniquePageviews": 11800,
-      "avgTimeOnPage": "2m 35s",
-      "exitRate": 0.38,
-      "conversionRate": 0.034
+      "page": "/planes/900mbps",
+      "views": 24500,
+      "uniquePageviews": 20800,
+      "avgTimeOnPage": "3m 42s",
+      "exitRate": 0.32,
+      "conversionRate": 0.046
     },
     {
-      "page": "/preguntas-frecuentes",
-      "views": 12200,
-      "uniquePageviews": 9800,
-      "avgTimeOnPage": "4m 05s",
-      "exitRate": 0.32,
+      "page": "/cobertura",
+      "views": 27000,
+      "uniquePageviews": 22600,
+      "avgTimeOnPage": "2m 20s",
+      "exitRate": 0.35,
       "conversionRate": 0.018
+    },
+    {
+      "page": "/win-tv",
+      "views": 19600,
+      "uniquePageviews": 16400,
+      "avgTimeOnPage": "3m 05s",
+      "exitRate": 0.30,
+      "conversionRate": 0.024
     }
   ],
   "searchTerms": [
     {
-      "term": "powerpay",
-      "searches": 4250,
-      "resultClicks": 3680,
-      "conversionRate": 0.085,
+      "term": "win internet",
+      "searches": 5320,
+      "resultClicks": 4680,
+      "conversionRate": 0.078,
       "trend": "rising"
     },
     {
-      "term": "cuotas sin intereses",
-      "searches": 3850,
-      "resultClicks": 3120,
-      "conversionRate": 0.062,
+      "term": "internet fibra optica",
+      "searches": 4180,
+      "resultClicks": 3420,
+      "conversionRate": 0.058,
       "trend": "rising"
     },
     {
-      "term": "powerpay como funciona",
+      "term": "contratar internet hogar",
+      "searches": 2680,
+      "resultClicks": 2280,
+      "conversionRate": 0.082,
+      "trend": "rising"
+    },
+    {
+      "term": "win planes",
       "searches": 2240,
-      "resultClicks": 1980,
-      "conversionRate": 0.092,
+      "resultClicks": 2050,
+      "conversionRate": 0.094,
       "trend": "rising"
     },
     {
-      "term": "comprar laptop en cuotas",
-      "searches": 2180,
-      "resultClicks": 1820,
-      "conversionRate": 0.048,
-      "trend": "rising"
-    },
-    {
-      "term": "powerpay registrarme",
-      "searches": 1620,
-      "resultClicks": 1480,
-      "conversionRate": 0.118,
+      "term": "mejor internet lima",
+      "searches": 1820,
+      "resultClicks": 1520,
+      "conversionRate": 0.052,
       "trend": "rising"
     }
   ],
   "demographics": {
     "age": {
-      "18-24": 0.18,
-      "25-34": 0.42,
-      "35-44": 0.25,
-      "45-54": 0.10,
-      "55+": 0.05
+      "18-24": 0.14,
+      "25-34": 0.36,
+      "35-44": 0.28,
+      "45-54": 0.16,
+      "55+": 0.06
     },
     "gender": {
-      "male": 0.52,
-      "female": 0.47,
+      "male": 0.54,
+      "female": 0.45,
       "other": 0.01
     },
     "locations": {
-      "Lima": 0.60,
-      "Arequipa": 0.10,
-      "Trujillo": 0.07,
-      "Chiclayo": 0.06,
-      "Piura": 0.05,
-      "Cusco": 0.04,
-      "Huancayo": 0.03,
-      "Otros": 0.05
+      "Lima Moderna": 0.38,
+      "Lima Norte": 0.22,
+      "Lima Sur": 0.18,
+      "Lima Este": 0.12,
+      "Callao": 0.06,
+      "Otros": 0.04
     }
   },
   "deviceCategory": {
@@ -137,63 +135,69 @@
         "source": "meta_ads",
         "leads": 870,
         "qualified": 627,
-        "avgLeadScore": 76
+        "avgLeadScore": 78
       },
       {
         "source": "google_search",
-        "leads": 365,
-        "qualified": 285,
-        "avgLeadScore": 82
+        "leads": 320,
+        "qualified": 252,
+        "avgLeadScore": 84
       },
       {
         "source": "organic_search",
         "leads": 105,
         "qualified": 78,
-        "avgLeadScore": 72
+        "avgLeadScore": 74
       },
       {
-        "source": "google_display",
+        "source": "youtube",
         "leads": 75,
+        "qualified": 50,
+        "avgLeadScore": 62
+      },
+      {
+        "source": "tiktok_ads",
+        "leads": 50,
         "qualified": 32,
-        "avgLeadScore": 58
+        "avgLeadScore": 60
       },
       {
         "source": "direct",
-        "leads": 35,
-        "qualified": 28,
-        "avgLeadScore": 70
+        "leads": 30,
+        "qualified": 11,
+        "avgLeadScore": 68
       }
     ]
   },
   "interestAreas": {
-    "tecnologia": {
-      "pageviews": 24500,
-      "avgTimeOnPage": "2m 48s",
-      "bounceRate": 0.34
+    "gaming": {
+      "pageviews": 28500,
+      "avgTimeOnPage": "2m 58s",
+      "bounceRate": 0.32
     },
-    "electrohogar": {
+    "streaming": {
+      "pageviews": 22400,
+      "avgTimeOnPage": "2m 42s",
+      "bounceRate": 0.36
+    },
+    "teletrabajo": {
       "pageviews": 16800,
       "avgTimeOnPage": "2m 35s",
       "bounceRate": 0.38
     },
-    "moda_calzado": {
-      "pageviews": 12400,
-      "avgTimeOnPage": "2m 12s",
-      "bounceRate": 0.42
-    },
-    "entretenimiento_viajes": {
-      "pageviews": 8500,
+    "smart_home": {
+      "pageviews": 9800,
       "avgTimeOnPage": "2m 28s",
       "bounceRate": 0.40
     },
-    "belleza_salud": {
-      "pageviews": 6200,
+    "educacion_digital": {
+      "pageviews": 7200,
       "avgTimeOnPage": "2m 18s",
-      "bounceRate": 0.45
+      "bounceRate": 0.42
     }
   },
   "metadata": {
-    "note": "Mock data para MVP - Powerpay (Demo Client)",
+    "note": "Mock data para MVP - WIN (cliente demo)",
     "actualIntegration": "Requiere acceso al property GA4 del cliente",
     "updateFrequency": "Diaria automática una vez integrado"
   }

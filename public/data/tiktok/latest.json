@@ -1,123 +1,115 @@
 {
   "timestamp": "2026-05-04T21:45:34.998Z",
-  "source": "TikTok Trends via Apify",
+  "source": "TikTok Trends - Apify",
   "region": "PE",
-  "category": "Finance",
-  "client": "Powerpay",
+  "category": "Internet & Telecom",
+  "client": "WIN",
   "trends": {
     "hashtags": [
       {
-        "hashtag": "#CuotasSinIntereses",
+        "hashtag": "#FibraOptica",
+        "videos": 16800,
+        "views": 3200000,
+        "growth": "+34%",
+        "category": "Telco"
+      },
+      {
+        "hashtag": "#InternetPeru",
+        "videos": 22400,
+        "views": 4800000,
+        "growth": "+28%",
+        "category": "Telco"
+      },
+      {
+        "hashtag": "#GamingPeru",
+        "videos": 14200,
+        "views": 2800000,
+        "growth": "+42%",
+        "category": "Gaming"
+      },
+      {
+        "hashtag": "#StreamingHD",
         "videos": 18500,
-        "views": 4200000,
+        "views": 5200000,
         "growth": "+38%",
-        "category": "Fintech"
+        "category": "Lifestyle"
       },
       {
-        "hashtag": "#CyberWow",
-        "videos": 12200,
-        "views": 6800000,
-        "growth": "+82%",
-        "category": "Retail"
-      },
-      {
-        "hashtag": "#ComprarEnCuotas",
-        "videos": 8400,
-        "views": 1900000,
-        "growth": "+25%",
-        "category": "Fintech"
-      },
-      {
-        "hashtag": "#FintechPeru",
-        "videos": 5200,
-        "views": 980000,
-        "growth": "+18%",
-        "category": "Fintech"
-      },
-      {
-        "hashtag": "#Powerpay",
-        "videos": 320,
-        "views": 145000,
-        "growth": "+72%",
+        "hashtag": "#WIN",
+        "videos": 480,
+        "views": 165000,
+        "growth": "+62%",
         "category": "Brand"
       }
     ],
     "sounds": [
       {
-        "soundName": "Oh No Oh No (Kreepa remix LATAM)",
-        "author": "Kreepa",
-        "usage": "2100000",
-        "growth": "+12%",
-        "duration": 22,
-        "category": "Comedia"
-      },
-      {
-        "soundName": "Aesthetic shopping vibes",
-        "author": "Lo-fi viral PE",
-        "usage": "650000",
-        "growth": "+28%",
-        "duration": 30,
+        "soundName": "Voices (Øneheart)",
+        "author": "Øneheart",
+        "usage": "1850000",
+        "growth": "+22%",
+        "duration": 28,
         "category": "Lifestyle"
       },
       {
-        "soundName": "Una noche en Medellín sped-up",
-        "author": "Cris Mj",
-        "usage": "3200000",
-        "growth": "+15%",
-        "duration": 18,
-        "category": "Trend joven"
+        "soundName": "Levitating (Dua Lipa)",
+        "author": "Dua Lipa",
+        "usage": "1320000",
+        "growth": "+14%",
+        "duration": 26,
+        "category": "Pop celebración"
       },
       {
-        "soundName": "Money Money Money flip TikTok",
-        "author": "ABBA flip",
-        "usage": "720000",
-        "growth": "+8%",
-        "duration": 25,
-        "category": "Finanzas"
+        "soundName": "Tití Me Preguntó (Bad Bunny)",
+        "author": "Bad Bunny",
+        "usage": "2600000",
+        "growth": "+18%",
+        "duration": 24,
+        "category": "LATAM evergreen"
       },
       {
-        "soundName": "Voiceover narrativo PE",
-        "author": "Creators finanzas",
-        "usage": "180000",
-        "growth": "+42%",
+        "soundName": "Voiceover narrativo PE creators tech",
+        "author": "Creators tech PE",
+        "usage": "240000",
+        "growth": "+38%",
         "duration": 60,
         "category": "Storytime"
       },
       {
-        "soundName": "Cyber Wow beat genérico Perú",
+        "soundName": "Beat estacional Cyber Wow Perú",
         "author": "Estacional Perú",
-        "usage": "320000",
-        "growth": "+95%",
+        "usage": "380000",
+        "growth": "+88%",
         "duration": 15,
         "category": "Estacional"
       }
     ],
     "creators": [
       {
-        "username": "@finanzasconfede",
-        "followers": 285000,
-        "category": "Educación financiera",
-        "engagement_rate": 8.4
+        "username": "@conectadosperu",
+        "followers": 320000,
+        "category": "Tecnología y conectividad",
+        "engagement_rate": 7.8
       },
       {
-        "username": "@unboxingperu",
-        "followers": 410000,
-        "category": "Tecnología",
-        "engagement_rate": 6.8
+        "username": "@gamersetuppe",
+        "followers": 245000,
+        "category": "Gaming y setups",
+        "engagement_rate": 9.4
       },
       {
-        "username": "@compracomprueba",
-        "followers": 165000,
-        "category": "Comparativos retail",
-        "engagement_rate": 9.2
+        "username": "@streamingreviewpe",
+        "followers": 180000,
+        "category": "Streaming y series",
+        "engagement_rate": 6.6
       }
     ]
   },
   "metadata": {
     "method": "Apify clockworks/tiktok-trends-scraper",
-    "note": "Datos curados de TikTok Creative Center Perú para nicho fintech y retail",
+    "note": "Datos curados de TikTok Creative Center Perú para nicho telco e internet hogar",
     "timeframe": "Last 30 days",
-    "industry": "Finance",
-    "items_fetched": 14
+    "industry": "Internet & Telecom",
+    "items_fetched": 13
   }
 }

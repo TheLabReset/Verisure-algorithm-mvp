@@ -6,16 +6,16 @@
 // ============================================================================
 export const BRAND_CONFIG = {
   name: 'The Algorithm by Reset',
-  tagline: 'Powerpay Intelligence Platform',
-  subtitle: 'Optimización automática de inversión digital en adquisición de cuentas',
-  product: 'Cuentas Powerpay 2026',
-  market: 'Perú (digital nacional, foco Lima)',
-  client: 'Powerpay',
+  tagline: 'WIN Awareness Intelligence Platform',
+  subtitle: 'Optimización de inversión digital para recordación de marca de WIN',
+  product: 'Campaña de Marca WIN 2026',
+  market: 'Perú (foco Lima Metropolitana)',
+  client: 'WIN',
   agency: 'Reset Agency',
   isTemplate: false,
   version: '1.0.0',
-  slogan: 'El poder de elegir',
-  founded: 2022,
+  slogan: 'Internet 100% fibra óptica',
+  founded: 2017,
 };
 
 // ============================================================================
@@ -25,7 +25,7 @@ export const LAYER_CONFIG = {
   data: {
     id: 'data',
     name: 'Captura de Señales',
-    subtitle: 'Monitoreo en tiempo real del ecosistema digital fintech y BNPL',
+    subtitle: 'Monitoreo en tiempo real del ecosistema digital telco y fibra óptica',
     description: 'Búsqueda, Tendencia, Intención, Engagement',
     icon: 'Search',
     color: 'from-fitzone-orange to-fitzone-darkOrange',
@@ -33,7 +33,7 @@ export const LAYER_CONFIG = {
   decision: {
     id: 'decision',
     name: 'Inteligencia de Mercado',
-    subtitle: 'Insights automáticos para optimizar inversión en captación de cuentas',
+    subtitle: 'Insights automáticos para optimizar inversión en recordación de marca',
     description: 'Análisis y definición de estrategia',
     icon: 'Target',
     color: 'from-fitzone-darkOrange to-fitzone-electric',
@@ -41,7 +41,7 @@ export const LAYER_CONFIG = {
   execution: {
     id: 'execution',
     name: 'Activación Estratégica',
-    subtitle: 'Distribución inteligente de presupuesto, comercios y contenidos',
+    subtitle: 'Distribución inteligente de presupuesto, zonas y contenidos',
     description: 'Implementación en tiempo real',
     icon: 'Zap',
     color: 'from-fitzone-electric to-fitzone-lime',
@@ -49,7 +49,7 @@ export const LAYER_CONFIG = {
   optimization: {
     id: 'optimization',
     name: 'Performance & Optimización',
-    subtitle: 'Resultados en tiempo real y ajustes automáticos',
+    subtitle: 'Resultados de awareness en tiempo real y ajustes automáticos',
     description: 'Evaluación y redistribución',
     icon: 'TrendingUp',
     color: 'from-fitzone-lime to-fitzone-orange',
@@ -57,33 +57,33 @@ export const LAYER_CONFIG = {
 };
 
 // ============================================================================
-// KEY MESSAGES - Mensajes clave de comunicación Powerpay
+// KEY MESSAGES - Mensajes clave de comunicación WIN
 // ============================================================================
 export const KEY_MESSAGES = {
-  linea: {
-    title: 'Sin afectar tu línea de crédito',
-    message: 'Las cuotas se debitan automáticamente, sin consumir el cupo de tu tarjeta',
-    description: 'Conserva tu línea disponible para lo que tú decidas',
+  fibra_pura: {
+    title: 'Fibra 100% óptica hasta el hogar',
+    message: 'Tecnología FTTH pura, sin tramos de cobre, con velocidad estable',
+    description: 'Internet diseñado para el consumo digital actual',
   },
-  cualquier_tarjeta: {
-    title: 'Funciona con cualquier tarjeta',
-    message: 'Acepta cualquier tarjeta de crédito o débito del mercado peruano',
-    description: 'Sin importar el banco emisor',
+  velocidad_simetrica: {
+    title: 'Velocidad simétrica 1:1',
+    message: 'La misma velocidad de bajada y de subida en todos los planes',
+    description: 'Ideal para teletrabajo, streaming y videollamadas',
   },
-  sin_intereses: {
-    title: 'Cuotas sin intereses disponibles',
-    message: 'Hasta en 12 cuotas desde 0% de interés en comercios seleccionados',
-    description: 'Solo se paga la primera cuota al comprar',
+  satisfaccion_lider: {
+    title: 'Líder en satisfacción al cliente',
+    message: 'Reconocidos por OSIPTEL como el operador con mejor experiencia de servicio en fibra',
+    description: 'Atención técnica local con soporte cercano',
   },
-  transparencia: {
-    title: 'Transparencia total',
-    message: 'Sin letras chicas: la información completa antes de pagar',
-    description: 'Cuotas, fechas y montos siempre visibles',
+  instalacion_incluida: {
+    title: 'Instalación gratuita incluida',
+    message: 'Sin costo de instalación, equipo entregado y configurado en el hogar',
+    description: 'Activación rápida, normalmente en pocos días',
   },
-  comercios: {
-    title: 'Más de 300 comercios afiliados',
-    message: 'Tecnología, electrohogar, moda, viajes, belleza y mucho más',
-    description: 'Una red en crecimiento permanente',
+  cobertura_lima: {
+    title: 'Cobertura en 40+ distritos de Lima',
+    message: 'Red propia desplegada en Lima Metropolitana y 11 provincias del país',
+    description: 'Una red en expansión continua',
   },
 };
 
@@ -94,20 +94,20 @@ export const DATA_SOURCES_CONFIG = {
   googleTrends: {
     enabled: true,
     name: 'Google Trends',
-    description: 'Tendencias de búsqueda fintech y cuotas en tiempo real',
+    description: 'Tendencias de búsqueda de internet hogar y fibra óptica en tiempo real',
     icon: 'TrendingUp',
     color: 'text-fitzone-electric',
     bgColor: 'bg-fitzone-slate',
     region: 'PE',
-    category: 'Finance',
+    category: 'Internet & Telecom',
     interval: 'hourly',
     status: 'active',
-    geo: ['Lima', 'Arequipa', 'Trujillo', 'Chiclayo'],
+    geo: ['Lima', 'Callao', 'Arequipa', 'Trujillo'],
   },
   tiktok: {
     enabled: true,
     name: 'TikTok',
-    description: 'Contenido viral fintech y hashtags trending',
+    description: 'Contenido viral telco, lifestyle digital y hashtags trending',
     icon: 'Video',
     color: 'text-fitzone-lime',
     bgColor: 'bg-fitzone-slate',
@@ -117,7 +117,7 @@ export const DATA_SOURCES_CONFIG = {
   meta: {
     enabled: true,
     name: 'Meta Platforms',
-    description: 'Facebook e Instagram insights del sector financiero',
+    description: 'Facebook e Instagram insights del sector telco e internet hogar',
     icon: 'Share2',
     color: 'text-fitzone-electric',
     bgColor: 'bg-fitzone-slate',
@@ -127,26 +127,26 @@ export const DATA_SOURCES_CONFIG = {
   youtube: {
     enabled: true,
     name: 'YouTube',
-    description: 'Reseñas, comparativas y educación financiera',
+    description: 'Reseñas de operadores, tests de velocidad y contenido educativo',
     icon: 'Youtube',
     color: 'text-fitzone-orange',
     bgColor: 'bg-fitzone-slate',
     status: 'active',
   },
-  fintech: {
+  telco: {
     enabled: true,
-    name: 'Portales Fintech',
-    description: 'ASBANC, BCRP, Niubiz, reportes del sector financiero',
+    name: 'Portales del Sector',
+    description: 'OSIPTEL, MTC y reportes públicos de telecomunicaciones en Perú',
     icon: 'Globe',
     color: 'text-fitzone-lime',
     bgColor: 'bg-fitzone-slate',
-    sources: ['ASBANC', 'BCRP', 'Niubiz', 'IAB Perú'],
+    sources: ['OSIPTEL', 'MTC', 'IAB Perú', 'IPSOS Perú'],
     status: 'active',
   },
   ga4: {
     enabled: false,
     name: 'Google Analytics 4',
-    description: 'Tráfico web y registros',
+    description: 'Tráfico web y consultas de planes',
     icon: 'BarChart3',
     color: 'text-fitzone-orange',
     bgColor: 'bg-fitzone-slate',
@@ -164,53 +164,58 @@ export const CHANNELS_CONFIG = {
     icon: 'Share2',
     color: 'text-fitzone-electric',
     bgColor: 'bg-fitzone-slate',
-    primary_kpi: 'Registros + Awareness',
-    description: 'Instagram y Facebook Ads',
-    subchannels: ['Lead Ads', 'Conversions API', 'Tráfico a web'],
+    primary_kpi: 'Alcance + Interacciones',
+    description: 'Instagram y Facebook Ads orientados a awareness',
+    subchannels: ['Reach campaigns', 'Engagement', 'Reels Ads'],
   },
   google_search: {
     name: 'Google Search',
     icon: 'Search',
     color: 'text-fitzone-lime',
     bgColor: 'bg-fitzone-slate',
-    primary_kpi: 'Intención de compra',
-    description: 'Campañas Brand, Generic y Competitor',
+    primary_kpi: 'Búsquedas de marca',
+    description: 'Campañas Brand y categoría fibra óptica',
   },
   google_display: {
     name: 'Google Display',
     icon: 'Monitor',
     color: 'text-fitzone-orange',
     bgColor: 'bg-fitzone-slate',
-    primary_kpi: 'Remarketing + Awareness',
-    description: 'Red de display y banners contextuales',
+    primary_kpi: 'Alcance + Frecuencia',
+    description: 'Red de display contextual y geo Lima',
   },
   youtube: {
-    name: 'YouTube (Demand Gen)',
+    name: 'YouTube',
     icon: 'Youtube',
     color: 'text-fitzone-orange',
     bgColor: 'bg-fitzone-slate',
-    primary_kpi: 'Awareness + Consideración',
-    description: 'Demand Gen y bumpers educativos',
+    primary_kpi: 'Recordación + Consideración',
+    description: 'Bumpers, in-stream y shorts para awareness',
+  },
+  tiktok_ads: {
+    name: 'TikTok Ads',
+    icon: 'Video',
+    color: 'text-fitzone-lime',
+    bgColor: 'bg-fitzone-slate',
+    primary_kpi: 'Alcance audiencia joven',
+    description: 'Spark Ads y TopView para audiencia 18-30',
   },
 };
 
 // ============================================================================
-// COMERCIOS PARTNERS - Top retailers afiliados a Powerpay
-// (reinterpretación de "sedes" para una marca 100% digital con red de comercios)
+// SEDES - Centros de atención WIN en Lima Metropolitana y Callao
 // ============================================================================
 export const SEDES_CONFIG = [
-  { id: 1, nombre: 'Samsung Store', distrito: 'Tecnología', nse: 'A/B', size: 'S/2.500', type: 'Smartphones y TV' },
-  { id: 2, nombre: 'iShop Perú', distrito: 'Tecnología', nse: 'A', size: 'S/3.800', type: 'Apple Premium' },
-  { id: 3, nombre: 'Mac Center', distrito: 'Tecnología', nse: 'A/B', size: 'S/3.200', type: 'Apple multi-tienda' },
-  { id: 4, nombre: 'PC Factory', distrito: 'Tecnología', nse: 'B/C+', size: 'S/2.100', type: 'Computación' },
-  { id: 5, nombre: 'Sony Store', distrito: 'Electrohogar', nse: 'A/B', size: 'S/2.800', type: 'Audio y video' },
-  { id: 6, nombre: 'iRobot Perú', distrito: 'Electrohogar', nse: 'A/B', size: 'S/2.300', type: 'Hogar inteligente' },
-  { id: 7, nombre: 'Aldo & Co.', distrito: 'Moda', nse: 'A/B', size: 'S/650', type: 'Calzado premium' },
-  { id: 8, nombre: 'Footloose', distrito: 'Moda', nse: 'B/C+', size: 'S/420', type: 'Calzado urbano' },
-  { id: 9, nombre: 'Coliseum', distrito: 'Deportes', nse: 'B/C+', size: 'S/580', type: 'Indumentaria deportiva' },
-  { id: 10, nombre: 'Teleticket', distrito: 'Entretenimiento', nse: 'B/C+', size: 'S/380', type: 'Eventos y conciertos' },
-  { id: 11, nombre: 'NuSkin Perú', distrito: 'Belleza', nse: 'A/B', size: 'S/890', type: 'Skincare premium' },
-  { id: 12, nombre: 'Thermomix', distrito: 'Hogar', nse: 'A', size: 'S/5.200', type: 'Cocina premium' },
+  { id: 1, nombre: 'WIN Sede Central', distrito: 'Surquillo', nse: 'A/B', size: 'Corporativa', type: 'Sede principal' },
+  { id: 2, nombre: 'WIN Surco', distrito: 'Santiago de Surco', nse: 'A/B', size: 'Premium', type: 'Centro de atención' },
+  { id: 3, nombre: 'WIN Miraflores', distrito: 'Miraflores', nse: 'A', size: 'Premium', type: 'Centro de atención' },
+  { id: 4, nombre: 'WIN San Miguel', distrito: 'San Miguel', nse: 'B', size: 'Estándar', type: 'Centro de atención' },
+  { id: 5, nombre: 'WIN La Molina', distrito: 'La Molina', nse: 'A/B', size: 'Premium', type: 'Centro de atención' },
+  { id: 6, nombre: 'WIN Los Olivos', distrito: 'Los Olivos', nse: 'B/C+', size: 'Estándar', type: 'Centro de atención' },
+  { id: 7, nombre: 'WIN San Juan de Lurigancho', distrito: 'San Juan de Lurigancho', nse: 'C+/B', size: 'Estándar', type: 'Centro de atención' },
+  { id: 8, nombre: 'WIN San Juan de Miraflores', distrito: 'San Juan de Miraflores', nse: 'C+/B', size: 'Estándar', type: 'Centro de atención' },
+  { id: 9, nombre: 'WIN Comas', distrito: 'Comas', nse: 'C+/B', size: 'Estándar', type: 'Centro de atención' },
+  { id: 10, nombre: 'WIN Callao', distrito: 'Bellavista (Callao)', nse: 'B/C+', size: 'Estándar', type: 'Centro de atención' },
 ];
 
 // ============================================================================
@@ -218,130 +223,130 @@ export const SEDES_CONFIG = [
 // ============================================================================
 export const TARGET_AUDIENCES = [
   {
-    id: 'joven_digital',
-    name: 'Joven Digital Primer-Usuario',
-    description: '22-30 años, primer crédito o débito, compra impulsiva en marketplaces',
+    id: 'joven_lima_moderna',
+    name: 'Joven Conectado Lima Moderna',
+    description: '25-39 años, NSE A/B, distritos de Lima Moderna, alto consumo digital',
     size: '~620.000',
-    age_range: '22-30',
+    age_range: '25-39',
     priority: 'high',
     segments: [
       {
-        name: 'Universitario tardío y primer empleo',
+        name: 'Profesional millennial digital',
         size: '~340.000',
-        age: '22-26',
-        characteristics: ['Primera tarjeta', 'Sensibilidad a la cuota mensual', 'Influenciado por reseñas TikTok'],
+        age: '25-32',
+        characteristics: ['Teletrabajo y streaming intensivo', 'Decisión individual de contratación', 'Compara velocidades antes que precio'],
       },
       {
-        name: 'Joven profesional digital',
+        name: 'Adulto joven gamer y creador',
         size: '~280.000',
-        age: '27-30',
-        characteristics: ['Compra tech y moda en marketplaces', 'Valora rapidez de checkout', 'Compara cuotas vs. precio'],
+        age: '28-39',
+        characteristics: ['Gaming online y video en alta resolución', 'Valora velocidad de subida (simétrica)', 'Influenciado por reseñas en YouTube y TikTok'],
       },
     ],
-    interests: ['Tecnología', 'Lanzamientos', 'Marketplaces', 'Lifestyle digital'],
-    message: 'La libertad de comprar hoy y pagar cómo mejor se acomode',
+    interests: ['Tecnología', 'Streaming', 'Gaming', 'Smart home', 'Teletrabajo'],
+    message: 'Velocidad simétrica para teletrabajar, transmitir y jugar sin esperas',
     channels: {
-      'Meta Ads': 55,
-      'Google Search': 25,
-      'Google Display': 12,
-      'YouTube': 8,
+      'Meta Ads': 50,
+      'Google Display': 18,
+      'YouTube': 18,
+      'TikTok Ads': 14,
     },
-    engagement_rate: 4.8,
-    cpl_target: 9,
+    engagement_rate: 5.2,
+    cpl_target: 0.12,
     conversion_funnel: {
-      alcance: 1080000,
-      visitas_landing: 16200,
+      alcance: 1500000,
+      visitas_landing: 22800,
       formularios: 870,
-      trials: 630,
-      miembros: 630,
+      trials: 0,
+      miembros: 1500000,
     },
   },
   {
-    id: 'adulto_planificador',
-    name: 'Adulto Bancarizado Planificador',
-    description: '32-45 años, NSE A/B, financia electro, viajes y tecnología premium',
+    id: 'familia_conectada',
+    name: 'Familia Conectada Lima Norte y Sur',
+    description: '35-55 años, NSE B/C+, distritos de Lima Norte, Este y Sur, decisión familiar',
     size: '~440.000',
-    age_range: '32-45',
+    age_range: '35-55',
     priority: 'medium',
     segments: [
       {
-        name: 'Profesional urbano',
+        name: 'Padres millennials y Gen X',
         size: '~260.000',
-        age: '32-38',
-        characteristics: ['Tarjeta(s) activa(s)', 'Planifica compras grandes', 'Cuida su línea de crédito'],
+        age: '35-45',
+        characteristics: ['Decisión familiar de contratación', 'Hijos consumen streaming y gaming', 'Sensibles al servicio técnico local'],
       },
       {
-        name: 'Adulto consolidado',
+        name: 'Adultos consolidados',
         size: '~180.000',
-        age: '39-45',
-        characteristics: ['Renueva electro y tecnología', 'Compara TCEA y comisiones', 'Valora transparencia'],
+        age: '46-55',
+        characteristics: ['Buscan estabilidad y soporte cercano', 'Valoran transparencia en cobros', 'Influenciados por referidos del barrio'],
       },
     ],
-    interests: ['Electrodomésticos', 'Tecnología premium', 'Viajes', 'Educación familiar'],
-    message: 'Financiamiento para lo importante, sin tocar la línea de tu tarjeta principal',
+    interests: ['Streaming familiar', 'Educación de hijos', 'Series y deportes', 'Soporte técnico'],
+    message: 'Internet estable y simétrico para todos en casa, con soporte local cercano',
     channels: {
-      'Meta Ads': 45,
-      'Google Search': 35,
-      'Google Display': 12,
-      'YouTube': 8,
+      'Meta Ads': 58,
+      'Google Search': 20,
+      'YouTube': 14,
+      'Google Display': 8,
     },
-    engagement_rate: 3.4,
-    cpl_target: 11.5,
+    engagement_rate: 3.6,
+    cpl_target: 0.15,
     conversion_funnel: {
-      alcance: 720000,
-      visitas_landing: 10800,
+      alcance: 1000000,
+      visitas_landing: 15200,
       formularios: 580,
-      trials: 420,
-      miembros: 420,
+      trials: 0,
+      miembros: 1000000,
     },
   },
 ];
 
 // ============================================================================
-// TIMING - Mejores momentos para pauta (BNPL Perú)
+// TIMING - Mejores momentos para pauta (telco awareness Perú)
 // ============================================================================
 export const OPTIMAL_TIMING = {
   dayparts: [
-    { name: 'Mañana', hours: '7:00 - 10:00', performance: 'medium', multiplier: 1.0, audience: 'Profesionales' },
-    { name: 'Mediodía', hours: '12:00 - 14:00', performance: 'high', multiplier: 1.3, audience: 'Oficinistas' },
-    { name: 'Tarde-noche', hours: '18:00 - 22:00', performance: 'very_high', multiplier: 1.6, audience: 'Todos' },
-    { name: 'Madrugada', hours: '22:00 - 00:00', performance: 'high', multiplier: 1.2, audience: 'Joven digital' },
+    { name: 'Mañana', hours: '7:00 - 10:00', performance: 'medium', multiplier: 1.0, audience: 'Profesionales en teletrabajo' },
+    { name: 'Mediodía', hours: '12:00 - 14:00', performance: 'high', multiplier: 1.3, audience: 'Pausa laboral, consumo móvil' },
+    { name: 'Tarde-noche', hours: '18:00 - 22:00', performance: 'very_high', multiplier: 1.7, audience: 'Familia conectada, streaming' },
+    { name: 'Madrugada', hours: '22:00 - 00:00', performance: 'high', multiplier: 1.2, audience: 'Joven digital, gaming' },
   ],
   weekdays: [
-    { name: 'Lunes', performance: 'medium', recommended: true, note: 'Búsqueda y consideración' },
-    { name: 'Martes', performance: 'high', recommended: true, note: 'Cierres de carrito' },
-    { name: 'Miércoles', performance: 'high', recommended: true, note: 'Ofertas mid-week' },
-    { name: 'Jueves', performance: 'very_high', recommended: true, note: 'Pre-quincena, mayor conversión' },
-    { name: 'Viernes', performance: 'very_high', recommended: true, note: 'Pago de quincena' },
-    { name: 'Sábado', performance: 'high', recommended: true, note: 'Compra planificada' },
-    { name: 'Domingo', performance: 'medium', recommended: true, note: 'Comparación y decisión' },
+    { name: 'Lunes', performance: 'medium', recommended: true, note: 'Búsqueda y consideración de cambio' },
+    { name: 'Martes', performance: 'high', recommended: true, note: 'Picos de tráfico web' },
+    { name: 'Miércoles', performance: 'high', recommended: true, note: 'Engagement medio semana' },
+    { name: 'Jueves', performance: 'very_high', recommended: true, note: 'Alta consideración pre-fin de semana' },
+    { name: 'Viernes', performance: 'very_high', recommended: true, note: 'Pago de quincena, decisión' },
+    { name: 'Sábado', performance: 'high', recommended: true, note: 'Consumo familiar y comparación' },
+    { name: 'Domingo', performance: 'medium', recommended: true, note: 'Investigación y decisión final' },
   ],
   seasonality: [
-    { month: 'Enero', demand: 'medium', note: 'Vuelta al cole y verano' },
-    { month: 'Febrero', demand: 'medium', note: 'Verano, estabilización' },
-    { month: 'Marzo', demand: 'high', note: 'Cyber Days marzo y back-to-school' },
-    { month: 'Abril', demand: 'medium', note: 'Pre Día de la Madre' },
-    { month: 'Mayo', demand: 'high', note: 'Día de la Madre, pico retail' },
-    { month: 'Junio', demand: 'medium', note: 'Pre Cyber Wow' },
-    { month: 'Julio', demand: 'very_high', note: 'Cyber Wow y Fiestas Patrias' },
-    { month: 'Agosto', demand: 'medium', note: 'Estabilización' },
-    { month: 'Septiembre', demand: 'medium', note: 'Lanzamientos tech' },
-    { month: 'Octubre', demand: 'medium', note: 'Pre-Cyber Wow noviembre' },
-    { month: 'Noviembre', demand: 'very_high', note: 'Cyber Wow y Black Friday' },
-    { month: 'Diciembre', demand: 'very_high', note: 'Navidad y campaña fin de año' },
+    { month: 'Enero', demand: 'low', note: 'Post-Navidad, ajuste de presupuesto familiar' },
+    { month: 'Febrero', demand: 'high', note: 'Regreso a clases, pico de búsqueda escolar' },
+    { month: 'Marzo', demand: 'high', note: 'Ajuste de planes para año académico' },
+    { month: 'Abril', demand: 'medium', note: 'Estabilización post escolar' },
+    { month: 'Mayo', demand: 'low', note: 'Mes intermedio, valle natural' },
+    { month: 'Junio', demand: 'medium', note: 'Recuperación y eventos deportivos' },
+    { month: 'Julio', demand: 'very_high', note: 'Fiestas Patrias y vacaciones, alto consumo digital' },
+    { month: 'Agosto', demand: 'medium', note: 'Estabilización post Fiestas Patrias' },
+    { month: 'Septiembre', demand: 'medium', note: 'Pre-Cyber Days noviembre' },
+    { month: 'Octubre', demand: 'medium', note: 'Calentamiento de campañas' },
+    { month: 'Noviembre', demand: 'very_high', note: 'Cyber Days y Black Friday, pico anual' },
+    { month: 'Diciembre', demand: 'very_high', note: 'Navidad y campañas de fin de año' },
   ],
 };
 
 // ============================================================================
-// SERVICIOS - Categorías de comercios monitoreadas (6)
+// SERVICIOS - Planes y bundles WIN monitoreados (6 entradas)
 // ============================================================================
 export const SERVICIOS_CONFIG = [
-  { id: 1, nombre: 'Tecnología', revenue_pct: 32, cpl_target: 7, conversion: 6.5 },
-  { id: 2, nombre: 'Electrohogar', revenue_pct: 22, cpl_target: 9, conversion: 5.2 },
-  { id: 3, nombre: 'Moda y calzado', revenue_pct: 16, cpl_target: 8, conversion: 8.0 },
-  { id: 4, nombre: 'Entretenimiento y viajes', revenue_pct: 12, cpl_target: 10, conversion: 9.0 },
-  { id: 5, nombre: 'Belleza y salud', revenue_pct: 10, cpl_target: 11, conversion: 8.5 },
-  { id: 6, nombre: 'Lifestyle premium', revenue_pct: 8, cpl_target: 13, conversion: 4.0 },
+  { id: 1, nombre: 'WIN Hogar 750 Mbps', revenue_pct: 22, cpl_target: 0.13, conversion: 5.4 },
+  { id: 2, nombre: 'WIN Hogar 850 Mbps', revenue_pct: 26, cpl_target: 0.14, conversion: 6.1 },
+  { id: 3, nombre: 'WIN Hogar 1 Gbps Premium', revenue_pct: 18, cpl_target: 0.16, conversion: 4.8 },
+  { id: 4, nombre: 'WIN Gamer 600 Mbps', revenue_pct: 10, cpl_target: 0.12, conversion: 7.2 },
+  { id: 5, nombre: 'WIN + WIN TV Premium', revenue_pct: 14, cpl_target: 0.15, conversion: 5.0 },
+  { id: 6, nombre: 'WIN + L1MAX (Liga 1)', revenue_pct: 10, cpl_target: 0.17, conversion: 4.4 },
 ];
 
 // ============================================================================
@@ -349,18 +354,18 @@ export const SERVICIOS_CONFIG = [
 // ============================================================================
 export const METRIC_CARDS_CONFIG = [
   {
-    id: 'nuevos_miembros',
-    title: 'Cuentas Creadas',
-    description: 'Registros activos de Powerpay este mes',
-    icon: 'Users',
+    id: 'reach',
+    title: 'Alcance Único',
+    description: 'Personas únicas impactadas por la campaña este mes',
+    icon: 'Eye',
     color: 'fitzone-orange',
     gradient: 'from-fitzone-orange to-fitzone-darkOrange',
   },
   {
-    id: 'reach',
-    title: 'Alcance Total',
-    description: 'Usuarios únicos impactados a nivel nacional',
-    icon: 'Eye',
+    id: 'cpm',
+    title: 'CPM Promedio',
+    description: 'Costo por mil impresiones servidas',
+    icon: 'DollarSign',
     color: 'fitzone-electric',
     gradient: 'from-fitzone-electric to-fitzone-cyan',
   },
@@ -368,14 +373,14 @@ export const METRIC_CARDS_CONFIG = [
     id: 'engagement',
     title: 'Interacciones',
     description: 'Likes, comentarios, saves y compartidos',
-    icon: 'Heart',
+    icon: 'ThumbsUp',
     color: 'fitzone-lime',
     gradient: 'from-fitzone-lime to-fitzone-green',
   },
   {
     id: 'opportunity',
-    title: 'Powerpay Opportunity Score',
-    description: 'Índice de oportunidad de inversión BNPL',
+    title: 'WIN Awareness Score',
+    description: 'Índice de oportunidad de recordación de marca',
     icon: 'Zap',
     color: 'fitzone-orange',
     gradient: 'from-fitzone-orange to-fitzone-lime',
@@ -383,31 +388,32 @@ export const METRIC_CARDS_CONFIG = [
 ];
 
 // ============================================================================
-// CRM INTEGRATION - Configuración de alertas CPL
+// CRM INTEGRATION - Umbrales de CPI por audiencia (awareness)
+// (las claves cpl_* se mantienen por compatibilidad; representan CPI en USD)
 // ============================================================================
 export const CRM_CONFIG = {
   enabled: false,
   api_key: null,
   cpl_thresholds: {
-    joven_digital: {
-      cpl_target: 9,
-      cpl_alert: 12,
-      cpl_pause: 16,
-      max_cpl: 14,
+    joven_lima_moderna: {
+      cpl_target: 0.12,
+      cpl_alert: 0.18,
+      cpl_pause: 0.25,
+      max_cpl: 0.22,
     },
-    adulto_planificador: {
-      cpl_target: 11.5,
-      cpl_alert: 14,
-      cpl_pause: 18,
-      max_cpl: 16,
+    familia_conectada: {
+      cpl_target: 0.15,
+      cpl_alert: 0.22,
+      cpl_pause: 0.30,
+      max_cpl: 0.27,
     },
   },
   conversion_tracking: {
-    lead_ads: true,
-    web_registrations: true,
+    reach_unique: true,
+    interactions: true,
     landing_page_visits: true,
-    kyc_completed: true,
-    first_transaction: true,
+    branded_search_lift: true,
+    consideration: true,
   },
   alerts: {
     email: true,
@@ -420,7 +426,7 @@ export const CRM_CONFIG = {
 // UI TEXT - Textos de interfaz
 // ============================================================================
 export const UI_TEXT = {
-  loading: 'Cargando Powerpay Algorithm...',
+  loading: 'Cargando WIN Algorithm...',
   lastUpdate: 'Última actualización',
   systemActive: 'Sistema activo',
   noData: 'No hay datos disponibles',
@@ -428,7 +434,7 @@ export const UI_TEXT = {
   retry: 'Reintentar',
 
   footer: {
-    copyright: '2026 Powerpay Algorithm - El poder de elegir',
+    copyright: '2026 WIN Algorithm - Internet 100% fibra óptica',
     version: 'v1.0.0',
   },
 
