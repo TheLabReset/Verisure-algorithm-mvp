@@ -6,7 +6,7 @@
 
 ## ¿Qué es este repositorio?
 
-**The Algorithm by Reset** es una SPA (React 18 + Vite + Tailwind CSS + Recharts) que simula una plataforma de analytics de marketing digital para presentaciones a clientes. Muestra datos reales o simulados organizados en 4 capas navegables:
+**The Algorithm by Reset** es una SPA (React 18 + Vite + Tailwind CSS + Recharts + @nivo/funnel) que simula una plataforma de analytics de marketing digital para presentaciones a clientes. Muestra datos reales o simulados organizados en 4 capas navegables:
 
 | Capa | Nombre | Qué muestra |
 |------|--------|-------------|
@@ -15,7 +15,7 @@
 | 3 | Activación Estratégica | Presupuesto por canal, rendimiento por producto/servicio, sedes/puntos de venta, timing óptimo |
 | 4 | Performance & Optimización | 4 KPIs principales, gráfico 7 días, funnel de conversión, alertas, análisis de competidores |
 
-El template fue creado para **FitZone Perú** (cadena de gimnasios) y adaptado a **UPN - Universidad Privada del Norte**. El proceso de esa adaptación es la base de este playbook.
+El template fue creado para **FitZone Perú** (cadena de gimnasios), adaptado a **UPN - Universidad Privada del Norte** (educación), **UCSP - Universidad Católica San Pablo** (educación) y **Powerpay** (BNPL fintech). El proceso acumulado de esas adaptaciones es la base de este playbook.
 
 ---
 
@@ -29,14 +29,14 @@ Al iniciar una adaptación, haz TODAS estas preguntas al usuario. No investigues
 2. **¿Qué producto o servicio ofrece?** (descripción breve, sector)
 3. **¿En qué país y ciudades opera principalmente?**
 4. **¿Cuál es el objetivo principal de la campaña?**
-   - Opciones: generación de leads, ventas directas, alcance/awareness, recordación de marca, tráfico web, visitas a tienda, otra
+   - Opciones: generación de leads, ventas directas, alcance/awareness, recordación de marca, tráfico web, visitas a tienda, registros de cuenta, otra
 5. **¿Cuál es el presupuesto mensual aproximado en USD?**
 6. **¿Cuáles son los canales de pauta activos o previstos?**
    - Opciones: Meta Ads (Facebook/Instagram), Google Search, TikTok Ads, Google Display, YouTube, Influencers, otra
    - ¿Cuál es el canal principal (mayor inversión)?
 7. **¿Tienen competidores definidos?** (si sí, listarlos; si no, investigar en Fase 1)
-8. **¿Cuántos puntos de venta, sedes, tiendas o campus tienen?** (nombre y ciudad de cada uno, máx. 10-12)
-9. **¿Cuáles son los 4-6 productos, servicios o programas principales a monitorear?**
+8. **¿Cuántos puntos de venta, sedes, tiendas, campus o comercios partners tienen?** (nombre y ciudad de cada uno, máx. 10-12). Si la marca es 100% digital, preguntar si reinterpretamos `SEDES_*` como "comercios partners" / "regiones" / "categorías".
+9. **¿Cuáles son los 4-6 productos, servicios, programas o categorías principales a monitorear?**
 10. **¿Tienen identidad visual definida?** (colores hex, brand guidelines, URL de la web oficial)
 
 ### Preguntas opcionales (investigar si el usuario no las tiene)
@@ -46,6 +46,55 @@ Al iniciar una adaptación, haz TODAS estas preguntas al usuario. No investigues
 - KPIs específicos (CPL target, CPA, ROAS, tasa de conversión, retención)
 - Dos perfiles de audiencia con edad, NSE y canal principal
 - Estacionalidad conocida (épocas de mayor demanda)
+
+---
+
+## FASE 0.5 — Setup técnico inicial (NUEVO, antes de Fase 1)
+
+Antes de lanzar subagentes, garantizar que el repo está listo:
+
+```bash
+# Instalar dependencias base
+npm install
+
+# Si se va a usar el funnel vertical (recomendado, ver Apéndice D)
+npm install @nivo/funnel
+
+# Verificar que el build pasa sin tocar nada
+npm run build
+```
+
+**Crear `src/utils/format.js` desde el primer momento.** JS por defecto renderiza `1234.56` con punto y `1,234` con coma — formato US. Para español necesitamos lo opuesto. No improvisar inline en cada componente; centralizar:
+
+```js
+// src/utils/format.js
+export const formatES = (n, decimals = null) => {
+  if (n === null || n === undefined) return '';
+  if (typeof n !== 'number') return String(n);
+  const fixed = decimals !== null ? n.toFixed(decimals) : String(n);
+  return fixed.replace('.', ',');
+};
+
+export const formatThousands = (n) => {
+  if (n === null || n === undefined) return '';
+  return Number(n).toLocaleString('es-PE');
+};
+
+export const formatMoney = (n, decimals = 2) => `$${formatES(n, decimals)}`;
+export const formatPercent = (n, decimals = 1) => `${formatES(n, decimals)}%`;
+export const formatCompact = (n, decimals = 1) => {
+  if (n >= 1_000_000) return `${formatES(n / 1_000_000, decimals)}M`;
+  if (n >= 1_000) return `${formatES(n / 1_000, decimals)}K`;
+  return formatES(n);
+};
+```
+
+Importarlo en los 4 componentes JSX desde el primer edit:
+```js
+import { formatES, formatThousands, formatMoney, formatPercent, formatCompact } from '../utils/format';
+```
+
+**Sin este helper, en la revisión final aparecerán 10+ hallazgos ALTA por decimales con punto.**
 
 ---
 
@@ -70,6 +119,7 @@ Con las respuestas del intake, lanzar múltiples subagentes simultáneos. Cada b
 - Por cada competidor: nombre completo, presencia en ciudades, precios estimados, fortalezas observables, presencia digital
 - Share of voice estimado (búsquedas, seguidores, actividad en Meta Ad Library)
 - Tono de comunicación de cada competidor
+- **Verificar que la matriz de cada competidor sea correcta** (ej. en Powerpay el usuario dijo "Cuotéalo de Interbank" pero la matriz real es BCP — el agente debe corregir respetuosamente)
 
 ### BLOQUE D — Audiencias
 - Comportamiento digital de cada perfil de audiencia en el país
@@ -104,10 +154,20 @@ Con las respuestas del intake, lanzar múltiples subagentes simultáneos. Cada b
 
 **Verificar siempre:** el color del texto vs. el color de fondo exacto donde se muestra. Un token de color puede fallar en un contexto y pasar en otro.
 
-**Errores comunes a evitar:**
-- Texto oscuro (`text-upn-navy`) sobre fondo de color oscuro (`bg-fitzone-emerald`) → invisible
-- Texto de opacidad baja (`text-white/30`) sobre fondos de color → puede fallar
-- Badges con texto oscuro sobre fondo de color saturado → verificar siempre
+### Combinaciones de contraste BLACKLIST conocidas del template
+
+Estas combinaciones existen en el template heredado y SIEMPRE fallan AA. Buscarlas explícitamente y reemplazarlas:
+
+| Combinación | Ratio | Reemplazo |
+|------------|-------|-----------|
+| `text-fitzone-charcoal bg-fitzone-purple` | 1,7:1 | `text-white bg-fitzone-darkPurple` |
+| `text-fitzone-purple bg-fitzone-purple/20` o `/30` | 1,7:1 | `text-fitzone-lightPurple` |
+| `bg-fitzone-amber text-white` | 2,4:1 | `bg-fitzone-amber text-fitzone-charcoal` |
+| `text-fitzone-charcoal bg-fitzone-emerald/30` (badges) | ~3:1 | subir opacidad o usar `text-fitzone-charcoal bg-fitzone-emerald` |
+| `text-fitzone-charcoal/70` u `/80` sobre emerald | ~5,5:1 (límite) | usar `/90` o `/100` |
+| `bg-red-400 text-white` (default Tailwind) | 3:1 | `bg-red-500 text-white` |
+
+**Patrón a evitar:** badges con texto del color del accent sobre fondo translúcido del mismo accent (`text-fitzone-purple bg-fitzone-purple/20`). Siempre usar `text-fitzone-lightPurple` en estos casos.
 
 ### Derivar la paleta desde los colores del cliente
 
@@ -127,7 +187,7 @@ textPrimary  → texto principal: nunca #000000 puro, warm near-black (ej. #1C14
 textMuted    → texto secundario: verificar ≥4,5:1 sobre fondo card
 ```
 
-Para el header/nav del dashboard, usar un color oscuro derivado de la marca (no azul frío genérico). Ejemplo: si el cliente es naranja, el header puede ser un charcoal cálido.
+**Modo oscuro vs claro:** El template actual es DARK MODE (charcoal #0F0719 es fondo de página oscuro, no off-white). No redefinir si el template ya es dark; solo realinear colores al accent del cliente.
 
 ### Actualizar tokens en tailwind.config.js
 
@@ -139,34 +199,26 @@ fitzone: {
   purple:      '#XXXXXX',  // accent principal
   darkPurple:  '#XXXXXX',  // hover (≥4,5:1 sobre blanco obligatorio)
   lightPurple: '#XXXXXX',  // tint — solo sobre fondos oscuros
-  charcoal:    '#XXXXXX',  // fondo página (warm off-white)
+  charcoal:    '#XXXXXX',  // fondo página o dark surface
   slate:       '#XXXXXX',  // fondo cards
   darkSlate:   '#XXXXXX',  // superficie alternativa
-  surface:     '#XXXXXX',  // superficie terciaria
-  navy:        '#XXXXXX',  // texto principal (warm near-black)
-  darkText:    '#XXXXXX',  // alias de navy
-  border:      '#XXXXXX',  // borde suave
-  cyan:        '#0284C7',  // datos/info — mantener o ajustar si hay conflicto de marca
-  electric:    '#0EA5E9',  // datos secundarios
-  emerald:     '#16A34A',  // positivo/éxito
+  cyan:        '#06B6D4',  // datos/info — mantener o ajustar si hay conflicto de marca
+  electric:    '#22D3EE',  // datos secundarios
+  emerald:     '#10B981',  // positivo/éxito
   green:       '#22C55E',  // secundario positivo
-  red:         '#B91C1C',  // alerta/error
-  amber:       '#D97706',  // advertencia
-  lightGray:   '#XXXXXX',  // body text (warm, mínimo 12:1 sobre card)
-  textGray:    '#XXXXXX',  // muted text (mínimo 4,5:1 sobre card)
+  lime:        '#84CC16',  // secundario positivo 2
+  red:         '#EF4444',  // alerta/error
+  amber:       '#XXXXXX',  // advertencia / CTA secundario warm
+  orange:      '#XXXXXX',  // alias accent o CTA secundario
+  darkOrange:  '#XXXXXX',  // hover orange
+  white:       '#FFFFFF',
+  lightGray:   '#XXXXXX',  // texto claro warm sobre dark
+  textGray:    '#XXXXXX',  // texto muted (≥4,5:1 sobre charcoal/slate)
   mediumGray:  '#XXXXXX',  // decorativo
-  white:       '#XXXXXX',  // warm white (no puro)
-  orange:      '#XXXXXX',  // alias accent
-  darkOrange:  '#XXXXXX',  // alias darkAccent
-},
-upn: {
-  navy:      '#XXXXXX',  // color header/nav del cliente (oscuro)
-  darkNavy:  '#XXXXXX',  // sub-nav
-  lightNavy: '#XXXXXX',  // hover en nav
-  deepNavy:  '#XXXXXX',  // footer
-  amber:     '#XXXXXX',  // acento secundario en fondo oscuro
 },
 ```
+
+**Tokens también en gradientes y shadows** — actualizar `boxShadow.fitzone-*` y `backgroundImage.gradient-fitzone-*` con el nuevo accent. Recordar el `keyframes.pulseGlow` y los `rgba()` literales.
 
 **Colores de plataformas — NO modificar:**
 ```js
@@ -191,57 +243,73 @@ Editar en este orden exacto. Verificar build con `npm run build` después de cad
 | Sección | Qué cambiar |
 |---------|-------------|
 | `BRAND_CONFIG` | name, tagline, subtitle, product, market, client, agency, slogan, founded |
-| `LAYER_CONFIG` | subtítulos de las 4 capas adaptados al sector |
-| `KEY_MESSAGES` | 3-5 mensajes clave del cliente (propuesta de valor, diferenciadores, acreditaciones) |
-| `SEDES_CONFIG` | lista de sedes/tiendas/campus con distrito, NSE, tipo — máx. 10-12 |
-| `TARGET_AUDIENCES` | exactamente 2 perfiles con age_range, segments, interests, channels, cpl_target, funnel |
-| `OPTIMAL_TIMING` | dayparts, weekdays y seasonality del sector investigado |
-| `SERVICIOS_CONFIG` | exactamente 6 productos/servicios con revenue_pct, cpl_target, conversion |
-| `CRM_CONFIG` | umbrales CPL por audiencia (target, alert, pause) |
+| `LAYER_CONFIG` | subtítulos de las 4 capas adaptados al sector. **Nota:** la prop `color` (gradientes) es campo muerto, no se renderiza |
+| `KEY_MESSAGES` | 5 mensajes clave del cliente. **Renombrar las claves** del objeto (ej. `espacio` → `linea`, `tecnologia` → `cualquier_tarjeta`). Esto rompe `DecisionLayer.jsx` si no se actualiza también ahí |
+| `SEDES_CONFIG` | lista de sedes/tiendas/campus/comercios con distrito, NSE, tipo — máx. 10-12. **Usar la propiedad `nombre`, no `name`** (debe coincidir con `SEDES_PERFORMANCE`) |
+| `TARGET_AUDIENCES` | exactamente 2 perfiles con age_range, segments, interests, channels, cpl_target, conversion_funnel |
+| `OPTIMAL_TIMING` | dayparts, weekdays y seasonality del sector investigado. **Nombres de dayparts en español** (no "Late night", usar "Madrugada") |
+| `SERVICIOS_CONFIG` | exactamente 6 productos/servicios con revenue_pct, cpl_target, conversion. **Suma `revenue_pct` debe ser exactamente 100** |
+| `CRM_CONFIG` | umbrales CPL por audiencia (target, alert, pause). **Las claves deben coincidir 1:1 con los `id` de `TARGET_AUDIENCES`** |
 
 ### 3.2 — `src/data/mockData.js` (segundo archivo a editar)
 
-**Coherencia obligatoria entre secciones:**
+**Coherencia obligatoria entre secciones (ver Apéndice C para asserts formales):**
 - `presupuesto total` = suma de `BUDGET_ALLOCATION.distribution.*amount`
 - `leads totales` ≈ `presupuesto / CPL promedio`
 - `leads calificados` ≈ `leads totales × qualification_rate`
+- `cost_per_lead = total_spent / leads.total` (NO `total_budget / leads.total`)
 - `campaña CRM budget` sumados ≈ 85-95% del presupuesto total
-- `funnel` debe decrecer en cada etapa (nunca un paso mayor que el anterior)
+- `campaña CRM spent` sumados = `total_spent` (igualdad exacta, no rango)
+- `campaña CRM leads` sumados = `leads.total` (igualdad exacta)
+- `funnel global` debe decrecer en cada etapa
+- `suma de TARGET_AUDIENCES[*].conversion_funnel.formularios` = `leads.total`
+- `suma de TARGET_AUDIENCES[*].conversion_funnel.miembros` = `nuevos_miembros.current`
 
 Usar la tabla de escala del Apéndice A para calibrar los números según presupuesto.
 
 | Sección | Qué cambiar |
 |---------|-------------|
-| `PERFORMANCE_KPIS` | todos los valores según escala de presupuesto |
-| `OPPORTUNITY_SCORE` | score total, insights de 5 componentes, recomendación, 4 acciones |
-| `SERVICIOS_PERFORMANCE` | rendimiento de los 6 productos/servicios |
-| `SEDES_PERFORMANCE` | métricas de cada sede |
-| `COMPETENCIA` | 5-6 competidores con datos investigados — sin denigrar |
+| `PERFORMANCE_KPIS` | todos los valores según escala de presupuesto. **Las keys `nuevos_miembros`, `trials`, `whatsapp`, `retention` son históricas: solo cambiar `label` y `description`, no las keys** (rompería componentes) |
+| `OPPORTUNITY_SCORE` | score total, insights de 5 componentes, recomendación, 4 acciones. **Las acciones se renderizan como pills en DecisionLayer; usar formulación sugerente: "Se sugiere", "Se recomienda", "Se propone evaluar" — NO infinitivos directos como "Reforzar", "Activar", "Lanzar"** |
+| `SERVICIOS_PERFORMANCE` | rendimiento de los 6 productos/servicios. Suma `leads` ≈ `leads.total` |
+| `SEDES_PERFORMANCE` | métricas de cada sede. Mismos `nombre` y `id` que `SEDES_CONFIG` |
+| `COMPETENCIA` | 5-6 competidores con datos investigados — sin denigrar. **Suma `market_share` debe sumar 100** |
 | `CRM_MOCKUP` | 4 campañas activas, 2 alertas, lead quality |
 | `BUDGET_ALLOCATION` | total, distribución por canal (%, monto), 3 recomendaciones |
 | `CONTENT_PILLARS` | 5 pilares adaptados al cliente con formatos del sector |
-| `ALERTS` | 4 alertas realistas del sector |
-| `COMPETITOR_INSIGHTS` | análisis de cada competidor con opportunity objetiva |
+| `ALERTS` | 4 alertas realistas del sector. Tono observacional, no imperativo |
+| `COMPETITOR_INSIGHTS` | análisis de cada competidor con `opportunity` objetiva, sugerente. Misma `share_of_voice` que `COMPETENCIA.market_share` |
 | `TRENDING_SOUNDS` | sonidos TikTok relevantes para el sector y región |
 
 ### 3.3 — `src/data/keywords.js` (tercer archivo a editar)
 
 | Sección | Qué cambiar |
 |---------|-------------|
-| `KEYWORDS_*` | keywords de marca, categoría, intención, producto, competidores, geo |
-| `HASHTAGS_*` | hashtags de marca, engagement, sector, local, producto |
+| `KEYWORDS_FITZONE` | keywords de marca, categoría, intención, producto, competidores, geo. El nombre del export es histórico, mantenerlo |
+| `HASHTAGS_FITZONE` | hashtags de marca, engagement, sector, local, producto |
 | `TIKTOK_CONFIG.sounds` | sonidos trending para el sector |
-| `CAMPUS_UPN` | renombrar a `CAMPUS_[CLIENTE]` o `SEDES_[CLIENTE]` con los puntos de venta reales |
+| `SEDES_FITZONE` | comercios/sedes con keywords/hashtags por unidad |
+| `FITNESS_SOURCES` | fuentes de información del sector cliente |
 
-### 3.4 — Archivos JSON en `/data/`
+### 3.4 — Archivos JSON en `public/data/` (NO en `/data/`)
 
-Actualizar el campo `client` y metadatos en:
-- `data/trends/latest.json`
-- `data/tiktok/latest.json`
-- `data/meta/latest.json`
-- `data/mock/ga4_data.json`
+**IMPORTANTE:** Vite sirve archivos estáticos desde `public/`. El componente `DataLayer.jsx` hace `fetch('/data/trends/latest.json')` lo cual mapea a `public/data/trends/latest.json`. La carpeta `/data/` raíz es archivo histórico, no se sirve. **Editar siempre `public/data/`**, opcionalmente espejar a `/data/` por consistencia.
 
-Usar `-` en lugar de `—` (sin guiones largos en JSON).
+**Archivos críticos** (todos consumidos por la app):
+- `public/data/trends/latest.json`
+- `public/data/tiktok/latest.json`
+- `public/data/meta/latest.json`
+- `public/data/mock/ga4_data.json`
+- `public/data/ml/predictions.json` ← consumido por `DataLayer.calculateScores()`. Si no se actualiza, los scores quedan del cliente anterior
+- `public/data/ml/insights.json` ← se fetchea en estado pero no se renderiza hoy
+
+**Archivos opcionales** (huérfanos pero conviene actualizar para consistencia):
+- `public/data/ml/scores.json`
+- `public/data/ml/recommendations.json`
+
+**Archivos archivados** (snapshots con timestamp, NO se consumen): los `*_20251204.json`, `*_20260105.json`, etc. en `data/`. Pueden quedar con cliente anterior; no se renderizan.
+
+Actualizar el campo `client` y metadatos en cada uno. Usar `-` en lugar de `—` (sin guiones largos en JSON).
 
 ### 3.5 — Componentes JSX con valores hardcodeados
 
@@ -249,20 +317,54 @@ Solo actualizar los valores, nunca la lógica:
 
 | Archivo | Sección hardcodeada | Qué cambiar |
 |---------|--------------------|-----------||
-| `DataLayer.jsx` | `metaAdPerformance[]` | 4 campañas Meta con reach, CTR, CPL |
-| `DataLayer.jsx` | hashtags expandidos en acordeón TikTok | hashtags del cliente |
-| `DataLayer.jsx` | texto multi-fuente insight | texto coherente con el sector |
-| `OptimizationLayer.jsx` | `performanceData[]` | 7 días de leads, reach, engagement, spent |
-| `OptimizationLayer.jsx` | `channelData[]` | % y leads por canal — ordenar de mayor a menor % |
-| `OptimizationLayer.jsx` | `funnelSteps[]` | valores del funnel coherentes con KPIs |
-| `DecisionLayer.jsx` | `recommendations[]` | 5 recomendaciones estratégicas del sector |
-| `ExecutionLayer.jsx` | texto de estacionalidad | meses pico del sector investigados |
+| `Dashboard.jsx` | icono header (`Dumbbell` legacy) | reemplazar por icono del sector (Apéndice E) |
+| `Dashboard.jsx` | `BRAND_CONFIG.name`/footer | confirmar |
+| `DataLayer.jsx` | título header **hardcoded** (no usa `LAYER_CONFIG.data.name` como los otros 3 layers — gotcha del template) | actualizar a mano |
+| `DataLayer.jsx` | `ga4Pages[]` | rutas y títulos del sitio web del cliente |
+| `DataLayer.jsx` | `tiktokHashtags[]` | hashtags del sector con `views` en formato es-PE (`'4,2M'` no `'4.2M'`) |
+| `DataLayer.jsx` | `tiktokSounds[]` | sonidos del sector |
+| `DataLayer.jsx` | `metaTopics[]` | temas relevantes con marcas del sector |
+| `DataLayer.jsx` | `metaAdPerformance[]` | 4 campañas Meta con reach, CTR, CPL **alineados a CRM_MOCKUP** |
+| `DataLayer.jsx` | `generateInsights()` (4 insights) | textos coherentes con el sector |
+| `DataLayer.jsx` | `multiSourceInsight` | texto + recommendation |
+| `DataLayer.jsx` | tabla inline keywords (en sección Trends) | keywords del sector |
+| `DataLayer.jsx` | KPI cards GA4 (Usuarios, Sesiones, Registros, Conv.) | valores coherentes con `MOCK_GA4_DATA` |
+| `DataLayer.jsx` | barras Devices y Traffic Sources | porcentajes del cliente |
+| `DataLayer.jsx` | bottom Keywords Reference card | tags por columna |
+| `OptimizationLayer.jsx` | `performanceData[]` | 7 días de leads, reach, engagement, spent (proyectado mensual = budget) |
+| `OptimizationLayer.jsx` | `channelData[]` | % y leads por canal — ordenar de mayor a menor %, hex de colores |
+| `OptimizationLayer.jsx` | `funnelSteps[]` | etapas + valores. Si rango amplio (>100x), considerar `@nivo/funnel` con escala log (Apéndice D) |
+| `OptimizationLayer.jsx` | summary cards laterales del funnel | métricas calculadas |
+| `OptimizationLayer.jsx` | sección CRM thresholds (cards por audiencia) | renombrar headers a las 2 audiencias del cliente |
+| `OptimizationLayer.jsx` | filtro `COMPETITOR_INSIGHTS.filter(c => c.brand !== 'FitZone')` | cambiar a marca del cliente |
+| `OptimizationLayer.jsx` | bottom comparison card del cliente | datos de la marca del cliente |
+| `OptimizationLayer.jsx` | Recharts Tooltip styles | `contentStyle` background+border, `labelStyle` color, **`itemStyle` color blanco** (Apéndice D) |
+| `DecisionLayer.jsx` | `recommendations[]` | 5 recomendaciones estratégicas en tono sugerente |
+| `DecisionLayer.jsx` | bloque `KEY_MESSAGES.*` (5 pilares) — usa las keys de `config.js` | actualizar nombres de keys e iconos por pilar |
+| `DecisionLayer.jsx` | `priority.toUpperCase()` produce inglés "HIGH" | reemplazar por ternario `priority === 'high' ? 'ALTA' : 'MEDIA'` etc. |
+| `DecisionLayer.jsx` | etiquetas "ACTIVA / TESTING" | traducir TESTING → "EN PRUEBA" |
+| `ExecutionLayer.jsx` | switch de nombres de canal en `BUDGET_ALLOCATION` y `recommendations` | adaptar a los canales del cliente |
+| `ExecutionLayer.jsx` | etiquetas visibles "AUMENTAR / REDUCIR / MANTENER" en `recommendations` (regla #5 prohíbe imperativos) | reemplazar por "Subida sugerida / Bajada sugerida / Sin cambios" |
+| `ExecutionLayer.jsx` | etiqueta "TOP" en cards de servicios | reemplazar por "Destacado" |
+| `ExecutionLayer.jsx` | sección "Mejores horarios" / "Mejores días" / "Estacionalidad" | adaptar al sector investigado |
 
 **Archivos que NO tocar bajo ninguna circunstancia:**
 - `PlatformIcons.jsx` — SVGs de Simple Icons (Google, TikTok, Meta, GA4)
-- Lógica de componentes, hooks, `calculateScores()`, `generateInsights()`
+- Lógica de componentes, hooks, `calculateScores()`, `generateInsights()` (renombrar `// fitness scores` comentarios sí, lógica no)
 - Estructura de Recharts (LineChart, PieChart, etc.)
-- `index.html`, `vite.config.js`, `package.json`
+- `vite.config.js`, `package.json` (excepto al instalar @nivo/funnel)
+
+### 3.6 — `index.html` (NUEVO en checklist)
+
+| Atributo | Cambio |
+|---------|--------|
+| `<meta name="theme-color">` | hex del accent del cliente |
+| `<meta name="description">` | descripción Powerpay/educación/etc. |
+| `<meta name="keywords">` | keywords del sector |
+| `<meta property="og:title">`, `og:description` | branding del cliente |
+| `<title>` | "[Cliente] Algorithm - The Algorithm by Reset" |
+
+Sin esto, el tab del browser y los previews al compartir el link siguen mostrando el template genérico.
 
 ---
 
@@ -270,15 +372,15 @@ Solo actualizar los valores, nunca la lógica:
 
 ### Mapa de términos por sector
 
-| Término base | Universidad | E-commerce | Salud | Inmobiliaria | Fintech |
-|-------------|-------------|------------|-------|--------------|---------|
-| Miembros/Clientes | Matriculados/Estudiantes | Compradores | Pacientes | Compradores | Usuarios |
-| Leads | Prospectos/Interesados | Leads | Consultas | Interesados | Solicitantes |
-| Sedes | Campus | Tiendas/Locales | Clínicas/Sedes | Proyectos | Agencias/Sucursales |
-| Servicios | Programas/Carreras | Categorías/Líneas | Especialidades | Tipologías | Productos financieros |
-| Trials/Demos | Charlas de orientación | Primera compra | Consulta inicial | Visita a proyecto | Demo/Onboarding |
-| Retención | Renovación de ciclo | Recompra | Fidelidad/Adherencia | Referidos | Permanencia |
-| Revenue | Ingresos por captación | Facturación | Ingresos por atención | Valor de cierre | Cartera activa |
+| Término base | Universidad | E-commerce | Salud | Inmobiliaria | Fintech BNPL |
+|-------------|-------------|------------|-------|--------------|--------------|
+| Miembros/Clientes | Matriculados/Estudiantes | Compradores | Pacientes | Compradores | Usuarios/Cuentas |
+| Leads | Prospectos/Interesados | Leads | Consultas | Interesados | Registros iniciados |
+| Sedes | Campus | Tiendas/Locales | Clínicas/Sedes | Proyectos | Comercios partners |
+| Servicios | Programas/Carreras | Categorías/Líneas | Especialidades | Tipologías | Categorías de comercio |
+| Trials/Demos | Charlas de orientación | Primera compra | Consulta inicial | Visita a proyecto | KYC completado |
+| Retención | Renovación de ciclo | Recompra | Fidelidad/Adherencia | Referidos | Primera transacción |
+| Revenue | Ingresos por captación | Facturación | Ingresos por atención | Valor de cierre | Comisiones / cartera |
 
 ### Reglas de redacción (SIEMPRE aplicar)
 
@@ -288,18 +390,56 @@ Solo actualizar los valores, nunca la lógica:
 - Preguntas con apertura obligatoria: `¿`...`?`
 
 **Tildes:**
-- Verificar: Análisis, Métricas, Distribución, Evolución, Último/Últimos, Día/Días, Índice, Único, Interés, automático/automáticas, notificación, Activación, Optimización, Conversión
+- Verificar: Análisis, Métricas, Distribución, Evolución, Último/Últimos, Día/Días, Índice, Único, Interés, automático/automáticas, notificación, Activación, Optimización, Conversión, Información, Acción, Tamaño, Categoría, Histórico, Sentimiento, Búsqueda, Educación, Promoción, Comparación, Tecnología, vía (no "via")
 
 **Números en español:**
 - Miles: punto → 1.250, 74.200, 10.400.000
 - Decimales: coma → 7,20%, 1,67%, $8,50
 - Rangos de precio: S/650-850/mes (guion, sin espacios)
+- **Usar siempre helpers `formatES`, `formatMoney`, `formatPercent`, `formatThousands`** (ver Fase 0.5). NO usar `${num}` directo, `.toFixed(N)`, `.toLocaleString()` sin locale.
 
-**Tono:**
-- Sugerente: "Se recomienda considerar...", "Se sugiere evaluar...", "Se observa una oportunidad..."
-- No imperativo: nunca "Aumentar", "Lanzar", "Reducir", "Capturar" como instrucción directa
-- Competidores: solo datos objetivos y observables. Sin: "baja calidad", "mala reputación", "marketing débil"
-- Sin absolutismos: "Comprobada" no "Garantizada", "Alto desempeño" no "TOP", "Favorable" no "Óptimo"
+**Tono — anti-patrones explícitos:**
+
+Lenguaje sugerente, NO imperativo, NO concluyente, NO determinante, NO acusatorio, NO denigrante:
+
+- ✅ "Se recomienda considerar...", "Se sugiere evaluar...", "Se observa una oportunidad..."
+- ❌ "Aumentar", "Lanzar", "Reducir", "Capturar" como infinitivo directo
+- ❌ Etiquetas operativas en mayúsculas: "AUMENTAR", "REDUCIR", "MANTENER", "TOP", "TESTING", "ALTA" (esta sí permitida como label de severidad)
+- ❌ Verbos concluyentes: "lidera", "domina", "garantiza", "asegura", "el líder absoluto"
+- ❌ Determinantes: "siempre", "nunca", "el mejor", "óptimo/óptima" (usar "favorable"), "el máximo", "la única", "único en"
+- ❌ Hacia competidores: "falla en", "no logra", "carece de", "tiene problemas con", "marketing débil", "baja calidad", "mala reputación"
+
+**Patrón clave — `priority.toUpperCase()` produce inglés.** Si el código tiene `OPPORTUNITY_SCORE.recommendation.priority.toUpperCase()` y `priority` es `'high'`, renderiza "HIGH". Reemplazar por:
+```jsx
+{priority === 'high' ? 'ALTA' : priority === 'medium' ? 'MEDIA' : 'BAJA'}
+```
+
+### Comandos de grep para auditar texto
+
+Ejecutar antes del commit final:
+
+```bash
+# Em-dashes y caracteres prohibidos
+grep -rE "—" src/ public/data/*/latest.json public/data/mock/ public/data/ml/
+
+# Imperativos en arrays de actions
+grep -rE "^\s*'[A-ZÁÉÍÓÚ][a-záéíóú]+(ar|er|ir) " src/data/
+
+# Etiquetas operativas en mayúsculas
+grep -rE "(AUMENTAR|REDUCIR|MANTENER|TOP|TESTING|HIGH|MEDIUM|LOW)" src/
+
+# Inglés residual hardcoded
+grep -rE "(Late night|Demo Client|via )" src/ public/data/
+
+# .toUpperCase() en strings de prioridad
+grep -rE "\.toUpperCase\(\)" src/
+
+# Decimales con punto en strings hardcodeados
+grep -rE "'[0-9]+\.[0-9]+(M|K|%)'" src/
+
+# Cliente anterior visible (FitZone, gimnasio, etc. — adaptar al template anterior)
+grep -rE "(FitZone|fitness|gimnasio|Smart Fit|UCSP|UPN|Powerpay|Dumbbell)" src/ public/data/*/latest.json | grep -v "// "
+```
 
 ---
 
@@ -307,17 +447,18 @@ Solo actualizar los valores, nunca la lógica:
 
 ### Lógica de distribución recomendada
 
-El canal principal debe llevar el mayor porcentaje (25-35%). El orden en `channelData[]` de OptimizationLayer debe reflejar esto: de mayor a menor porcentaje.
+El canal principal debe llevar el mayor porcentaje (25-65%, según objetivo). El orden en `channelData[]` de OptimizationLayer debe reflejar esto: de mayor a menor porcentaje.
 
 **Distribuciones de referencia por objetivo:**
 
-| Objetivo | TikTok | Meta | Google Search | Google Display | Influencers |
-|----------|--------|------|---------------|----------------|-------------|
-| Leads jóvenes (16-30) | **30-35%** | 25-30% | 20-25% | 8-10% | 5-8% |
-| Leads adultos (30-55) | 10-15% | **35-40%** | 25-30% | 10-12% | 5-8% |
-| Ventas e-commerce | 20-25% | **30-35%** | 20-25% | 10-12% | 8-10% |
-| Awareness/recordación | **25-30%** | 25-30% | 10-15% | **20-25%** | 10-12% |
-| B2B / ticket alto | 5-10% | 20-25% | **35-40%** | 15-20% | 10-15% |
+| Objetivo | TikTok | Meta | Google Search | Google Display | YouTube | Influencers |
+|----------|--------|------|---------------|----------------|---------|-------------|
+| Leads jóvenes (16-30) | **30-35%** | 25-30% | 20-25% | 8-10% | 5-8% | 5-8% |
+| Leads adultos (30-55) | 10-15% | **35-40%** | 25-30% | 10-12% | 5-8% | 5-8% |
+| Ventas e-commerce | 20-25% | **30-35%** | 20-25% | 10-12% | 5-8% | 8-10% |
+| Awareness/recordación | **25-30%** | 25-30% | 10-15% | **20-25%** | 10-15% | 10-12% |
+| B2B / ticket alto | 5-10% | 20-25% | **35-40%** | 15-20% | 8-10% | 10-15% |
+| BNPL fintech (Powerpay) | 0-5% | **55-65%** | 25-30% | 5-10% | 3-5% | 0-5% |
 
 ### Escala de KPIs por presupuesto (Apéndice A)
 
@@ -336,6 +477,7 @@ El canal principal debe llevar el mayor porcentaje (25-35%). El orden en `channe
 - E-commerce / retail: $3-8
 - Servicios financieros: $10-35
 - B2B / SaaS: $20-80
+- BNPL fintech: $7-12
 
 ---
 
@@ -348,42 +490,81 @@ Ejecutar TODOS los puntos antes de considerar la adaptación terminada.
 - [ ] `npm run dev` muestra la app sin errores en consola del navegador
 - [ ] Los 4 tabs de navegación renderizan correctamente
 - [ ] Los gráficos de Recharts muestran datos (no están vacíos)
+- [ ] El funnel `@nivo/funnel` (si se usa) renderiza con altura definida
 - [ ] Los iconos de plataforma se muestran (Google, TikTok, Meta, GA4)
+- [ ] Tooltips de Recharts y nivo legibles (texto blanco sobre fondo oscuro)
 
 ### Contraste y diseño
-- [ ] Ningún texto oscuro sobre fondo oscuro
-- [ ] Ningún texto claro sobre fondo claro (especialmente en secciones con `bg-upn-navy`)
-- [ ] Los badges de estado sobre fondos de color usan `text-white` (nunca texto oscuro)
+- [ ] Ningún texto oscuro sobre fondo oscuro (revisar lista BLACKLIST de Fase 2)
+- [ ] Ningún texto claro sobre fondo claro (especialmente en secciones con `bg-fitzone-amber`)
+- [ ] Los badges de estado sobre fondos de color usan `text-white` o `text-fitzone-charcoal` según contraste, nunca el mismo color del fondo
 - [ ] Los subtítulos en acordeones de colores usan `/90` o superior de opacidad en blanco
 - [ ] No hay gradients de dos colores en bloques de contenido (solo accents decorativos)
 - [ ] Las plataformas usan sus colores de marca reales en los headers del acordeón
+- [ ] Los hex `#FF6B35` (legacy FitZone naranja), `#1A1A2E` (legacy slate) NO aparecen en JSX
 
-### Coherencia de datos (cruzar entre archivos)
+### Coherencia de datos (asserts formales — Apéndice C)
 - [ ] `BUDGET_ALLOCATION.distribution` suma exactamente 100%
 - [ ] `BUDGET_ALLOCATION.distribution.*amount` suma = `total_budget`
 - [ ] `CRM_MOCKUP.campaigns.*budget` sumados ≈ 85-95% del budget total
-- [ ] `CRM_MOCKUP.campaigns.*leads` sumados ≈ `PERFORMANCE_KPIS.leads.total`
-- [ ] `budget / leads.total` ≈ `leads.cost_per_lead` (coherencia CPL)
+- [ ] `CRM_MOCKUP.campaigns.*spent` sumados = `PERFORMANCE_KPIS.budget.total_spent` (igualdad)
+- [ ] `CRM_MOCKUP.campaigns.*leads` sumados = `PERFORMANCE_KPIS.leads.total` (igualdad)
+- [ ] `cost_per_lead` = `total_spent / leads.total` (no budget/leads)
 - [ ] `OPPORTUNITY_SCORE.components.*contribution` sumados ≈ `current_score`
+- [ ] `OPPORTUNITY_SCORE.components.*` cada `contribution` = `weight × score`
+- [ ] `OPPORTUNITY_SCORE.components.*weight` suman 1.00
 - [ ] El funnel de `OptimizationLayer.funnelSteps` decrece en cada etapa
 - [ ] `funnelSteps` último valor (`Conversiones`) ≈ `PERFORMANCE_KPIS.nuevos_miembros.current`
+- [ ] suma `TARGET_AUDIENCES[*].conversion_funnel.formularios` = `leads.total`
+- [ ] suma `TARGET_AUDIENCES[*].conversion_funnel.miembros` = `nuevos_miembros.current`
 - [ ] `channelData` en OptimizationLayer refleja los mismos % que `BUDGET_ALLOCATION`
+- [ ] `SEDES_CONFIG[i].nombre === SEDES_PERFORMANCE[i].nombre` (mismas keys)
+- [ ] `CRM_CONFIG.cpl_thresholds.*` claves coinciden con `TARGET_AUDIENCES.id`
+- [ ] `SERVICIOS_CONFIG.revenue_pct` suma 100
+- [ ] suma `SERVICIOS_PERFORMANCE.leads` ≈ `leads.total`
+- [ ] `COMPETENCIA[*].market_share` suman 100
+- [ ] `COMPETITOR_INSIGHTS[*].share_of_voice` suman 100
+- [ ] `MOCK_GA4_DATA.leadGeneration.leadsBySource[*].leads` suman 1450 (= `leads.total`)
+- [ ] `MOCK_GA4_DATA.leadGeneration.leadsBySource[*].qualified` suman = `qualifiedLeads`
 - [ ] Los competidores tienen datos plausibles y no contradictorios entre `COMPETENCIA` y `COMPETITOR_INSIGHTS`
 
 ### Ortografía y tono
-- [ ] Cero guiones largos (`—`) en texto visible
+- [ ] Cero guiones largos (`—`) en texto visible y JSON
 - [ ] Tildes correctas en todos los títulos y textos, incluyendo botones y labels
-- [ ] Números con formato español (1.250 / 7,20%)
+- [ ] Números con formato español (1.250 / 7,20%) usando helpers `formatES`/etc.
 - [ ] Preguntas con apertura `¿`
 - [ ] Lenguaje sugerente (no imperativo) en acciones y recomendaciones
+- [ ] Cero etiquetas operativas en mayúsculas: "AUMENTAR", "REDUCIR", "MANTENER", "TOP", "TESTING"
+- [ ] Cero `priority.toUpperCase()` produciendo "HIGH/MEDIUM/LOW"
+- [ ] Cero inglés hardcoded ("Late night", "Demo Client", "via")
 - [ ] Ninguna descripción de competidor usa adjetivos negativos editoriales
-- [ ] Sin absolutismos en propuesta de valor
+- [ ] Sin absolutismos ("óptimo", "el mejor", "lidera", "garantiza") en propuesta de valor o insights
 
 ### Terminología
-- [ ] Cero menciones al cliente anterior (FitZone, UPN, gym, fitness, membresía u otro)
+- [ ] Cero menciones al cliente anterior (FitZone, UPN, UCSP, Powerpay, gym, fitness, membresía u otro) — ejecutar todos los `grep` de la sección Comandos
 - [ ] Terminología consistente entre las 4 capas (mismo término para el mismo concepto)
-- [ ] Nombre correcto del cliente en: header, footer, `BRAND_CONFIG.client`, metadatos JSON
-- [ ] Nombre correcto en `ALGORITHM_BRIEF.md` si se actualizó
+- [ ] Nombre correcto del cliente en: header (Dashboard.jsx), footer, `BRAND_CONFIG.client`, metadatos JSON, `index.html` title/og:tags
+- [ ] El icono del header (`Dashboard.jsx`) corresponde al sector (Apéndice E)
+
+---
+
+## FASE 7 — Post-deploy (NUEVO)
+
+Después de mergear y desplegar:
+
+### Verificación de deploy
+- [ ] En el panel de Netlify confirmar que el último deploy capturó el commit del merge a main y está en estado "Published"
+- [ ] Si el deploy aún muestra commit anterior: **Trigger deploy → Clear cache and deploy site**
+
+### Cache del browser y CDN
+- [ ] **Hard reload** en el primer test (`Ctrl+Shift+R` / `Cmd+Shift+R`) o ventana incógnito
+- [ ] `netlify.toml` tiene cache 1 año `immutable` para JS/CSS — esto es correcto porque Vite genera hashes únicos, pero un browser que ya tiene la versión vieja puede mantenerla. Hard reload o esperar que el hash nuevo invalide
+- [ ] Si el cliente reporta ver versión vieja, primero pedirle hard reload antes de investigar deploy
+
+### Verificación visual final en producción
+- [ ] Abrir el deploy y recorrer las 4 capas
+- [ ] Hover sobre tooltips de Recharts (Line, Pie) y nivo (funnel)
+- [ ] Verificar tab del browser (favicon + title) y compartir el link en Slack/WhatsApp para ver preview og:
 
 ---
 
@@ -393,25 +574,34 @@ Ejecutar TODOS los puntos antes de considerar la adaptación terminada.
 /
 ├── src/
 │   ├── components/
-│   │   ├── Dashboard.jsx          ← Header, nav, footer (nombre/tagline/logo)
-│   │   ├── DataLayer.jsx          ← Capa 1 (hardcoded: campaigns, hashtags, insight)
-│   │   ├── DecisionLayer.jsx      ← Capa 2 (hardcoded: recommendations[])
-│   │   ├── ExecutionLayer.jsx     ← Capa 3 (hardcoded: timing, estacionalidad)
-│   │   ├── OptimizationLayer.jsx  ← Capa 4 (hardcoded: channelData, funnelSteps, performanceData)
+│   │   ├── Dashboard.jsx          ← Header, nav, footer (nombre/tagline/logo/icono)
+│   │   ├── DataLayer.jsx          ← Capa 1 (hardcoded: campaigns, hashtags, insight, ga4Pages, KPI cards)
+│   │   ├── DecisionLayer.jsx      ← Capa 2 (hardcoded: recommendations[], pilares con KEY_MESSAGES)
+│   │   ├── ExecutionLayer.jsx     ← Capa 3 (hardcoded: timing, estacionalidad, etiquetas canal)
+│   │   ├── OptimizationLayer.jsx  ← Capa 4 (hardcoded: channelData, funnelSteps, performanceData, CRM cards)
 │   │   └── PlatformIcons.jsx      ← SVG icons — NO editar
-│   └── data/
-│       ├── config.js              ← Editar primero
-│       ├── mockData.js            ← Editar segundo
-│       └── keywords.js            ← Editar tercero
-├── data/
-│   ├── trends/latest.json         ← Actualizar field "client"
-│   ├── tiktok/latest.json         ← Actualizar field "client"
-│   ├── meta/latest.json           ← Actualizar field "client"
-│   └── mock/ga4_data.json         ← Actualizar field "client"
+│   ├── data/
+│   │   ├── config.js              ← Editar primero (BRAND, KEY_MESSAGES, SEDES, audiencias, servicios, CRM)
+│   │   ├── mockData.js            ← Editar segundo (KPIs, opportunity, perf, competencia, CRM, budget, pilares)
+│   │   └── keywords.js            ← Editar tercero (keywords, hashtags, sources, sedes con keywords)
+│   └── utils/
+│       └── format.js              ← Crear en Fase 0.5 (formatES, formatMoney, formatPercent, formatThousands, formatCompact)
+├── public/data/                   ← SE SIRVE EN PRODUCCIÓN (Vite static)
+│   ├── trends/latest.json         ← Actualizar campo "client", keywords del sector
+│   ├── tiktok/latest.json         ← Idem
+│   ├── meta/latest.json           ← Idem
+│   ├── mock/ga4_data.json         ← Idem
+│   └── ml/
+│       ├── predictions.json       ← Crítico: scores se inyectan al dashboard
+│       ├── insights.json          ← Fetcheado, no renderizado
+│       ├── scores.json            ← Huérfano
+│       └── recommendations.json   ← Huérfano
+├── data/                          ← Histórico. NO se sirve. Espejarlo es opcional
 ├── tailwind.config.js             ← Paleta de colores (solo cambiar hex values)
-├── index.html                     ← NO editar
+├── index.html                     ← Editar metadata (theme-color, og: tags, title)
+├── netlify.toml                   ← NO editar
 ├── vite.config.js                 ← NO editar
-└── ALGORITHM_BRIEF.md             ← Este archivo
+└── Adaptación para Nuevos Clientes ← Este archivo
 ```
 
 ---
@@ -421,10 +611,14 @@ Ejecutar TODOS los puntos antes de considerar la adaptación terminada.
 ```
 Usuario: "Lee el playbook y adaptemos para [Cliente]"
          ↓
-Claude:  Lee ALGORITHM_BRIEF.md completo
+Claude:  Lee este archivo completo
          ↓
 FASE 0 → Hacer TODAS las preguntas de intake
          Esperar respuestas del usuario
+         ↓
+FASE 0.5 → npm install [+ @nivo/funnel si aplica]
+           Crear src/utils/format.js
+           Build verify
          ↓
 FASE 1 → Investigación en paralelo (subagentes)
          Presentar hallazgos consolidados
@@ -440,18 +634,27 @@ FASE 2 → Proponer paleta de colores con hex
 FASE 3 → Editar config.js → build ✓
          Editar mockData.js → build ✓
          Editar keywords.js → build ✓
-         Editar JSON files → build ✓
+         Editar JSON files (public/data/) → build ✓
          Editar componentes JSX → build ✓
+         Editar index.html → build ✓
          ↓
 FASE 4 → Revisar terminología y textos
          Reemplazar términos del cliente anterior
          Aplicar reglas de redacción
+         Ejecutar todos los greps de auditoría
          ↓
 FASE 6 → Ejecutar checklist completo
-         Corregir cualquier fallo
+         Lanzar 3 agentes de revisión en paralelo:
+           - Coherencia textual (lenguaje, tildes, anti-patrones)
+           - Coherencia numérica (asserts cross-layer del Apéndice C)
+           - Coherencia visual (contraste, blacklist, restos cliente anterior)
+         Aplicar correcciones de los 3 reportes
          Build final ✓
          ↓
-         Commit + Push a la rama correspondiente
+         Commit + Push a la rama dedicada
+         ↓
+FASE 7 → Verificar deploy en Netlify
+         Hard reload + recorrido visual en producción
          Reportar al usuario: qué cambió, qué falta, próximos pasos
 ```
 
@@ -459,10 +662,302 @@ FASE 6 → Ejecutar checklist completo
 
 ---
 
-## Notas técnicas importantes
+# APÉNDICES
+
+## Apéndice A — Escala de KPIs por presupuesto
+
+(Ver Fase 5)
+
+## Apéndice B — Anti-patrones léxicos a buscar con grep
+
+```bash
+# Em-dashes
+grep -rE "—" src/ public/data/
+
+# Imperativos en arrays de actions
+grep -rE "^\s*'[A-ZÁÉÍÓÚ][a-záéíóú]+(ar|er|ir) " src/data/
+
+# Etiquetas operativas en mayúsculas (visibles al usuario)
+grep -rE "(AUMENTAR|REDUCIR|MANTENER|TOP|TESTING|HIGH|MEDIUM|LOW)" src/components/
+
+# .toUpperCase()
+grep -rE "\.toUpperCase\(\)" src/
+
+# Inglés hardcoded
+grep -rE "(Late night|Demo Client|via |Trial Gratis)" src/ public/data/
+
+# Decimales con punto en strings
+grep -rE "'[0-9]+\.[0-9]+(M|K|%)'" src/components/
+
+# .toFixed() sin .replace
+grep -rE "\.toFixed\(" src/components/ | grep -v "formatES\|formatMoney\|formatPercent"
+
+# Absolutismos editoriales
+grep -rE "(óptim[oa]|el mejor|garantiz|el líder|lidera|único en)" src/ | grep -v "//"
+
+# Cliente anterior (adaptar al previo)
+grep -rE "(FitZone|fitness|gimnasio|Smart Fit|Bio Ritmo|UPN|UCSP|Powerpay|matrícula|Dumbbell|Heart.*member)" src/ public/data/ | grep -v "// \|KEYWORDS_FITZONE\|HASHTAGS_FITZONE\|SEDES_FITZONE\|FITNESS_SOURCES\|fitness:"
+```
+
+## Apéndice C — Asserts de coherencia numérica (cross-layer)
+
+Ejecutar mentalmente o pedir a un agente "numerical coherence" que recorra todos:
+
+```
+1.  sum(BUDGET_ALLOCATION.distribution.*.percentage) == 100
+2.  sum(BUDGET_ALLOCATION.distribution.*.amount) == BUDGET_ALLOCATION.total_budget
+3.  PERFORMANCE_KPIS.budget.total_budget == BUDGET_ALLOCATION.total_budget
+4.  PERFORMANCE_KPIS.budget.total_spent / PERFORMANCE_KPIS.budget.total_budget ≈ spent_percentage / 100
+5.  PERFORMANCE_KPIS.leads.cost_per_lead ≈ PERFORMANCE_KPIS.budget.total_spent / PERFORMANCE_KPIS.leads.total
+6.  PERFORMANCE_KPIS.leads.qualified == PERFORMANCE_KPIS.leads.total * (qualification_rate / 100) ± 1
+7.  sum(CRM_MOCKUP.campaigns.*.budget) ≈ 0.85-0.95 * total_budget
+8.  sum(CRM_MOCKUP.campaigns.*.spent) == PERFORMANCE_KPIS.budget.total_spent  (exacto)
+9.  sum(CRM_MOCKUP.campaigns.*.leads) == PERFORMANCE_KPIS.leads.total  (exacto)
+10. CRM_MOCKUP.campaigns[i].cpl == campaigns[i].spent / campaigns[i].leads ± 0.05
+11. funnelSteps en OptimizationLayer es estrictamente decreciente
+12. funnelSteps[last].value == PERFORMANCE_KPIS.nuevos_miembros.current
+13. sum(TARGET_AUDIENCES.*.conversion_funnel.alcance) == funnelSteps[0].value
+14. sum(TARGET_AUDIENCES.*.conversion_funnel.formularios) == PERFORMANCE_KPIS.leads.total
+15. sum(TARGET_AUDIENCES.*.conversion_funnel.miembros) == PERFORMANCE_KPIS.nuevos_miembros.current
+16. sum(OPPORTUNITY_SCORE.components.*.contribution) == OPPORTUNITY_SCORE.current_score
+17. ∀ component: contribution == weight * score
+18. sum(OPPORTUNITY_SCORE.components.*.weight) == 1.00
+19. sum(SERVICIOS_CONFIG.*.revenue_pct) == 100
+20. sum(SERVICIOS_PERFORMANCE.*.leads) ≈ PERFORMANCE_KPIS.leads.total
+21. ∀ i: SEDES_CONFIG[i].id == SEDES_PERFORMANCE[i].id  AND  .nombre == .nombre  (NO mezclar name/nombre)
+22. ∀ key in CRM_CONFIG.cpl_thresholds: key ∈ TARGET_AUDIENCES.*.id
+23. sum(COMPETENCIA.*.market_share) == 100
+24. sum(COMPETITOR_INSIGHTS.*.share_of_voice) == 100
+25. sum(MOCK_GA4_DATA.leadGeneration.leadsBySource.*.leads) == leadGeneration.totalLeads
+26. sum(MOCK_GA4_DATA.leadGeneration.leadsBySource.*.qualified) == leadGeneration.qualifiedLeads
+27. sum(MOCK_GA4_DATA.demographics.locations.*) == 1.00
+28. sum(MOCK_GA4_DATA.deviceCategory.*) == 1.00
+29. sum(MOCK_GA4_DATA.demographics.age.*) == 1.00
+30. channelData en OptimizationLayer.percentage[] == BUDGET_ALLOCATION.distribution.*.percentage[]
+```
+
+## Apéndice D — Funnel vertical con @nivo/funnel
+
+### Cuándo usar @nivo/funnel vs el funnel default de cards
+
+- **Cards horizontales del template (default)**: rangos uniformes (ej. 100, 90, 80, 70). No requiere instalar nada.
+- **`@nivo/funnel` vertical**: rangos amplios (>100x entre primera y última etapa), o cuando se quiere efecto visual de embudo real.
+
+### Instalación
+
+```bash
+npm install @nivo/funnel
+```
+
+### Custom SVG layer (clave)
+
+Nivo no admite valores de tamaño dispar entre secciones — las pequeñas desaparecen. Hay que inflar visualmente los valores y mostrar los reales con un layer custom:
+
+```jsx
+import { ResponsiveFunnel } from '@nivo/funnel';
+
+const FunnelValueLabels = ({ parts }) => {
+  if (!parts || !parts.length) return null;
+  return (
+    <g>
+      {parts.map((part) => {
+        const realVal = part.data.realValue;
+        if (realVal == null) return null;
+        return (
+          <text
+            key={part.data.id}
+            x={part.x}
+            y={part.y}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#ffffff"
+            fontSize={14}
+            fontWeight={700}
+            stroke="#00000055"
+            strokeWidth={0.5}
+          >
+            {Number(realVal).toLocaleString('es-PE')}
+          </text>
+        );
+      })}
+    </g>
+  );
+};
+```
+
+### Inflado visual: escala logarítmica (RECOMENDADO sobre piso 15%)
+
+El piso 15% del playbook UCSP funciona para rangos moderados, pero con rangos muy amplios pega todas las etapas pequeñas al mismo nivel. La **escala logarítmica** preserva las diferencias relativas:
+
+```js
+const funnelSteps = [
+  { stage: 'Alcance', value: 1800000, conversionRate: 1.5 },
+  { stage: 'Visitas Web', value: 27000, conversionRate: 68.5 },
+  { stage: 'Visitas a Tiendas', value: 18500, conversionRate: 7.8 },
+  { stage: 'Registros Iniciados', value: 1450, conversionRate: 72.4 },
+  { stage: 'Cuentas Creadas', value: 1050, conversionRate: null }
+];
+
+// Log scale: rango 175-1000 visual
+const logVals = funnelSteps.map(s => Math.log10(s.value));
+const logMin = Math.min(...logVals);
+const logMax = Math.max(...logVals);
+const logRange = logMax - logMin || 1;
+
+const funnelChartData = funnelSteps.map((step, i) => ({
+  id: step.stage,
+  value: Math.round(175 + ((logVals[i] - logMin) / logRange) * 825),
+  label: step.stage,
+  realValue: step.value,
+}));
+
+// Resultado:
+// Alcance       1.800.000 → 1000
+// Visitas Web      27.000 →  535
+// Visitas Tiendas  18.500 →  493
+// Registros         1.450 →  211
+// Cuentas Creadas   1.050 →  175
+// (cada etapa se distingue visualmente)
+```
+
+### Componente final
+
+```jsx
+<div style={{ height: 540 }}>
+  <ResponsiveFunnel
+    data={funnelChartData}
+    direction="vertical"
+    margin={{ top: 10, right: 20, bottom: 10, left: 20 }}
+    colors={funnelColors}                           // array de 5 hex
+    borderWidth={0}
+    enableLabel={false}                              // CRÍTICO
+    layers={['parts', FunnelValueLabels, 'annotations']}  // SIN 'separators' para look limpio
+    spacing={2}
+    shapeBlending={0.65}
+    valueFormat={v => v.toLocaleString('es-PE')}
+    motionConfig="gentle"
+    tooltip={({ part }) => {
+      const idx = funnelChartData.findIndex(d => d.id === part.data.id);
+      const next = funnelSteps[idx + 1];
+      const stepRate = next ? (next.value / part.data.realValue) * 100 : null;
+      return (
+        <div style={{
+          background: '#1A0F26',                     // adaptar al color slate del cliente
+          color: '#fff',
+          padding: '8px 12px',
+          borderRadius: '8px',
+          border: '1px solid #7B2CBF',               // adaptar al accent
+          fontSize: '13px',
+        }}>
+          <strong>{part.data.label}</strong>
+          <br />
+          {Number(part.data.realValue).toLocaleString('es-PE')}
+          {stepRate != null && (
+            <>
+              <br />
+              <span style={{ color: '#B8A8C7' }}>
+                → {formatES(stepRate, 1)}% a la siguiente
+              </span>
+            </>
+          )}
+        </div>
+      );
+    }}
+  />
+</div>
+```
+
+### Layout grid 2/1 (funnel + side cards)
+
+```jsx
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+  <div className="lg:col-span-2">
+    <div style={{ height: 540 }}>{/* ResponsiveFunnel */}</div>
+  </div>
+  <div className="space-y-3 sm:space-y-4">
+    {/* 3-4 cards con métricas calculadas: Conversión Global, Mid-funnel, Top drop, etc. */}
+  </div>
+</div>
+```
+
+### Do's
+- Usar `realValue` para mostrar números y cálculos.
+- `enableLabel={false}` siempre (las labels default muestran los valores inflados).
+- Tooltip custom que lee `part.data.realValue`, no `part.data.value`.
+- Colores como array — un color por etapa.
+- Excluir etapa final con valor 0; nivo la renderiza como línea invisible.
+- Si el rango es uniforme (~10x): usar piso 15% como en el original.
+- Si el rango es amplio (>100x): usar escala log10.
+
+### Don'ts
+- NO `enableLabel={true}` — muestra los valores inflados.
+- NO `value === realValue` cuando hay etapas dispares.
+- NO `direction="horizontal"` para procesos de conversión.
+- NO confiar en el tooltip default (también muestra inflado).
+- NO `shapeBlending: 1` — las secciones pierden forma.
+- NO incluir etapas con valor 0.
+- NO contenedor `overflow: hidden` sin `height` definido — colapsa.
+
+### Recharts customization (LineChart, PieChart en OptimizationLayer)
+
+Tooltip de Recharts requiere TRES props para texto legible sobre fondo oscuro:
+
+```jsx
+<Tooltip
+  contentStyle={{
+    backgroundColor: '#1A0F26',     // slate del cliente
+    border: '1px solid #7B2CBF',    // accent
+    borderRadius: '8px',
+    color: '#fff',                  // afecta solo container
+    fontSize: '12px',
+  }}
+  labelStyle={{ fontWeight: 'bold', marginBottom: '8px', color: '#7B2CBF' }}
+  itemStyle={{ color: '#fff' }}     // CRÍTICO: sin esto el item sale en negro
+  formatter={(value, name) => [`${value}% (...)`, name]}  // opcional
+/>
+```
+
+Reemplazar legacy `#FF6B35` (FitZone naranja) y `#1A1A2E` (slate viejo) por tokens del sistema actual.
+
+## Apéndice E — Iconos por sector
+
+`lucide-react` icons. Reemplazar `Dumbbell` (FitZone) en `Dashboard.jsx`, `DataLayer.jsx`, `OptimizationLayer.jsx`, `DecisionLayer.jsx`, `ExecutionLayer.jsx`.
+
+| Sector | Header principal | Servicio/categoría | Sede/comercio | Métrica clave |
+|--------|------------------|--------------------|---------------| --------------|
+| Educación | `GraduationCap` | `BookOpen` | `Building2` | `Users` |
+| Salud | `HeartPulse` | `Stethoscope` | `Building2` | `Activity` |
+| E-commerce/Retail | `ShoppingBag` | `Package` o `Tag` | `Store` | `TrendingUp` |
+| Inmobiliaria | `Home` | `Building` | `MapPin` | `KeyRound` |
+| Fintech BNPL | `CreditCard` | `Wallet` o `Tag` | `Store` | `Activity` o `ThumbsUp` |
+| Fitness | `Dumbbell` (legacy) | `Activity` | `MapPin` | `Heart` |
+| SaaS / B2B | `Layers` | `Package` | `Briefcase` | `TrendingUp` |
+| Travel | `Plane` | `Map` | `MapPin` | `Globe` |
+
+`Heart` es ambiguo en fintech (puede leerse "amor a la marca"). Preferir `ThumbsUp` o `Activity` para "engagement" en sectores no-lifestyle.
+
+## Apéndice F — Inconsistencias conocidas del template (deuda técnica)
+
+Documentadas para no confundirse en futuras adaptaciones:
+
+1. **`DataLayer.jsx` tiene título de header hardcoded** mientras los otros 3 layers leen de `LAYER_CONFIG.*.name`. Hay que actualizar ambos (string en JSX y `LAYER_CONFIG.data.name` en config.js).
+2. **`LAYER_CONFIG.*.color` es campo muerto** — define gradientes (`from-fitzone-orange to-fitzone-darkOrange`, etc.) que `Dashboard.jsx` ignora porque usa `bg-fitzone-purple`/`cyan`/`emerald`/`amber` directo. Mantenerlos coherentes o ignorar.
+3. **Tokens internos legacy del primer cliente:**
+   - Variables: `KEYWORDS_FITZONE`, `HASHTAGS_FITZONE`, `SEDES_FITZONE`, `FITNESS_SOURCES`, subkey `fitness:` dentro de hashtags
+   - Keys de objetos en `PERFORMANCE_KPIS`: `nuevos_miembros`, `trials`, `whatsapp`, `retention`. **Cambiar `label` y `description`, NO la key** (rompería componentes).
+   - Token Tailwind: `fitzone-*` se mantiene como prefijo histórico. Solo cambiar los hex en `tailwind.config.js`, no los nombres.
+4. **`SEDES_CONFIG` en config.js usa `name`** mientras `SEDES_PERFORMANCE` en mockData.js usa `nombre`. Unificar a `nombre` en `SEDES_CONFIG` durante la adaptación.
+5. **Scores de `predictions.json`** — si no se actualiza, el dashboard muestra los scores del cliente anterior (por ejemplo 9.03 search score "fitness"). Editar `public/data/ml/predictions.json` siempre.
+6. **`netlify.toml` cache 1 año immutable** — correcto pero al cliente ver versión vieja, hard reload o Clear cache deploy.
+7. **`#FF6B35` (FitZone naranja) y `#1A1A2E` (FitZone slate)** aparecen hardcoded en Recharts Tooltip de OptimizationLayer en el template original. Buscar y reemplazar por tokens del cliente nuevo.
+8. **`bg-yellow-500`, `bg-red-500`, `bg-green-500` Tailwind genéricos** aparecen en JSX en algunas alertas y badges. Reemplazar por `fitzone-amber`, `fitzone-red`, `fitzone-green` cuando se quiera coherencia total.
+9. **Icono `Heart` para "Interacciones"** en OptimizationLayer KPI card — válido para social engagement pero ambiguo en fintech/B2B.
+10. **`#8884d8` default Recharts** en `<Pie fill="...">` — sobrescrito por `<Cell>`, no se ve, pero ensucia el código.
+
+## Apéndice G — Notas técnicas adicionales
 
 ### Sistema de tokens de color
-Los nombres de los tokens (`fitzone-purple`, `upn-navy`, etc.) son históricos del primer cliente y se mantienen por compatibilidad. Solo cambiar los valores hex en `tailwind.config.js`. Tailwind JIT propaga los cambios automáticamente.
+Los nombres de los tokens (`fitzone-purple`, etc.) son históricos del primer cliente y se mantienen por compatibilidad. Solo cambiar los valores hex en `tailwind.config.js`. Tailwind JIT propaga los cambios automáticamente.
 
 ### Iconos de plataformas
 `PlatformIcons.jsx` contiene SVGs inline de Simple Icons (simpleicons.org) para Google, TikTok, Meta y GA4. No requieren instalación npm. Si se necesita un ícono adicional, buscar en `https://github.com/simple-icons/simple-icons/tree/develop/icons` y añadir como componente función en ese archivo.
@@ -471,7 +966,18 @@ Los nombres de los tokens (`fitzone-purple`, `upn-navy`, etc.) son históricos d
 Tailwind permite opacidades como `text-white/90` o `bg-fitzone-purple/20`. Al usar opacidades bajas en texto, verificar siempre el contraste resultante sobre el fondo específico. El valor `/70` en texto blanco sobre fondo oscuro puede fallar WCAG si el fondo no es suficientemente oscuro.
 
 ### Fuentes de datos JSON
-Los archivos en `/data/` son consumidos por los componentes para mostrar trends, hashtags y ad performance simulados. Mantener la estructura JSON intacta; solo actualizar valores de contenido y el campo `client`.
+Los archivos en `public/data/` son consumidos por los componentes para mostrar trends, hashtags y ad performance simulados. Mantener la estructura JSON intacta; solo actualizar valores de contenido y el campo `client`. Si se ve que un campo nuevo es útil agregarlo al final del objeto.
 
 ### Commits y ramas
-Desarrollar siempre en una rama dedicada al cliente (ej. `claude/algoritmo-[cliente]-[id]`). Hacer commits incrementales por fase. No hacer squash de fases distintas en un mismo commit.
+Desarrollar siempre en una rama dedicada al cliente (ej. `claude/algoritmo-[cliente]-[id]`). Hacer commits incrementales por fase. No hacer squash de fases distintas en un mismo commit. Los mensajes de commit siempre en español, descriptivos del "por qué" más que del "qué".
+
+### Multi-agent review (recomendado al final)
+Antes del commit final de la Fase 6, lanzar 3 agentes en paralelo:
+
+```
+Agent 1 (Coherencia textual): tildes, em-dashes, lenguaje sugerente, anti-patrones
+Agent 2 (Coherencia numérica): asserts del Apéndice C, presupuesto, leads, funnels
+Agent 3 (Coherencia visual): contraste WCAG, blacklist, tokens, restos cliente anterior
+```
+
+Aplicar correcciones de los 3 reportes en un commit "follow-up review fixes" antes del merge.
