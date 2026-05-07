@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-05-04T08:30:00.000Z",
-  "client": "Powerpay",
+  "client": "WIN",
   "model_versions": {
     "sentiment_analyzer": "1.0.0",
     "budget_optimizer": "1.0.0",
@@ -8,40 +8,40 @@
   },
   "sentiment_analysis": {
     "overall": {
-      "score": 0.76,
+      "score": 0.78,
       "category": "positive",
       "topics_analyzed": 5
     },
     "by_topic": {
-      "Cuotas sin intereses": {
-        "score": 0.82,
+      "Fibra óptica y velocidad simétrica": {
+        "score": 0.84,
         "category": "positive",
-        "mentions": 8920,
-        "engagement": 78
+        "mentions": 9650,
+        "engagement": 80
       },
       "Cyber Wow y Cyber Days": {
         "score": 0.88,
         "category": "positive",
-        "mentions": 12450,
-        "engagement": 82
+        "mentions": 14820,
+        "engagement": 84
       },
-      "Tecnología y electrohogar": {
-        "score": 0.78,
+      "Streaming, gaming y entretenimiento en casa": {
+        "score": 0.80,
         "category": "positive",
-        "mentions": 6240,
-        "engagement": 75
+        "mentions": 7280,
+        "engagement": 76
       },
-      "Educación financiera": {
-        "score": 0.72,
+      "Educación digital y conectividad": {
+        "score": 0.74,
         "category": "positive",
-        "mentions": 3850,
-        "engagement": 68
+        "mentions": 4250,
+        "engagement": 70
       },
-      "Comparativas BNPL": {
-        "score": 0.68,
+      "Comparativas operadores fibra Perú": {
+        "score": 0.70,
         "category": "neutral",
-        "mentions": 2180,
-        "engagement": 64
+        "mentions": 2580,
+        "engagement": 68
       }
     },
     "timestamp": "2026-05-04T08:30:00.000Z"
@@ -50,25 +50,25 @@
     "timestamp": "2026-05-04T08:30:00.000Z",
     "individual": {
       "search": {
-        "base": 8.2,
-        "momentum": 0.42,
-        "final": 8.4
+        "base": 8.4,
+        "momentum": 0.38,
+        "final": 8.5
       },
       "trend": {
-        "base": 7.2,
-        "final": 7.2
+        "base": 7.6,
+        "final": 7.6
       },
       "social": {
-        "sentiment": 7.6,
-        "engagement": 8.0,
-        "final": 7.8
+        "sentiment": 7.8,
+        "engagement": 7.6,
+        "final": 7.7
       },
       "intent": {
-        "conversion_rate": 0.0088,
-        "final": 7.1
+        "conversion_rate": 0.0059,
+        "final": 6.8
       }
     },
-    "overall": 7.8,
+    "overall": 7.6,
     "weights": {
       "search": 0.25,
       "trend": 0.20,
@@ -78,37 +78,44 @@
   },
   "budget_optimization": {
     "current": {
-      "meta_ads": 60,
-      "google_search": 27,
-      "google_display": 8,
-      "youtube": 5
+      "meta_ads": 54,
+      "youtube": 14,
+      "google_search": 13,
+      "google_display": 12,
+      "tiktok_ads": 7
     },
     "recommended": {
       "meta_ads": {
-        "percentage": 64,
-        "amount": 9600,
-        "expected_roi": "32.4%",
+        "percentage": 58,
+        "amount": 8700,
+        "expected_uplift": "+12% alcance único",
+        "confidence": "high"
+      },
+      "youtube": {
+        "percentage": 14,
+        "amount": 2100,
+        "expected_uplift": "VTR 28,4%",
         "confidence": "high"
       },
       "google_search": {
-        "percentage": 27,
-        "amount": 4050,
-        "expected_roi": "28.6%",
+        "percentage": 13,
+        "amount": 1950,
+        "expected_uplift": "+18% búsquedas de marca",
         "confidence": "high"
       },
       "google_display": {
-        "percentage": 6,
-        "amount": 900,
-        "expected_roi": "12.5%",
+        "percentage": 10,
+        "amount": 1500,
+        "expected_uplift": "Frecuencia controlada",
         "confidence": "medium"
       },
-      "youtube": {
-        "percentage": 3,
-        "amount": 450,
-        "expected_roi": "9.8%",
+      "tiktok_ads": {
+        "percentage": 5,
+        "amount": 750,
+        "expected_uplift": "Alcance audiencia 18-30",
         "confidence": "medium"
       }
     },
-    "expected_uplift": "+95 cuentas creadas/mes"
+    "expected_uplift": "+250.000 personas alcanzadas/mes"
   }
 }

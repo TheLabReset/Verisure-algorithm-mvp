@@ -1,78 +1,189 @@
 {
   "timestamp": "2026-05-04T17:02:08.274Z",
   "region": "PE",
-  "category": "Finance",
+  "category": "Internet & Telecom",
   "source": "Google Trends (Curated Fallback)",
-  "client": "Powerpay",
+  "client": "WIN",
   "keywords": [
     {
-      "keyword": "cuotas sin intereses",
-      "average_interest": 86,
+      "keyword": "internet fibra optica",
+      "average_interest": 84,
       "trend": "rising",
       "peak_score": 100,
-      "growth_3m": "+42%",
+      "growth_3m": "+38%",
       "top_regions": {
         "Lima": 100,
-        "Arequipa": 68,
-        "Trujillo": 55,
-        "Chiclayo": 48,
-        "Piura": 42
+        "Callao": 78,
+        "Arequipa": 64,
+        "Trujillo": 52,
+        "Chiclayo": 46
       },
       "rising_queries": [
-        "cuotas sin intereses peru",
-        "comprar en cuotas sin intereses",
-        "cuotas 0 interes"
+        "internet fibra optica lima",
+        "mejor fibra optica peru",
+        "fibra simetrica que es"
       ],
       "related_topics": [
         {
-          "title": "Cuotéalo",
+          "title": "Movistar Hogar",
           "type": "Brand",
-          "value": 80
+          "value": 82
         },
         {
-          "title": "Yape",
+          "title": "Wow Perú",
           "type": "Brand",
-          "value": 78
+          "value": 76
         },
         {
-          "title": "Powerpay",
+          "title": "WIN",
           "type": "Brand",
+          "value": 65
+        }
+      ],
+      "source": "curated"
+    },
+    {
+      "keyword": "internet hogar lima",
+      "average_interest": 72,
+      "trend": "rising",
+      "peak_score": 92,
+      "growth_3m": "+24%",
+      "top_regions": {
+        "Lima": 100,
+        "Callao": 70,
+        "Arequipa": 56,
+        "Trujillo": 48,
+        "Cusco": 40
+      },
+      "rising_queries": [
+        "mejor internet hogar lima",
+        "plan internet hogar familia",
+        "como contratar internet en lima"
+      ],
+      "related_topics": [
+        {
+          "title": "Fibra óptica",
+          "type": "Topic",
+          "value": 90
+        },
+        {
+          "title": "Velocidad simétrica",
+          "type": "Topic",
+          "value": 68
+        },
+        {
+          "title": "Streaming HD",
+          "type": "Topic",
           "value": 62
         }
       ],
       "source": "curated"
     },
     {
-      "keyword": "pagar en cuotas",
+      "keyword": "contratar internet",
       "average_interest": 78,
       "trend": "rising",
-      "peak_score": 92,
-      "growth_3m": "+28%",
+      "peak_score": 95,
+      "growth_3m": "+30%",
       "top_regions": {
         "Lima": 100,
-        "Arequipa": 70,
-        "Trujillo": 58,
-        "Chiclayo": 50,
-        "Cusco": 42
+        "Callao": 72,
+        "Arequipa": 60,
+        "Trujillo": 55,
+        "Piura": 48
       },
       "rising_queries": [
-        "pagar en cuotas con tarjeta",
-        "pagar compras en cuotas",
-        "como pagar en cuotas"
+        "contratar internet hogar lima",
+        "instalar internet en mi casa",
+        "cambiar de operador internet"
       ],
       "related_topics": [
         {
-          "title": "Tarjeta de crédito",
-          "type": "Topic",
+          "title": "Cyber Wow",
+          "type": "Event",
           "value": 88
         },
         {
-          "title": "BNPL",
+          "title": "Black Friday",
+          "type": "Event",
+          "value": 80
+        },
+        {
+          "title": "Regreso a clases",
+          "type": "Event",
+          "value": 76
+        }
+      ],
+      "source": "curated"
+    },
+    {
+      "keyword": "fibra simetrica",
+      "average_interest": 66,
+      "trend": "rising",
+      "peak_score": 84,
+      "growth_3m": "+44%",
+      "top_regions": {
+        "Lima": 100,
+        "Callao": 65,
+        "Arequipa": 50,
+        "Trujillo": 44,
+        "Cusco": 38
+      },
+      "rising_queries": [
+        "que es velocidad simetrica",
+        "fibra simetrica peru",
+        "subida igual a bajada internet"
+      ],
+      "related_topics": [
+        {
+          "title": "WIN",
+          "type": "Brand",
+          "value": 78
+        },
+        {
+          "title": "Fiberlux",
+          "type": "Brand",
+          "value": 60
+        },
+        {
+          "title": "Teletrabajo",
+          "type": "Topic",
+          "value": 70
+        }
+      ],
+      "source": "curated"
+    },
+    {
+      "keyword": "win internet",
+      "average_interest": 65,
+      "trend": "rising",
+      "peak_score": 82,
+      "growth_3m": "+58%",
+      "top_regions": {
+        "Lima": 100,
+        "Callao": 75,
+        "Arequipa": 52,
+        "Trujillo": 46,
+        "Piura": 40
+      },
+      "rising_queries": [
+        "win internet planes",
+        "win cobertura mi distrito",
+        "win opiniones"
+      ],
+      "related_topics": [
+        {
+          "title": "Fibra óptica",
+          "type": "Topic",
+          "value": 85
+        },
+        {
+          "title": "Velocidad simétrica",
           "type": "Topic",
           "value": 72
         },
         {
-          "title": "Tarjeta de débito",
+          "title": "OSIPTEL",
           "type": "Topic",
           "value": 60
         }
@@ -80,147 +191,36 @@
       "source": "curated"
     },
     {
-      "keyword": "comprar en cuotas",
-      "average_interest": 82,
-      "trend": "rising",
-      "peak_score": 95,
-      "growth_3m": "+35%",
-      "top_regions": {
-        "Lima": 100,
-        "Arequipa": 72,
-        "Trujillo": 60,
-        "Chiclayo": 55,
-        "Piura": 50
-      },
-      "rising_queries": [
-        "comprar laptop en cuotas",
-        "comprar celular en cuotas",
-        "comprar electrodomesticos en cuotas"
-      ],
-      "related_topics": [
-        {
-          "title": "Cyber Wow",
-          "type": "Event",
-          "value": 90
-        },
-        {
-          "title": "Black Friday",
-          "type": "Event",
-          "value": 82
-        },
-        {
-          "title": "Cyber Days",
-          "type": "Event",
-          "value": 78
-        }
-      ],
-      "source": "curated"
-    },
-    {
-      "keyword": "comprar ahora pagar despues",
-      "average_interest": 70,
-      "trend": "rising",
-      "peak_score": 88,
-      "growth_3m": "+48%",
-      "top_regions": {
-        "Lima": 100,
-        "Arequipa": 65,
-        "Trujillo": 52,
-        "Chiclayo": 48,
-        "Cusco": 40
-      },
-      "rising_queries": [
-        "que es buy now pay later",
-        "bnpl peru",
-        "comprar y pagar despues sin intereses"
-      ],
-      "related_topics": [
-        {
-          "title": "Powerpay",
-          "type": "Brand",
-          "value": 75
-        },
-        {
-          "title": "Cuotéalo",
-          "type": "Brand",
-          "value": 70
-        },
-        {
-          "title": "aCuotaz",
-          "type": "Brand",
-          "value": 45
-        }
-      ],
-      "source": "curated"
-    },
-    {
-      "keyword": "powerpay",
-      "average_interest": 64,
-      "trend": "rising",
-      "peak_score": 82,
-      "growth_3m": "+62%",
-      "top_regions": {
-        "Lima": 100,
-        "Arequipa": 60,
-        "Trujillo": 48,
-        "Chiclayo": 42,
-        "Piura": 38
-      },
-      "rising_queries": [
-        "powerpay como funciona",
-        "powerpay opiniones",
-        "powerpay registrarme"
-      ],
-      "related_topics": [
-        {
-          "title": "BBVA",
-          "type": "Brand",
-          "value": 85
-        },
-        {
-          "title": "Cuotas sin intereses",
-          "type": "Topic",
-          "value": 72
-        },
-        {
-          "title": "Tarjeta de crédito",
-          "type": "Topic",
-          "value": 65
-        }
-      ],
-      "source": "curated"
-    },
-    {
-      "keyword": "cuotealo",
-      "average_interest": 75,
+      "keyword": "movistar fibra",
+      "average_interest": 80,
       "trend": "stable",
-      "peak_score": 90,
-      "growth_3m": "+15%",
+      "peak_score": 92,
+      "growth_3m": "+12%",
       "top_regions": {
         "Lima": 100,
-        "Arequipa": 70,
-        "Trujillo": 55,
-        "Chiclayo": 50,
-        "Cusco": 45
+        "Callao": 76,
+        "Arequipa": 68,
+        "Trujillo": 58,
+        "Cusco": 50
       },
       "rising_queries": [
-        "cuotealo bcp",
-        "cuotealo como funciona",
-        "alternativa a cuotealo"
+        "movistar fibra hogar",
+        "movistar plan internet",
+        "movistar cobertura lima"
       ],
       "related_topics": [
         {
-          "title": "BCP",
+          "title": "Telefónica",
           "type": "Brand",
           "value": 95
         },
         {
-          "title": "Cuotas sin tarjeta",
+          "title": "Bundle TV",
           "type": "Topic",
           "value": 78
         },
         {
-          "title": "BNPL",
+          "title": "Plan familia",
           "type": "Topic",
           "value": 65
         }
@@ -230,11 +230,11 @@
   ],
   "metadata": {
     "method": "Curated data (Apify unavailable)",
-    "note": "Keywords genéricos de alto volumen para BNPL en Perú. Se priorizan términos de marca, intención y comparativos.",
+    "note": "Keywords genéricos de alto volumen para internet fibra en Perú. Se priorizan términos de marca, categoría e intención de búsqueda en Lima.",
     "timeframe": "today 1-m",
     "apify_keywords": 0,
     "curated_keywords": 6,
-    "market": "Perú nacional digital, foco Lima Metropolitana y principales ciudades",
-    "product": "Powerpay BNPL 2026"
+    "market": "Perú, foco Lima Metropolitana y Callao",
+    "product": "Campaña de Marca WIN 2026"
   }
 }

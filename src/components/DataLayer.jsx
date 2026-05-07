@@ -1,21 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Search, TrendingUp, Video, Share2, CreditCard, RefreshCw, ChevronDown, ChevronUp, BarChart3, Info, Music, Target, DollarSign, Layers, Lightbulb, Users, Globe, MapPin, Eye, Clock, MousePointer, Smartphone, Monitor, ExternalLink, Calendar } from 'lucide-react';
-import { formatES, formatMoney, formatPercent } from '../utils/format';
+import { Search, TrendingUp, Video, Share2, Wifi, RefreshCw, ChevronDown, ChevronUp, BarChart3, Info, Music, Target, DollarSign, Layers, Lightbulb, Users, Globe, MapPin, Eye, Clock, MousePointer, Smartphone, Monitor, ExternalLink, Calendar } from 'lucide-react';
+import { formatES, formatMoney, formatPercent, formatThousands } from '../utils/format';
 
 export default function DataLayer() {
-  // Helper function to get current week info
   const getWeekPeriod = () => {
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     const days = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000));
     const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
 
-    // Get Monday of current week
     const dayOfWeek = now.getDay();
     const monday = new Date(now);
     monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
 
-    // Get Sunday of current week
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
 
@@ -98,7 +95,6 @@ export default function DataLayer() {
     return iconMap[type] || Lightbulb;
   };
 
-  // Calculate scores for fitness metrics
   const calculateScores = () => {
     const fmt = (v, fallback) => v !== undefined && v !== null
       ? formatES(Number(v), 1)
@@ -106,118 +102,109 @@ export default function DataLayer() {
 
     if (mlData?.scores?.individual) {
       return {
-        overall: fmt(mlData.scores.overall, '7,8'),
-        search: fmt(mlData.scores.individual.search?.final, '8,4'),
-        trend: fmt(mlData.scores.individual.trend?.final, '7,2'),
-        social: fmt(mlData.scores.individual.social?.final, '7,8'),
-        intent: fmt(mlData.scores.individual.intent?.final, '7,1'),
+        overall: fmt(mlData.scores.overall, '7,6'),
+        search: fmt(mlData.scores.individual.search?.final, '8,5'),
+        trend: fmt(mlData.scores.individual.trend?.final, '7,6'),
+        social: fmt(mlData.scores.individual.social?.final, '7,7'),
+        intent: fmt(mlData.scores.individual.intent?.final, '6,8'),
         isML: true,
         weights: mlData.scores.weights
       };
     }
 
-    // Mock Powerpay scores
     return {
-      overall: '7,8',
-      search: '8,4',
-      trend: '7,2',
-      social: '7,8',
-      intent: '7,1',
+      overall: '7,6',
+      search: '8,5',
+      trend: '7,6',
+      social: '7,7',
+      intent: '6,8',
       isML: false
     };
   };
 
   const scores = calculateScores();
 
-  // Generate Powerpay BNPL insights - exactly 4 sources: Google Trends, TikTok, Meta, GA4
   const generateInsights = () => {
-    // Always return exactly 4 insights, one per source
     return [
       {
         source: 'Google Trends',
         IconComponent: Search,
-        text: '"Cuotas sin intereses" lidera con 86/100 de interés y +42% de crecimiento. La marca "powerpay" sube 62% en los últimos 3 meses.',
+        text: '"Internet fibra óptica" lidera con 84/100 de interés y +38% de crecimiento. La marca "win internet" sube 58% en los últimos 3 meses.',
       },
       {
         source: 'TikTok',
         IconComponent: Video,
-        text: '#CyberWow alcanza 6,8M de views en Perú con +82% de crecimiento. El contenido de comparativas y unboxing tiene engagement 9,2/10.',
+        text: '#StreamingHD alcanza 5,2M de views en Perú con +38% de crecimiento. El contenido de gaming y casos de uso muestra engagement 9,4/10.',
       },
       {
         source: 'Meta',
         IconComponent: Share2,
-        text: 'Sentimiento social positivo en torno a cuotas sin intereses. "Cyber Wow y Cyber Days" concentra 12,4K menciones con 82/100 de engagement.',
+        text: 'Sentimiento social positivo en torno a fibra óptica y velocidad simétrica. "Cyber Wow y Cyber Days" concentra 14,8K menciones con 84/100 de engagement.',
       },
       {
         source: 'GA4',
         IconComponent: BarChart3,
-        text: '165K sesiones derivaron en 1.450 registros iniciados y 1.050 cuentas creadas con KYC validado (tasa registro→KYC de 72%). La página "/registrarme" muestra 5,8% de tasa de conversión.',
+        text: '245K sesiones derivaron en 1.450 consultas iniciadas y 1.050 leads cualificados (tasa de cualificación 72%). La página "/planes" muestra 3,8% de tasa de conversión.',
       },
     ];
   };
 
-  // Multi-source insight (separate)
   const multiSourceInsight = {
     source: 'Análisis Multi-Fuente',
     IconComponent: Layers,
-    text: 'Las cuatro fuentes coinciden en una ventana estacional fuerte hacia Cyber Wow. La combinación de búsquedas en alza (+42%), engagement social sostenido (8,2/10), contenido relevante en TikTok y conversiones web en aumento sugieren un momento favorable para escalar inversión. Se observa una oportunidad de posicionar el mensaje "no consume tu línea de crédito" como diferenciador.',
-    recommendation: 'Se sugiere ampliar Meta Ads en torno a categorías de tecnología y electrohogar y reforzar Search en términos de "cuotas sin intereses" durante Cyber Wow.'
+    text: 'Las cuatro fuentes coinciden en una ventana favorable hacia Cyber Days y campañas de fin de año. La combinación de búsquedas en alza (+38%), engagement social sostenido (8,0/10), contenido relevante en TikTok y tráfico web en aumento sugiere un momento favorable para reforzar awareness. Se observa una oportunidad de posicionar el mensaje de fibra 100% pura y velocidad simétrica como diferenciador.',
+    recommendation: 'Se sugiere reforzar Meta Ads en torno a casos de uso reales (gaming, streaming, teletrabajo) y amplificar YouTube en términos de "internet fibra óptica" durante la ventana estacional.'
   };
 
   const insights = generateInsights();
 
-  // Expanded GA4 pages data
   const ga4Pages = [
-    { page: '/registrarme', title: 'Crear cuenta Powerpay', views: 28500, sessions: 22400, avgTime: '3:48', bounceRate: 22, conversions: 1450, convRate: 5.84 },
-    { page: '/como-funciona', title: 'Cómo funciona Powerpay', views: 22400, sessions: 18200, avgTime: '3:12', bounceRate: 28, conversions: 850, convRate: 4.21 },
-    { page: '/tiendas/tecnologia', title: 'Tiendas de Tecnología', views: 19800, sessions: 15600, avgTime: '2:42', bounceRate: 35, conversions: 620, convRate: 3.83 },
-    { page: '/tiendas/electrohogar', title: 'Tiendas de Electrohogar', views: 14600, sessions: 11800, avgTime: '2:35', bounceRate: 38, conversions: 410, convRate: 3.42 },
-    { page: '/preguntas-frecuentes', title: 'Preguntas frecuentes', views: 12200, sessions: 9800, avgTime: '4:05', bounceRate: 32, conversions: 185, convRate: 1.84 },
-    { page: '/tiendas/moda', title: 'Tiendas de Moda', views: 9800, sessions: 7900, avgTime: '2:18', bounceRate: 40, conversions: 215, convRate: 2.65 },
-    { page: '/tiendas/viajes', title: 'Tiendas de Viajes', views: 7600, sessions: 6200, avgTime: '2:28', bounceRate: 41, conversions: 142, convRate: 2.20 },
-    { page: '/cyber-wow', title: 'Landing Cyber Wow', views: 6800, sessions: 5800, avgTime: '2:55', bounceRate: 30, conversions: 285, convRate: 4.71 },
-    { page: '/comercios', title: 'Listado de comercios partners', views: 5400, sessions: 4500, avgTime: '2:05', bounceRate: 45, conversions: 78, convRate: 1.62 },
-    { page: '/app', title: 'App Powerpay', views: 3200, sessions: 2800, avgTime: '2:45', bounceRate: 45, conversions: 95, convRate: 3.20 },
+    { page: '/', title: 'WIN - Internet 100% fibra óptica', views: 78400, sessions: 64200, avgTime: '2:48', bounceRate: 28, conversions: 1450, convRate: 2.20 },
+    { page: '/planes', title: 'Planes de internet hogar WIN', views: 53900, sessions: 44800, avgTime: '3:12', bounceRate: 24, conversions: 850, convRate: 3.80 },
+    { page: '/cobertura', title: 'Cobertura WIN en Lima', views: 27000, sessions: 22600, avgTime: '2:20', bounceRate: 35, conversions: 410, convRate: 1.80 },
+    { page: '/planes/900mbps', title: 'Plan WIN 1 Gbps Premium', views: 24500, sessions: 20800, avgTime: '3:42', bounceRate: 32, conversions: 620, convRate: 4.60 },
+    { page: '/win-tv', title: 'WIN TV Premium y L1MAX', views: 19600, sessions: 16400, avgTime: '3:05', bounceRate: 30, conversions: 285, convRate: 2.40 },
+    { page: '/planes/600mbps', title: 'Plan WIN 600 Mbps Gamer', views: 16800, sessions: 14200, avgTime: '2:55', bounceRate: 33, conversions: 215, convRate: 2.65 },
+    { page: '/empresas', title: 'WIN Empresas y PYME', views: 9800, sessions: 8100, avgTime: '3:18', bounceRate: 38, conversions: 142, convRate: 2.10 },
+    { page: '/preguntas-frecuentes', title: 'Preguntas frecuentes', views: 8600, sessions: 7200, avgTime: '4:05', bounceRate: 32, conversions: 95, convRate: 1.85 },
+    { page: '/atencion-cliente', title: 'Atención al cliente WIN', views: 5400, sessions: 4500, avgTime: '2:05', bounceRate: 45, conversions: 78, convRate: 1.62 },
+    { page: '/cobertura/lima-norte', title: 'Cobertura Lima Norte', views: 4800, sessions: 4100, avgTime: '2:32', bounceRate: 36, conversions: 110, convRate: 2.85 },
   ];
 
-  // Expanded TikTok hashtags data
   const tiktokHashtags = [
-    { hashtag: '#CuotasSinIntereses', views: '4,2M', posts: '18,5K', growth: '+38%', region: 'Perú', engagement: 8.4 },
-    { hashtag: '#CyberWow', views: '6,8M', posts: '12,2K', growth: '+82%', region: 'Perú', engagement: 9.2 },
-    { hashtag: '#ComprarEnCuotas', views: '1,9M', posts: '8,4K', growth: '+25%', region: 'LATAM', engagement: 7.8 },
-    { hashtag: '#FintechPeru', views: '980K', posts: '5,2K', growth: '+18%', region: 'Perú', engagement: 7.2 },
-    { hashtag: '#BNPLPeru', views: '320K', posts: '1,8K', growth: '+95%', region: 'Perú', engagement: 8.0 },
-    { hashtag: '#Powerpay', views: '145K', posts: '320', growth: '+72%', region: 'Perú', engagement: 9.0 },
-    { hashtag: '#ShoppingHaul', views: '2,4M', posts: '9,8K', growth: '+22%', region: 'LATAM', engagement: 8.6 },
-    { hashtag: '#FinanzasPersonales', views: '1,2M', posts: '6,5K', growth: '+34%', region: 'LATAM', engagement: 7.5 },
+    { hashtag: '#FibraOptica', views: '3,2M', posts: '16,8K', growth: '+34%', region: 'Perú', engagement: 8.2 },
+    { hashtag: '#InternetPeru', views: '4,8M', posts: '22,4K', growth: '+28%', region: 'Perú', engagement: 8.0 },
+    { hashtag: '#GamingPeru', views: '2,8M', posts: '14,2K', growth: '+42%', region: 'Perú', engagement: 9.4 },
+    { hashtag: '#StreamingHD', views: '5,2M', posts: '18,5K', growth: '+38%', region: 'LATAM', engagement: 8.6 },
+    { hashtag: '#WIN', views: '165K', posts: '480', growth: '+62%', region: 'Perú', engagement: 9.0 },
+    { hashtag: '#SmartHome', views: '1,4M', posts: '6,8K', growth: '+22%', region: 'LATAM', engagement: 7.6 },
+    { hashtag: '#Teletrabajo', views: '980K', posts: '4,2K', growth: '+18%', region: 'Perú', engagement: 7.4 },
+    { hashtag: '#LimaPeru', views: '8,6M', posts: '34,5K', growth: '+12%', region: 'Perú', engagement: 7.8 },
   ];
 
-  // Expanded TikTok sounds
   const tiktokSounds = [
-    { name: 'Oh No Oh No (Kreepa remix LATAM)', type: 'Comedia', usage: '2,1M', trend: '+12%' },
-    { name: 'Aesthetic shopping vibes', type: 'Lifestyle', usage: '650K', trend: '+28%' },
-    { name: 'Una noche en Medellín sped-up', type: 'Trend joven', usage: '3,2M', trend: '+15%' },
-    { name: 'Money Money Money (TikTok flip)', type: 'Finanzas', usage: '720K', trend: '+8%' },
-    { name: 'Voiceover narrativo PE', type: 'Storytime', usage: '180K', trend: '+42%' },
-    { name: 'Cyber Wow beat genérico Perú', type: 'Estacional', usage: '320K', trend: '+95%' },
+    { name: 'Voices (Øneheart)', type: 'Lifestyle', usage: '1,8M', trend: '+22%' },
+    { name: 'Levitating (Dua Lipa)', type: 'Pop celebración', usage: '1,3M', trend: '+14%' },
+    { name: 'Tití Me Preguntó (Bad Bunny)', type: 'LATAM evergreen', usage: '2,6M', trend: '+18%' },
+    { name: 'Voiceover narrativo PE creators tech', type: 'Storytime', usage: '240K', trend: '+38%' },
+    { name: 'Beat Cyber Wow Perú', type: 'Estacional', usage: '380K', trend: '+88%' },
+    { name: 'Ella Baila Sola (Peso Pluma)', type: 'Regional energético', usage: '1,2M', trend: '+24%' },
   ];
 
-  // Expanded Meta topics data
   const metaTopics = [
-    { topic: 'Cyber Wow y Cyber Days', mentions: 12450, engagement: 8.2, sentiment: 88, growth: '+58%', brands: 'Saga Falabella, Ripley, Plaza Vea' },
-    { topic: 'Cuotas sin intereses', mentions: 8920, engagement: 7.8, sentiment: 82, growth: '+42%', brands: 'Powerpay, Cuotéalo, Yape, Divídelo' },
-    { topic: 'Tecnología y electrohogar en cuotas', mentions: 6240, engagement: 7.5, sentiment: 78, growth: '+34%', brands: 'Samsung, Xiaomi, Sony, iShop' },
-    { topic: 'Educación financiera', mentions: 3850, engagement: 6.8, sentiment: 72, growth: '+22%', brands: 'BBVA, BCP, Interbank, Powerpay' },
-    { topic: 'Comparativas BNPL Perú', mentions: 2180, engagement: 6.4, sentiment: 68, growth: '+48%', brands: 'Powerpay, Cuotéalo, Yape, aCuotaz' },
-    { topic: 'Compras planificadas', mentions: 2980, engagement: 6.1, sentiment: 75, growth: '+18%', brands: 'Mercado Libre, Linio' },
+    { topic: 'Cyber Wow y Cyber Days', mentions: 14820, engagement: 8.4, sentiment: 88, growth: '+62%', brands: 'Movistar, Wow Perú, WIN, Claro' },
+    { topic: 'Fibra óptica y velocidad simétrica', mentions: 9650, engagement: 8.0, sentiment: 84, growth: '+48%', brands: 'WIN, Movistar, Wow Perú, Fiberlux' },
+    { topic: 'Streaming, gaming y entretenimiento en casa', mentions: 7280, engagement: 7.6, sentiment: 80, growth: '+38%', brands: 'DGO, Netflix, Liga 1, PlayStation' },
+    { topic: 'Educación digital y conectividad', mentions: 4250, engagement: 7.0, sentiment: 74, growth: '+24%', brands: 'OSIPTEL, MTC, WIN, Movistar' },
+    { topic: 'Comparativas operadores fibra Perú', mentions: 2580, engagement: 6.8, sentiment: 70, growth: '+52%', brands: 'WIN, Movistar, Wow Perú, Claro' },
+    { topic: 'Smart home y IoT', mentions: 2180, engagement: 6.4, sentiment: 76, growth: '+18%', brands: 'Google Home, Alexa, Samsung' },
   ];
 
-  // Meta ad performance
   const metaAdPerformance = [
-    { campaign: 'Cyber Wow - Tecnología y Electrohogar', platform: 'Instagram', reach: 850000, clicks: 12500, ctr: 1.47, cpl: 9.17, status: 'Activo' },
-    { campaign: 'Línea de Crédito Libre - Adulto', platform: 'Facebook', reach: 420000, clicks: 5800, ctr: 1.38, cpl: 11.16, status: 'Activo' },
-    { campaign: 'Brand + Genérico Cuotas', platform: 'Instagram', reach: 380000, clicks: 9200, ctr: 2.42, cpl: 10.49, status: 'Activo' },
-    { campaign: 'Retargeting Comercios Partners', platform: 'Facebook', reach: 180000, clicks: 2200, ctr: 1.22, cpl: 9.65, status: 'Activo' },
+    { campaign: 'Brand Awareness Hogares Lima Moderna', platform: 'Instagram', reach: 1450000, clicks: 18500, ctr: 1.28, cpl: 9.96, status: 'Activa' },
+    { campaign: 'Recordación Familias Conectadas Lima Norte y Sur', platform: 'Facebook', reach: 980000, clicks: 11200, ctr: 1.14, cpl: 8.72, status: 'Activa' },
+    { campaign: 'YouTube Brand WIN Fibra 100%', platform: 'YouTube', reach: 720000, clicks: 8400, ctr: 1.17, cpl: 11.25, status: 'Activa' },
+    { campaign: 'TikTok Spark Awareness Joven', platform: 'TikTok', reach: 380000, clicks: 6500, ctr: 1.71, cpl: 6.78, status: 'Activa' },
   ];
 
   return (
@@ -228,14 +215,14 @@ export default function DataLayer() {
           <div className="flex-1">
             <div className="flex items-center gap-3 sm:gap-4 mb-4">
               <div className="w-10 h-10 sm:w-14 sm:h-14 bg-fitzone-purple rounded-xl flex items-center justify-center flex-shrink-0">
-                <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                <Wifi className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
               <div className="min-w-0">
                 <h2 className="text-base sm:text-xl font-bold mb-1">
                   Capa de Data - Captura de Señales
                 </h2>
                 <p className="text-fitzone-textGray text-xs sm:text-base">
-                  Monitoreo en tiempo real del ecosistema digital fintech y BNPL en Perú
+                  Monitoreo en tiempo real del ecosistema digital telco y fibra óptica en Perú
                 </p>
               </div>
             </div>
@@ -297,7 +284,7 @@ export default function DataLayer() {
             <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm sm:text-lg font-bold text-white">Insights Clave del Mercado Fintech</h3>
+            <h3 className="text-sm sm:text-lg font-bold text-white">Insights Clave del Mercado Telco</h3>
             <p className="text-xs sm:text-sm text-fitzone-textGray">Análisis automático multi-fuente</p>
           </div>
         </div>
@@ -344,7 +331,7 @@ export default function DataLayer() {
           })}
         </div>
 
-        {/* Multi-Source Analysis - Full Width at Bottom */}
+        {/* Multi-Source Analysis */}
         <div className="relative bg-gradient-to-r from-fitzone-purple/20 to-fitzone-cyan/20 rounded-xl p-3 sm:p-6 border border-fitzone-purple/30">
           <div className="flex items-start gap-2 sm:gap-4">
             <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-fitzone-purple to-fitzone-cyan rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
@@ -380,7 +367,7 @@ export default function DataLayer() {
             <Search className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
             <div className="text-left min-w-0">
               <h3 className="text-sm sm:text-base font-bold">Google Trends</h3>
-              <p className="text-[10px] sm:text-xs text-white/80">Keywords BNPL y cuotas - Score: {scores.search}/10</p>
+              <p className="text-[10px] sm:text-xs text-white/80">Keywords telco e internet hogar - Score: {scores.search}/10</p>
             </div>
           </div>
           {expandedSections.trends ? <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
@@ -392,7 +379,7 @@ export default function DataLayer() {
               <Info className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-cyan flex-shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm text-fitzone-lightGray">
                 <p className="font-semibold mb-1 text-fitzone-cyan">Cómo se calcula el score:</p>
-                <p>Promedio del "interés de búsqueda" (0-100) de keywords BNPL y cuotas monitoreadas en Perú.</p>
+                <p>Promedio del "interés de búsqueda" (0-100) de keywords de telco e internet hogar monitoreadas en Perú.</p>
                 <p className="mt-2 text-[10px] sm:text-xs text-fitzone-textGray hidden sm:block">
                   <strong>Fuente:</strong> Google Trends API (Perú) - <strong>Actualización:</strong> Semanal
                 </p>
@@ -411,14 +398,14 @@ export default function DataLayer() {
                 </thead>
                 <tbody className="divide-y divide-fitzone-slate">
                   {[
-                    { keyword: 'cuotas sin intereses', interest: 86, growth: '+42%', trend: 'rising' },
-                    { keyword: 'comprar en cuotas', interest: 82, growth: '+35%', trend: 'rising' },
-                    { keyword: 'pagar en cuotas', interest: 78, growth: '+28%', trend: 'rising' },
-                    { keyword: 'cuotealo', interest: 75, growth: '+15%', trend: 'stable' },
-                    { keyword: 'comprar ahora pagar despues', interest: 70, growth: '+48%', trend: 'rising' },
-                    { keyword: 'powerpay', interest: 64, growth: '+62%', trend: 'rising' },
-                    { keyword: 'comprar laptop en cuotas', interest: 58, growth: '+22%', trend: 'rising' },
-                    { keyword: 'cuotas sin intereses lima', interest: 52, growth: '+18%', trend: 'rising' },
+                    { keyword: 'internet fibra optica', interest: 84, growth: '+38%', trend: 'rising' },
+                    { keyword: 'movistar fibra', interest: 80, growth: '+12%', trend: 'stable' },
+                    { keyword: 'contratar internet', interest: 78, growth: '+30%', trend: 'rising' },
+                    { keyword: 'internet hogar lima', interest: 72, growth: '+24%', trend: 'rising' },
+                    { keyword: 'fibra simetrica', interest: 66, growth: '+44%', trend: 'rising' },
+                    { keyword: 'win internet', interest: 65, growth: '+58%', trend: 'rising' },
+                    { keyword: 'mejor internet lima', interest: 58, growth: '+22%', trend: 'rising' },
+                    { keyword: 'cambiar de operador internet', interest: 52, growth: '+18%', trend: 'rising' },
                   ].map((kw, idx) => (
                     <tr key={idx} className="hover:bg-fitzone-slate/50 transition">
                       <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-white">{kw.keyword}</td>
@@ -466,15 +453,14 @@ export default function DataLayer() {
               <Info className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-emerald flex-shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm text-fitzone-lightGray">
                 <p className="font-semibold mb-1 text-fitzone-emerald">Cómo se calcula el score:</p>
-                <p>Promedio del "relevance score" (0-100) de hashtags fintech y de cuotas virales.</p>
+                <p>Promedio del "relevance score" (0-100) de hashtags telco y de fibra óptica virales.</p>
               </div>
             </div>
 
-            {/* Hashtags Table */}
             <div>
               <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
                 <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-emerald" />
-                Hashtags Trending Fintech y BNPL
+                Hashtags Trending Telco y Fibra Óptica
               </h4>
               <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
                 <table className="w-full min-w-[450px]">
@@ -518,11 +504,10 @@ export default function DataLayer() {
               </div>
             </div>
 
-            {/* Trending Sounds */}
             <div>
               <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
                 <Music className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-emerald" />
-                Sonidos Trending para Contenido Powerpay
+                Sonidos Trending para Contenido WIN
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                 {tiktokSounds.map((sound, idx) => (
@@ -570,11 +555,10 @@ export default function DataLayer() {
               <Info className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-lightPurple flex-shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm text-fitzone-lightGray">
                 <p className="font-semibold mb-1 text-fitzone-lightPurple">Cómo se calcula el score:</p>
-                <p>Promedio del "engagement score" (0-10) de temas fintech y BNPL en Facebook e Instagram.</p>
+                <p>Promedio del "engagement score" (0-10) de temas telco y fibra óptica en Facebook e Instagram.</p>
               </div>
             </div>
 
-            {/* Topics Table */}
             <div>
               <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
                 <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-lightPurple" />
@@ -600,13 +584,13 @@ export default function DataLayer() {
                           <span className="text-xs sm:text-sm font-bold text-fitzone-lightPurple">{(topic.mentions / 1000).toFixed(0)}K</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                          <span className="text-xs sm:text-sm font-bold text-white">{topic.engagement}</span>
+                          <span className="text-xs sm:text-sm font-bold text-white">{formatES(topic.engagement, 1)}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                           <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full ${
                             topic.sentiment >= 80 ? 'bg-fitzone-emerald/20 text-fitzone-emerald' :
                             topic.sentiment >= 60 ? 'bg-fitzone-amber/20 text-fitzone-amber' :
-                            'bg-red-500/20 text-red-400'
+                            'bg-fitzone-red/20 text-fitzone-red'
                           }`}>
                             {topic.sentiment}%
                           </span>
@@ -622,11 +606,10 @@ export default function DataLayer() {
               </div>
             </div>
 
-            {/* Ad Performance */}
             <div>
               <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
                 <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-lightPurple" />
-                Rendimiento de Campañas Meta Ads
+                Rendimiento de Campañas Activas
               </h4>
               <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
                 <table className="w-full min-w-[500px]">
@@ -650,19 +633,19 @@ export default function DataLayer() {
                           <span className="text-xs sm:text-sm text-white">{(ad.reach / 1000).toFixed(0)}K</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center hidden sm:table-cell">
-                          <span className="text-xs sm:text-sm text-white">{ad.clicks.toLocaleString()}</span>
+                          <span className="text-xs sm:text-sm text-white">{ad.clicks.toLocaleString('es-PE')}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                           <span className={`text-xs sm:text-sm font-bold ${ad.ctr >= 1.5 ? 'text-fitzone-emerald' : 'text-fitzone-amber'}`}>{formatPercent(ad.ctr, 2)}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                          <span className={`text-xs sm:text-sm font-bold ${ad.cpl <= 12 ? 'text-fitzone-emerald' : ad.cpl <= 18 ? 'text-fitzone-amber' : 'text-red-400'}`}>{formatMoney(ad.cpl)}</span>
+                          <span className={`text-xs sm:text-sm font-bold ${ad.cpl <= 10 ? 'text-fitzone-emerald' : ad.cpl <= 12 ? 'text-fitzone-amber' : 'text-fitzone-red'}`}>{formatMoney(ad.cpl)}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                           <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full ${
-                            ad.status === 'Activo' ? 'bg-fitzone-emerald/20 text-fitzone-emerald' : 'bg-fitzone-slate text-fitzone-textGray'
+                            ad.status === 'Activa' ? 'bg-fitzone-emerald/20 text-fitzone-emerald' : 'bg-fitzone-slate text-fitzone-textGray'
                           }`}>
-                            {ad.status === 'Activo' ? '●' : '○'}
+                            {ad.status === 'Activa' ? '●' : '○'}
                           </span>
                         </td>
                       </tr>
@@ -700,21 +683,21 @@ export default function DataLayer() {
                   <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-textGray" />
                   <p className="text-[10px] sm:text-xs text-fitzone-textGray">Usuarios</p>
                 </div>
-                <p className="text-lg sm:text-xl font-bold text-white">142,5K</p>
-                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+24%</p>
+                <p className="text-lg sm:text-xl font-bold text-white">198,4K</p>
+                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+28%</p>
               </div>
               <div className="bg-fitzone-slate rounded-lg p-3 sm:p-4">
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-textGray" />
                   <p className="text-[10px] sm:text-xs text-fitzone-textGray">Sesiones</p>
                 </div>
-                <p className="text-lg sm:text-xl font-bold text-white">165K</p>
-                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+28%</p>
+                <p className="text-lg sm:text-xl font-bold text-white">245K</p>
+                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+32%</p>
               </div>
               <div className="bg-fitzone-slate rounded-lg p-3 sm:p-4">
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-textGray" />
-                  <p className="text-[10px] sm:text-xs text-fitzone-textGray">Registros</p>
+                  <p className="text-[10px] sm:text-xs text-fitzone-textGray">Consultas</p>
                 </div>
                 <p className="text-lg sm:text-xl font-bold text-fitzone-purple">1.450</p>
                 <p className="text-[10px] sm:text-xs text-fitzone-emerald">+22,9%</p>
@@ -724,8 +707,8 @@ export default function DataLayer() {
                   <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-textGray" />
                   <p className="text-[10px] sm:text-xs text-fitzone-textGray">Conv.</p>
                 </div>
-                <p className="text-lg sm:text-xl font-bold text-fitzone-emerald">0,88%</p>
-                <p className="text-[10px] sm:text-xs text-fitzone-textGray">Meta: 0,80%</p>
+                <p className="text-lg sm:text-xl font-bold text-fitzone-emerald">0,59%</p>
+                <p className="text-[10px] sm:text-xs text-fitzone-textGray">Meta: 0,55%</p>
               </div>
             </div>
 
@@ -790,7 +773,7 @@ export default function DataLayer() {
                     <span className="text-xs sm:text-sm font-bold text-white">9%</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs sm:text-sm text-fitzone-textGray">Comercios partners</span>
+                    <span className="text-xs sm:text-sm text-fitzone-textGray">Referidos</span>
                     <span className="text-xs sm:text-sm font-bold text-white">4%</span>
                   </div>
                 </div>
@@ -801,7 +784,7 @@ export default function DataLayer() {
             <div>
               <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
                 <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-amber" />
-                Páginas del Sitio Web Powerpay
+                Páginas del Sitio Web WIN
               </h4>
               <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
                 <table className="w-full min-w-[550px]">
@@ -825,19 +808,19 @@ export default function DataLayer() {
                           </div>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                          <span className="text-xs sm:text-sm text-white">{(page.views / 1000).toFixed(1)}K</span>
+                          <span className="text-xs sm:text-sm text-white">{formatES(page.views / 1000, 1)}K</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center hidden sm:table-cell">
                           <span className="text-xs sm:text-sm text-white">{page.avgTime}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center hidden lg:table-cell">
-                          <span className={`text-xs sm:text-sm ${page.bounceRate <= 30 ? 'text-fitzone-emerald' : page.bounceRate <= 40 ? 'text-fitzone-amber' : 'text-red-400'}`}>{page.bounceRate}%</span>
+                          <span className={`text-xs sm:text-sm ${page.bounceRate <= 30 ? 'text-fitzone-emerald' : page.bounceRate <= 40 ? 'text-fitzone-amber' : 'text-fitzone-red'}`}>{page.bounceRate}%</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                          <span className="text-xs sm:text-sm font-bold text-fitzone-purple">{page.conversions}</span>
+                          <span className="text-xs sm:text-sm font-bold text-fitzone-purple">{formatThousands(page.conversions)}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                          <span className={`text-xs sm:text-sm font-bold ${page.convRate >= 2.5 ? 'text-fitzone-emerald' : 'text-white'}`}>{page.convRate}%</span>
+                          <span className={`text-xs sm:text-sm font-bold ${page.convRate >= 2.5 ? 'text-fitzone-emerald' : 'text-white'}`}>{formatPercent(page.convRate, 2)}</span>
                         </td>
                       </tr>
                     ))}
@@ -852,30 +835,30 @@ export default function DataLayer() {
       {/* Keywords Reference */}
       <div className="bg-fitzone-purple rounded-xl p-4 sm:p-6 text-white">
         <h3 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 flex items-center gap-2">
-          <CreditCard className="w-5 h-5 sm:w-6 sm:h-6" />
-          Keywords Monitoreadas - Powerpay
+          <Wifi className="w-5 h-5 sm:w-6 sm:h-6" />
+          Keywords Monitoreadas - WIN
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <div>
-            <p className="text-xs sm:text-sm text-white/70 mb-1.5 sm:mb-2 font-semibold">Marca Powerpay:</p>
+            <p className="text-xs sm:text-sm text-white/70 mb-1.5 sm:mb-2 font-semibold">Marca WIN:</p>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Powerpay</span>
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Powerpay BBVA</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">WIN Internet</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">WIN Fibra</span>
             </div>
           </div>
           <div>
-            <p className="text-xs sm:text-sm text-white/70 mb-1.5 sm:mb-2 font-semibold">Mercado BNPL:</p>
+            <p className="text-xs sm:text-sm text-white/70 mb-1.5 sm:mb-2 font-semibold">Mercado fibra óptica:</p>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Cuotas sin intereses</span>
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Comprar en cuotas</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Fibra óptica</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Velocidad simétrica</span>
             </div>
           </div>
           <div>
             <p className="text-xs sm:text-sm text-white/70 mb-1.5 sm:mb-2 font-semibold">Competencia:</p>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Cuotéalo</span>
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Yape</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Movistar</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Wow Perú</span>
             </div>
           </div>
         </div>

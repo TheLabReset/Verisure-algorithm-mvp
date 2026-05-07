@@ -1,42 +1,42 @@
 {
   "generated_at": "2026-05-04T08:30:00.000Z",
-  "client": "Powerpay",
+  "client": "WIN",
   "budget": [
     {
       "channel": "meta_ads",
       "type": "increase",
-      "from": 60,
-      "to": 64,
+      "from": 54,
+      "to": 58,
       "change": "+4.0%",
-      "impact": 95,
+      "impact": 250000,
       "confidence": "high",
-      "reason": "Meta supera el target de CPL en audiencia adulta planificadora durante la ventana de Cyber Wow"
+      "reason": "Meta supera el target de CPM en la audiencia Joven Conectado Lima Moderna durante la ventana pre Cyber Days"
     },
     {
-      "channel": "google_search",
+      "channel": "youtube",
       "type": "maintain",
-      "from": 27,
-      "to": 27,
+      "from": 14,
+      "to": 14,
       "change": "0%",
       "impact": 0,
       "confidence": "high",
-      "reason": "Search captura intención alta en keywords de marca y cuotas sin intereses"
+      "reason": "YouTube muestra VTR 28,4% con bumpers enfocados en fibra simétrica"
     },
     {
       "channel": "google_display",
       "type": "decrease",
-      "from": 8,
-      "to": 6,
+      "from": 12,
+      "to": 10,
       "change": "-2.0%",
       "impact": 40,
       "confidence": "medium",
-      "reason": "Display muestra frecuencia elevada en retargeting; se sugiere reasignar a Meta"
+      "reason": "Display muestra frecuencia elevada en algunos placements; se sugiere reasignar a Meta"
     }
   ],
   "actions": [
     {
       "priority": "high",
-      "action": "Reforzar Meta Ads en categorías de tecnología y electrohogar durante Cyber Wow",
+      "action": "Reforzar Meta Ads con creatividades enfocadas en fibra 100% pura y velocidad simétrica",
       "source": "ML Trend Analysis"
     },
     {
@@ -46,33 +46,33 @@
     },
     {
       "priority": "high",
-      "action": "Amplificar contenido educativo sobre cómo funciona Powerpay",
+      "action": "Amplificar contenido educativo sobre fibra 100% óptica y casos de uso reales",
       "source": "Meta Social Listening"
     },
     {
       "priority": "high",
-      "action": "Priorizar cuotas sin intereses, Cyber Wow, tecnología y comparativas BNPL en el calendario editorial",
+      "action": "Priorizar fibra óptica, velocidad simétrica, gaming y streaming HD en el calendario editorial",
       "source": "Multi-Source Analysis"
     },
     {
       "priority": "medium",
-      "action": "Subir Meta Ads de 60% a 64% del presupuesto durante la ventana estacional",
+      "action": "Subir Meta Ads de 54% a 58% del presupuesto durante la ventana estacional",
       "source": "ML Budget Optimizer"
     },
     {
       "priority": "medium",
-      "action": "Optimizar landing /registrarme con tasa de conversión actual de 5,8%",
+      "action": "Reforzar la landing /planes con tasa de conversión actual de 3,8%",
       "source": "Google Analytics 4"
     },
     {
       "priority": "medium",
-      "action": "Evaluar segmentación geo dedicada para Arequipa, Trujillo y Chiclayo",
+      "action": "Evaluar segmentación geo dedicada para distritos de Lima Norte y Sur",
       "source": "Google Trends"
     },
     {
       "priority": "medium",
-      "action": "Co-branding con Samsung, iShop y Sony Store durante Cyber Wow para apalancar tráfico cualificado",
-      "source": "Comercios partners"
+      "action": "Colaborar con creators de tecnología y gaming para amplificar contenido orgánico relevante",
+      "source": "TikTok Trends"
     }
   ]
 }

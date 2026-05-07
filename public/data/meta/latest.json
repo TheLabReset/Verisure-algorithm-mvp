@@ -3,100 +3,100 @@
   "source": "Meta/Facebook Social Listening",
   "region": "LATAM",
   "category": "Social Listening",
-  "client": "Powerpay",
+  "client": "WIN",
   "pages": [
     {
-      "name": "Powerpay Official Pages - Public",
+      "name": "WIN Official Pages - Public",
       "source": "Facebook Public Pages",
       "period": "Last 30 days",
       "topics": [
         {
           "topic": "Cyber Wow y Cyber Days",
-          "mentions": 12450,
-          "engagement_score": 82,
-          "growth": "+58%",
+          "mentions": 14820,
+          "engagement_score": 84,
+          "growth": "+62%",
           "sentiment": "positive",
           "top_brands": [
-            "Saga Falabella",
-            "Ripley",
-            "Plaza Vea",
-            "Mercado Libre"
+            "Movistar",
+            "Wow Perú",
+            "WIN",
+            "Claro"
           ],
-          "avg_reactions": 285,
-          "avg_comments": 64,
-          "avg_shares": 38
+          "avg_reactions": 305,
+          "avg_comments": 72,
+          "avg_shares": 42
         },
         {
-          "topic": "Cuotas sin intereses",
-          "mentions": 8920,
-          "engagement_score": 78,
-          "growth": "+42%",
-          "sentiment": "positive",
-          "top_brands": [
-            "Powerpay",
-            "Cuotéalo",
-            "Yape",
-            "Divídelo"
-          ],
-          "avg_reactions": 198,
-          "avg_comments": 52,
-          "avg_shares": 28
-        },
-        {
-          "topic": "Tecnología y electrohogar en cuotas",
-          "mentions": 6240,
-          "engagement_score": 75,
-          "growth": "+34%",
-          "sentiment": "positive",
-          "top_brands": [
-            "Samsung",
-            "Xiaomi",
-            "Sony",
-            "iShop"
-          ],
-          "avg_reactions": 165,
-          "avg_comments": 42,
-          "avg_shares": 22
-        },
-        {
-          "topic": "Educación financiera",
-          "mentions": 3850,
-          "engagement_score": 68,
-          "growth": "+22%",
-          "sentiment": "neutral",
-          "top_brands": [
-            "BBVA",
-            "BCP",
-            "Interbank",
-            "Powerpay"
-          ],
-          "avg_reactions": 92,
-          "avg_comments": 35,
-          "avg_shares": 18
-        },
-        {
-          "topic": "Comparativas BNPL Perú",
-          "mentions": 2180,
-          "engagement_score": 64,
+          "topic": "Fibra óptica y velocidad simétrica",
+          "mentions": 9650,
+          "engagement_score": 80,
           "growth": "+48%",
+          "sentiment": "positive",
+          "top_brands": [
+            "WIN",
+            "Movistar",
+            "Wow Perú",
+            "Fiberlux"
+          ],
+          "avg_reactions": 224,
+          "avg_comments": 58,
+          "avg_shares": 32
+        },
+        {
+          "topic": "Streaming, gaming y entretenimiento en casa",
+          "mentions": 7280,
+          "engagement_score": 76,
+          "growth": "+38%",
+          "sentiment": "positive",
+          "top_brands": [
+            "DGO",
+            "Netflix",
+            "Liga 1",
+            "PlayStation"
+          ],
+          "avg_reactions": 182,
+          "avg_comments": 48,
+          "avg_shares": 26
+        },
+        {
+          "topic": "Educación digital y conectividad",
+          "mentions": 4250,
+          "engagement_score": 70,
+          "growth": "+24%",
           "sentiment": "neutral",
           "top_brands": [
-            "Powerpay",
-            "Cuotéalo",
-            "Yape",
-            "aCuotaz"
+            "OSIPTEL",
+            "MTC",
+            "WIN",
+            "Movistar"
           ],
-          "avg_reactions": 78,
-          "avg_comments": 48,
-          "avg_shares": 12
+          "avg_reactions": 105,
+          "avg_comments": 38,
+          "avg_shares": 20
+        },
+        {
+          "topic": "Comparativas operadores fibra Perú",
+          "mentions": 2580,
+          "engagement_score": 68,
+          "growth": "+52%",
+          "sentiment": "neutral",
+          "top_brands": [
+            "WIN",
+            "Movistar",
+            "Wow Perú",
+            "Claro"
+          ],
+          "avg_reactions": 88,
+          "avg_comments": 56,
+          "avg_shares": 14
         }
       ],
       "metadata": {
         "pages_monitored": [
-          "https://www.facebook.com/powerpaype"
+          "https://www.facebook.com/WinInternetpe"
         ],
-        "total_posts_analyzed": 142,
-        "total_comments_analyzed": 3850,
+        "total_posts_analyzed": 168,
+        "total_comments_analyzed": 4280,
         "timeframe": "Last 30 days"
       }
     }
@@ -104,92 +104,92 @@
   "aggregatedTopics": [
     {
       "topic": "Cyber Wow y Cyber Days",
-      "mentions": 12450,
-      "engagement_score": 82,
-      "growth": "+58%",
+      "mentions": 14820,
+      "engagement_score": 84,
+      "growth": "+62%",
       "sentiment": "positive",
       "top_brands": [
-        "Saga Falabella",
-        "Ripley",
-        "Plaza Vea",
-        "Mercado Libre"
+        "Movistar",
+        "Wow Perú",
+        "WIN",
+        "Claro"
       ],
-      "avg_reactions": 285,
-      "avg_comments": 64,
-      "avg_shares": 38
+      "avg_reactions": 305,
+      "avg_comments": 72,
+      "avg_shares": 42
     },
     {
-      "topic": "Cuotas sin intereses",
-      "mentions": 8920,
-      "engagement_score": 78,
-      "growth": "+42%",
-      "sentiment": "positive",
-      "top_brands": [
-        "Powerpay",
-        "Cuotéalo",
-        "Yape",
-        "Divídelo"
-      ],
-      "avg_reactions": 198,
-      "avg_comments": 52,
-      "avg_shares": 28
-    },
-    {
-      "topic": "Tecnología y electrohogar en cuotas",
-      "mentions": 6240,
-      "engagement_score": 75,
-      "growth": "+34%",
-      "sentiment": "positive",
-      "top_brands": [
-        "Samsung",
-        "Xiaomi",
-        "Sony",
-        "iShop"
-      ],
-      "avg_reactions": 165,
-      "avg_comments": 42,
-      "avg_shares": 22
-    },
-    {
-      "topic": "Educación financiera",
-      "mentions": 3850,
-      "engagement_score": 68,
-      "growth": "+22%",
-      "sentiment": "neutral",
-      "top_brands": [
-        "BBVA",
-        "BCP",
-        "Interbank",
-        "Powerpay"
-      ],
-      "avg_reactions": 92,
-      "avg_comments": 35,
-      "avg_shares": 18
-    },
-    {
-      "topic": "Comparativas BNPL Perú",
-      "mentions": 2180,
-      "engagement_score": 64,
+      "topic": "Fibra óptica y velocidad simétrica",
+      "mentions": 9650,
+      "engagement_score": 80,
       "growth": "+48%",
+      "sentiment": "positive",
+      "top_brands": [
+        "WIN",
+        "Movistar",
+        "Wow Perú",
+        "Fiberlux"
+      ],
+      "avg_reactions": 224,
+      "avg_comments": 58,
+      "avg_shares": 32
+    },
+    {
+      "topic": "Streaming, gaming y entretenimiento en casa",
+      "mentions": 7280,
+      "engagement_score": 76,
+      "growth": "+38%",
+      "sentiment": "positive",
+      "top_brands": [
+        "DGO",
+        "Netflix",
+        "Liga 1",
+        "PlayStation"
+      ],
+      "avg_reactions": 182,
+      "avg_comments": 48,
+      "avg_shares": 26
+    },
+    {
+      "topic": "Educación digital y conectividad",
+      "mentions": 4250,
+      "engagement_score": 70,
+      "growth": "+24%",
       "sentiment": "neutral",
       "top_brands": [
-        "Powerpay",
-        "Cuotéalo",
-        "Yape",
-        "aCuotaz"
+        "OSIPTEL",
+        "MTC",
+        "WIN",
+        "Movistar"
       ],
-      "avg_reactions": 78,
-      "avg_comments": 48,
-      "avg_shares": 12
+      "avg_reactions": 105,
+      "avg_comments": 38,
+      "avg_shares": 20
+    },
+    {
+      "topic": "Comparativas operadores fibra Perú",
+      "mentions": 2580,
+      "engagement_score": 68,
+      "growth": "+52%",
+      "sentiment": "neutral",
+      "top_brands": [
+        "WIN",
+        "Movistar",
+        "Wow Perú",
+        "Claro"
+      ],
+      "avg_reactions": 88,
+      "avg_comments": 56,
+      "avg_shares": 14
     }
   ],
   "metadata": {
     "method": "Apify Social Listening Actor",
     "actor": "social-listening-meta",
-    "note": "Datos de Facebook e Instagram via scraping para nicho fintech y BNPL en Perú",
+    "note": "Datos de Facebook e Instagram (scraping) para nicho telco y fibra óptica en Perú",
     "timeframe": "Last 30 days",
-    "posts_analyzed": 142,
-    "comments_analyzed": 3850,
+    "posts_analyzed": 168,
+    "comments_analyzed": 4280,
     "pages_analyzed": 1,
     "topics_configured": 5
   }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { DollarSign, TrendingUp, Target, Zap, Calendar, PlayCircle, AlertTriangle, Store, ChevronDown, ChevronUp, MessageCircle, Rocket, CheckCircle, ArrowRight, AlertCircle, FileText, Globe, Star, Lightbulb, CalendarDays } from 'lucide-react';
 import { BUDGET_ALLOCATION, SERVICIOS_PERFORMANCE, SEDES_PERFORMANCE } from '../data/mockData';
 import { LAYER_CONFIG } from '../data/config';
-import { formatMoney } from '../utils/format';
+import { formatMoney, formatES, formatThousands } from '../utils/format';
 
 export default function ExecutionLayer() {
   // Helper function to get monthly period (1st to today)
@@ -19,8 +19,15 @@ export default function ExecutionLayer() {
   const getStatusColor = (status) => {
     if (status === 'overperforming') return { bg: 'bg-fitzone-emerald/10', border: 'border-fitzone-emerald/30', text: 'text-fitzone-emerald', badge: 'bg-fitzone-emerald/20' };
     if (status === 'performing') return { bg: 'bg-fitzone-cyan/10', border: 'border-fitzone-cyan/30', text: 'text-fitzone-cyan', badge: 'bg-fitzone-cyan/20' };
-    if (status === 'ontrack') return { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400', badge: 'bg-yellow-500/20' };
-    return { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400', badge: 'bg-red-500/20' };
+    if (status === 'ontrack') return { bg: 'bg-fitzone-amber/10', border: 'border-fitzone-amber/30', text: 'text-fitzone-amber', badge: 'bg-fitzone-amber/20' };
+    return { bg: 'bg-fitzone-red/10', border: 'border-fitzone-red/30', text: 'text-fitzone-red', badge: 'bg-fitzone-red/20' };
+  };
+
+  const getStatusLabel = (status) => {
+    if (status === 'overperforming') return 'Sobre objetivo';
+    if (status === 'performing') return 'En objetivo';
+    if (status === 'ontrack') return 'En curso';
+    return 'Atención';
   };
 
   const getStatusIcon = (status) => {
@@ -64,15 +71,15 @@ export default function ExecutionLayer() {
               <DollarSign className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold">Presupuesto Mensual Powerpay</h3>
-              <p className="text-white/90 mt-0.5 sm:mt-1 text-xs sm:text-sm">Distribución inteligente por canal digital</p>
+              <h3 className="text-base sm:text-lg lg:text-xl font-bold">Presupuesto Mensual WIN</h3>
+              <p className="text-white/90 mt-0.5 sm:mt-1 text-xs sm:text-sm">Distribución inteligente por canal digital para awareness</p>
             </div>
           </div>
 
           <div className="text-left sm:text-center lg:text-right">
             <div className="flex items-baseline gap-1 sm:gap-2">
               <span className="text-base sm:text-lg lg:text-xl text-white/80">$</span>
-              <span className="text-2xl sm:text-3xl lg:text-4xl font-bold">{(BUDGET_ALLOCATION.total_budget / 1000).toFixed(0)}K</span>
+              <span className="text-2xl sm:text-3xl lg:text-4xl font-bold">{formatES(BUDGET_ALLOCATION.total_budget / 1000, 0)}K</span>
             </div>
             <p className="text-white/80 mt-1 sm:mt-2 text-xs sm:text-sm">Total presupuesto mensual</p>
           </div>
@@ -83,7 +90,7 @@ export default function ExecutionLayer() {
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
             <span className="text-xs sm:text-sm font-medium">Ejecución del mes</span>
             <span className="text-lg sm:text-xl font-bold">
-              ${(Object.values(BUDGET_ALLOCATION.distribution).reduce((sum, ch) => sum + ch.amount, 0)).toLocaleString()}
+              ${formatThousands(Object.values(BUDGET_ALLOCATION.distribution).reduce((sum, ch) => sum + ch.amount, 0))}
             </span>
           </div>
           <div className="w-full h-2 sm:h-3 bg-white/20 rounded-full overflow-hidden">
@@ -101,7 +108,7 @@ export default function ExecutionLayer() {
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold text-white">Distribución por Canal Digital</h3>
-            <p className="text-xs sm:text-sm text-fitzone-textGray">Performance y asignación para adquisición de cuentas Powerpay</p>
+            <p className="text-xs sm:text-sm text-fitzone-textGray">Performance y asignación para recordación de marca WIN</p>
           </div>
         </div>
 
@@ -117,10 +124,11 @@ export default function ExecutionLayer() {
                         {key === 'meta_ads' ? 'Meta Ads (FB + IG)' :
                          key === 'google_search' ? 'Google Search' :
                          key === 'google_display' ? 'Google Display' :
-                         key === 'youtube' ? 'YouTube (Demand Gen)' : key}
+                         key === 'youtube' ? 'YouTube' :
+                         key === 'tiktok_ads' ? 'TikTok Ads' : key}
                       </h4>
                       <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-1 ${colors.badge} ${colors.text}`}>
-                        {getStatusIcon(channel.status)} {channel.status.toUpperCase()}
+                        {getStatusIcon(channel.status)} {getStatusLabel(channel.status)}
                       </span>
                     </div>
                     <p className="text-xs sm:text-sm text-fitzone-textGray mb-2 sm:mb-3">
@@ -144,7 +152,7 @@ export default function ExecutionLayer() {
                         <span className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{channel.percentage}%</span>
                       </div>
                       <div className="text-base sm:text-lg lg:text-xl font-bold text-fitzone-purple lg:mb-1">
-                        ${channel.amount.toLocaleString()}
+                        ${formatThousands(channel.amount)}
                       </div>
                     </div>
                     <p className="text-[10px] sm:text-xs text-fitzone-textGray hidden lg:block">del presupuesto total</p>
@@ -158,7 +166,7 @@ export default function ExecutionLayer() {
                       className={`h-full ${
                         channel.status === 'overperforming' ? 'bg-fitzone-emerald' :
                         channel.status === 'performing' ? 'bg-fitzone-cyan' :
-                        channel.status === 'ontrack' ? 'bg-yellow-500' : 'bg-red-500'
+                        channel.status === 'ontrack' ? 'bg-fitzone-amber' : 'bg-fitzone-red'
                       }`}
                       style={{ width: `${channel.percentage}%` }}
                     ></div>
@@ -186,14 +194,14 @@ export default function ExecutionLayer() {
           {BUDGET_ALLOCATION.recommendations.map((rec, idx) => (
             <div key={idx} className={`p-3 sm:p-4 lg:p-5 rounded-lg sm:rounded-xl border-2 ${
               rec.type === 'increase' ? 'bg-fitzone-emerald/10 border-fitzone-emerald/30' :
-              rec.type === 'decrease' ? 'bg-red-500/10 border-red-500/30' :
+              rec.type === 'decrease' ? 'bg-fitzone-red/10 border-fitzone-red/30' :
               'bg-fitzone-cyan/10 border-fitzone-cyan/30'
             }`}>
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold ${
                     rec.type === 'increase' ? 'bg-fitzone-emerald/30 text-fitzone-emerald' :
-                    rec.type === 'decrease' ? 'bg-red-500/30 text-red-400' :
+                    rec.type === 'decrease' ? 'bg-fitzone-red/30 text-fitzone-red' :
                     'bg-fitzone-cyan/30 text-fitzone-cyan'
                   }`}>
                     {rec.type === 'increase' ? 'Subida sugerida' :
@@ -203,7 +211,8 @@ export default function ExecutionLayer() {
                     {rec.channel === 'meta_ads' ? 'Meta Ads' :
                      rec.channel === 'google_search' ? 'Google Search' :
                      rec.channel === 'google_display' ? 'Google Display' :
-                     rec.channel === 'youtube' ? 'YouTube' : rec.channel}
+                     rec.channel === 'youtube' ? 'YouTube' :
+                     rec.channel === 'tiktok_ads' ? 'TikTok Ads' : rec.channel}
                   </span>
                 </div>
                 {rec.from && rec.to && (
@@ -234,8 +243,8 @@ export default function ExecutionLayer() {
               <Store className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-bold text-white">Performance por Categoría</h3>
-              <p className="text-xs sm:text-sm text-fitzone-textGray">Rendimiento de campaña por categoría de comercio</p>
+              <h3 className="text-sm sm:text-base font-bold text-white">Performance por Plan</h3>
+              <p className="text-xs sm:text-sm text-fitzone-textGray">Rendimiento de campaña por plan WIN monitoreado</p>
             </div>
           </div>
           <button
@@ -275,12 +284,12 @@ export default function ExecutionLayer() {
 
                 <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-fitzone-textGray">Leads</span>
-                    <span className="font-semibold text-white">{servicio.leads}</span>
+                    <span className="text-fitzone-textGray">Consultas</span>
+                    <span className="font-semibold text-white">{formatThousands(servicio.leads)}</span>
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-fitzone-textGray">Conversiones</span>
-                    <span className="font-semibold text-fitzone-emerald">{servicio.conversiones}</span>
+                    <span className="text-fitzone-textGray">Contrataciones</span>
+                    <span className="font-semibold text-fitzone-emerald">{formatThousands(servicio.conversiones)}</span>
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-fitzone-textGray">CPL</span>
@@ -309,12 +318,12 @@ export default function ExecutionLayer() {
                 <div className="pt-2 sm:pt-3 border-t border-fitzone-slate">
                   <p className="text-[10px] sm:text-xs font-semibold text-fitzone-textGray mb-1.5 sm:mb-2 flex items-center gap-1">
                     <MessageCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-fitzone-emerald" />
-                    WhatsApp
+                    Atención por WhatsApp
                   </p>
                   <div className="grid grid-cols-2 gap-2 text-[10px] sm:text-xs">
                     <div>
                       <p className="text-fitzone-textGray">Conversaciones</p>
-                      <p className="font-semibold text-white">{servicio.whatsapp.conversaciones}</p>
+                      <p className="font-semibold text-white">{formatThousands(servicio.whatsapp.conversaciones)}</p>
                     </div>
                     <div>
                       <p className="text-fitzone-textGray">Tasa Respuesta</p>
@@ -322,6 +331,7 @@ export default function ExecutionLayer() {
                     </div>
                   </div>
                 </div>
+
               </div>
             );
           })}
@@ -340,19 +350,19 @@ export default function ExecutionLayer() {
             <h4 className="font-bold text-sm sm:text-base mb-2 sm:mb-3">Mejores horarios del día</h4>
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">7:00 - 10:00 AM (camino al trabajo)</span>
+                <span className="text-white/90 text-xs sm:text-sm">7:00 - 10:00 AM (teletrabajo)</span>
                 <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">+0%</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">12:00 - 2:00 PM (almuerzo)</span>
+                <span className="text-white/90 text-xs sm:text-sm">12:00 - 2:00 PM (pausa laboral)</span>
                 <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">+30%</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">6:00 - 10:00 PM (tarde-noche)</span>
-                <span className="px-2 py-0.5 sm:py-1 bg-fitzone-emerald/30 rounded text-xs sm:text-sm font-bold w-fit">+60%</span>
+                <span className="text-white/90 text-xs sm:text-sm">6:00 - 10:00 PM (familia y streaming)</span>
+                <span className="px-2 py-0.5 sm:py-1 bg-fitzone-emerald/30 rounded text-xs sm:text-sm font-bold w-fit">+70%</span>
               </div>
             </div>
-            <p className="text-[10px] sm:text-xs text-white/70 mt-2 sm:mt-3">Pico máximo: 6-10 PM, momento de compra reflexiva</p>
+            <p className="text-[10px] sm:text-xs text-white/90 mt-2 sm:mt-3">Pico máximo: 6-10 PM, momento de mayor consumo digital en el hogar</p>
           </div>
 
           <div className="bg-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5">
@@ -371,15 +381,15 @@ export default function ExecutionLayer() {
                 <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">Alta</span>
               </div>
             </div>
-            <p className="text-[10px] sm:text-xs text-white/70 mt-2 sm:mt-3">Pago de quincena impulsa el cierre</p>
+            <p className="text-[10px] sm:text-xs text-white/90 mt-2 sm:mt-3">Decisión familiar de cambio de operador se concentra en fin de semana</p>
           </div>
         </div>
 
         <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-white/20 rounded-lg sm:rounded-xl">
           <p className="text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
-            <Lightbulb className="w-3 h-3 sm:w-4 sm:h-4" /> Estacionalidad Powerpay:
+            <Lightbulb className="w-3 h-3 sm:w-4 sm:h-4" /> Estacionalidad WIN:
           </p>
-          <p className="text-xs sm:text-sm">Cyber Wow Julio (Fiestas Patrias), Cyber Wow Noviembre y Black Friday concentran los picos más fuertes. Día de la Madre (mayo), Cyber Days (marzo) y Navidad (diciembre) son ventanas secundarias relevantes para escalar inversión.</p>
+          <p className="text-xs sm:text-sm">Cyber Days de noviembre y Black Friday concentran el pico anual de búsqueda. Regreso a clases (febrero a marzo), Fiestas Patrias (julio) y Navidad (diciembre) son ventanas secundarias relevantes para escalar awareness.</p>
         </div>
       </div>
     </div>

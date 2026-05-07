@@ -1,43 +1,43 @@
 {
   "timestamp": "2026-05-04T08:30:00.000Z",
-  "client": "Powerpay",
+  "client": "WIN",
   "individual": {
     "search": {
-      "base": 8.2,
-      "momentum": 0.42,
-      "final": 8.4
+      "base": 8.4,
+      "momentum": 0.38,
+      "final": 8.5
     },
     "trend": {
-      "base": 7.2,
-      "final": 7.2
+      "base": 7.6,
+      "final": 7.6
     },
     "social": {
-      "sentiment": 7.6,
-      "engagement": 8.0,
-      "final": 7.8
+      "sentiment": 7.8,
+      "engagement": 7.6,
+      "final": 7.7
     },
     "intent": {
-      "conversion_rate": 0.0088,
-      "final": 7.1
+      "conversion_rate": 0.0059,
+      "final": 6.8
     }
   },
-  "overall": 7.8,
+  "overall": 7.6,
   "weights": {
     "search": 0.25,
     "trend": 0.20,
     "social": 0.20,
     "intent": 0.35
   },
-  "powerpay_opportunity_score": {
-    "current": 78,
+  "win_awareness_score": {
+    "current": 76,
     "components": {
       "search_interest": 84,
-      "social_engagement": 72,
-      "competitor_gap": 76,
-      "seasonal_index": 88,
-      "conversion_efficiency": 71
+      "social_engagement": 76,
+      "competitor_gap": 72,
+      "seasonal_index": 80,
+      "conversion_efficiency": 68
     },
-    "trend": "+5,2%",
-    "recommendation": "Se sugiere reforzar la inversión durante la ventana de Cyber Wow priorizando categorías de tecnología y electrohogar."
+    "trend": "+4,8%",
+    "recommendation": "Se sugiere reforzar la inversión en Meta Ads y YouTube durante la ventana pre Cyber Days, priorizando mensajes de fibra 100% pura y velocidad simétrica."
   }
 }
