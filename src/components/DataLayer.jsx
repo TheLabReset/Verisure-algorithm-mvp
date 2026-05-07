@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, TrendingUp, Video, Share2, Wifi, RefreshCw, ChevronDown, ChevronUp, BarChart3, Info, Music, Target, DollarSign, Layers, Lightbulb, Users, Globe, MapPin, Eye, Clock, MousePointer, Smartphone, Monitor, ExternalLink, Calendar } from 'lucide-react';
+import { GoogleIcon, TikTokIcon, MetaIcon, GoogleAnalyticsIcon } from './PlatformIcons';
 import { formatES, formatMoney, formatPercent, formatThousands } from '../utils/format';
 
 export default function DataLayer() {
@@ -102,22 +103,22 @@ export default function DataLayer() {
 
     if (mlData?.scores?.individual) {
       return {
-        overall: fmt(mlData.scores.overall, '7,6'),
-        search: fmt(mlData.scores.individual.search?.final, '8,5'),
-        trend: fmt(mlData.scores.individual.trend?.final, '7,6'),
-        social: fmt(mlData.scores.individual.social?.final, '7,7'),
-        intent: fmt(mlData.scores.individual.intent?.final, '6,8'),
+        overall: fmt(mlData.scores.overall, '7.6'),
+        search: fmt(mlData.scores.individual.search?.final, '8.5'),
+        trend: fmt(mlData.scores.individual.trend?.final, '7.6'),
+        social: fmt(mlData.scores.individual.social?.final, '7.7'),
+        intent: fmt(mlData.scores.individual.intent?.final, '6.8'),
         isML: true,
         weights: mlData.scores.weights
       };
     }
 
     return {
-      overall: '7,6',
-      search: '8,5',
-      trend: '7,6',
-      social: '7,7',
-      intent: '6,8',
+      overall: '7.6',
+      search: '8.5',
+      trend: '7.6',
+      social: '7.7',
+      intent: '6.8',
       isML: false
     };
   };
@@ -128,23 +129,23 @@ export default function DataLayer() {
     return [
       {
         source: 'Google Trends',
-        IconComponent: Search,
+        IconComponent: GoogleIcon,
         text: '"Internet fibra óptica" lidera con 84/100 de interés y +38% de crecimiento. La marca "win internet" sube 58% en los últimos 3 meses.',
       },
       {
         source: 'TikTok',
-        IconComponent: Video,
-        text: '#StreamingHD alcanza 5,2M de views en Perú con +38% de crecimiento. El contenido de gaming y casos de uso muestra engagement 9,4/10.',
+        IconComponent: TikTokIcon,
+        text: '#StreamingHD alcanza 5.2M de views en Perú con +38% de crecimiento. El contenido de gaming y casos de uso muestra engagement 9.4/10.',
       },
       {
         source: 'Meta',
-        IconComponent: Share2,
-        text: 'Sentimiento social positivo en torno a fibra óptica y velocidad simétrica. "Cyber Wow y Cyber Days" concentra 14,8K menciones con 84/100 de engagement.',
+        IconComponent: MetaIcon,
+        text: 'Sentimiento social positivo en torno a fibra óptica y velocidad simétrica. "Cyber Wow y Cyber Days" concentra 14.8K menciones con 84/100 de engagement.',
       },
       {
         source: 'GA4',
-        IconComponent: BarChart3,
-        text: '245K sesiones derivaron en 1.450 consultas iniciadas y 1.050 leads cualificados (tasa de cualificación 72%). La página "/planes" muestra 3,8% de tasa de conversión.',
+        IconComponent: GoogleAnalyticsIcon,
+        text: '245K sesiones derivaron en 1,450 consultas iniciadas y 1,050 leads cualificados (tasa de cualificación 72%). La página "/planes" muestra 3.8% de tasa de conversión.',
       },
     ];
   };
@@ -152,7 +153,7 @@ export default function DataLayer() {
   const multiSourceInsight = {
     source: 'Análisis Multi-Fuente',
     IconComponent: Layers,
-    text: 'Las cuatro fuentes coinciden en una ventana favorable hacia Cyber Days y campañas de fin de año. La combinación de búsquedas en alza (+38%), engagement social sostenido (8,0/10), contenido relevante en TikTok y tráfico web en aumento sugiere un momento favorable para reforzar awareness. Se observa una oportunidad de posicionar el mensaje de fibra 100% pura y velocidad simétrica como diferenciador.',
+    text: 'Las cuatro fuentes coinciden en una ventana favorable hacia Cyber Days y campañas de fin de año. La combinación de búsquedas en alza (+38%), engagement social sostenido (8.0/10), contenido relevante en TikTok y tráfico web en aumento sugiere un momento favorable para reforzar awareness. Se observa una oportunidad de posicionar el mensaje de fibra 100% pura y velocidad simétrica como diferenciador.',
     recommendation: 'Se sugiere reforzar Meta Ads en torno a casos de uso reales (gaming, streaming, teletrabajo) y amplificar YouTube en términos de "internet fibra óptica" durante la ventana estacional.'
   };
 
@@ -172,23 +173,23 @@ export default function DataLayer() {
   ];
 
   const tiktokHashtags = [
-    { hashtag: '#FibraOptica', views: '3,2M', posts: '16,8K', growth: '+34%', region: 'Perú', engagement: 8.2 },
-    { hashtag: '#InternetPeru', views: '4,8M', posts: '22,4K', growth: '+28%', region: 'Perú', engagement: 8.0 },
-    { hashtag: '#GamingPeru', views: '2,8M', posts: '14,2K', growth: '+42%', region: 'Perú', engagement: 9.4 },
-    { hashtag: '#StreamingHD', views: '5,2M', posts: '18,5K', growth: '+38%', region: 'LATAM', engagement: 8.6 },
+    { hashtag: '#FibraOptica', views: '3.2M', posts: '16.8K', growth: '+34%', region: 'Perú', engagement: 8.2 },
+    { hashtag: '#InternetPeru', views: '4.8M', posts: '22.4K', growth: '+28%', region: 'Perú', engagement: 8.0 },
+    { hashtag: '#GamingPeru', views: '2.8M', posts: '14.2K', growth: '+42%', region: 'Perú', engagement: 9.4 },
+    { hashtag: '#StreamingHD', views: '5.2M', posts: '18.5K', growth: '+38%', region: 'LATAM', engagement: 8.6 },
     { hashtag: '#WIN', views: '165K', posts: '480', growth: '+62%', region: 'Perú', engagement: 9.0 },
-    { hashtag: '#SmartHome', views: '1,4M', posts: '6,8K', growth: '+22%', region: 'LATAM', engagement: 7.6 },
-    { hashtag: '#Teletrabajo', views: '980K', posts: '4,2K', growth: '+18%', region: 'Perú', engagement: 7.4 },
-    { hashtag: '#LimaPeru', views: '8,6M', posts: '34,5K', growth: '+12%', region: 'Perú', engagement: 7.8 },
+    { hashtag: '#SmartHome', views: '1.4M', posts: '6.8K', growth: '+22%', region: 'LATAM', engagement: 7.6 },
+    { hashtag: '#Teletrabajo', views: '980K', posts: '4.2K', growth: '+18%', region: 'Perú', engagement: 7.4 },
+    { hashtag: '#LimaPeru', views: '8.6M', posts: '34.5K', growth: '+12%', region: 'Perú', engagement: 7.8 },
   ];
 
   const tiktokSounds = [
-    { name: 'Voices (Øneheart)', type: 'Lifestyle', usage: '1,8M', trend: '+22%' },
-    { name: 'Levitating (Dua Lipa)', type: 'Pop celebración', usage: '1,3M', trend: '+14%' },
-    { name: 'Tití Me Preguntó (Bad Bunny)', type: 'LATAM evergreen', usage: '2,6M', trend: '+18%' },
+    { name: 'Voices (Øneheart)', type: 'Lifestyle', usage: '1.8M', trend: '+22%' },
+    { name: 'Levitating (Dua Lipa)', type: 'Pop celebración', usage: '1.3M', trend: '+14%' },
+    { name: 'Tití Me Preguntó (Bad Bunny)', type: 'LATAM evergreen', usage: '2.6M', trend: '+18%' },
     { name: 'Voiceover narrativo PE creators tech', type: 'Storytime', usage: '240K', trend: '+38%' },
     { name: 'Beat Cyber Wow Perú', type: 'Estacional', usage: '380K', trend: '+88%' },
-    { name: 'Ella Baila Sola (Peso Pluma)', type: 'Regional energético', usage: '1,2M', trend: '+24%' },
+    { name: 'Ella Baila Sola (Peso Pluma)', type: 'Regional energético', usage: '1.2M', trend: '+24%' },
   ];
 
   const metaTopics = [
@@ -236,7 +237,7 @@ export default function DataLayer() {
             <div className="text-right">
               <p className="text-fitzone-textGray text-[10px] sm:text-xs uppercase font-semibold mb-0.5 sm:mb-1">Score Global</p>
               <p className="text-2xl sm:text-3xl font-bold text-fitzone-purple">{scores.overall}</p>
-              <p className="text-[10px] sm:text-xs text-fitzone-textGray">de 10,0</p>
+              <p className="text-[10px] sm:text-xs text-fitzone-textGray">de 10.0</p>
             </div>
             <button
               onClick={loadData}
@@ -293,10 +294,10 @@ export default function DataLayer() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
           {insights.map((insight, idx) => {
             const colorScheme =
-              insight.source === 'Google Trends' ? { bg: 'bg-fitzone-cyan/10', text: 'text-fitzone-cyan', icon: 'bg-fitzone-cyan', badge: 'bg-fitzone-cyan/20 text-fitzone-cyan' } :
-              insight.source === 'TikTok' ? { bg: 'bg-fitzone-emerald/10', text: 'text-fitzone-emerald', icon: 'bg-fitzone-emerald', badge: 'bg-fitzone-emerald/20 text-fitzone-charcoal' } :
-              insight.source === 'Meta' ? { bg: 'bg-fitzone-purple/10', text: 'text-fitzone-lightPurple', icon: 'bg-fitzone-purple', badge: 'bg-fitzone-purple/20 text-fitzone-lightPurple' } :
-              insight.source === 'GA4' ? { bg: 'bg-fitzone-amber/10', text: 'text-fitzone-amber', icon: 'bg-fitzone-amber', badge: 'bg-fitzone-amber/20 text-fitzone-amber' } :
+              insight.source === 'Google Trends' ? { bg: 'bg-platform-google/10', text: 'text-platform-google', icon: 'bg-platform-google', badge: 'bg-platform-google/20 text-platform-google' } :
+              insight.source === 'TikTok' ? { bg: 'bg-platform-tiktok/10', text: 'text-fitzone-lightGray', icon: 'bg-platform-tiktok', badge: 'bg-fitzone-textGray/20 text-fitzone-lightGray' } :
+              insight.source === 'Meta' ? { bg: 'bg-platform-meta/10', text: 'text-platform-meta', icon: 'bg-platform-meta', badge: 'bg-platform-meta/20 text-platform-meta' } :
+              insight.source === 'GA4' ? { bg: 'bg-platform-ga4/10', text: 'text-platform-ga4', icon: 'bg-platform-ga4', badge: 'bg-platform-ga4/20 text-platform-ga4' } :
               { bg: 'bg-fitzone-cyan/10', text: 'text-fitzone-cyan', icon: 'bg-fitzone-cyan', badge: 'bg-fitzone-cyan/20 text-fitzone-cyan' };
 
             const sourceScore =
@@ -332,9 +333,9 @@ export default function DataLayer() {
         </div>
 
         {/* Multi-Source Analysis */}
-        <div className="relative bg-gradient-to-r from-fitzone-purple/20 to-fitzone-cyan/20 rounded-xl p-3 sm:p-6 border border-fitzone-purple/30">
+        <div className="relative bg-fitzone-purple/15 rounded-xl p-3 sm:p-6 border border-fitzone-purple/30">
           <div className="flex items-start gap-2 sm:gap-4">
-            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-fitzone-purple to-fitzone-cyan rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-fitzone-purple rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
               <Layers className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
@@ -353,7 +354,7 @@ export default function DataLayer() {
               </div>
             </div>
           </div>
-          <div className="absolute top-0 left-0 w-1 sm:w-1.5 h-full bg-gradient-to-b from-fitzone-purple to-fitzone-cyan rounded-l-xl"></div>
+          <div className="absolute top-0 left-0 w-1 sm:w-1.5 h-full bg-fitzone-purple rounded-l-xl"></div>
         </div>
       </div>
 
@@ -361,13 +362,13 @@ export default function DataLayer() {
       <div className="bg-fitzone-slate rounded-xl shadow-lg overflow-hidden border border-fitzone-purple/10">
         <button
           onClick={() => toggleSection('trends')}
-          className="w-full bg-fitzone-cyan text-white p-3 sm:p-4 flex items-center justify-between hover:brightness-110 transition"
+          className="w-full bg-platform-google text-white p-3 sm:p-4 flex items-center justify-between hover:brightness-110 transition"
         >
           <div className="flex items-center gap-2 sm:gap-3">
-            <Search className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+            <GoogleIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" size={24} />
             <div className="text-left min-w-0">
               <h3 className="text-sm sm:text-base font-bold">Google Trends</h3>
-              <p className="text-[10px] sm:text-xs text-white/80">Keywords telco e internet hogar - Score: {scores.search}/10</p>
+              <p className="text-[10px] sm:text-xs text-white/90">Keywords telco e internet hogar - Score: {scores.search}/10</p>
             </div>
           </div>
           {expandedSections.trends ? <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
@@ -435,13 +436,13 @@ export default function DataLayer() {
       <div className="bg-fitzone-slate rounded-xl shadow-lg overflow-hidden border border-fitzone-purple/10">
         <button
           onClick={() => toggleSection('tiktok')}
-          className="w-full bg-fitzone-emerald text-fitzone-charcoal p-3 sm:p-4 flex items-center justify-between hover:brightness-110 transition"
+          className="w-full bg-platform-tiktok text-white p-3 sm:p-4 flex items-center justify-between hover:brightness-125 transition"
         >
           <div className="flex items-center gap-2 sm:gap-3">
-            <Video className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+            <TikTokIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" size={24} />
             <div className="text-left min-w-0">
               <h3 className="text-sm sm:text-base font-bold">TikTok Creative Center</h3>
-              <p className="text-[10px] sm:text-xs text-fitzone-charcoal/80">Hashtags virales - Score: {scores.trend}/10</p>
+              <p className="text-[10px] sm:text-xs text-white/90">Hashtags virales - Score: {scores.trend}/10</p>
             </div>
           </div>
           {expandedSections.tiktok ? <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
@@ -537,13 +538,13 @@ export default function DataLayer() {
       <div className="bg-fitzone-slate rounded-xl shadow-lg overflow-hidden border border-fitzone-purple/10">
         <button
           onClick={() => toggleSection('meta')}
-          className="w-full bg-fitzone-purple text-white p-3 sm:p-4 flex items-center justify-between hover:brightness-110 transition"
+          className="w-full bg-platform-meta text-white p-3 sm:p-4 flex items-center justify-between hover:brightness-110 transition"
         >
           <div className="flex items-center gap-2 sm:gap-3">
-            <Share2 className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+            <MetaIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" size={24} />
             <div className="text-left min-w-0">
-              <h3 className="text-sm sm:text-base font-bold">Meta/Facebook Trends</h3>
-              <p className="text-[10px] sm:text-xs text-white/80">Redes sociales - Score: {scores.social}/10</p>
+              <h3 className="text-sm sm:text-base font-bold">Meta / Facebook</h3>
+              <p className="text-[10px] sm:text-xs text-white/90">Redes sociales - Score: {scores.social}/10</p>
             </div>
           </div>
           {expandedSections.meta ? <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
@@ -633,7 +634,7 @@ export default function DataLayer() {
                           <span className="text-xs sm:text-sm text-white">{(ad.reach / 1000).toFixed(0)}K</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center hidden sm:table-cell">
-                          <span className="text-xs sm:text-sm text-white">{ad.clicks.toLocaleString('es-PE')}</span>
+                          <span className="text-xs sm:text-sm text-white">{ad.clicks.toLocaleString('en-US')}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                           <span className={`text-xs sm:text-sm font-bold ${ad.ctr >= 1.5 ? 'text-fitzone-emerald' : 'text-fitzone-amber'}`}>{formatPercent(ad.ctr, 2)}</span>
@@ -662,13 +663,13 @@ export default function DataLayer() {
       <div className="bg-fitzone-slate rounded-xl shadow-lg overflow-hidden border border-fitzone-purple/10">
         <button
           onClick={() => toggleSection('ga4')}
-          className="w-full bg-fitzone-amber text-fitzone-charcoal p-3 sm:p-4 flex items-center justify-between hover:brightness-110 transition"
+          className="w-full bg-platform-ga4 text-white p-3 sm:p-4 flex items-center justify-between hover:brightness-110 transition"
         >
           <div className="flex items-center gap-2 sm:gap-3">
-            <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+            <GoogleAnalyticsIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" size={24} />
             <div className="text-left min-w-0">
               <h3 className="text-sm sm:text-base font-bold">Google Analytics 4</h3>
-              <p className="text-[10px] sm:text-xs text-fitzone-charcoal/80">Conversión - Score: {scores.intent}/10</p>
+              <p className="text-[10px] sm:text-xs text-white/90">Conversión - Score: {scores.intent}/10</p>
             </div>
           </div>
           {expandedSections.ga4 ? <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
@@ -683,7 +684,7 @@ export default function DataLayer() {
                   <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-textGray" />
                   <p className="text-[10px] sm:text-xs text-fitzone-textGray">Usuarios</p>
                 </div>
-                <p className="text-lg sm:text-xl font-bold text-white">198,4K</p>
+                <p className="text-lg sm:text-xl font-bold text-white">198.4K</p>
                 <p className="text-[10px] sm:text-xs text-fitzone-emerald">+28%</p>
               </div>
               <div className="bg-fitzone-slate rounded-lg p-3 sm:p-4">
@@ -699,16 +700,16 @@ export default function DataLayer() {
                   <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-textGray" />
                   <p className="text-[10px] sm:text-xs text-fitzone-textGray">Consultas</p>
                 </div>
-                <p className="text-lg sm:text-xl font-bold text-fitzone-purple">1.450</p>
-                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+22,9%</p>
+                <p className="text-lg sm:text-xl font-bold text-fitzone-purple">1,450</p>
+                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+22.9%</p>
               </div>
               <div className="bg-fitzone-slate rounded-lg p-3 sm:p-4">
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-textGray" />
                   <p className="text-[10px] sm:text-xs text-fitzone-textGray">Conv.</p>
                 </div>
-                <p className="text-lg sm:text-xl font-bold text-fitzone-emerald">0,59%</p>
-                <p className="text-[10px] sm:text-xs text-fitzone-textGray">Meta: 0,55%</p>
+                <p className="text-lg sm:text-xl font-bold text-fitzone-emerald">0.59%</p>
+                <p className="text-[10px] sm:text-xs text-fitzone-textGray">Meta: 0.55%</p>
               </div>
             </div>
 
