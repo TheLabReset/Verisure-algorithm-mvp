@@ -1,204 +1,204 @@
 {
   "timestamp": "2026-05-04T22:55:00Z",
   "source": "Google Analytics 4 (Mock)",
-  "property": "WIN - Internet Hogar (Demo)",
-  "client": "WIN",
+  "property": "Verisure Perú - verisure.pe (Demo)",
+  "client": "Verisure Perú",
   "dateRange": {
     "start": "2026-04-04",
     "end": "2026-05-04"
   },
   "overview": {
-    "totalUsers": 198400,
-    "activeUsers": 165200,
-    "newUsers": 142800,
-    "sessions": 245000,
-    "averageSessionDuration": "2m 32s",
-    "bounceRate": 0.384,
-    "conversions": 1450,
-    "conversionRate": 0.0059
+    "totalUsers": 56800,
+    "activeUsers": 47200,
+    "newUsers": 40800,
+    "sessions": 70000,
+    "averageSessionDuration": "2m 48s",
+    "bounceRate": 0.362,
+    "conversions": 1500,
+    "conversionRate": 0.0214
   },
   "topPages": [
     {
       "page": "/",
-      "views": 78400,
-      "uniquePageviews": 64200,
-      "avgTimeOnPage": "2m 48s",
-      "exitRate": 0.28,
-      "conversionRate": 0.022
-    },
-    {
-      "page": "/planes",
-      "views": 53900,
-      "uniquePageviews": 44800,
-      "avgTimeOnPage": "3m 12s",
-      "exitRate": 0.24,
-      "conversionRate": 0.038
-    },
-    {
-      "page": "/planes/900mbps",
-      "views": 24500,
+      "views": 25000,
       "uniquePageviews": 20800,
-      "avgTimeOnPage": "3m 42s",
-      "exitRate": 0.32,
+      "avgTimeOnPage": "2m 52s",
+      "exitRate": 0.30,
+      "conversionRate": 0.024
+    },
+    {
+      "page": "/precio-alarma",
+      "views": 15000,
+      "uniquePageviews": 12400,
+      "avgTimeOnPage": "3m 25s",
+      "exitRate": 0.22,
+      "conversionRate": 0.058
+    },
+    {
+      "page": "/nuestra-alarma",
+      "views": 12000,
+      "uniquePageviews": 9800,
+      "avgTimeOnPage": "3m 08s",
+      "exitRate": 0.28,
+      "conversionRate": 0.034
+    },
+    {
+      "page": "/alarmas-negocio",
+      "views": 10000,
+      "uniquePageviews": 8200,
+      "avgTimeOnPage": "3m 14s",
+      "exitRate": 0.26,
       "conversionRate": 0.046
     },
     {
-      "page": "/cobertura",
-      "views": 27000,
-      "uniquePageviews": 22600,
-      "avgTimeOnPage": "2m 20s",
-      "exitRate": 0.35,
-      "conversionRate": 0.018
-    },
-    {
-      "page": "/win-tv",
-      "views": 19600,
-      "uniquePageviews": 16400,
-      "avgTimeOnPage": "3m 05s",
-      "exitRate": 0.30,
-      "conversionRate": 0.024
+      "page": "/servicios/zerovision",
+      "views": 8000,
+      "uniquePageviews": 6600,
+      "avgTimeOnPage": "2m 40s",
+      "exitRate": 0.34,
+      "conversionRate": 0.020
     }
   ],
   "searchTerms": [
     {
-      "term": "win internet",
-      "searches": 5320,
-      "resultClicks": 4680,
-      "conversionRate": 0.078,
-      "trend": "rising"
-    },
-    {
-      "term": "internet fibra optica",
-      "searches": 4180,
-      "resultClicks": 3420,
-      "conversionRate": 0.058,
-      "trend": "rising"
-    },
-    {
-      "term": "contratar internet hogar",
-      "searches": 2680,
-      "resultClicks": 2280,
-      "conversionRate": 0.082,
-      "trend": "rising"
-    },
-    {
-      "term": "win planes",
-      "searches": 2240,
-      "resultClicks": 2050,
+      "term": "verisure",
+      "searches": 4820,
+      "resultClicks": 4280,
       "conversionRate": 0.094,
       "trend": "rising"
     },
     {
-      "term": "mejor internet lima",
-      "searches": 1820,
-      "resultClicks": 1520,
-      "conversionRate": 0.052,
+      "term": "alarma para casa",
+      "searches": 3640,
+      "resultClicks": 2980,
+      "conversionRate": 0.072,
+      "trend": "rising"
+    },
+    {
+      "term": "camaras de seguridad",
+      "searches": 2920,
+      "resultClicks": 2380,
+      "conversionRate": 0.058,
+      "trend": "rising"
+    },
+    {
+      "term": "alarmas monitoreadas",
+      "searches": 1880,
+      "resultClicks": 1620,
+      "conversionRate": 0.086,
+      "trend": "rising"
+    },
+    {
+      "term": "alarma para negocio",
+      "searches": 1420,
+      "resultClicks": 1180,
+      "conversionRate": 0.094,
       "trend": "rising"
     }
   ],
   "demographics": {
     "age": {
-      "18-24": 0.14,
-      "25-34": 0.36,
-      "35-44": 0.28,
-      "45-54": 0.16,
-      "55+": 0.06
+      "18-24": 0.04,
+      "25-34": 0.22,
+      "35-44": 0.38,
+      "45-54": 0.26,
+      "55+": 0.10
     },
     "gender": {
-      "male": 0.54,
-      "female": 0.45,
+      "male": 0.52,
+      "female": 0.47,
       "other": 0.01
     },
     "locations": {
-      "Lima Moderna": 0.38,
-      "Lima Norte": 0.22,
-      "Lima Sur": 0.18,
-      "Lima Este": 0.12,
-      "Callao": 0.06,
-      "Otros": 0.04
+      "Lima Moderna": 0.35,
+      "Lima Norte": 0.20,
+      "Lima Este": 0.14,
+      "Lima Sur": 0.13,
+      "Lima Centro y otros": 0.11,
+      "Callao": 0.07
     }
   },
   "deviceCategory": {
-    "mobile": 0.82,
-    "desktop": 0.14,
+    "mobile": 0.80,
+    "desktop": 0.16,
     "tablet": 0.04
   },
   "leadGeneration": {
-    "totalLeads": 1450,
+    "totalLeads": 1500,
     "qualifiedLeads": 1050,
-    "qualificationRate": 0.724,
-    "registrosIniciados": 1450,
-    "kycCompletados": 1050,
-    "primeraTransaccion": 95,
+    "qualificationRate": 0.70,
+    "solicitudesCotizacion": 1500,
+    "cotizacionesCalificadas": 1050,
+    "instalacionesCompletadas": 120,
     "leadsBySource": [
       {
         "source": "meta_ads",
-        "leads": 870,
-        "qualified": 627,
-        "avgLeadScore": 78
-      },
-      {
-        "source": "google_search",
-        "leads": 320,
-        "qualified": 252,
-        "avgLeadScore": 84
-      },
-      {
-        "source": "organic_search",
-        "leads": 105,
-        "qualified": 78,
+        "leads": 780,
+        "qualified": 547,
         "avgLeadScore": 74
       },
       {
+        "source": "google_search",
+        "leads": 420,
+        "qualified": 295,
+        "avgLeadScore": 82
+      },
+      {
+        "source": "organic_search",
+        "leads": 130,
+        "qualified": 95,
+        "avgLeadScore": 70
+      },
+      {
         "source": "youtube",
-        "leads": 75,
-        "qualified": 50,
+        "leads": 60,
+        "qualified": 42,
         "avgLeadScore": 62
       },
       {
         "source": "tiktok_ads",
-        "leads": 50,
-        "qualified": 32,
-        "avgLeadScore": 60
+        "leads": 70,
+        "qualified": 50,
+        "avgLeadScore": 58
       },
       {
         "source": "direct",
-        "leads": 30,
-        "qualified": 11,
-        "avgLeadScore": 68
+        "leads": 40,
+        "qualified": 21,
+        "avgLeadScore": 66
       }
     ]
   },
   "interestAreas": {
-    "gaming": {
-      "pageviews": 28500,
-      "avgTimeOnPage": "2m 58s",
-      "bounceRate": 0.32
+    "alarmas_residenciales": {
+      "pageviews": 26800,
+      "avgTimeOnPage": "3m 02s",
+      "bounceRate": 0.30
     },
-    "streaming": {
-      "pageviews": 22400,
-      "avgTimeOnPage": "2m 42s",
+    "camaras_videovigilancia": {
+      "pageviews": 18400,
+      "avgTimeOnPage": "2m 52s",
+      "bounceRate": 0.34
+    },
+    "alarmas_negocio": {
+      "pageviews": 14600,
+      "avgTimeOnPage": "3m 14s",
+      "bounceRate": 0.28
+    },
+    "monitoreo_continuo": {
+      "pageviews": 9800,
+      "avgTimeOnPage": "2m 38s",
       "bounceRate": 0.36
     },
-    "teletrabajo": {
-      "pageviews": 16800,
-      "avgTimeOnPage": "2m 35s",
-      "bounceRate": 0.38
-    },
-    "smart_home": {
-      "pageviews": 9800,
-      "avgTimeOnPage": "2m 28s",
+    "proteccion_familiar": {
+      "pageviews": 6200,
+      "avgTimeOnPage": "2m 20s",
       "bounceRate": 0.40
-    },
-    "educacion_digital": {
-      "pageviews": 7200,
-      "avgTimeOnPage": "2m 18s",
-      "bounceRate": 0.42
     }
   },
   "metadata": {
-    "note": "Mock data para MVP - WIN (cliente demo)",
-    "actualIntegration": "Requiere acceso al property GA4 del cliente",
+    "note": "Mock data para MVP - Verisure Perú (cliente demo)",
+    "actualIntegration": "Requiere acceso al property GA4 de verisure.pe",
     "updateFrequency": "Diaria automática una vez integrado"
   }
 }

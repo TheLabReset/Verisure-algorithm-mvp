@@ -3,193 +3,193 @@
   "source": "Meta/Facebook Social Listening",
   "region": "LATAM",
   "category": "Social Listening",
-  "client": "WIN",
+  "client": "Verisure Perú",
   "pages": [
     {
-      "name": "WIN Official Pages - Public",
+      "name": "Verisure Official Pages - Public",
       "source": "Facebook Public Pages",
       "period": "Last 30 days",
       "topics": [
         {
-          "topic": "Cyber Wow y Cyber Days",
-          "mentions": 14820,
-          "engagement_score": 84,
+          "topic": "Inseguridad ciudadana y protección del hogar",
+          "mentions": 18420,
+          "engagement_score": 86,
+          "growth": "+58%",
+          "sentiment": "neutral",
+          "top_brands": [
+            "Prosegur",
+            "Verisure",
+            "Securitas",
+            "Liderman"
+          ],
+          "avg_reactions": 340,
+          "avg_comments": 82,
+          "avg_shares": 46
+        },
+        {
+          "topic": "Cámaras de seguridad y videovigilancia",
+          "mentions": 12680,
+          "engagement_score": 82,
+          "growth": "+44%",
+          "sentiment": "positive",
+          "top_brands": [
+            "Verisure",
+            "Prosegur",
+            "Liderman",
+            "Hikvision"
+          ],
+          "avg_reactions": 268,
+          "avg_comments": 64,
+          "avg_shares": 38
+        },
+        {
+          "topic": "Extorsión y protección de negocios",
+          "mentions": 8540,
+          "engagement_score": 78,
           "growth": "+62%",
-          "sentiment": "positive",
+          "sentiment": "negative",
           "top_brands": [
-            "Movistar",
-            "Wow Perú",
-            "WIN",
-            "Claro"
+            "Asociación de Bodegueros",
+            "Verisure",
+            "Prosegur",
+            "Cámara de Comercio"
           ],
-          "avg_reactions": 305,
-          "avg_comments": 72,
-          "avg_shares": 42
+          "avg_reactions": 215,
+          "avg_comments": 96,
+          "avg_shares": 48
         },
         {
-          "topic": "Fibra óptica y velocidad simétrica",
-          "mentions": 9650,
-          "engagement_score": 80,
-          "growth": "+48%",
+          "topic": "Vacaciones, viajes y hogar protegido",
+          "mentions": 5980,
+          "engagement_score": 74,
+          "growth": "+34%",
           "sentiment": "positive",
           "top_brands": [
-            "WIN",
-            "Movistar",
-            "Wow Perú",
-            "Fiberlux"
+            "Verisure",
+            "Prosegur",
+            "Indecopi",
+            "Mininter"
           ],
-          "avg_reactions": 224,
-          "avg_comments": 58,
-          "avg_shares": 32
+          "avg_reactions": 156,
+          "avg_comments": 42,
+          "avg_shares": 22
         },
         {
-          "topic": "Streaming, gaming y entretenimiento en casa",
-          "mentions": 7280,
-          "engagement_score": 76,
-          "growth": "+38%",
-          "sentiment": "positive",
-          "top_brands": [
-            "DGO",
-            "Netflix",
-            "Liga 1",
-            "PlayStation"
-          ],
-          "avg_reactions": 182,
-          "avg_comments": 48,
-          "avg_shares": 26
-        },
-        {
-          "topic": "Educación digital y conectividad",
-          "mentions": 4250,
+          "topic": "Tecnología y monitoreo continuo",
+          "mentions": 3640,
           "engagement_score": 70,
-          "growth": "+24%",
-          "sentiment": "neutral",
+          "growth": "+28%",
+          "sentiment": "positive",
           "top_brands": [
-            "OSIPTEL",
-            "MTC",
-            "WIN",
-            "Movistar"
+            "Verisure",
+            "Prosegur",
+            "Ajax Systems",
+            "Alarm.com"
           ],
-          "avg_reactions": 105,
+          "avg_reactions": 112,
           "avg_comments": 38,
-          "avg_shares": 20
-        },
-        {
-          "topic": "Comparativas operadores fibra Perú",
-          "mentions": 2580,
-          "engagement_score": 68,
-          "growth": "+52%",
-          "sentiment": "neutral",
-          "top_brands": [
-            "WIN",
-            "Movistar",
-            "Wow Perú",
-            "Claro"
-          ],
-          "avg_reactions": 88,
-          "avg_comments": 56,
-          "avg_shares": 14
+          "avg_shares": 18
         }
       ],
       "metadata": {
         "pages_monitored": [
-          "https://www.facebook.com/WinInternetpe"
+          "https://www.facebook.com/VerisurePeru"
         ],
-        "total_posts_analyzed": 168,
-        "total_comments_analyzed": 4280,
+        "total_posts_analyzed": 192,
+        "total_comments_analyzed": 5120,
         "timeframe": "Last 30 days"
       }
     }
   ],
   "aggregatedTopics": [
     {
-      "topic": "Cyber Wow y Cyber Days",
-      "mentions": 14820,
-      "engagement_score": 84,
+      "topic": "Inseguridad ciudadana y protección del hogar",
+      "mentions": 18420,
+      "engagement_score": 86,
+      "growth": "+58%",
+      "sentiment": "neutral",
+      "top_brands": [
+        "Prosegur",
+        "Verisure",
+        "Securitas",
+        "Liderman"
+      ],
+      "avg_reactions": 340,
+      "avg_comments": 82,
+      "avg_shares": 46
+    },
+    {
+      "topic": "Cámaras de seguridad y videovigilancia",
+      "mentions": 12680,
+      "engagement_score": 82,
+      "growth": "+44%",
+      "sentiment": "positive",
+      "top_brands": [
+        "Verisure",
+        "Prosegur",
+        "Liderman",
+        "Hikvision"
+      ],
+      "avg_reactions": 268,
+      "avg_comments": 64,
+      "avg_shares": 38
+    },
+    {
+      "topic": "Extorsión y protección de negocios",
+      "mentions": 8540,
+      "engagement_score": 78,
       "growth": "+62%",
-      "sentiment": "positive",
+      "sentiment": "negative",
       "top_brands": [
-        "Movistar",
-        "Wow Perú",
-        "WIN",
-        "Claro"
+        "Asociación de Bodegueros",
+        "Verisure",
+        "Prosegur",
+        "Cámara de Comercio"
       ],
-      "avg_reactions": 305,
-      "avg_comments": 72,
-      "avg_shares": 42
+      "avg_reactions": 215,
+      "avg_comments": 96,
+      "avg_shares": 48
     },
     {
-      "topic": "Fibra óptica y velocidad simétrica",
-      "mentions": 9650,
-      "engagement_score": 80,
-      "growth": "+48%",
+      "topic": "Vacaciones, viajes y hogar protegido",
+      "mentions": 5980,
+      "engagement_score": 74,
+      "growth": "+34%",
       "sentiment": "positive",
       "top_brands": [
-        "WIN",
-        "Movistar",
-        "Wow Perú",
-        "Fiberlux"
+        "Verisure",
+        "Prosegur",
+        "Indecopi",
+        "Mininter"
       ],
-      "avg_reactions": 224,
-      "avg_comments": 58,
-      "avg_shares": 32
+      "avg_reactions": 156,
+      "avg_comments": 42,
+      "avg_shares": 22
     },
     {
-      "topic": "Streaming, gaming y entretenimiento en casa",
-      "mentions": 7280,
-      "engagement_score": 76,
-      "growth": "+38%",
-      "sentiment": "positive",
-      "top_brands": [
-        "DGO",
-        "Netflix",
-        "Liga 1",
-        "PlayStation"
-      ],
-      "avg_reactions": 182,
-      "avg_comments": 48,
-      "avg_shares": 26
-    },
-    {
-      "topic": "Educación digital y conectividad",
-      "mentions": 4250,
+      "topic": "Tecnología y monitoreo continuo",
+      "mentions": 3640,
       "engagement_score": 70,
-      "growth": "+24%",
-      "sentiment": "neutral",
+      "growth": "+28%",
+      "sentiment": "positive",
       "top_brands": [
-        "OSIPTEL",
-        "MTC",
-        "WIN",
-        "Movistar"
+        "Verisure",
+        "Prosegur",
+        "Ajax Systems",
+        "Alarm.com"
       ],
-      "avg_reactions": 105,
+      "avg_reactions": 112,
       "avg_comments": 38,
-      "avg_shares": 20
-    },
-    {
-      "topic": "Comparativas operadores fibra Perú",
-      "mentions": 2580,
-      "engagement_score": 68,
-      "growth": "+52%",
-      "sentiment": "neutral",
-      "top_brands": [
-        "WIN",
-        "Movistar",
-        "Wow Perú",
-        "Claro"
-      ],
-      "avg_reactions": 88,
-      "avg_comments": 56,
-      "avg_shares": 14
+      "avg_shares": 18
     }
   ],
   "metadata": {
     "method": "Apify Social Listening Actor",
     "actor": "social-listening-meta",
-    "note": "Datos de Facebook e Instagram (scraping) para nicho telco y fibra óptica en Perú",
+    "note": "Datos de Facebook e Instagram (scraping) para nicho seguridad y alarmas monitoreadas en Perú",
     "timeframe": "Last 30 days",
-    "posts_analyzed": 168,
-    "comments_analyzed": 4280,
+    "posts_analyzed": 192,
+    "comments_analyzed": 5120,
     "pages_analyzed": 1,
     "topics_configured": 5
   }

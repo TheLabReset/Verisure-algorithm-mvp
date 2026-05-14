@@ -2,114 +2,114 @@
   "timestamp": "2026-05-04T21:45:34.998Z",
   "source": "TikTok Trends - Apify",
   "region": "PE",
-  "category": "Internet & Telecom",
-  "client": "WIN",
+  "category": "Home Security",
+  "client": "Verisure Perú",
   "trends": {
     "hashtags": [
       {
-        "hashtag": "#FibraOptica",
-        "videos": 16800,
-        "views": 3200000,
-        "growth": "+34%",
-        "category": "Telco"
+        "hashtag": "#SeguridadEnElHogar",
+        "videos": 28400,
+        "views": 6400000,
+        "growth": "+36%",
+        "category": "Seguridad"
       },
       {
-        "hashtag": "#InternetPeru",
-        "videos": 22400,
-        "views": 4800000,
+        "hashtag": "#CamarasDeSeguridad",
+        "videos": 21200,
+        "views": 5800000,
+        "growth": "+32%",
+        "category": "Seguridad"
+      },
+      {
+        "hashtag": "#SeguridadCiudadana",
+        "videos": 18600,
+        "views": 4700000,
         "growth": "+28%",
-        "category": "Telco"
+        "category": "Local"
       },
       {
-        "hashtag": "#GamingPeru",
-        "videos": 14200,
-        "views": 2800000,
-        "growth": "+42%",
-        "category": "Gaming"
+        "hashtag": "#RobosEnLima",
+        "videos": 9400,
+        "views": 3200000,
+        "growth": "+44%",
+        "category": "Tendencia local"
       },
       {
-        "hashtag": "#StreamingHD",
-        "videos": 18500,
-        "views": 5200000,
-        "growth": "+38%",
-        "category": "Lifestyle"
-      },
-      {
-        "hashtag": "#WIN",
-        "videos": 480,
-        "views": 165000,
-        "growth": "+62%",
+        "hashtag": "#Verisure",
+        "videos": 620,
+        "views": 185000,
+        "growth": "+58%",
         "category": "Brand"
       }
     ],
     "sounds": [
       {
-        "soundName": "Voices (Øneheart)",
-        "author": "Øneheart",
-        "usage": "1850000",
-        "growth": "+22%",
+        "soundName": "Las Limeñitas (orgullo limeño)",
+        "author": "Trend PE",
+        "usage": "1450000",
+        "growth": "+24%",
+        "duration": 22,
+        "category": "Local PE"
+      },
+      {
+        "soundName": "POV ruido en la noche (suspense)",
+        "author": "POV creators",
+        "usage": "820000",
+        "growth": "+42%",
+        "duration": 18,
+        "category": "Suspense"
+      },
+      {
+        "soundName": "Pelotero a la Bola (reedición)",
+        "author": "Reedición LATAM",
+        "usage": "1280000",
+        "growth": "+16%",
         "duration": 28,
-        "category": "Lifestyle"
+        "category": "Familia"
       },
       {
-        "soundName": "Levitating (Dua Lipa)",
-        "author": "Dua Lipa",
-        "usage": "1320000",
-        "growth": "+14%",
-        "duration": 26,
-        "category": "Pop celebración"
-      },
-      {
-        "soundName": "Tití Me Preguntó (Bad Bunny)",
-        "author": "Bad Bunny",
-        "usage": "2600000",
-        "growth": "+18%",
-        "duration": 24,
-        "category": "LATAM evergreen"
-      },
-      {
-        "soundName": "Voiceover narrativo PE creators tech",
-        "author": "Creators tech PE",
-        "usage": "240000",
-        "growth": "+38%",
+        "soundName": "Voiceover narrativo PE seguridad",
+        "author": "Creadores seguridad PE",
+        "usage": "210000",
+        "growth": "+34%",
         "duration": 60,
         "category": "Storytime"
       },
       {
-        "soundName": "Beat estacional Cyber Wow Perú",
-        "author": "Estacional Perú",
-        "usage": "380000",
-        "growth": "+88%",
+        "soundName": "Audio evergreen Kreepa (humor cotidiano)",
+        "author": "Kreepa",
+        "usage": "920000",
+        "growth": "+12%",
         "duration": 15,
-        "category": "Estacional"
+        "category": "Humor"
       }
     ],
     "creators": [
       {
-        "username": "@conectadosperu",
-        "followers": 320000,
-        "category": "Tecnología y conectividad",
-        "engagement_rate": 7.8
+        "username": "@seguridadlimape",
+        "followers": 285000,
+        "category": "Seguridad y tecnología",
+        "engagement_rate": 7.4
       },
       {
-        "username": "@gamersetuppe",
-        "followers": 245000,
-        "category": "Gaming y setups",
-        "engagement_rate": 9.4
+        "username": "@vecinosalertaspe",
+        "followers": 196000,
+        "category": "Comunidad y prevención",
+        "engagement_rate": 8.6
       },
       {
-        "username": "@streamingreviewpe",
-        "followers": 180000,
-        "category": "Streaming y series",
-        "engagement_rate": 6.6
+        "username": "@bodegueroprotegido",
+        "followers": 142000,
+        "category": "PyME y comercio",
+        "engagement_rate": 6.9
       }
     ]
   },
   "metadata": {
     "method": "Apify clockworks/tiktok-trends-scraper",
-    "note": "Datos curados de TikTok Creative Center Perú para nicho telco e internet hogar",
+    "note": "Datos curados de TikTok Creative Center Perú para nicho seguridad y hogar protegido",
     "timeframe": "Last 30 days",
-    "industry": "Internet & Telecom",
+    "industry": "Home Security",
     "items_fetched": 13
   }
 }

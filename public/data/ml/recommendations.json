@@ -1,42 +1,42 @@
 {
   "generated_at": "2026-05-04T08:30:00.000Z",
-  "client": "WIN",
+  "client": "Verisure Perú",
   "budget": [
     {
       "channel": "meta_ads",
       "type": "increase",
-      "from": 54,
-      "to": 58,
+      "from": 40,
+      "to": 44,
       "change": "+4.0%",
-      "impact": 250000,
+      "impact": 180,
       "confidence": "high",
-      "reason": "Meta supera el target de CPM en la audiencia Joven Conectado Lima Moderna durante la ventana pre Cyber Days"
+      "reason": "Meta lead ads sostiene CPL $21,67 con volumen creciente en la audiencia Hogar Familiar Lima Moderna"
     },
     {
       "channel": "youtube",
       "type": "maintain",
-      "from": 14,
-      "to": 14,
+      "from": 10,
+      "to": 10,
       "change": "0%",
       "impact": 0,
       "confidence": "high",
-      "reason": "YouTube muestra VTR 28.4% con bumpers enfocados en fibra simétrica"
+      "reason": "YouTube muestra VTR 27,4% con piezas testimoniales y aporta lift incremental al search"
     },
     {
-      "channel": "google_display",
+      "channel": "google_search",
       "type": "decrease",
-      "from": 12,
-      "to": 10,
-      "change": "-2.0%",
-      "impact": 40,
+      "from": 35,
+      "to": 31,
+      "change": "-4.0%",
+      "impact": 60,
       "confidence": "medium",
-      "reason": "Display muestra frecuencia elevada en algunos placements; se sugiere reasignar a Meta"
+      "reason": "Search supera el CPL target en algunas keywords competitivas; se sugiere reasignar parte hacia Meta"
     }
   ],
   "actions": [
     {
       "priority": "high",
-      "action": "Reforzar Meta Ads con creatividades enfocadas en fibra 100% pura y velocidad simétrica",
+      "action": "Reforzar Meta Reels con creatividades enfocadas en doble verificación y respuesta inmediata",
       "source": "ML Trend Analysis"
     },
     {
@@ -46,32 +46,32 @@
     },
     {
       "priority": "high",
-      "action": "Amplificar contenido educativo sobre fibra 100% óptica y casos de uso reales",
+      "action": "Amplificar contenido educativo sobre monitoreo continuo, ZeroVision y app My Verisure",
       "source": "Meta Social Listening"
     },
     {
       "priority": "high",
-      "action": "Priorizar fibra óptica, velocidad simétrica, gaming y streaming HD en el calendario editorial",
+      "action": "Priorizar alarma para casa, cámaras de seguridad y alarma para negocio en el calendario editorial",
       "source": "Multi-Source Analysis"
     },
     {
       "priority": "medium",
-      "action": "Subir Meta Ads de 54% a 58% del presupuesto durante la ventana estacional",
+      "action": "Subir Meta lead ads de 40% a 44% del presupuesto durante la ventana de fin de año",
       "source": "ML Budget Optimizer"
     },
     {
       "priority": "medium",
-      "action": "Reforzar la landing /planes con tasa de conversión actual de 3.8%",
+      "action": "Reforzar la landing /precio-alarma con tasa de conversión actual de 5,8%",
       "source": "Google Analytics 4"
     },
     {
       "priority": "medium",
-      "action": "Evaluar segmentación geo dedicada para distritos de Lima Norte y Sur",
+      "action": "Evaluar segmentación geo dedicada para Lima Norte y Lima Este con foco en PyME",
       "source": "Google Trends"
     },
     {
       "priority": "medium",
-      "action": "Colaborar con creators de tecnología y gaming para amplificar contenido orgánico relevante",
+      "action": "Pilotar Spark Ads con creadores del nicho seguridad ciudadana y hogar protegido",
       "source": "TikTok Trends"
     }
   ]
