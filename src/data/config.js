@@ -381,7 +381,7 @@ export const METRIC_CARDS_CONFIG = [
   },
   {
     id: 'opportunity',
-    title: 'Verisure Awareness Score',
+    title: 'Score de Oportunidad Verisure',
     description: 'Índice de oportunidad de captación en el sector seguridad',
     icon: 'Shield',
     color: 'fitzone-orange',

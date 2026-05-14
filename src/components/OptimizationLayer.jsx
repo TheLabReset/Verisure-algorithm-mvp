@@ -110,7 +110,7 @@ export default function OptimizationLayer() {
             </div>
             <span className="px-2 sm:px-3 py-1 bg-fitzone-purple text-white rounded-full text-xs sm:text-sm font-medium flex items-center gap-1">
               <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Auto-optimización activa</span>
+              <span className="hidden sm:inline">Optimización automática activa</span>
               <span className="sm:hidden">Activa</span>
             </span>
           </div>

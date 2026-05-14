@@ -469,7 +469,7 @@ export const CRM_MOCKUP = {
   alerts: [
     {
       type: 'success',
-      message: 'Meta Lead Ads Hogar Familiar supera el target con CPL $21,67 frente a $22 propuesto y volumen sostenido de 900 leads',
+      message: 'Meta Lead Ads Hogar Familiar Lima Moderna supera el objetivo con CPL $21,67 frente a $22 propuesto y volumen sostenido de 900 leads',
       campaign_id: 'camp_001',
       timestamp: '2026-05-04T14:30:00',
     },

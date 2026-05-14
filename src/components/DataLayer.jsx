@@ -286,7 +286,7 @@ export default function DataLayer() {
           </div>
           <div className="min-w-0">
             <h3 className="text-sm sm:text-lg font-bold text-white">Insights Clave del Mercado de Seguridad</h3>
-            <p className="text-xs sm:text-sm text-fitzone-textGray">Análisis automático multi-fuente</p>
+            <p className="text-xs sm:text-sm text-fitzone-textGray">Análisis automático y multifuente</p>
           </div>
         </div>
 
@@ -391,10 +391,10 @@ export default function DataLayer() {
               <table className="w-full min-w-[400px]">
                 <thead className="bg-fitzone-slate border-b border-fitzone-purple/20">
                   <tr>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Keyword</th>
+                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Término</th>
                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Interés</th>
                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Crec.</th>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Trend</th>
+                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Tendencia</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-fitzone-slate">
@@ -468,7 +468,7 @@ export default function DataLayer() {
                   <thead className="bg-fitzone-slate border-b border-fitzone-purple/20">
                     <tr>
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Hashtag</th>
-                      <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Views</th>
+                      <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Vistas</th>
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase hidden sm:table-cell">Posts</th>
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Crec.</th>
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Región</th>

@@ -37,7 +37,7 @@ export default function DecisionLayer() {
     {
       priority: 'medium',
       category: 'TikTok',
-      action: 'Se observa una oportunidad de pilotar Spark Ads con creadores del nicho seguridad ciudadana y hogar para amplificar contenido testimonial en sub-segmento 30 a 45',
+      action: 'Se observa una oportunidad de pilotar Spark Ads con creadores del nicho seguridad ciudadana y hogar para amplificar contenido testimonial en el subsegmento 30 a 45',
       impact: 'Apertura de un canal adicional con CPL exploratorio en Lima',
       confidence: 78
     },
@@ -55,7 +55,7 @@ export default function DecisionLayer() {
     size: aud.size,
     engagement: formatPercent(aud.engagement_rate),
     status: 'active',
-    description: aud.description + ` - ${aud.interests.slice(0, 3).join(', ')}`,
+    description: aud.description + `. Intereses: ${aud.interests.slice(0, 3).join(', ')}`,
     message: aud.message,
     age_range: aud.age_range,
     cpl_target: aud.cpl_target
@@ -94,7 +94,7 @@ export default function DecisionLayer() {
         </div>
       </div>
 
-      {/* Verisure Awareness Score */}
+      {/* Score de Oportunidad Verisure */}
       <div className="bg-fitzone-purple text-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6 mb-4 sm:mb-6 lg:mb-8">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -102,7 +102,7 @@ export default function DecisionLayer() {
               <Zap className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10" />
             </div>
             <div>
-              <h3 className="text-lg sm:text-xl font-bold">Verisure Awareness Score</h3>
+              <h3 className="text-lg sm:text-xl font-bold">Score de Oportunidad Verisure</h3>
               <p className="text-white/90 mt-0.5 sm:mt-1 text-xs sm:text-sm">Índice de oportunidad para inversión en captación de leads</p>
             </div>
           </div>
