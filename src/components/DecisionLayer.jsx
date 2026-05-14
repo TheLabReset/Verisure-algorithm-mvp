@@ -94,7 +94,7 @@ export default function DecisionLayer() {
         </div>
       </div>
 
-      {/* WIN Awareness Score */}
+      {/* Verisure Awareness Score */}
       <div className="bg-fitzone-purple text-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6 mb-4 sm:mb-6 lg:mb-8">
           <div className="flex items-center gap-3 sm:gap-4">

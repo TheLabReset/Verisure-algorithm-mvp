@@ -1,4 +1,4 @@
-// Mock Data para Verisure Perú — Dashboard Demo Comercial
+// Mock Data para Verisure Perú. Dashboard Demo Comercial
 // Datos simulados realistas para captación de leads en alarmas monitoreadas en Lima
 
 // ============================================================================

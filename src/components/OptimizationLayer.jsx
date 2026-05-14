@@ -304,7 +304,7 @@ export default function OptimizationLayer() {
         </div>
       </div>
 
-      {/* Funnel de Awareness WIN con @nivo/funnel vertical (escala log) */}
+      {/* Funnel de Captación Verisure con @nivo/funnel vertical (escala log) */}
       <div className="bg-fitzone-slate rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 lg:p-6 border border-fitzone-purple/20">
         <h3 className="text-sm sm:text-base font-bold text-white mb-4 sm:mb-6">Funnel de Captación Verisure</h3>
 

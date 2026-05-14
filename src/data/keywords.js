@@ -1,4 +1,4 @@
-// Keywords y hashtags para Verisure Perú — Alarmas monitoreadas Lima
+// Keywords y hashtags para Verisure Perú. Alarmas monitoreadas Lima
 // Configuración completa para búsquedas y monitoreo social
 // Nota: nombres de exports (KEYWORDS_FITZONE, HASHTAGS_FITZONE, FITNESS_SOURCES,
 // SEDES_FITZONE) son históricos del template y se mantienen por compatibilidad.
