@@ -352,7 +352,7 @@ export const COMPETENCIA = [
     rank: 1,
     type: 'Operador integrado con alianza telco',
     precio: 'S/ 99 a S/ 199 instalación, mensual S/ 120 a S/ 180',
-    fortalezas: ['Alianza comercial con Movistar amplifica búsquedas y referidos', 'Base de seguidores Meta amplia con pauta sostenida', 'Promociones agresivas de instalación'],
+    fortalezas: ['Alianza comercial con Movistar amplifica búsquedas y referidos', 'Base de seguidores Meta amplia con pauta sostenida', 'Promociones frecuentes de instalación'],
     debilidades: ['Diferenciación de la oferta tecnológica menos visible en comunicación', 'Producto residencial percibido como menos premium frente a competidores europeos'],
   },
   {

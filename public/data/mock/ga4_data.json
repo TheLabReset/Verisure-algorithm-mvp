@@ -197,7 +197,7 @@
     }
   },
   "metadata": {
-    "note": "Mock data para MVP - Verisure Perú (cliente demo)",
+    "note": "Mock data para MVP. Verisure Perú (cliente demo)",
     "actualIntegration": "Requiere acceso al property GA4 de verisure.pe",
     "updateFrequency": "Diaria automática una vez integrado"
   }

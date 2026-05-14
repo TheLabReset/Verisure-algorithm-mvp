@@ -59,10 +59,10 @@ export default function OptimizationLayer() {
   // Channel performance, Verisure (mix Meta + Google Search + TikTok + YouTube)
   // Suma percentages = 100, suma leads = 1.500 (= leads.total)
   const channelData = [
-    { name: 'Meta Ads', value: 40, leads: 780, color: '#ED002F' },
-    { name: 'Google Search', value: 35, leads: 420, color: '#06B6D4' },
+    { name: 'Meta Ads', value: 40, leads: 870, color: '#ED002F' },
+    { name: 'Google Search', value: 35, leads: 450, color: '#06B6D4' },
     { name: 'YouTube', value: 10, leads: 60, color: '#FF5C7A' },
-    { name: 'TikTok Ads', value: 10, leads: 70, color: '#10B981' },
+    { name: 'TikTok Ads', value: 10, leads: 80, color: '#10B981' },
     { name: 'Google Display', value: 5, leads: 40, color: '#F59E0B' }
   ];
 

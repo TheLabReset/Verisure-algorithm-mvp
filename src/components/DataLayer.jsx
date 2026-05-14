@@ -130,7 +130,7 @@ export default function DataLayer() {
       {
         source: 'Google Trends',
         IconComponent: GoogleIcon,
-        text: '"cámaras de seguridad" lidera con 92/100 de interés y "alarma para casa" sostiene 88/100. La marca "verisure peru" sube 42% en los últimos tres meses.',
+        text: '"cámaras de seguridad" encabeza el interés con 92/100 y "alarma para casa" sostiene 88/100. La marca "verisure peru" sube 42% en los últimos tres meses.',
       },
       {
         source: 'TikTok',
@@ -382,7 +382,7 @@ export default function DataLayer() {
                 <p className="font-semibold mb-1 text-fitzone-cyan">Cómo se calcula el score:</p>
                 <p>Promedio del "interés de búsqueda" (0 a 100) de keywords del sector seguridad y alarmas monitoreadas en Perú.</p>
                 <p className="mt-2 text-[10px] sm:text-xs text-fitzone-textGray hidden sm:block">
-                  <strong>Fuente:</strong> Google Trends API (Perú) - <strong>Actualización:</strong> Semanal
+                  <strong>Fuente:</strong> Google Trends API (Perú). <strong>Actualización:</strong> Semanal
                 </p>
               </div>
             </div>
@@ -640,7 +640,7 @@ export default function DataLayer() {
                           <span className={`text-xs sm:text-sm font-bold ${ad.ctr >= 1.5 ? 'text-fitzone-emerald' : 'text-fitzone-amber'}`}>{formatPercent(ad.ctr, 2)}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                          <span className={`text-xs sm:text-sm font-bold ${ad.cpl <= 10 ? 'text-fitzone-emerald' : ad.cpl <= 12 ? 'text-fitzone-amber' : 'text-fitzone-red'}`}>{formatMoney(ad.cpl)}</span>
+                          <span className={`text-xs sm:text-sm font-bold ${ad.cpl <= 25 ? 'text-fitzone-emerald' : ad.cpl <= 40 ? 'text-fitzone-amber' : 'text-fitzone-red'}`}>{formatMoney(ad.cpl)}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                           <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full ${
