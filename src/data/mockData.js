@@ -475,7 +475,7 @@ export const CRM_MOCKUP = {
     },
     {
       type: 'warning',
-      message: 'TikTok Spark Negocio muestra CPL $52,50 sobre el target $25; se sugiere refrescar creatividades y reducir frecuencia',
+      message: 'TikTok Spark Negocio muestra CPL $52,50 sobre el target $18 de la audiencia PyME; se sugiere refrescar creatividades y reducir frecuencia',
       campaign_id: 'camp_004',
       timestamp: '2026-05-04T11:15:00',
     },
