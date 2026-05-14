@@ -9,7 +9,7 @@ export default function ExecutionLayer() {
   const getMonthlyPeriod = () => {
     const now = new Date();
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    return `1-${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+    return `1 al ${now.getDate()} de ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
   };
 
   const monthlyPeriod = getMonthlyPeriod();
@@ -71,8 +71,8 @@ export default function ExecutionLayer() {
               <DollarSign className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold">Presupuesto Mensual WIN</h3>
-              <p className="text-white/90 mt-0.5 sm:mt-1 text-xs sm:text-sm">Distribución inteligente por canal digital para awareness</p>
+              <h3 className="text-base sm:text-lg lg:text-xl font-bold">Presupuesto Mensual Verisure</h3>
+              <p className="text-white/90 mt-0.5 sm:mt-1 text-xs sm:text-sm">Distribución sugerida por canal digital para lead generation</p>
             </div>
           </div>
 
@@ -108,7 +108,7 @@ export default function ExecutionLayer() {
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold text-white">Distribución por Canal Digital</h3>
-            <p className="text-xs sm:text-sm text-fitzone-textGray">Performance y asignación para recordación de marca WIN</p>
+            <p className="text-xs sm:text-sm text-fitzone-textGray">Performance y asignación sugerida para captación de leads Verisure</p>
           </div>
         </div>
 
@@ -182,7 +182,7 @@ export default function ExecutionLayer() {
       <div className="bg-fitzone-slate rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 lg:p-6 border border-fitzone-purple/10">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-fitzone-amber rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
-            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-fitzone-charcoal" />
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold text-white">Recomendaciones de Optimización</h3>
@@ -243,8 +243,8 @@ export default function ExecutionLayer() {
               <Store className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-bold text-white">Performance por Plan</h3>
-              <p className="text-xs sm:text-sm text-fitzone-textGray">Rendimiento de campaña por plan WIN monitoreado</p>
+              <h3 className="text-sm sm:text-base font-bold text-white">Performance por Servicio</h3>
+              <p className="text-xs sm:text-sm text-fitzone-textGray">Rendimiento de campaña por servicio Verisure monitoreado</p>
             </div>
           </div>
           <button
@@ -254,7 +254,7 @@ export default function ExecutionLayer() {
             {showAllServicios ? (
               <>
                 <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
-                Mostrar top 4
+                Mostrar 4 principales
               </>
             ) : (
               <>
@@ -284,11 +284,11 @@ export default function ExecutionLayer() {
 
                 <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-fitzone-textGray">Consultas</span>
+                    <span className="text-fitzone-textGray">Leads</span>
                     <span className="font-semibold text-white">{formatThousands(servicio.leads)}</span>
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-fitzone-textGray">Contrataciones</span>
+                    <span className="text-fitzone-textGray">Instalaciones</span>
                     <span className="font-semibold text-fitzone-emerald">{formatThousands(servicio.conversiones)}</span>
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
@@ -350,19 +350,19 @@ export default function ExecutionLayer() {
             <h4 className="font-bold text-sm sm:text-base mb-2 sm:mb-3">Mejores horarios del día</h4>
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">7:00 - 10:00 AM (teletrabajo)</span>
+                <span className="text-white/90 text-xs sm:text-sm">7:00 a 10:00 AM (salida laboral)</span>
                 <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">+0%</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">12:00 - 2:00 PM (pausa laboral)</span>
+                <span className="text-white/90 text-xs sm:text-sm">12:00 a 2:00 PM (pausa laboral)</span>
                 <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">+30%</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <span className="text-white/90 text-xs sm:text-sm">6:00 - 10:00 PM (familia y streaming)</span>
-                <span className="px-2 py-0.5 sm:py-1 bg-fitzone-emerald/30 rounded text-xs sm:text-sm font-bold w-fit">+70%</span>
+                <span className="text-white/90 text-xs sm:text-sm">6:00 a 10:00 PM (hogar conectado, noticias)</span>
+                <span className="px-2 py-0.5 sm:py-1 bg-fitzone-emerald/30 rounded text-xs sm:text-sm font-bold w-fit">+80%</span>
               </div>
             </div>
-            <p className="text-[10px] sm:text-xs text-white/90 mt-2 sm:mt-3">Pico máximo: 6-10 PM, momento de mayor consumo digital en el hogar</p>
+            <p className="text-[10px] sm:text-xs text-white/90 mt-2 sm:mt-3">Pico observado de 6:00 a 10:00 PM, momento de planificación de compra tras la jornada y exposición a noticias de inseguridad</p>
           </div>
 
           <div className="bg-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5">
@@ -381,15 +381,15 @@ export default function ExecutionLayer() {
                 <span className="px-2 py-0.5 sm:py-1 bg-white/20 rounded text-xs sm:text-sm font-bold w-fit">Alta</span>
               </div>
             </div>
-            <p className="text-[10px] sm:text-xs text-white/90 mt-2 sm:mt-3">Decisión familiar de cambio de operador se concentra en fin de semana</p>
+            <p className="text-[10px] sm:text-xs text-white/90 mt-2 sm:mt-3">La decisión familiar de contratación se concentra entre jueves y sábado, alineada con la planificación del fin de semana</p>
           </div>
         </div>
 
         <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-white/20 rounded-lg sm:rounded-xl">
           <p className="text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
-            <Lightbulb className="w-3 h-3 sm:w-4 sm:h-4" /> Estacionalidad WIN:
+            <Lightbulb className="w-3 h-3 sm:w-4 sm:h-4" /> Estacionalidad Verisure:
           </p>
-          <p className="text-xs sm:text-sm">Cyber Days de noviembre y Black Friday concentran el pico anual de búsqueda. Regreso a clases (febrero a marzo), Fiestas Patrias (julio) y Navidad (diciembre) son ventanas secundarias relevantes para escalar awareness.</p>
+          <p className="text-xs sm:text-sm">El pico anual del sector seguridad se concentra entre noviembre y enero (Navidad, viajes de verano, alta incidencia delictiva). Vacaciones de febrero a marzo y Fiestas Patrias de julio son ventanas relevantes para escalar lead generation.</p>
         </div>
       </div>
     </div>

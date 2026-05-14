@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, TrendingUp, Video, Share2, Wifi, RefreshCw, ChevronDown, ChevronUp, BarChart3, Info, Music, Target, DollarSign, Layers, Lightbulb, Users, Globe, MapPin, Eye, Clock, MousePointer, Smartphone, Monitor, ExternalLink, Calendar } from 'lucide-react';
+import { Search, TrendingUp, Video, Share2, Shield, RefreshCw, ChevronDown, ChevronUp, BarChart3, Info, Music, Target, DollarSign, Layers, Lightbulb, Users, Globe, MapPin, Eye, Clock, MousePointer, Smartphone, Monitor, ExternalLink, Calendar } from 'lucide-react';
 import { GoogleIcon, TikTokIcon, MetaIcon, GoogleAnalyticsIcon } from './PlatformIcons';
 import { formatES, formatMoney, formatPercent, formatThousands } from '../utils/format';
 
@@ -130,22 +130,22 @@ export default function DataLayer() {
       {
         source: 'Google Trends',
         IconComponent: GoogleIcon,
-        text: '"Internet fibra óptica" lidera con 84/100 de interés y +38% de crecimiento. La marca "win internet" sube 58% en los últimos 3 meses.',
+        text: '"cámaras de seguridad" encabeza el interés con 92/100 y "alarma para casa" sostiene 88/100. La marca "verisure peru" sube 42% en los últimos tres meses.',
       },
       {
         source: 'TikTok',
         IconComponent: TikTokIcon,
-        text: '#StreamingHD alcanza 5.2M de views en Perú con +38% de crecimiento. El contenido de gaming y casos de uso muestra engagement 9.4/10.',
+        text: '#SeguridadEnElHogar alcanza 6,4M de views en Perú con +36% de crecimiento. El contenido de seguridad ciudadana y testimoniales muestra engagement entre 7,4 y 8,6 sobre 10.',
       },
       {
         source: 'Meta',
         IconComponent: MetaIcon,
-        text: 'Sentimiento social positivo en torno a fibra óptica y velocidad simétrica. "Cyber Wow y Cyber Days" concentra 14.8K menciones con 84/100 de engagement.',
+        text: 'Conversación social sostenida en torno a protección del hogar y cámaras de seguridad. "Inseguridad ciudadana y protección" concentra 18,4K menciones con 86/100 de engagement.',
       },
       {
         source: 'GA4',
         IconComponent: GoogleAnalyticsIcon,
-        text: '245K sesiones derivaron en 1,450 consultas iniciadas y 1,050 leads cualificados (tasa de cualificación 72%). La página "/planes" muestra 3.8% de tasa de conversión.',
+        text: '70K sesiones derivaron en 1.500 solicitudes de cotización y 1.050 leads calificados (tasa de calificación 70%). La página /precio-alarma muestra 5,8% de tasa de conversión.',
       },
     ];
   };
@@ -153,59 +153,59 @@ export default function DataLayer() {
   const multiSourceInsight = {
     source: 'Análisis Multi-Fuente',
     IconComponent: Layers,
-    text: 'Las cuatro fuentes coinciden en una ventana favorable hacia Cyber Days y campañas de fin de año. La combinación de búsquedas en alza (+38%), engagement social sostenido (8.0/10), contenido relevante en TikTok y tráfico web en aumento sugiere un momento favorable para reforzar awareness. Se observa una oportunidad de posicionar el mensaje de fibra 100% pura y velocidad simétrica como diferenciador.',
-    recommendation: 'Se sugiere reforzar Meta Ads en torno a casos de uso reales (gaming, streaming, teletrabajo) y amplificar YouTube en términos de "internet fibra óptica" durante la ventana estacional.'
+    text: 'Las cuatro fuentes coinciden en una ventana favorable hacia el cierre de año y vacaciones de verano. La combinación de búsquedas en alza, engagement social sostenido, presencia viral de contenido sobre robos en TikTok y tráfico web creciente sugiere un momento favorable para reforzar lead generation. Se observa una oportunidad de posicionar el mensaje de doble verificación, monitoreo continuo y ZeroVision como capa diferencial.',
+    recommendation: 'Se sugiere reforzar Meta lead ads en torno a vacaciones seguras y protección de negocio, y amplificar Google Search en términos de "alarma para casa" y "alarma para negocio" durante la ventana estacional.'
   };
 
   const insights = generateInsights();
 
   const ga4Pages = [
-    { page: '/', title: 'WIN - Internet 100% fibra óptica', views: 78400, sessions: 64200, avgTime: '2:48', bounceRate: 28, conversions: 1450, convRate: 2.20 },
-    { page: '/planes', title: 'Planes de internet hogar WIN', views: 53900, sessions: 44800, avgTime: '3:12', bounceRate: 24, conversions: 850, convRate: 3.80 },
-    { page: '/cobertura', title: 'Cobertura WIN en Lima', views: 27000, sessions: 22600, avgTime: '2:20', bounceRate: 35, conversions: 410, convRate: 1.80 },
-    { page: '/planes/900mbps', title: 'Plan WIN 1 Gbps Premium', views: 24500, sessions: 20800, avgTime: '3:42', bounceRate: 32, conversions: 620, convRate: 4.60 },
-    { page: '/win-tv', title: 'WIN TV Premium y L1MAX', views: 19600, sessions: 16400, avgTime: '3:05', bounceRate: 30, conversions: 285, convRate: 2.40 },
-    { page: '/planes/600mbps', title: 'Plan WIN 600 Mbps Gamer', views: 16800, sessions: 14200, avgTime: '2:55', bounceRate: 33, conversions: 215, convRate: 2.65 },
-    { page: '/empresas', title: 'WIN Empresas y PYME', views: 9800, sessions: 8100, avgTime: '3:18', bounceRate: 38, conversions: 142, convRate: 2.10 },
-    { page: '/preguntas-frecuentes', title: 'Preguntas frecuentes', views: 8600, sessions: 7200, avgTime: '4:05', bounceRate: 32, conversions: 95, convRate: 1.85 },
-    { page: '/atencion-cliente', title: 'Atención al cliente WIN', views: 5400, sessions: 4500, avgTime: '2:05', bounceRate: 45, conversions: 78, convRate: 1.62 },
-    { page: '/cobertura/lima-norte', title: 'Cobertura Lima Norte', views: 4800, sessions: 4100, avgTime: '2:32', bounceRate: 36, conversions: 110, convRate: 2.85 },
+    { page: '/', title: 'Verisure Perú. Alarmas con monitoreo continuo', views: 25000, sessions: 20800, avgTime: '2:52', bounceRate: 30, conversions: 600, convRate: 2.40 },
+    { page: '/precio-alarma', title: 'Cotiza tu alarma Verisure', views: 15000, sessions: 12400, avgTime: '3:25', bounceRate: 22, conversions: 870, convRate: 5.80 },
+    { page: '/nuestra-alarma', title: 'Cómo funciona la alarma Verisure', views: 12000, sessions: 9800, avgTime: '3:08', bounceRate: 28, conversions: 410, convRate: 3.40 },
+    { page: '/alarmas-negocio', title: 'Alarmas para negocio y comercio', views: 10000, sessions: 8200, avgTime: '3:14', bounceRate: 26, conversions: 460, convRate: 4.60 },
+    { page: '/servicios/zerovision', title: 'ZeroVision. Neutralización por niebla', views: 8000, sessions: 6600, avgTime: '2:40', bounceRate: 34, conversions: 160, convRate: 2.00 },
+    { page: '/servicios/camaras', title: 'Cámaras de videovigilancia Verisure', views: 7200, sessions: 5900, avgTime: '2:48', bounceRate: 32, conversions: 215, convRate: 2.98 },
+    { page: '/cobertura-lima', title: 'Cobertura Verisure en Lima', views: 5400, sessions: 4500, avgTime: '2:32', bounceRate: 36, conversions: 110, convRate: 2.04 },
+    { page: '/guardian-verisure', title: 'Guardián Verisure con botón SOS', views: 4800, sessions: 4000, avgTime: '2:20', bounceRate: 38, conversions: 95, convRate: 1.98 },
+    { page: '/preguntas-frecuentes', title: 'Preguntas frecuentes', views: 4200, sessions: 3500, avgTime: '4:05', bounceRate: 32, conversions: 60, convRate: 1.43 },
+    { page: '/atencion-cliente', title: 'Atención al cliente Verisure', views: 2800, sessions: 2300, avgTime: '2:05', bounceRate: 45, conversions: 40, convRate: 1.43 },
   ];
 
   const tiktokHashtags = [
-    { hashtag: '#FibraOptica', views: '3.2M', posts: '16.8K', growth: '+34%', region: 'Perú', engagement: 8.2 },
-    { hashtag: '#InternetPeru', views: '4.8M', posts: '22.4K', growth: '+28%', region: 'Perú', engagement: 8.0 },
-    { hashtag: '#GamingPeru', views: '2.8M', posts: '14.2K', growth: '+42%', region: 'Perú', engagement: 9.4 },
-    { hashtag: '#StreamingHD', views: '5.2M', posts: '18.5K', growth: '+38%', region: 'LATAM', engagement: 8.6 },
-    { hashtag: '#WIN', views: '165K', posts: '480', growth: '+62%', region: 'Perú', engagement: 9.0 },
-    { hashtag: '#SmartHome', views: '1.4M', posts: '6.8K', growth: '+22%', region: 'LATAM', engagement: 7.6 },
-    { hashtag: '#Teletrabajo', views: '980K', posts: '4.2K', growth: '+18%', region: 'Perú', engagement: 7.4 },
-    { hashtag: '#LimaPeru', views: '8.6M', posts: '34.5K', growth: '+12%', region: 'Perú', engagement: 7.8 },
+    { hashtag: '#SeguridadEnElHogar', views: '6,4M', posts: '28,4K', growth: '+36%', region: 'Perú', engagement: 8.2 },
+    { hashtag: '#CamarasDeSeguridad', views: '5,8M', posts: '21,2K', growth: '+32%', region: 'Perú', engagement: 8.0 },
+    { hashtag: '#SeguridadCiudadana', views: '4,7M', posts: '18,6K', growth: '+28%', region: 'Perú', engagement: 7.6 },
+    { hashtag: '#RobosEnLima', views: '3,2M', posts: '9,4K', growth: '+44%', region: 'Perú', engagement: 8.4 },
+    { hashtag: '#Verisure', views: '185K', posts: '620', growth: '+58%', region: 'Perú', engagement: 8.6 },
+    { hashtag: '#ProtegeTuFamilia', views: '1,9M', posts: '7,2K', growth: '+24%', region: 'LATAM', engagement: 7.4 },
+    { hashtag: '#NegocioSeguro', views: '780K', posts: '3,4K', growth: '+22%', region: 'Perú', engagement: 7.0 },
+    { hashtag: '#LimaPeru', views: '8,7M', posts: '34,5K', growth: '+12%', region: 'Perú', engagement: 7.8 },
   ];
 
   const tiktokSounds = [
-    { name: 'Voices (Øneheart)', type: 'Lifestyle', usage: '1.8M', trend: '+22%' },
-    { name: 'Levitating (Dua Lipa)', type: 'Pop celebración', usage: '1.3M', trend: '+14%' },
-    { name: 'Tití Me Preguntó (Bad Bunny)', type: 'LATAM evergreen', usage: '2.6M', trend: '+18%' },
-    { name: 'Voiceover narrativo PE creators tech', type: 'Storytime', usage: '240K', trend: '+38%' },
-    { name: 'Beat Cyber Wow Perú', type: 'Estacional', usage: '380K', trend: '+88%' },
-    { name: 'Ella Baila Sola (Peso Pluma)', type: 'Regional energético', usage: '1.2M', trend: '+24%' },
+    { name: 'Las Limeñitas (orgullo limeño)', type: 'Local PE', usage: '1,4M', trend: '+24%' },
+    { name: 'POV ruido en la noche (suspense)', type: 'Suspense', usage: '820K', trend: '+42%' },
+    { name: 'Pelotero a la Bola (reedición)', type: 'Familia', usage: '1,3M', trend: '+16%' },
+    { name: 'Voiceover narrativo PE seguridad', type: 'Storytime', usage: '210K', trend: '+34%' },
+    { name: 'Audio evergreen Kreepa (humor)', type: 'Humor', usage: '920K', trend: '+12%' },
+    { name: 'Beat estacional fin de año Perú', type: 'Estacional', usage: '340K', trend: '+58%' },
   ];
 
   const metaTopics = [
-    { topic: 'Cyber Wow y Cyber Days', mentions: 14820, engagement: 8.4, sentiment: 88, growth: '+62%', brands: 'Movistar, Wow Perú, WIN, Claro' },
-    { topic: 'Fibra óptica y velocidad simétrica', mentions: 9650, engagement: 8.0, sentiment: 84, growth: '+48%', brands: 'WIN, Movistar, Wow Perú, Fiberlux' },
-    { topic: 'Streaming, gaming y entretenimiento en casa', mentions: 7280, engagement: 7.6, sentiment: 80, growth: '+38%', brands: 'DGO, Netflix, Liga 1, PlayStation' },
-    { topic: 'Educación digital y conectividad', mentions: 4250, engagement: 7.0, sentiment: 74, growth: '+24%', brands: 'OSIPTEL, MTC, WIN, Movistar' },
-    { topic: 'Comparativas operadores fibra Perú', mentions: 2580, engagement: 6.8, sentiment: 70, growth: '+52%', brands: 'WIN, Movistar, Wow Perú, Claro' },
-    { topic: 'Smart home y IoT', mentions: 2180, engagement: 6.4, sentiment: 76, growth: '+18%', brands: 'Google Home, Alexa, Samsung' },
+    { topic: 'Inseguridad ciudadana y protección del hogar', mentions: 18420, engagement: 8.6, sentiment: 62, growth: '+58%', brands: 'Prosegur, Verisure, Securitas, Liderman' },
+    { topic: 'Cámaras de seguridad y videovigilancia', mentions: 12680, engagement: 8.2, sentiment: 82, growth: '+44%', brands: 'Verisure, Prosegur, Liderman, Hikvision' },
+    { topic: 'Extorsión y protección de negocios', mentions: 8540, engagement: 7.8, sentiment: 46, growth: '+62%', brands: 'Asoc. Bodegueros, Verisure, Prosegur, Cám. Comercio' },
+    { topic: 'Vacaciones, viajes y hogar protegido', mentions: 5980, engagement: 7.4, sentiment: 84, growth: '+34%', brands: 'Verisure, Prosegur, Indecopi, Mininter' },
+    { topic: 'Tecnología y monitoreo continuo', mentions: 3640, engagement: 7.0, sentiment: 80, growth: '+28%', brands: 'Verisure, Prosegur, Ajax Systems, Alarm.com' },
+    { topic: 'Comparativas operadores de alarmas', mentions: 2180, engagement: 6.4, sentiment: 70, growth: '+18%', brands: 'Verisure, Prosegur, Securitas, Liderman' },
   ];
 
   const metaAdPerformance = [
-    { campaign: 'Brand Awareness Hogares Lima Moderna', platform: 'Instagram', reach: 1450000, clicks: 18500, ctr: 1.28, cpl: 9.96, status: 'Activa' },
-    { campaign: 'Recordación Familias Conectadas Lima Norte y Sur', platform: 'Facebook', reach: 980000, clicks: 11200, ctr: 1.14, cpl: 8.72, status: 'Activa' },
-    { campaign: 'YouTube Brand WIN Fibra 100%', platform: 'YouTube', reach: 720000, clicks: 8400, ctr: 1.17, cpl: 11.25, status: 'Activa' },
-    { campaign: 'TikTok Spark Awareness Joven', platform: 'TikTok', reach: 380000, clicks: 6500, ctr: 1.71, cpl: 6.78, status: 'Activa' },
+    { campaign: 'Meta Lead Ads Hogar Familiar Lima Moderna', platform: 'Instagram', reach: 1350000, clicks: 19800, ctr: 1.47, cpl: 21.67, status: 'Activa' },
+    { campaign: 'Google Search Categoría y Brand', platform: 'Google Search', reach: 0, clicks: 14200, ctr: 4.20, cpl: 36.52, status: 'Activa' },
+    { campaign: 'YouTube TrueView Brand Verisure Lima', platform: 'YouTube', reach: 620000, clicks: 4800, ctr: 0.77, cpl: 75.00, status: 'Activa' },
+    { campaign: 'TikTok Spark Negocio PyME y Hogar 30 a 45', platform: 'TikTok', reach: 410000, clicks: 7200, ctr: 1.76, cpl: 52.50, status: 'En prueba' },
   ];
 
   return (
@@ -216,14 +216,14 @@ export default function DataLayer() {
           <div className="flex-1">
             <div className="flex items-center gap-3 sm:gap-4 mb-4">
               <div className="w-10 h-10 sm:w-14 sm:h-14 bg-fitzone-purple rounded-xl flex items-center justify-center flex-shrink-0">
-                <Wifi className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
               <div className="min-w-0">
                 <h2 className="text-base sm:text-xl font-bold mb-1">
-                  Capa de Data - Captura de Señales
+                  Capa de Data. Captura de Señales
                 </h2>
                 <p className="text-fitzone-textGray text-xs sm:text-base">
-                  Monitoreo en tiempo real del ecosistema digital telco y fibra óptica en Perú
+                  Monitoreo en tiempo real del ecosistema digital de seguridad y alarmas en Lima
                 </p>
               </div>
             </div>
@@ -242,7 +242,7 @@ export default function DataLayer() {
             <button
               onClick={loadData}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-fitzone-purple/20 text-fitzone-purple rounded-lg hover:bg-fitzone-purple/30 transition disabled:opacity-50 text-sm"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-fitzone-purple/20 text-fitzone-lightPurple rounded-lg hover:bg-fitzone-purple/30 transition disabled:opacity-50 text-sm"
             >
               <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Actualizar</span>
@@ -285,8 +285,8 @@ export default function DataLayer() {
             <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm sm:text-lg font-bold text-white">Insights Clave del Mercado Telco</h3>
-            <p className="text-xs sm:text-sm text-fitzone-textGray">Análisis automático multi-fuente</p>
+            <h3 className="text-sm sm:text-lg font-bold text-white">Insights Clave del Mercado de Seguridad</h3>
+            <p className="text-xs sm:text-sm text-fitzone-textGray">Análisis automático y multifuente</p>
           </div>
         </div>
 
@@ -368,7 +368,7 @@ export default function DataLayer() {
             <GoogleIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" size={24} />
             <div className="text-left min-w-0">
               <h3 className="text-sm sm:text-base font-bold">Google Trends</h3>
-              <p className="text-[10px] sm:text-xs text-white/90">Keywords telco e internet hogar - Score: {scores.search}/10</p>
+              <p className="text-[10px] sm:text-xs text-white/90">Keywords del sector seguridad. Score: {scores.search}/10</p>
             </div>
           </div>
           {expandedSections.trends ? <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
@@ -380,9 +380,9 @@ export default function DataLayer() {
               <Info className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-cyan flex-shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm text-fitzone-lightGray">
                 <p className="font-semibold mb-1 text-fitzone-cyan">Cómo se calcula el score:</p>
-                <p>Promedio del "interés de búsqueda" (0-100) de keywords de telco e internet hogar monitoreadas en Perú.</p>
+                <p>Promedio del "interés de búsqueda" (0 a 100) de keywords del sector seguridad y alarmas monitoreadas en Perú.</p>
                 <p className="mt-2 text-[10px] sm:text-xs text-fitzone-textGray hidden sm:block">
-                  <strong>Fuente:</strong> Google Trends API (Perú) - <strong>Actualización:</strong> Semanal
+                  <strong>Fuente:</strong> Google Trends API (Perú). <strong>Actualización:</strong> Semanal
                 </p>
               </div>
             </div>
@@ -391,22 +391,22 @@ export default function DataLayer() {
               <table className="w-full min-w-[400px]">
                 <thead className="bg-fitzone-slate border-b border-fitzone-purple/20">
                   <tr>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Keyword</th>
+                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Término</th>
                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Interés</th>
                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Crec.</th>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Trend</th>
+                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Tendencia</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-fitzone-slate">
                   {[
-                    { keyword: 'internet fibra optica', interest: 84, growth: '+38%', trend: 'rising' },
-                    { keyword: 'movistar fibra', interest: 80, growth: '+12%', trend: 'stable' },
-                    { keyword: 'contratar internet', interest: 78, growth: '+30%', trend: 'rising' },
-                    { keyword: 'internet hogar lima', interest: 72, growth: '+24%', trend: 'rising' },
-                    { keyword: 'fibra simetrica', interest: 66, growth: '+44%', trend: 'rising' },
-                    { keyword: 'win internet', interest: 65, growth: '+58%', trend: 'rising' },
-                    { keyword: 'mejor internet lima', interest: 58, growth: '+22%', trend: 'rising' },
-                    { keyword: 'cambiar de operador internet', interest: 52, growth: '+18%', trend: 'rising' },
+                    { keyword: 'camaras de seguridad', interest: 92, growth: '+28%', trend: 'rising' },
+                    { keyword: 'alarma para casa', interest: 88, growth: '+34%', trend: 'rising' },
+                    { keyword: 'prosegur alarmas', interest: 78, growth: '+14%', trend: 'stable' },
+                    { keyword: 'alarmas monitoreadas', interest: 74, growth: '+30%', trend: 'rising' },
+                    { keyword: 'alarma para negocio', interest: 70, growth: '+38%', trend: 'rising' },
+                    { keyword: 'verisure peru', interest: 68, growth: '+42%', trend: 'rising' },
+                    { keyword: 'monitoreo 24 horas', interest: 60, growth: '+22%', trend: 'rising' },
+                    { keyword: 'seguridad para bodega', interest: 54, growth: '+44%', trend: 'rising' },
                   ].map((kw, idx) => (
                     <tr key={idx} className="hover:bg-fitzone-slate/50 transition">
                       <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-white">{kw.keyword}</td>
@@ -442,7 +442,7 @@ export default function DataLayer() {
             <TikTokIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" size={24} />
             <div className="text-left min-w-0">
               <h3 className="text-sm sm:text-base font-bold">TikTok Creative Center</h3>
-              <p className="text-[10px] sm:text-xs text-white/90">Hashtags virales - Score: {scores.trend}/10</p>
+              <p className="text-[10px] sm:text-xs text-white/90">Hashtags virales. Score: {scores.trend}/10</p>
             </div>
           </div>
           {expandedSections.tiktok ? <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
@@ -454,21 +454,21 @@ export default function DataLayer() {
               <Info className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-emerald flex-shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm text-fitzone-lightGray">
                 <p className="font-semibold mb-1 text-fitzone-emerald">Cómo se calcula el score:</p>
-                <p>Promedio del "relevance score" (0-100) de hashtags telco y de fibra óptica virales.</p>
+                <p>Promedio del "relevance score" (0 a 100) de hashtags de seguridad y hogar protegido virales en Perú.</p>
               </div>
             </div>
 
             <div>
               <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
                 <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-emerald" />
-                Hashtags Trending Telco y Fibra Óptica
+                Hashtags Trending Seguridad y Hogar Protegido
               </h4>
               <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
                 <table className="w-full min-w-[450px]">
                   <thead className="bg-fitzone-slate border-b border-fitzone-purple/20">
                     <tr>
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Hashtag</th>
-                      <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Views</th>
+                      <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Vistas</th>
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase hidden sm:table-cell">Posts</th>
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Crec.</th>
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-fitzone-textGray uppercase">Región</th>
@@ -508,7 +508,7 @@ export default function DataLayer() {
             <div>
               <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
                 <Music className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-emerald" />
-                Sonidos Trending para Contenido WIN
+                Sonidos Trending para Contenido Verisure
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                 {tiktokSounds.map((sound, idx) => (
@@ -544,7 +544,7 @@ export default function DataLayer() {
             <MetaIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" size={24} />
             <div className="text-left min-w-0">
               <h3 className="text-sm sm:text-base font-bold">Meta / Facebook</h3>
-              <p className="text-[10px] sm:text-xs text-white/90">Redes sociales - Score: {scores.social}/10</p>
+              <p className="text-[10px] sm:text-xs text-white/90">Redes sociales. Score: {scores.social}/10</p>
             </div>
           </div>
           {expandedSections.meta ? <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
@@ -556,7 +556,7 @@ export default function DataLayer() {
               <Info className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-lightPurple flex-shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm text-fitzone-lightGray">
                 <p className="font-semibold mb-1 text-fitzone-lightPurple">Cómo se calcula el score:</p>
-                <p>Promedio del "engagement score" (0-10) de temas telco y fibra óptica en Facebook e Instagram.</p>
+                <p>Promedio del "engagement score" (0 a 10) de temas de seguridad y hogar protegido en Facebook e Instagram.</p>
               </div>
             </div>
 
@@ -640,7 +640,7 @@ export default function DataLayer() {
                           <span className={`text-xs sm:text-sm font-bold ${ad.ctr >= 1.5 ? 'text-fitzone-emerald' : 'text-fitzone-amber'}`}>{formatPercent(ad.ctr, 2)}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                          <span className={`text-xs sm:text-sm font-bold ${ad.cpl <= 10 ? 'text-fitzone-emerald' : ad.cpl <= 12 ? 'text-fitzone-amber' : 'text-fitzone-red'}`}>{formatMoney(ad.cpl)}</span>
+                          <span className={`text-xs sm:text-sm font-bold ${ad.cpl <= 25 ? 'text-fitzone-emerald' : ad.cpl <= 40 ? 'text-fitzone-amber' : 'text-fitzone-red'}`}>{formatMoney(ad.cpl)}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                           <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full ${
@@ -669,7 +669,7 @@ export default function DataLayer() {
             <GoogleAnalyticsIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" size={24} />
             <div className="text-left min-w-0">
               <h3 className="text-sm sm:text-base font-bold">Google Analytics 4</h3>
-              <p className="text-[10px] sm:text-xs text-white/90">Conversión - Score: {scores.intent}/10</p>
+              <p className="text-[10px] sm:text-xs text-white/90">Conversión. Score: {scores.intent}/10</p>
             </div>
           </div>
           {expandedSections.ga4 ? <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
@@ -684,32 +684,32 @@ export default function DataLayer() {
                   <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-textGray" />
                   <p className="text-[10px] sm:text-xs text-fitzone-textGray">Usuarios</p>
                 </div>
-                <p className="text-lg sm:text-xl font-bold text-white">198.4K</p>
-                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+28%</p>
+                <p className="text-lg sm:text-xl font-bold text-white">56,8K</p>
+                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+24%</p>
               </div>
               <div className="bg-fitzone-slate rounded-lg p-3 sm:p-4">
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-textGray" />
                   <p className="text-[10px] sm:text-xs text-fitzone-textGray">Sesiones</p>
                 </div>
-                <p className="text-lg sm:text-xl font-bold text-white">245K</p>
-                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+32%</p>
+                <p className="text-lg sm:text-xl font-bold text-white">70K</p>
+                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+28%</p>
               </div>
               <div className="bg-fitzone-slate rounded-lg p-3 sm:p-4">
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-textGray" />
-                  <p className="text-[10px] sm:text-xs text-fitzone-textGray">Consultas</p>
+                  <p className="text-[10px] sm:text-xs text-fitzone-textGray">Cotizaciones</p>
                 </div>
-                <p className="text-lg sm:text-xl font-bold text-fitzone-purple">1,450</p>
-                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+22.9%</p>
+                <p className="text-lg sm:text-xl font-bold text-fitzone-purple">1.500</p>
+                <p className="text-[10px] sm:text-xs text-fitzone-emerald">+18,2%</p>
               </div>
               <div className="bg-fitzone-slate rounded-lg p-3 sm:p-4">
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-textGray" />
                   <p className="text-[10px] sm:text-xs text-fitzone-textGray">Conv.</p>
                 </div>
-                <p className="text-lg sm:text-xl font-bold text-fitzone-emerald">0.59%</p>
-                <p className="text-[10px] sm:text-xs text-fitzone-textGray">Meta: 0.55%</p>
+                <p className="text-lg sm:text-xl font-bold text-fitzone-emerald">2,14%</p>
+                <p className="text-[10px] sm:text-xs text-fitzone-textGray">Target: 1,80%</p>
               </div>
             </div>
 
@@ -725,18 +725,18 @@ export default function DataLayer() {
                     <span className="text-xs sm:text-sm text-fitzone-textGray">Mobile</span>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                       <div className="w-20 sm:w-32 h-1.5 sm:h-2 bg-fitzone-charcoal rounded-full overflow-hidden">
-                        <div className="h-full bg-fitzone-purple rounded-full" style={{ width: '82%' }}></div>
+                        <div className="h-full bg-fitzone-purple rounded-full" style={{ width: '80%' }}></div>
                       </div>
-                      <span className="text-xs sm:text-sm font-bold text-white w-8 text-right">82%</span>
+                      <span className="text-xs sm:text-sm font-bold text-white w-8 text-right">80%</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs sm:text-sm text-fitzone-textGray">Desktop</span>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                       <div className="w-20 sm:w-32 h-1.5 sm:h-2 bg-fitzone-charcoal rounded-full overflow-hidden">
-                        <div className="h-full bg-fitzone-cyan rounded-full" style={{ width: '14%' }}></div>
+                        <div className="h-full bg-fitzone-cyan rounded-full" style={{ width: '16%' }}></div>
                       </div>
-                      <span className="text-xs sm:text-sm font-bold text-white w-8 text-right">14%</span>
+                      <span className="text-xs sm:text-sm font-bold text-white w-8 text-right">16%</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
@@ -758,12 +758,12 @@ export default function DataLayer() {
                 </h4>
                 <div className="space-y-1.5 sm:space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs sm:text-sm text-fitzone-textGray">Meta Ads</span>
-                    <span className="text-xs sm:text-sm font-bold text-fitzone-purple">38%</span>
+                    <span className="text-xs sm:text-sm text-fitzone-textGray">Google Ads</span>
+                    <span className="text-xs sm:text-sm font-bold text-fitzone-purple">35%</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs sm:text-sm text-fitzone-textGray">Google Ads</span>
-                    <span className="text-xs sm:text-sm font-bold text-white">27%</span>
+                    <span className="text-xs sm:text-sm text-fitzone-textGray">Meta Ads</span>
+                    <span className="text-xs sm:text-sm font-bold text-white">30%</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs sm:text-sm text-fitzone-textGray">Orgánico</span>
@@ -785,7 +785,7 @@ export default function DataLayer() {
             <div>
               <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
                 <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fitzone-amber" />
-                Páginas del Sitio Web WIN
+                Páginas de verisure.pe
               </h4>
               <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
                 <table className="w-full min-w-[550px]">
@@ -836,30 +836,30 @@ export default function DataLayer() {
       {/* Keywords Reference */}
       <div className="bg-fitzone-purple rounded-xl p-4 sm:p-6 text-white">
         <h3 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 flex items-center gap-2">
-          <Wifi className="w-5 h-5 sm:w-6 sm:h-6" />
-          Keywords Monitoreadas - WIN
+          <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
+          Keywords Monitoreadas. Verisure
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <div>
-            <p className="text-xs sm:text-sm text-white/70 mb-1.5 sm:mb-2 font-semibold">Marca WIN:</p>
+            <p className="text-xs sm:text-sm text-white/70 mb-1.5 sm:mb-2 font-semibold">Marca Verisure:</p>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">WIN Internet</span>
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">WIN Fibra</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Verisure</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">ZeroVision</span>
             </div>
           </div>
           <div>
-            <p className="text-xs sm:text-sm text-white/70 mb-1.5 sm:mb-2 font-semibold">Mercado fibra óptica:</p>
+            <p className="text-xs sm:text-sm text-white/70 mb-1.5 sm:mb-2 font-semibold">Categoría seguridad:</p>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Fibra óptica</span>
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Velocidad simétrica</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Alarma para casa</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Cámaras de seguridad</span>
             </div>
           </div>
           <div>
             <p className="text-xs sm:text-sm text-white/70 mb-1.5 sm:mb-2 font-semibold">Competencia:</p>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Movistar</span>
-              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Wow Perú</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Prosegur</span>
+              <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs sm:text-sm">Securitas</span>
             </div>
           </div>
         </div>

@@ -6,16 +6,16 @@
 // ============================================================================
 export const BRAND_CONFIG = {
   name: 'The Algorithm by Reset',
-  tagline: 'WIN Awareness Intelligence Platform',
-  subtitle: 'Optimización de inversión digital para recordación de marca de WIN',
-  product: 'Campaña de Marca WIN 2026',
+  tagline: 'Verisure Security Intelligence Platform',
+  subtitle: 'Optimización de inversión digital para Verisure Perú en alarmas monitoreadas',
+  product: 'Campaña Verisure Perú 2026',
   market: 'Perú (foco Lima Metropolitana)',
-  client: 'WIN',
+  client: 'Verisure Perú',
   agency: 'Reset Agency',
   isTemplate: false,
   version: '1.0.0',
-  slogan: 'Internet 100% fibra óptica',
-  founded: 2017,
+  slogan: 'Protección residencial y empresarial con monitoreo continuo',
+  founded: 1988,
 };
 
 // ============================================================================
@@ -25,7 +25,7 @@ export const LAYER_CONFIG = {
   data: {
     id: 'data',
     name: 'Captura de Señales',
-    subtitle: 'Monitoreo en tiempo real del ecosistema digital telco y fibra óptica',
+    subtitle: 'Monitoreo en tiempo real del ecosistema digital del sector seguridad y alarmas',
     description: 'Búsqueda, Tendencia, Intención, Engagement',
     icon: 'Search',
     color: 'from-fitzone-orange to-fitzone-darkOrange',
@@ -33,7 +33,7 @@ export const LAYER_CONFIG = {
   decision: {
     id: 'decision',
     name: 'Inteligencia de Mercado',
-    subtitle: 'Insights automáticos para optimizar inversión en recordación de marca',
+    subtitle: 'Insights automáticos para optimizar la captación de leads y el tráfico web',
     description: 'Análisis y definición de estrategia',
     icon: 'Target',
     color: 'from-fitzone-darkOrange to-fitzone-electric',
@@ -41,7 +41,7 @@ export const LAYER_CONFIG = {
   execution: {
     id: 'execution',
     name: 'Activación Estratégica',
-    subtitle: 'Distribución inteligente de presupuesto, zonas y contenidos',
+    subtitle: 'Distribución sugerida de presupuesto, zonas de cobertura y contenido',
     description: 'Implementación en tiempo real',
     icon: 'Zap',
     color: 'from-fitzone-electric to-fitzone-lime',
@@ -49,7 +49,7 @@ export const LAYER_CONFIG = {
   optimization: {
     id: 'optimization',
     name: 'Performance & Optimización',
-    subtitle: 'Resultados de awareness en tiempo real y ajustes automáticos',
+    subtitle: 'Resultados de leads en tiempo real y ajustes propuestos',
     description: 'Evaluación y redistribución',
     icon: 'TrendingUp',
     color: 'from-fitzone-lime to-fitzone-orange',
@@ -57,33 +57,33 @@ export const LAYER_CONFIG = {
 };
 
 // ============================================================================
-// KEY MESSAGES - Mensajes clave de comunicación WIN
+// KEY MESSAGES - 5 pilares de comunicación Verisure
 // ============================================================================
 export const KEY_MESSAGES = {
-  fibra_pura: {
-    title: 'Fibra 100% óptica hasta el hogar',
-    message: 'Tecnología FTTH pura, sin tramos de cobre, con velocidad estable',
-    description: 'Internet diseñado para el consumo digital actual',
+  monitoreo_continuo: {
+    title: 'Monitoreo desde Central propia',
+    message: 'La Central Receptora de Alarmas opera las 24 horas, los 7 días, con personal especializado',
+    description: 'Atención sostenida ante cualquier evento detectado',
   },
-  velocidad_simetrica: {
-    title: 'Velocidad simétrica 1:1',
-    message: 'La misma velocidad de bajada y de subida en todos los planes',
-    description: 'Ideal para teletrabajo, streaming y videollamadas',
+  doble_verificacion: {
+    title: 'Doble verificación por imagen y audio',
+    message: 'Antes de avisar a las autoridades se valida la intrusión por dos canales independientes',
+    description: 'Reduce el ruido por falsas alarmas',
   },
-  satisfaccion_lider: {
-    title: 'Líder en satisfacción al cliente',
-    message: 'Reconocidos por OSIPTEL como el operador con mejor experiencia de servicio en fibra',
-    description: 'Atención técnica local con soporte cercano',
+  zerovision: {
+    title: 'ZeroVision como capa diferencial',
+    message: 'Al confirmarse intrusión se libera niebla densa que limita la visibilidad en segundos',
+    description: 'Tecnología propietaria orientada a interrumpir el robo en curso',
   },
-  instalacion_incluida: {
-    title: 'Instalación gratuita incluida',
-    message: 'Sin costo de instalación, equipo entregado y configurado en el hogar',
-    description: 'Activación rápida, normalmente en pocos días',
+  respuesta_autoridades: {
+    title: 'Conexión con fuerzas de seguridad',
+    message: 'La Central coordina el aviso a la PNP y serenazgo del distrito ante un evento confirmado',
+    description: 'Articulación con autoridades locales',
   },
-  cobertura_lima: {
-    title: 'Cobertura en 40+ distritos de Lima',
-    message: 'Red propia desplegada en Lima Metropolitana y 11 provincias del país',
-    description: 'Una red en expansión continua',
+  control_movil: {
+    title: 'Control desde la app My Verisure',
+    message: 'Activación, desactivación y consulta de estado desde el celular, con historial de eventos',
+    description: 'Gestión del sistema sin depender del teclado físico',
   },
 };
 
@@ -94,20 +94,20 @@ export const DATA_SOURCES_CONFIG = {
   googleTrends: {
     enabled: true,
     name: 'Google Trends',
-    description: 'Tendencias de búsqueda de internet hogar y fibra óptica en tiempo real',
+    description: 'Tendencias de búsqueda de alarmas, cámaras y seguridad residencial en tiempo real',
     icon: 'TrendingUp',
     color: 'text-fitzone-electric',
     bgColor: 'bg-fitzone-slate',
     region: 'PE',
-    category: 'Internet & Telecom',
+    category: 'Home & Garden > Home Security',
     interval: 'hourly',
     status: 'active',
-    geo: ['Lima', 'Callao', 'Arequipa', 'Trujillo'],
+    geo: ['Lima', 'Callao', 'Lima Norte', 'Lima Sur'],
   },
   tiktok: {
     enabled: true,
     name: 'TikTok',
-    description: 'Contenido viral telco, lifestyle digital y hashtags trending',
+    description: 'Contenido viral de seguridad ciudadana, hogar protegido y testimonios',
     icon: 'Video',
     color: 'text-fitzone-lime',
     bgColor: 'bg-fitzone-slate',
@@ -117,7 +117,7 @@ export const DATA_SOURCES_CONFIG = {
   meta: {
     enabled: true,
     name: 'Meta Platforms',
-    description: 'Facebook e Instagram insights del sector telco e internet hogar',
+    description: 'Facebook e Instagram insights del sector seguridad para hogar y negocio',
     icon: 'Share2',
     color: 'text-fitzone-electric',
     bgColor: 'bg-fitzone-slate',
@@ -127,26 +127,26 @@ export const DATA_SOURCES_CONFIG = {
   youtube: {
     enabled: true,
     name: 'YouTube',
-    description: 'Reseñas de operadores, tests de velocidad y contenido educativo',
+    description: 'Reseñas, demos y testimoniales de sistemas de alarma y videovigilancia',
     icon: 'Youtube',
     color: 'text-fitzone-orange',
     bgColor: 'bg-fitzone-slate',
     status: 'active',
   },
-  telco: {
+  sector: {
     enabled: true,
     name: 'Portales del Sector',
-    description: 'OSIPTEL, MTC y reportes públicos de telecomunicaciones en Perú',
+    description: 'INEI, SUCAMEC, IPSOS Observatorio del Crimen y reportes sectoriales de seguridad',
     icon: 'Globe',
     color: 'text-fitzone-lime',
     bgColor: 'bg-fitzone-slate',
-    sources: ['OSIPTEL', 'MTC', 'IAB Perú', 'IPSOS Perú'],
+    sources: ['INEI ENAPRES', 'SUCAMEC', 'IPSOS Observatorio del Crimen', 'APEIM'],
     status: 'active',
   },
   ga4: {
     enabled: false,
     name: 'Google Analytics 4',
-    description: 'Tráfico web y consultas de planes',
+    description: 'Tráfico web y consultas de cotización en verisure.pe',
     icon: 'BarChart3',
     color: 'text-fitzone-orange',
     bgColor: 'bg-fitzone-slate',
@@ -164,58 +164,60 @@ export const CHANNELS_CONFIG = {
     icon: 'Share2',
     color: 'text-fitzone-electric',
     bgColor: 'bg-fitzone-slate',
-    primary_kpi: 'Alcance + Interacciones',
-    description: 'Instagram y Facebook Ads orientados a awareness',
-    subchannels: ['Reach campaigns', 'Engagement', 'Reels Ads'],
+    primary_kpi: 'Leads y tráfico web',
+    description: 'Facebook e Instagram con lead ads y Reels testimoniales',
+    subchannels: ['Lead campaigns', 'Click to WhatsApp', 'Reels Ads'],
   },
   google_search: {
     name: 'Google Search',
     icon: 'Search',
     color: 'text-fitzone-lime',
     bgColor: 'bg-fitzone-slate',
-    primary_kpi: 'Búsquedas de marca',
-    description: 'Campañas Brand y categoría fibra óptica',
+    primary_kpi: 'Leads de alta intención',
+    description: 'Campañas brand y categoría con keywords de seguridad y alarmas',
   },
   google_display: {
     name: 'Google Display',
     icon: 'Monitor',
     color: 'text-fitzone-orange',
     bgColor: 'bg-fitzone-slate',
-    primary_kpi: 'Alcance + Frecuencia',
-    description: 'Red de display contextual y geo Lima',
+    primary_kpi: 'Remarketing y refuerzo',
+    description: 'Red display contextual y remarketing de cierre de embudo',
   },
   youtube: {
     name: 'YouTube',
     icon: 'Youtube',
     color: 'text-fitzone-orange',
     bgColor: 'bg-fitzone-slate',
-    primary_kpi: 'Recordación + Consideración',
-    description: 'Bumpers, in-stream y shorts para awareness',
+    primary_kpi: 'Awareness y consideración',
+    description: 'TrueView for Action y Bumper Ads con piezas testimoniales',
   },
   tiktok_ads: {
     name: 'TikTok Ads',
     icon: 'Video',
     color: 'text-fitzone-lime',
     bgColor: 'bg-fitzone-slate',
-    primary_kpi: 'Alcance audiencia joven',
-    description: 'Spark Ads y TopView para audiencia 18-30',
+    primary_kpi: 'Alcance segmento 30 a 45',
+    description: 'Spark Ads y formato testimonial con creadores del nicho hogar',
   },
 };
 
 // ============================================================================
-// SEDES - Centros de atención WIN en Lima Metropolitana y Callao
+// SEDES - Zonas de cobertura de Verisure en Lima Metropolitana y Callao
+// (reinterpretado: Verisure opera 100% remoto, las "sedes" son agrupaciones
+// de distritos donde se entrega el servicio de monitoreo y soporte técnico)
 // ============================================================================
 export const SEDES_CONFIG = [
-  { id: 1, nombre: 'WIN Sede Central', distrito: 'Surquillo', nse: 'A/B', size: 'Corporativa', type: 'Sede principal' },
-  { id: 2, nombre: 'WIN Surco', distrito: 'Santiago de Surco', nse: 'A/B', size: 'Premium', type: 'Centro de atención' },
-  { id: 3, nombre: 'WIN Miraflores', distrito: 'Miraflores', nse: 'A', size: 'Premium', type: 'Centro de atención' },
-  { id: 4, nombre: 'WIN San Miguel', distrito: 'San Miguel', nse: 'B', size: 'Estándar', type: 'Centro de atención' },
-  { id: 5, nombre: 'WIN La Molina', distrito: 'La Molina', nse: 'A/B', size: 'Premium', type: 'Centro de atención' },
-  { id: 6, nombre: 'WIN Los Olivos', distrito: 'Los Olivos', nse: 'B/C+', size: 'Estándar', type: 'Centro de atención' },
-  { id: 7, nombre: 'WIN San Juan de Lurigancho', distrito: 'San Juan de Lurigancho', nse: 'C+/B', size: 'Estándar', type: 'Centro de atención' },
-  { id: 8, nombre: 'WIN San Juan de Miraflores', distrito: 'San Juan de Miraflores', nse: 'C+/B', size: 'Estándar', type: 'Centro de atención' },
-  { id: 9, nombre: 'WIN Comas', distrito: 'Comas', nse: 'C+/B', size: 'Estándar', type: 'Centro de atención' },
-  { id: 10, nombre: 'WIN Callao', distrito: 'Bellavista (Callao)', nse: 'B/C+', size: 'Estándar', type: 'Centro de atención' },
+  { id: 1, nombre: 'Zona Lima Top', distrito: 'Miraflores, San Isidro, Barranco', nse: 'A', size: 'Premium', type: 'Cobertura residencial' },
+  { id: 2, nombre: 'Zona Lima Moderna Este', distrito: 'Surco, La Molina, San Borja, Surquillo', nse: 'A/B', size: 'Premium', type: 'Cobertura residencial' },
+  { id: 3, nombre: 'Zona Lima Moderna Norte', distrito: 'Magdalena, Jesús María, Pueblo Libre, San Miguel, Lince', nse: 'A/B', size: 'Premium', type: 'Cobertura residencial' },
+  { id: 4, nombre: 'Zona Lima Norte', distrito: 'Los Olivos, San Martín de Porres, Independencia, Comas', nse: 'B/C+', size: 'Estándar', type: 'Cobertura mixta' },
+  { id: 5, nombre: 'Zona Lima Este', distrito: 'San Juan de Lurigancho, Ate, Santa Anita', nse: 'B/C+', size: 'Estándar', type: 'Cobertura mixta' },
+  { id: 6, nombre: 'Zona Lima Sur', distrito: 'Chorrillos, Villa El Salvador, Lurín, San Juan de Miraflores', nse: 'B/C+', size: 'Estándar', type: 'Cobertura mixta' },
+  { id: 7, nombre: 'Zona Lima Centro', distrito: 'Cercado de Lima, Breña, La Victoria', nse: 'B/C', size: 'Estándar', type: 'Cobertura mixta' },
+  { id: 8, nombre: 'Zona Callao', distrito: 'Callao, Bellavista, La Perla, Carmen de la Legua', nse: 'B/C', size: 'Estándar', type: 'Cobertura mixta' },
+  { id: 9, nombre: 'Eje Comercial Gamarra', distrito: 'La Victoria (eje Gamarra)', nse: 'C', size: 'Estándar', type: 'Cobertura comercial' },
+  { id: 10, nombre: 'Eje Sur Balnearios', distrito: 'Asia, Punta Hermosa, San Bartolo, Cerro Azul', nse: 'A', size: 'Premium', type: 'Cobertura estacional' },
 ];
 
 // ============================================================================
@@ -223,130 +225,130 @@ export const SEDES_CONFIG = [
 // ============================================================================
 export const TARGET_AUDIENCES = [
   {
-    id: 'joven_lima_moderna',
-    name: 'Joven Conectado Lima Moderna',
-    description: '25-39 años, NSE A/B, distritos de Lima Moderna, alto consumo digital',
-    size: '~620.000',
-    age_range: '25-39',
+    id: 'hogar_familiar_lima_moderna',
+    name: 'Hogar Familiar Lima Moderna',
+    description: '35 a 55 años, NSE A/B, distritos de Lima Top y Lima Moderna, decisión en pareja',
+    size: '~480.000',
+    age_range: '35 a 55',
     priority: 'high',
     segments: [
       {
-        name: 'Profesional millennial digital',
-        size: '~340.000',
-        age: '25-32',
-        characteristics: ['Teletrabajo y streaming intensivo', 'Decisión individual de contratación', 'Compara velocidades antes que precio'],
+        name: 'Padres con hijos en edad escolar',
+        size: '~290.000',
+        age: '35 a 45',
+        characteristics: ['Detonante por robo en la cuadra o viajes', 'Búsqueda iniciada por la madre, cierre en pareja', 'Sensibles al servicio cercano y la doble verificación'],
       },
       {
-        name: 'Adulto joven gamer y creador',
-        size: '~280.000',
-        age: '28-39',
-        characteristics: ['Gaming online y video en alta resolución', 'Valora velocidad de subida (simétrica)', 'Influenciado por reseñas en YouTube y TikTok'],
+        name: 'Adultos consolidados con vivienda propia',
+        size: '~190.000',
+        age: '46 a 55',
+        characteristics: ['Buscan tranquilidad y respaldo ante imprevistos', 'Valoran la trayectoria de la marca', 'Influenciados por referidos del condominio'],
       },
     ],
-    interests: ['Tecnología', 'Streaming', 'Gaming', 'Smart home', 'Teletrabajo'],
-    message: 'Velocidad simétrica para teletrabajar, transmitir y jugar sin esperas',
+    interests: ['Crianza y familia', 'Hogar inteligente', 'Viajes', 'Seguridad ciudadana'],
+    message: 'Protección continua para la familia con verificación por imagen y audio antes de avisar a las autoridades',
     channels: {
-      'Meta Ads': 50,
-      'Google Display': 18,
-      'YouTube': 18,
-      'TikTok Ads': 14,
+      'Meta Ads': 42,
+      'Google Search': 33,
+      'YouTube': 15,
+      'TikTok Ads': 10,
     },
-    engagement_rate: 5.2,
-    cpl_target: 0.12,
+    engagement_rate: 3.2,
+    cpl_target: 22,
     conversion_funnel: {
-      alcance: 1500000,
-      visitas_landing: 22800,
-      formularios: 870,
+      alcance: 2000000,
+      visitas_landing: 30000,
+      formularios: 950,
       trials: 0,
-      miembros: 1500000,
+      miembros: 75,
     },
   },
   {
-    id: 'familia_conectada',
-    name: 'Familia Conectada Lima Norte y Sur',
-    description: '35-55 años, NSE B/C+, distritos de Lima Norte, Este y Sur, decisión familiar',
-    size: '~440.000',
-    age_range: '35-55',
+    id: 'negocio_pyme_lima',
+    name: 'Negocio PyME Lima',
+    description: '32 a 58 años, dueños de bodegas, farmacias, restaurantes y oficinas en Lima Norte, Este y comercial',
+    size: '~310.000',
+    age_range: '32 a 58',
     priority: 'medium',
     segments: [
       {
-        name: 'Padres millennials y Gen X',
-        size: '~260.000',
-        age: '35-45',
-        characteristics: ['Decisión familiar de contratación', 'Hijos consumen streaming y gaming', 'Sensibles al servicio técnico local'],
+        name: 'Dueños de comercio en zonas de alta incidencia',
+        size: '~190.000',
+        age: '32 a 45',
+        characteristics: ['Detonante por extorsión o asalto cercano', 'Decisión rápida después del evento', 'Sensibles al costo de instalación inicial'],
       },
       {
-        name: 'Adultos consolidados',
-        size: '~180.000',
-        age: '46-55',
-        characteristics: ['Buscan estabilidad y soporte cercano', 'Valoran transparencia en cobros', 'Influenciados por referidos del barrio'],
+        name: 'Comercio establecido y oficinas',
+        size: '~120.000',
+        age: '46 a 58',
+        characteristics: ['Buscan continuidad operativa', 'Evalúan integraciones con cámaras y control de accesos', 'Influenciados por gremios y asociaciones de bodegueros'],
       },
     ],
-    interests: ['Streaming familiar', 'Educación de hijos', 'Series y deportes', 'Soporte técnico'],
-    message: 'Internet estable y simétrico para todos en casa, con soporte local cercano',
+    interests: ['Emprendimiento PyME', 'Cámaras y videovigilancia', 'Asociaciones de bodegueros', 'Continuidad operativa'],
+    message: 'Protección del negocio con monitoreo continuo, verificación por imagen y respuesta articulada con las autoridades',
     channels: {
-      'Meta Ads': 58,
-      'Google Search': 20,
-      'YouTube': 14,
-      'Google Display': 8,
+      'Google Search': 45,
+      'Meta Ads': 30,
+      'TikTok Ads': 15,
+      'YouTube': 10,
     },
-    engagement_rate: 3.6,
-    cpl_target: 0.15,
+    engagement_rate: 2.9,
+    cpl_target: 18,
     conversion_funnel: {
-      alcance: 1000000,
-      visitas_landing: 15200,
-      formularios: 580,
+      alcance: 800000,
+      visitas_landing: 14000,
+      formularios: 550,
       trials: 0,
-      miembros: 1000000,
+      miembros: 45,
     },
   },
 ];
 
 // ============================================================================
-// TIMING - Mejores momentos para pauta (telco awareness Perú)
+// TIMING - Mejores momentos para pauta (sector seguridad Lima)
 // ============================================================================
 export const OPTIMAL_TIMING = {
   dayparts: [
-    { name: 'Mañana', hours: '7:00 - 10:00', performance: 'medium', multiplier: 1.0, audience: 'Profesionales en teletrabajo' },
-    { name: 'Mediodía', hours: '12:00 - 14:00', performance: 'high', multiplier: 1.3, audience: 'Pausa laboral, consumo móvil' },
-    { name: 'Tarde-noche', hours: '18:00 - 22:00', performance: 'very_high', multiplier: 1.7, audience: 'Familia conectada, streaming' },
-    { name: 'Madrugada', hours: '22:00 - 00:00', performance: 'high', multiplier: 1.2, audience: 'Joven digital, gaming' },
+    { name: 'Mañana', hours: '7:00 a 10:00', performance: 'medium', multiplier: 1.0, audience: 'Salida laboral, exposición móvil baja' },
+    { name: 'Mediodía', hours: '12:00 a 14:00', performance: 'high', multiplier: 1.3, audience: 'Pausa laboral, consumo móvil' },
+    { name: 'Tarde noche', hours: '18:00 a 22:00', performance: 'very_high', multiplier: 1.8, audience: 'Hogar conectado, noticias en TV, planificación de compra' },
+    { name: 'Madrugada', hours: '22:00 a 00:00', performance: 'high', multiplier: 1.2, audience: 'Insomnio asociado a inseguridad, picos de búsqueda' },
   ],
   weekdays: [
-    { name: 'Lunes', performance: 'medium', recommended: true, note: 'Búsqueda y consideración de cambio' },
-    { name: 'Martes', performance: 'high', recommended: true, note: 'Picos de tráfico web' },
-    { name: 'Miércoles', performance: 'high', recommended: true, note: 'Engagement medio semana' },
-    { name: 'Jueves', performance: 'very_high', recommended: true, note: 'Alta consideración pre-fin de semana' },
-    { name: 'Viernes', performance: 'very_high', recommended: true, note: 'Pago de quincena, decisión' },
+    { name: 'Lunes', performance: 'medium', recommended: true, note: 'Continuación de consultas del fin de semana' },
+    { name: 'Martes', performance: 'high', recommended: true, note: 'Picos de tráfico web del sector' },
+    { name: 'Miércoles', performance: 'high', recommended: true, note: 'Engagement sostenido a media semana' },
+    { name: 'Jueves', performance: 'very_high', recommended: true, note: 'Alta consideración antes del fin de semana' },
+    { name: 'Viernes', performance: 'very_high', recommended: true, note: 'Planificación de viajes y seguridad del hogar' },
     { name: 'Sábado', performance: 'high', recommended: true, note: 'Consumo familiar y comparación' },
     { name: 'Domingo', performance: 'medium', recommended: true, note: 'Investigación y decisión final' },
   ],
   seasonality: [
-    { month: 'Enero', demand: 'low', note: 'Post-Navidad, ajuste de presupuesto familiar' },
-    { month: 'Febrero', demand: 'high', note: 'Regreso a clases, pico de búsqueda escolar' },
-    { month: 'Marzo', demand: 'high', note: 'Ajuste de planes para año académico' },
-    { month: 'Abril', demand: 'medium', note: 'Estabilización post escolar' },
-    { month: 'Mayo', demand: 'low', note: 'Mes intermedio, valle natural' },
-    { month: 'Junio', demand: 'medium', note: 'Recuperación y eventos deportivos' },
-    { month: 'Julio', demand: 'very_high', note: 'Fiestas Patrias y vacaciones, alto consumo digital' },
-    { month: 'Agosto', demand: 'medium', note: 'Estabilización post Fiestas Patrias' },
-    { month: 'Septiembre', demand: 'medium', note: 'Pre-Cyber Days noviembre' },
-    { month: 'Octubre', demand: 'medium', note: 'Calentamiento de campañas' },
-    { month: 'Noviembre', demand: 'very_high', note: 'Cyber Days y Black Friday, pico anual' },
-    { month: 'Diciembre', demand: 'very_high', note: 'Navidad y campañas de fin de año' },
+    { month: 'Enero', demand: 'very_high', note: 'Vacaciones de verano, hogares ausentes, búsqueda activa' },
+    { month: 'Febrero', demand: 'high', note: 'Vuelta a clases, ajuste de rutinas y seguridad familiar' },
+    { month: 'Marzo', demand: 'high', note: 'Estabilización del año, picos por noticias de inseguridad' },
+    { month: 'Abril', demand: 'medium', note: 'Mes intermedio, valle relativo' },
+    { month: 'Mayo', demand: 'medium', note: 'Demanda sostenida sin picos estacionales' },
+    { month: 'Junio', demand: 'medium', note: 'Eventos deportivos, exposición prolongada en hogar' },
+    { month: 'Julio', demand: 'high', note: 'Fiestas Patrias y feriados largos, hogares ausentes' },
+    { month: 'Agosto', demand: 'low', note: 'Estabilización tras Fiestas Patrias' },
+    { month: 'Septiembre', demand: 'medium', note: 'Recuperación previa a campañas de Q4' },
+    { month: 'Octubre', demand: 'medium', note: 'Calentamiento previo al pico de fin de año' },
+    { month: 'Noviembre', demand: 'very_high', note: 'Inicio del pico anual, refuerzo previo a Navidad' },
+    { month: 'Diciembre', demand: 'very_high', note: 'Pico máximo: viajes de fin de año y aumento de incidencia delictiva' },
   ],
 };
 
 // ============================================================================
-// SERVICIOS - Planes y bundles WIN monitoreados (6 entradas)
+// SERVICIOS - Productos y servicios Verisure monitoreados (6 entradas)
 // ============================================================================
 export const SERVICIOS_CONFIG = [
-  { id: 1, nombre: 'WIN Hogar 750 Mbps', revenue_pct: 22, cpl_target: 0.13, conversion: 5.4 },
-  { id: 2, nombre: 'WIN Hogar 850 Mbps', revenue_pct: 26, cpl_target: 0.14, conversion: 6.1 },
-  { id: 3, nombre: 'WIN Hogar 1 Gbps Premium', revenue_pct: 18, cpl_target: 0.16, conversion: 4.8 },
-  { id: 4, nombre: 'WIN Gamer 600 Mbps', revenue_pct: 10, cpl_target: 0.12, conversion: 7.2 },
-  { id: 5, nombre: 'WIN + WIN TV Premium', revenue_pct: 14, cpl_target: 0.15, conversion: 5.0 },
-  { id: 6, nombre: 'WIN + L1MAX (Liga 1)', revenue_pct: 10, cpl_target: 0.17, conversion: 4.4 },
+  { id: 1, nombre: 'Alarma Residencial Esencial', revenue_pct: 30, cpl_target: 22, conversion: 5.2 },
+  { id: 2, nombre: 'Alarma Residencial Plus con cámaras', revenue_pct: 22, cpl_target: 24, conversion: 4.8 },
+  { id: 3, nombre: 'ZeroVision Residencial', revenue_pct: 14, cpl_target: 26, conversion: 4.2 },
+  { id: 4, nombre: 'Alarma para Negocio PyME', revenue_pct: 18, cpl_target: 18, conversion: 6.5 },
+  { id: 5, nombre: 'Cámaras de Videovigilancia', revenue_pct: 8, cpl_target: 19, conversion: 5.8 },
+  { id: 6, nombre: 'Guardián Verisure con botón SOS', revenue_pct: 8, cpl_target: 16, conversion: 7.0 },
 ];
 
 // ============================================================================
@@ -363,8 +365,8 @@ export const METRIC_CARDS_CONFIG = [
   },
   {
     id: 'cpm',
-    title: 'CPM Promedio',
-    description: 'Costo por mil impresiones servidas',
+    title: 'CPL Promedio',
+    description: 'Costo promedio por lead generado en el mes',
     icon: 'DollarSign',
     color: 'fitzone-electric',
     gradient: 'from-fitzone-electric to-fitzone-cyan',
@@ -379,41 +381,40 @@ export const METRIC_CARDS_CONFIG = [
   },
   {
     id: 'opportunity',
-    title: 'WIN Awareness Score',
-    description: 'Índice de oportunidad de recordación de marca',
-    icon: 'Zap',
+    title: 'Score de Oportunidad Verisure',
+    description: 'Índice de oportunidad de captación en el sector seguridad',
+    icon: 'Shield',
     color: 'fitzone-orange',
     gradient: 'from-fitzone-orange to-fitzone-lime',
   },
 ];
 
 // ============================================================================
-// CRM INTEGRATION - Umbrales de CPI por audiencia (awareness)
-// (las claves cpl_* se mantienen por compatibilidad; representan CPI en USD)
+// CRM INTEGRATION - Umbrales de CPL por audiencia (USD)
 // ============================================================================
 export const CRM_CONFIG = {
   enabled: false,
   api_key: null,
   cpl_thresholds: {
-    joven_lima_moderna: {
-      cpl_target: 0.12,
-      cpl_alert: 0.18,
-      cpl_pause: 0.25,
-      max_cpl: 0.22,
+    hogar_familiar_lima_moderna: {
+      cpl_target: 22,
+      cpl_alert: 32,
+      cpl_pause: 45,
+      max_cpl: 35,
     },
-    familia_conectada: {
-      cpl_target: 0.15,
-      cpl_alert: 0.22,
-      cpl_pause: 0.30,
-      max_cpl: 0.27,
+    negocio_pyme_lima: {
+      cpl_target: 18,
+      cpl_alert: 26,
+      cpl_pause: 38,
+      max_cpl: 30,
     },
   },
   conversion_tracking: {
     reach_unique: true,
     interactions: true,
     landing_page_visits: true,
-    branded_search_lift: true,
-    consideration: true,
+    leads_formularios: true,
+    instalaciones: true,
   },
   alerts: {
     email: true,
@@ -426,7 +427,7 @@ export const CRM_CONFIG = {
 // UI TEXT - Textos de interfaz
 // ============================================================================
 export const UI_TEXT = {
-  loading: 'Cargando WIN Algorithm...',
+  loading: 'Cargando Verisure Algorithm...',
   lastUpdate: 'Última actualización',
   systemActive: 'Sistema activo',
   noData: 'No hay datos disponibles',
@@ -434,7 +435,7 @@ export const UI_TEXT = {
   retry: 'Reintentar',
 
   footer: {
-    copyright: '2026 WIN Algorithm - Internet 100% fibra óptica',
+    copyright: '2026 Verisure Algorithm. Protección residencial y empresarial con monitoreo continuo',
     version: 'v1.0.0',
   },
 

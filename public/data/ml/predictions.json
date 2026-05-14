@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-05-04T08:30:00.000Z",
-  "client": "WIN",
+  "client": "Verisure Perú",
   "model_versions": {
     "sentiment_analyzer": "1.0.0",
     "budget_optimizer": "1.0.0",
@@ -8,40 +8,40 @@
   },
   "sentiment_analysis": {
     "overall": {
-      "score": 0.78,
+      "score": 0.74,
       "category": "positive",
       "topics_analyzed": 5
     },
     "by_topic": {
-      "Fibra óptica y velocidad simétrica": {
+      "Inseguridad ciudadana y protección del hogar": {
+        "score": 0.62,
+        "category": "neutral",
+        "mentions": 18420,
+        "engagement": 86
+      },
+      "Cámaras de seguridad y videovigilancia": {
+        "score": 0.82,
+        "category": "positive",
+        "mentions": 12680,
+        "engagement": 82
+      },
+      "Extorsión y protección de negocios": {
+        "score": 0.46,
+        "category": "negative",
+        "mentions": 8540,
+        "engagement": 78
+      },
+      "Vacaciones, viajes y hogar protegido": {
         "score": 0.84,
         "category": "positive",
-        "mentions": 9650,
-        "engagement": 80
+        "mentions": 5980,
+        "engagement": 74
       },
-      "Cyber Wow y Cyber Days": {
-        "score": 0.88,
-        "category": "positive",
-        "mentions": 14820,
-        "engagement": 84
-      },
-      "Streaming, gaming y entretenimiento en casa": {
+      "Tecnología y monitoreo continuo": {
         "score": 0.80,
         "category": "positive",
-        "mentions": 7280,
-        "engagement": 76
-      },
-      "Educación digital y conectividad": {
-        "score": 0.74,
-        "category": "positive",
-        "mentions": 4250,
+        "mentions": 3640,
         "engagement": 70
-      },
-      "Comparativas operadores fibra Perú": {
-        "score": 0.70,
-        "category": "neutral",
-        "mentions": 2580,
-        "engagement": 68
       }
     },
     "timestamp": "2026-05-04T08:30:00.000Z"
@@ -50,25 +50,25 @@
     "timestamp": "2026-05-04T08:30:00.000Z",
     "individual": {
       "search": {
-        "base": 8.4,
-        "momentum": 0.38,
-        "final": 8.5
+        "base": 8.8,
+        "momentum": 0.42,
+        "final": 8.9
       },
       "trend": {
-        "base": 7.6,
-        "final": 7.6
+        "base": 8.0,
+        "final": 8.0
       },
       "social": {
-        "sentiment": 7.8,
+        "sentiment": 7.4,
         "engagement": 7.6,
-        "final": 7.7
+        "final": 7.5
       },
       "intent": {
-        "conversion_rate": 0.0059,
-        "final": 6.8
+        "conversion_rate": 0.0214,
+        "final": 7.2
       }
     },
-    "overall": 7.6,
+    "overall": 7.9,
     "weights": {
       "search": 0.25,
       "trend": 0.20,
@@ -78,44 +78,44 @@
   },
   "budget_optimization": {
     "current": {
-      "meta_ads": 54,
-      "youtube": 14,
-      "google_search": 13,
-      "google_display": 12,
-      "tiktok_ads": 7
+      "meta_ads": 40,
+      "google_search": 35,
+      "youtube": 10,
+      "tiktok_ads": 10,
+      "google_display": 5
     },
     "recommended": {
       "meta_ads": {
-        "percentage": 58,
-        "amount": 8700,
-        "expected_uplift": "+12% alcance único",
-        "confidence": "high"
-      },
-      "youtube": {
-        "percentage": 14,
-        "amount": 2100,
-        "expected_uplift": "VTR 28.4%",
+        "percentage": 44,
+        "amount": 22000,
+        "expected_uplift": "+12% leads mensuales",
         "confidence": "high"
       },
       "google_search": {
-        "percentage": 13,
-        "amount": 1950,
-        "expected_uplift": "+18% búsquedas de marca",
+        "percentage": 31,
+        "amount": 15500,
+        "expected_uplift": "CPL más cercano al target $30",
         "confidence": "high"
       },
-      "google_display": {
+      "youtube": {
         "percentage": 10,
-        "amount": 1500,
-        "expected_uplift": "Frecuencia controlada",
+        "amount": 5000,
+        "expected_uplift": "VTR 27,4% y lift asistido al search",
         "confidence": "medium"
       },
       "tiktok_ads": {
+        "percentage": 10,
+        "amount": 5000,
+        "expected_uplift": "Alcance segmento 30 a 45 Lima",
+        "confidence": "medium"
+      },
+      "google_display": {
         "percentage": 5,
-        "amount": 750,
-        "expected_uplift": "Alcance audiencia 18-30",
+        "amount": 2500,
+        "expected_uplift": "Remarketing y cierre de embudo",
         "confidence": "medium"
       }
     },
-    "expected_uplift": "+250.000 personas alcanzadas/mes"
+    "expected_uplift": "+180 leads mensuales adicionales"
   }
 }

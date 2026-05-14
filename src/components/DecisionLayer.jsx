@@ -1,4 +1,4 @@
-import { Target, Users, MessageSquare, TrendingUp, Lightbulb, Zap, AlertCircle, Wifi, Flame, BarChart3, CheckCircle, FlaskConical, Calendar, Award, MapPin, Gauge, Activity, Globe2 } from 'lucide-react';
+import { Target, Users, MessageSquare, TrendingUp, Lightbulb, Zap, AlertCircle, Shield, ShieldCheck, Camera, Bell, Smartphone, Flame, BarChart3, CheckCircle, FlaskConical, Calendar, Award, MapPin, Gauge, Activity, Globe2 } from 'lucide-react';
 import { OPPORTUNITY_SCORE } from '../data/mockData';
 import { LAYER_CONFIG, KEY_MESSAGES, TARGET_AUDIENCES } from '../data/config';
 import { formatMoney, formatPercent } from '../utils/format';
@@ -7,7 +7,7 @@ export default function DecisionLayer() {
   const getMonthlyPeriod = () => {
     const now = new Date();
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    return `1-${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+    return `1 al ${now.getDate()} de ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
   };
 
   const monthlyPeriod = getMonthlyPeriod();
@@ -15,38 +15,38 @@ export default function DecisionLayer() {
   const recommendations = [
     {
       priority: 'high',
-      category: 'Meta Ads',
-      action: 'Se sugiere reforzar Meta Ads con creatividades enfocadas en fibra 100% pura y velocidad simétrica de cara a Cyber Days, manteniendo CPM debajo de target',
-      impact: '+250.000 personas alcanzadas estimadas en la ventana estacional',
-      confidence: 90
-    },
-    {
-      priority: 'high',
-      category: 'YouTube',
-      action: 'Se recomienda escalar la cobertura de bumpers de 6 segundos sobre velocidad simétrica y casos de gaming, streaming y teletrabajo',
-      impact: 'VTR estimado en 28% con frecuencia controlada',
+      category: 'Meta Lead Ads',
+      action: 'Se sugiere reforzar Meta Lead Ads con creatividades sobre doble verificación y monitoreo continuo, sosteniendo CPL cerca de $22 en Hogar Familiar Lima Moderna',
+      impact: 'Subida sugerida de aproximadamente 180 leads mensuales en la ventana estacional',
       confidence: 88
     },
     {
-      priority: 'medium',
-      category: 'Mensaje',
-      action: 'Se sugiere posicionar el mensaje de fibra 100% pura junto al respaldo OSIPTEL como diferenciador frente a redes mixtas',
-      impact: 'Mayor consideración en audiencia familias conectadas',
+      priority: 'high',
+      category: 'Google Search',
+      action: 'Se recomienda escalar la cobertura SEM en keywords transaccionales (alarma para casa, cámaras de seguridad, alarma para negocio) durante el pico de fin de año',
+      impact: 'CPL acercándose al target $30 con leads de mayor calificación',
       confidence: 86
     },
     {
       priority: 'medium',
+      category: 'Mensaje',
+      action: 'Se sugiere posicionar ZeroVision y la doble verificación por imagen y audio como capas diferenciales frente a la promesa básica de monitoreo de la competencia',
+      impact: 'Mayor consideración en audiencia Hogar Familiar Lima Moderna',
+      confidence: 84
+    },
+    {
+      priority: 'medium',
       category: 'TikTok',
-      action: 'Se observa una oportunidad de colaboración con creators de tecnología y gaming para amplificar contenido orgánico de casos reales',
-      impact: 'Crecimiento de awareness en audiencia 18-30 en Lima Moderna',
-      confidence: 82
+      action: 'Se observa una oportunidad de pilotar Spark Ads con creadores del nicho seguridad ciudadana y hogar para amplificar contenido testimonial en el subsegmento 30 a 45',
+      impact: 'Apertura de un canal adicional con CPL exploratorio en Lima',
+      confidence: 78
     },
     {
       priority: 'low',
-      category: 'Geolocalización',
-      action: 'Se sugiere evaluar segmentación geo dedicada en distritos de Lima Norte y Sur, donde el CPI promedio se observa por debajo del target',
-      impact: '+180.000 personas alcanzadas adicionales fuera de Lima Moderna',
-      confidence: 78
+      category: 'Geo PyME',
+      action: 'Se sugiere evaluar segmentación geo dedicada en Lima Este (SJL, Ate) y Lima Norte (Los Olivos, Comas) con foco en hotspots delictivos para captar Negocio PyME',
+      impact: 'Captura adicional del segmento PyME post evento delictivo',
+      confidence: 74
     }
   ];
 
@@ -55,7 +55,7 @@ export default function DecisionLayer() {
     size: aud.size,
     engagement: formatPercent(aud.engagement_rate),
     status: 'active',
-    description: aud.description + ` - ${aud.interests.slice(0, 3).join(', ')}`,
+    description: aud.description + `. Intereses: ${aud.interests.slice(0, 3).join(', ')}`,
     message: aud.message,
     age_range: aud.age_range,
     cpl_target: aud.cpl_target
@@ -94,7 +94,7 @@ export default function DecisionLayer() {
         </div>
       </div>
 
-      {/* WIN Awareness Score */}
+      {/* Score de Oportunidad Verisure */}
       <div className="bg-fitzone-purple text-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6 mb-4 sm:mb-6 lg:mb-8">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -102,8 +102,8 @@ export default function DecisionLayer() {
               <Zap className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10" />
             </div>
             <div>
-              <h3 className="text-lg sm:text-xl font-bold">WIN Awareness Score</h3>
-              <p className="text-white/90 mt-0.5 sm:mt-1 text-xs sm:text-sm">Índice de oportunidad para inversión en recordación de marca</p>
+              <h3 className="text-lg sm:text-xl font-bold">Score de Oportunidad Verisure</h3>
+              <p className="text-white/90 mt-0.5 sm:mt-1 text-xs sm:text-sm">Índice de oportunidad para inversión en captación de leads</p>
             </div>
           </div>
 
@@ -136,7 +136,7 @@ export default function DecisionLayer() {
                    key === 'social_engagement' ? 'Engagement Social' :
                    key === 'competitor_gap' ? 'Gap Competitivo' :
                    key === 'seasonal_index' ? 'Índice Estacional' :
-                   key === 'conversion_efficiency' ? 'Eficiencia de Costos' : key}
+                   key === 'conversion_efficiency' ? 'Eficiencia de CPL' : key}
                 </h4>
                 <span className="text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
                   {(component.weight * 100).toFixed(0)}% peso
@@ -182,7 +182,7 @@ export default function DecisionLayer() {
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold text-white">Recomendaciones Estratégicas</h3>
-            <p className="text-xs sm:text-sm text-fitzone-textGray">Acciones sugeridas a partir de señales del mercado telco</p>
+            <p className="text-xs sm:text-sm text-fitzone-textGray">Acciones sugeridas a partir de señales del sector seguridad</p>
           </div>
         </div>
 
@@ -232,8 +232,8 @@ export default function DecisionLayer() {
             <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
           <div>
-            <h3 className="text-sm sm:text-base font-bold text-white">Audiencias Objetivo WIN</h3>
-            <p className="text-xs sm:text-sm text-fitzone-textGray">Segmentación inteligente para recordación de marca 2026</p>
+            <h3 className="text-sm sm:text-base font-bold text-white">Audiencias Objetivo Verisure</h3>
+            <p className="text-xs sm:text-sm text-fitzone-textGray">Segmentación sugerida para captación de leads 2026</p>
           </div>
         </div>
 
@@ -264,7 +264,7 @@ export default function DecisionLayer() {
                   <p className="text-lg sm:text-xl font-bold text-fitzone-cyan">{aud.engagement}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-fitzone-textGray">CPI Target</p>
+                  <p className="text-xs text-fitzone-textGray">CPL Target</p>
                   <p className="text-lg sm:text-xl font-bold text-fitzone-purple">{formatMoney(aud.cpl_target)}</p>
                 </div>
               </div>
@@ -288,67 +288,67 @@ export default function DecisionLayer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div className="bg-fitzone-slate rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 border border-fitzone-purple/20">
             <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-              <Wifi className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-purple" />
-              <p className="text-fitzone-textGray text-xs sm:text-sm font-semibold">Pilar 1: {KEY_MESSAGES.fibra_pura.title}</p>
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-purple" />
+              <p className="text-fitzone-textGray text-xs sm:text-sm font-semibold">Pilar 1: {KEY_MESSAGES.monitoreo_continuo.title}</p>
             </div>
-            <p className="text-sm sm:text-base font-bold mb-1 sm:mb-2">"{KEY_MESSAGES.fibra_pura.message}"</p>
-            <p className="text-fitzone-textGray text-xs sm:text-sm mb-2 sm:mb-3">{KEY_MESSAGES.fibra_pura.description}</p>
+            <p className="text-sm sm:text-base font-bold mb-1 sm:mb-2">"{KEY_MESSAGES.monitoreo_continuo.message}"</p>
+            <p className="text-fitzone-textGray text-xs sm:text-sm mb-2 sm:mb-3">{KEY_MESSAGES.monitoreo_continuo.description}</p>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">FTTH</span>
-              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Fibra pura</span>
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Central propia</span>
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">24/7</span>
             </div>
           </div>
 
           <div className="bg-fitzone-slate rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 border border-fitzone-purple/20">
             <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-              <Gauge className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-purple" />
-              <p className="text-fitzone-textGray text-xs sm:text-sm font-semibold">Pilar 2: {KEY_MESSAGES.velocidad_simetrica.title}</p>
+              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-purple" />
+              <p className="text-fitzone-textGray text-xs sm:text-sm font-semibold">Pilar 2: {KEY_MESSAGES.doble_verificacion.title}</p>
             </div>
-            <p className="text-sm sm:text-base font-bold mb-1 sm:mb-2">"{KEY_MESSAGES.velocidad_simetrica.message}"</p>
-            <p className="text-fitzone-textGray text-xs sm:text-sm mb-2 sm:mb-3">{KEY_MESSAGES.velocidad_simetrica.description}</p>
+            <p className="text-sm sm:text-base font-bold mb-1 sm:mb-2">"{KEY_MESSAGES.doble_verificacion.message}"</p>
+            <p className="text-fitzone-textGray text-xs sm:text-sm mb-2 sm:mb-3">{KEY_MESSAGES.doble_verificacion.description}</p>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Subida = Bajada</span>
-              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Teletrabajo</span>
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Imagen</span>
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Audio</span>
             </div>
           </div>
 
           <div className="bg-fitzone-slate rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 border border-fitzone-purple/20">
             <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-              <Award className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-purple" />
-              <p className="text-fitzone-textGray text-xs sm:text-sm font-semibold">Pilar 3: {KEY_MESSAGES.satisfaccion_lider.title}</p>
+              <Camera className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-purple" />
+              <p className="text-fitzone-textGray text-xs sm:text-sm font-semibold">Pilar 3: {KEY_MESSAGES.zerovision.title}</p>
             </div>
-            <p className="text-sm sm:text-base font-bold mb-1 sm:mb-2">"{KEY_MESSAGES.satisfaccion_lider.message}"</p>
-            <p className="text-fitzone-textGray text-xs sm:text-sm mb-2 sm:mb-3">{KEY_MESSAGES.satisfaccion_lider.description}</p>
+            <p className="text-sm sm:text-base font-bold mb-1 sm:mb-2">"{KEY_MESSAGES.zerovision.message}"</p>
+            <p className="text-fitzone-textGray text-xs sm:text-sm mb-2 sm:mb-3">{KEY_MESSAGES.zerovision.description}</p>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">OSIPTEL</span>
-              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Servicio cercano</span>
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Niebla densa</span>
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Tecnología propietaria</span>
             </div>
           </div>
 
           <div className="bg-fitzone-slate rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 border border-fitzone-purple/20">
             <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-purple" />
-              <p className="text-fitzone-textGray text-xs sm:text-sm font-semibold">Pilar 4: {KEY_MESSAGES.instalacion_incluida.title}</p>
+              <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-purple" />
+              <p className="text-fitzone-textGray text-xs sm:text-sm font-semibold">Pilar 4: {KEY_MESSAGES.respuesta_autoridades.title}</p>
             </div>
-            <p className="text-sm sm:text-base font-bold mb-1 sm:mb-2">"{KEY_MESSAGES.instalacion_incluida.message}"</p>
-            <p className="text-fitzone-textGray text-xs sm:text-sm mb-2 sm:mb-3">{KEY_MESSAGES.instalacion_incluida.description}</p>
+            <p className="text-sm sm:text-base font-bold mb-1 sm:mb-2">"{KEY_MESSAGES.respuesta_autoridades.message}"</p>
+            <p className="text-fitzone-textGray text-xs sm:text-sm mb-2 sm:mb-3">{KEY_MESSAGES.respuesta_autoridades.description}</p>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Sin costo</span>
-              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Activación rápida</span>
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">PNP</span>
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Serenazgo</span>
             </div>
           </div>
 
           <div className="bg-fitzone-slate rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 border border-fitzone-purple/20 sm:col-span-2">
             <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-              <Globe2 className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-purple" />
-              <p className="text-fitzone-textGray text-xs sm:text-sm font-semibold">Pilar 5: {KEY_MESSAGES.cobertura_lima.title}</p>
+              <Smartphone className="w-4 h-4 sm:w-5 sm:h-5 text-fitzone-purple" />
+              <p className="text-fitzone-textGray text-xs sm:text-sm font-semibold">Pilar 5: {KEY_MESSAGES.control_movil.title}</p>
             </div>
-            <p className="text-sm sm:text-base font-bold mb-1 sm:mb-2">"{KEY_MESSAGES.cobertura_lima.message}"</p>
-            <p className="text-fitzone-textGray text-xs sm:text-sm mb-2 sm:mb-3">{KEY_MESSAGES.cobertura_lima.description}</p>
+            <p className="text-sm sm:text-base font-bold mb-1 sm:mb-2">"{KEY_MESSAGES.control_movil.message}"</p>
+            <p className="text-fitzone-textGray text-xs sm:text-sm mb-2 sm:mb-3">{KEY_MESSAGES.control_movil.description}</p>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">40+ distritos</span>
-              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">11 provincias</span>
-              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Red en expansión</span>
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">My Verisure</span>
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Activación remota</span>
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-fitzone-purple/20 rounded text-xs">Historial de eventos</span>
             </div>
           </div>
         </div>

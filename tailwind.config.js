@@ -7,17 +7,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        // WIN Brand Colors - Naranja (telco fibra óptica)
+        // Verisure Brand Colors — Rojo Verisure sobre dark cool
         fitzone: {
-          // Primarios - Naranja WIN
-          purple: '#F26A1F',        // Naranja oficial WIN
-          darkPurple: '#C44E0E',    // Naranja hover/oscuro (≥4,5:1 sobre blanco)
-          lightPurple: '#FF8A4D',   // Naranja claro (acentos sobre dark)
+          // Primarios — Rojo Verisure
+          purple: '#ED002F',        // Rojo Verisure principal (accent)
+          darkPurple: '#B30024',    // Rojo Verisure hover (≥4,5:1 sobre blanco)
+          lightPurple: '#FF5C7A',   // Rojo claro / tint sobre fondos oscuros
 
-          // Secundarios - Oscuros warm con tinte naranja
-          charcoal: '#0F0810',      // Fondo de página (deep warm)
-          slate: '#1F0F0A',         // Cards
-          darkSlate: '#0A0506',     // Contraste extra
+          // Secundarios — Dark cool neutral (security/trust feel)
+          charcoal: '#0B0E16',      // Fondo de página
+          slate: '#141826',         // Cards
+          darkSlate: '#050810',     // Contraste extra
 
           // Acentos tech/datos
           cyan: '#06B6D4',          // Cyan (datos, tech)
@@ -29,18 +29,18 @@ export default {
           lime: '#84CC16',          // Lima (positivo secundario)
 
           // Alerta/Advertencia
-          red: '#EF4444',           // Rojo (alerta)
-          amber: '#F4B842',         // Ámbar warm (advertencia / CTA secundario)
+          red: '#DC2626',           // Rojo alerta semantic (oscuro, distinto del brand #ED002F)
+          amber: '#F59E0B',         // Ámbar warning / CTA secundario
 
-          // Secundario CTA (alias del accent naranja)
-          orange: '#F26A1F',        // Acento CTA secundario (= accent)
-          darkOrange: '#C44E0E',    // Hover acento secundario
+          // Alias accent
+          orange: '#ED002F',        // Acento CTA secundario (= accent)
+          darkOrange: '#B30024',    // Hover acento secundario
 
           // Neutros
           white: '#FFFFFF',
-          lightGray: '#FAF0EA',     // Texto claro warm sobre dark
-          textGray: '#C7B5A8',      // Texto muted sobre dark
-          mediumGray: '#73655A',    // Decorativo
+          lightGray: '#E2E8F0',     // Texto claro sobre dark
+          textGray: '#94A3B8',      // Texto muted (≥4,5:1 sobre slate/charcoal)
+          mediumGray: '#475569',    // Decorativo
         },
         // Colores oficiales de plataformas — NO modificar
         platform: {
@@ -53,8 +53,8 @@ export default {
         },
         // Semantic colors
         success: '#10B981',
-        warning: '#F4B842',
-        error: '#EF4444',
+        warning: '#F59E0B',
+        error: '#DC2626',
         info: '#06B6D4',
       },
       fontFamily: {
@@ -62,20 +62,20 @@ export default {
         display: ['Inter', 'Helvetica Neue', 'sans-serif'],
       },
       backgroundImage: {
-        // Gradientes WIN Naranja
-        'gradient-fitzone': 'linear-gradient(135deg, #F26A1F 0%, #C44E0E 100%)',
-        'gradient-fitzone-dark': 'linear-gradient(135deg, #1F0F0A 0%, #0F0810 100%)',
-        'gradient-fitzone-energy': 'linear-gradient(135deg, #F26A1F 0%, #F4B842 100%)',
+        // Gradientes Verisure
+        'gradient-fitzone': 'linear-gradient(135deg, #ED002F 0%, #B30024 100%)',
+        'gradient-fitzone-dark': 'linear-gradient(135deg, #141826 0%, #0B0E16 100%)',
+        'gradient-fitzone-energy': 'linear-gradient(135deg, #ED002F 0%, #F59E0B 100%)',
         'gradient-fitzone-tech': 'linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)',
-        'gradient-fitzone-premium': 'linear-gradient(135deg, #0F0810 0%, #1F0F0A 50%, #F26A1F 100%)',
-        'gradient-hero': 'linear-gradient(180deg, #0F0810 0%, #1F0F0A 100%)',
+        'gradient-fitzone-premium': 'linear-gradient(135deg, #0B0E16 0%, #141826 50%, #ED002F 100%)',
+        'gradient-hero': 'linear-gradient(180deg, #0B0E16 0%, #141826 100%)',
       },
       boxShadow: {
-        'fitzone': '0 20px 50px rgba(242, 106, 31, 0.15)',
-        'fitzone-lg': '0 30px 60px rgba(242, 106, 31, 0.25)',
-        'fitzone-glow': '0 0 30px rgba(242, 106, 31, 0.4)',
+        'fitzone': '0 20px 50px rgba(237, 0, 47, 0.15)',
+        'fitzone-lg': '0 30px 60px rgba(237, 0, 47, 0.25)',
+        'fitzone-glow': '0 0 30px rgba(237, 0, 47, 0.4)',
         'card': '0 4px 20px rgba(0, 0, 0, 0.3)',
-        'card-hover': '0 8px 30px rgba(242, 106, 31, 0.2)',
+        'card-hover': '0 8px 30px rgba(237, 0, 47, 0.2)',
       },
       animation: {
         'fadeIn': 'fadeIn 0.5s ease-in-out',
@@ -98,8 +98,8 @@ export default {
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(242, 106, 31, 0.3)' },
-          '50%': { boxShadow: '0 0 40px rgba(242, 106, 31, 0.6)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(237, 0, 47, 0.3)' },
+          '50%': { boxShadow: '0 0 40px rgba(237, 0, 47, 0.6)' },
         },
         bounceSubtle: {
           '0%, 100%': { transform: 'translateY(0)' },

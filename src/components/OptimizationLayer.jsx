@@ -1,4 +1,4 @@
-import { TrendingUp, BarChart3, RefreshCw, Award, Target, Users, ThumbsUp, Zap, AlertCircle, Wifi, Bell, Globe, FileText, CheckCircle, Lightbulb, Activity, UserPlus, Calendar, Store, DollarSign } from 'lucide-react';
+import { TrendingUp, BarChart3, RefreshCw, Award, Target, Users, ThumbsUp, Zap, AlertCircle, Shield, Bell, Globe, FileText, CheckCircle, Lightbulb, Activity, UserPlus, Calendar, Store, DollarSign } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { ResponsiveFunnel } from '@nivo/funnel';
 import { PERFORMANCE_KPIS, ALERTS, COMPETITOR_INSIGHTS, CRM_MOCKUP } from '../data/mockData';
@@ -26,7 +26,7 @@ const FunnelValueLabels = ({ parts }) => {
             stroke="#00000055"
             strokeWidth={0.5}
           >
-            {Number(realVal).toLocaleString('en-US')}
+            {Number(realVal).toLocaleString('es-PE')}
           </text>
         );
       })}
@@ -38,45 +38,45 @@ export default function OptimizationLayer() {
   const getMonthlyPeriod = () => {
     const now = new Date();
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    return `1-${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+    return `1 al ${now.getDate()} de ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
   };
 
   const monthlyPeriod = getMonthlyPeriod();
 
-  // Performance últimos 7 días - WIN awareness
-  // Spent diario ≈ $13.500/30 ≈ $450 promedio
-  // Leads diarios ≈ 1.450/30 ≈ 48 promedio
+  // Performance últimos 7 días, Verisure lead generation
+  // Spent diario ≈ $45.000/30 ≈ $1.500 promedio
+  // Leads diarios ≈ 1.500/30 ≈ 50 promedio
   const performanceData = [
-    { date: '30 Abr', leads: 42, reach: 358000, engagement: 14200, spent: 432 },
-    { date: '01 May', leads: 52, reach: 392000, engagement: 16800, spent: 468 },
-    { date: '02 May', leads: 46, reach: 372000, engagement: 15500, spent: 445 },
-    { date: '03 May', leads: 58, reach: 408000, engagement: 17900, spent: 482 },
-    { date: '04 May', leads: 54, reach: 396000, engagement: 17200, spent: 465 },
-    { date: '05 May', leads: 62, reach: 425000, engagement: 18600, spent: 498 },
-    { date: '06 May', leads: 48, reach: 380000, engagement: 15800, spent: 455 }
+    { date: '30 Abr', leads: 44, reach: 380000, engagement: 11400, spent: 1420 },
+    { date: '01 May', leads: 56, reach: 412000, engagement: 13600, spent: 1560 },
+    { date: '02 May', leads: 48, reach: 396000, engagement: 12200, spent: 1485 },
+    { date: '03 May', leads: 62, reach: 428000, engagement: 14400, spent: 1620 },
+    { date: '04 May', leads: 54, reach: 408000, engagement: 13100, spent: 1545 },
+    { date: '05 May', leads: 60, reach: 442000, engagement: 14800, spent: 1610 },
+    { date: '06 May', leads: 50, reach: 392000, engagement: 12500, spent: 1510 }
   ];
 
-  // Channel performance - WIN (mix Meta + Google + TikTok)
-  // Suma percentages = 100, suma leads = 1.450 (= leads.total)
+  // Channel performance, Verisure (mix Meta + Google Search + TikTok + YouTube)
+  // Suma percentages = 100, suma leads = 1.500 (= leads.total)
   const channelData = [
-    { name: 'Meta Ads', value: 54, leads: 870, color: '#F26A1F' },
-    { name: 'YouTube', value: 14, leads: 105, color: '#FF8A4D' },
-    { name: 'Google Search', value: 13, leads: 320, color: '#06B6D4' },
-    { name: 'Google Display', value: 12, leads: 105, color: '#F4B842' },
-    { name: 'TikTok Ads', value: 7, leads: 50, color: '#10B981' }
+    { name: 'Meta Ads', value: 40, leads: 870, color: '#ED002F' },
+    { name: 'Google Search', value: 35, leads: 450, color: '#06B6D4' },
+    { name: 'YouTube', value: 10, leads: 60, color: '#FF5C7A' },
+    { name: 'TikTok Ads', value: 10, leads: 80, color: '#10B981' },
+    { name: 'Google Display', value: 5, leads: 40, color: '#F59E0B' }
   ];
 
-  // Funnel awareness WIN - rango amplio (~1.700x), escala log obligatoria
+  // Funnel de captación Verisure, rango amplio (~23.000x), escala log obligatoria
   const funnelSteps = [
-    { stage: 'Alcance Único', value: 2500000, conversionRate: 38.0 },
-    { stage: 'Frecuencia 3+ (recordación)', value: 950000, conversionRate: 11.6 },
-    { stage: 'Interacciones', value: 110000, conversionRate: 34.5 },
-    { stage: 'Visitas Web', value: 38000, conversionRate: 3.8 },
-    { stage: 'Consultas Cualificadas', value: 1450, conversionRate: null }
+    { stage: 'Alcance Único', value: 2800000, conversionRate: 1.57 },
+    { stage: 'Visitas Web', value: 44000, conversionRate: 3.41 },
+    { stage: 'Leads Capturados', value: 1500, conversionRate: 70.0 },
+    { stage: 'Leads Calificados', value: 1050, conversionRate: 11.43 },
+    { stage: 'Instalaciones', value: 120, conversionRate: null }
   ];
 
-  // Paleta funnel: gradiente naranja WIN → cyan → amber (cierre)
-  const funnelColors = ['#FF8A4D', '#F26A1F', '#C44E0E', '#06B6D4', '#F4B842'];
+  // Paleta funnel: rojo Verisure (claro a oscuro) y cierre en cyan/emerald
+  const funnelColors = ['#FF5C7A', '#ED002F', '#B30024', '#06B6D4', '#10B981'];
 
   // Escala logarítmica para preservar diferencias entre etapas (rango 1.700x)
   const funnelLogVals = funnelSteps.map(s => Math.log10(s.value));
@@ -110,7 +110,7 @@ export default function OptimizationLayer() {
             </div>
             <span className="px-2 sm:px-3 py-1 bg-fitzone-purple text-white rounded-full text-xs sm:text-sm font-medium flex items-center gap-1">
               <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Auto-optimización activa</span>
+              <span className="hidden sm:inline">Optimización automática activa</span>
               <span className="sm:hidden">Activa</span>
             </span>
           </div>
@@ -174,14 +174,14 @@ export default function OptimizationLayer() {
               {PERFORMANCE_KPIS.whatsapp.change}%
             </span>
           </div>
-          <h3 className="text-xs sm:text-sm font-medium text-fitzone-charcoal/90 mb-0.5 sm:mb-1">CPM Promedio</h3>
-          <p className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">{formatMoney(PERFORMANCE_KPIS.whatsapp.current)}</p>
+          <h3 className="text-xs sm:text-sm font-medium text-fitzone-charcoal/90 mb-0.5 sm:mb-1">CPL Promedio</h3>
+          <p className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">{formatMoney(PERFORMANCE_KPIS.leads.cost_per_lead)}</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-xs sm:text-sm text-fitzone-charcoal/90">CPI: {formatMoney(PERFORMANCE_KPIS.retention.current)}</span>
+            <span className="text-xs sm:text-sm text-fitzone-charcoal/90">CPM: {formatMoney(PERFORMANCE_KPIS.whatsapp.current)}</span>
           </div>
           <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-fitzone-charcoal/20">
             <div className="flex justify-between text-xs">
-              <span className="text-fitzone-charcoal/90">Consultas</span>
+              <span className="text-fitzone-charcoal/90">Leads</span>
               <span className="font-bold">{formatThousands(PERFORMANCE_KPIS.leads.total)}</span>
             </div>
           </div>
@@ -214,12 +214,12 @@ export default function OptimizationLayer() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
           <div>
             <h3 className="text-sm sm:text-base font-bold text-white">Performance Últimos 7 Días</h3>
-            <p className="text-xs sm:text-sm text-fitzone-textGray">Evolución de métricas clave de awareness</p>
+            <p className="text-xs sm:text-sm text-fitzone-textGray">Evolución de métricas clave de captación</p>
           </div>
           <div className="flex gap-3 sm:gap-4 text-xs sm:text-sm">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-fitzone-purple"></div>
-              <span className="text-fitzone-textGray">Consultas</span>
+              <span className="text-fitzone-textGray">Leads</span>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-fitzone-cyan"></div>
@@ -236,11 +236,11 @@ export default function OptimizationLayer() {
               <YAxis yAxisId="left" stroke="#9CA3AF" style={{ fontSize: '10px' }} tick={{ fontSize: 10 }} width={35} />
               <YAxis yAxisId="right" orientation="right" stroke="#9CA3AF" style={{ fontSize: '10px' }} tick={{ fontSize: 10 }} width={45} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1F0F0A', border: '1px solid #F26A1F', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
-                labelStyle={{ fontWeight: 'bold', marginBottom: '8px', color: '#F26A1F' }}
+                contentStyle={{ backgroundColor: '#141826', border: '1px solid #ED002F', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+                labelStyle={{ fontWeight: 'bold', marginBottom: '8px', color: '#ED002F' }}
                 itemStyle={{ color: '#fff' }}
               />
-              <Line yAxisId="left" type="monotone" dataKey="leads" stroke="#F26A1F" strokeWidth={2} dot={{ r: 3 }} />
+              <Line yAxisId="left" type="monotone" dataKey="leads" stroke="#ED002F" strokeWidth={2} dot={{ r: 3 }} />
               <Line yAxisId="right" type="monotone" dataKey="engagement" stroke="#06B6D4" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -270,11 +270,12 @@ export default function OptimizationLayer() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#1F0F0A', border: '1px solid #F26A1F', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+                  contentStyle={{ backgroundColor: '#141826', border: '1px solid #ED002F', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+                  labelStyle={{ fontWeight: 'bold', color: '#ED002F' }}
                   itemStyle={{ color: '#fff' }}
                   formatter={(value, name) => {
                     const channel = channelData.find(c => c.name === name);
-                    return [`${value}% (${channel?.leads ?? '-'} consultas)`, name];
+                    return [`${value}% (${channel?.leads ?? 0} leads)`, name];
                   }}
                 />
               </PieChart>
@@ -304,9 +305,9 @@ export default function OptimizationLayer() {
         </div>
       </div>
 
-      {/* Funnel de Awareness WIN con @nivo/funnel vertical (escala log) */}
+      {/* Funnel de Captación Verisure con @nivo/funnel vertical (escala log) */}
       <div className="bg-fitzone-slate rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 lg:p-6 border border-fitzone-purple/20">
-        <h3 className="text-sm sm:text-base font-bold text-white mb-4 sm:mb-6">Funnel de Awareness WIN</h3>
+        <h3 className="text-sm sm:text-base font-bold text-white mb-4 sm:mb-6">Funnel de Captación Verisure</h3>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2">
@@ -321,7 +322,7 @@ export default function OptimizationLayer() {
                 layers={['parts', FunnelValueLabels, 'annotations']}
                 spacing={2}
                 shapeBlending={0.65}
-                valueFormat={v => v.toLocaleString('en-US')}
+                valueFormat={v => v.toLocaleString('es-PE')}
                 motionConfig="gentle"
                 tooltip={({ part }) => {
                   const idx = funnelChartData.findIndex(d => d.id === part.data.id);
@@ -329,20 +330,20 @@ export default function OptimizationLayer() {
                   const stepRate = next ? (next.value / part.data.realValue) * 100 : null;
                   return (
                     <div style={{
-                      background: '#1F0F0A',
+                      background: '#141826',
                       color: '#fff',
                       padding: '8px 12px',
                       borderRadius: '8px',
-                      border: '1px solid #F26A1F',
+                      border: '1px solid #ED002F',
                       fontSize: '13px',
                     }}>
                       <strong>{part.data.label}</strong>
                       <br />
-                      {Number(part.data.realValue).toLocaleString('en-US')}
+                      {Number(part.data.realValue).toLocaleString('es-PE')}
                       {stepRate != null && (
                         <>
                           <br />
-                          <span style={{ color: '#C7B5A8' }}>→ {formatES(stepRate, 1)}% a la siguiente</span>
+                          <span style={{ color: '#94A3B8' }}>→ {formatES(stepRate, 1)}% a la siguiente</span>
                         </>
                       )}
                     </div>
@@ -355,24 +356,24 @@ export default function OptimizationLayer() {
           {/* Métricas laterales */}
           <div className="space-y-3 sm:space-y-4">
             <div className="bg-fitzone-purple/10 rounded-lg p-3 sm:p-4 border border-fitzone-purple/20">
-              <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Conversión Global</p>
-              <p className="text-xl sm:text-2xl font-bold text-fitzone-lightPurple">0.058%</p>
-              <p className="text-xs text-fitzone-textGray mt-1">Alcance → Consultas</p>
+              <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Conversión global</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-lightPurple">0,004%</p>
+              <p className="text-xs text-fitzone-textGray mt-1">Alcance hasta Instalaciones</p>
             </div>
             <div className="bg-fitzone-emerald/10 rounded-lg p-3 sm:p-4 border border-fitzone-emerald/20">
-              <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Recordación efectiva</p>
-              <p className="text-xl sm:text-2xl font-bold text-fitzone-emerald">38.0%</p>
-              <p className="text-xs text-fitzone-textGray mt-1">Alcance → Frecuencia 3+</p>
+              <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Calidad de leads</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-emerald">70,0%</p>
+              <p className="text-xs text-fitzone-textGray mt-1">Leads que califican (MQL)</p>
             </div>
             <div className="bg-fitzone-cyan/10 rounded-lg p-3 sm:p-4 border border-fitzone-cyan/20">
-              <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Interacción → Web</p>
-              <p className="text-xl sm:text-2xl font-bold text-fitzone-cyan">34.5%</p>
-              <p className="text-xs text-fitzone-textGray mt-1">Engagement a visitas web</p>
+              <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Cierre de instalación</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-cyan">11,4%</p>
+              <p className="text-xs text-fitzone-textGray mt-1">Calificados que se instalan</p>
             </div>
             <div className="bg-fitzone-amber/10 rounded-lg p-3 sm:p-4 border border-fitzone-amber/20">
               <p className="text-xs text-fitzone-textGray mb-0.5 sm:mb-1">Mayor caída</p>
-              <p className="text-xl sm:text-2xl font-bold text-fitzone-amber">96.2%</p>
-              <p className="text-xs text-fitzone-textGray mt-1">Visitas Web → Consultas</p>
+              <p className="text-xl sm:text-2xl font-bold text-fitzone-amber">96,6%</p>
+              <p className="text-xs text-fitzone-textGray mt-1">Alcance hasta Visitas Web</p>
             </div>
           </div>
         </div>
@@ -384,8 +385,8 @@ export default function OptimizationLayer() {
           <div className="flex items-center gap-2 sm:gap-3">
             <Bell className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
             <div>
-              <h3 className="text-sm sm:text-base lg:text-lg font-bold">CRM - Monitoreo CPI por Audiencia</h3>
-              <p className="text-xs sm:text-sm text-white/90">Alertas automáticas de costo por interacción</p>
+              <h3 className="text-sm sm:text-base lg:text-lg font-bold">CRM. Monitoreo CPL por Audiencia</h3>
+              <p className="text-xs sm:text-sm text-white/90">Alertas automáticas de costo por lead</p>
             </div>
           </div>
           <span className="px-2 sm:px-3 py-1 bg-white/20 rounded-full text-xs font-bold self-start sm:self-auto">
@@ -397,42 +398,42 @@ export default function OptimizationLayer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="bg-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4">
             <h4 className="font-bold text-sm sm:text-base mb-2 sm:mb-3 flex items-center gap-1.5 sm:gap-2">
-              <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
-              Joven Conectado
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
+              Hogar Familiar Lima Moderna
             </h4>
             <div className="space-y-1.5 sm:space-y-2">
               <div className="flex justify-between text-xs sm:text-sm">
-                <span>CPI Target</span>
-                <span className="font-bold">{formatMoney(CRM_CONFIG.cpl_thresholds.joven_lima_moderna.cpl_target)}</span>
+                <span>CPL Target</span>
+                <span className="font-bold">{formatMoney(CRM_CONFIG.cpl_thresholds.hogar_familiar_lima_moderna.cpl_target, 0)}</span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm">
                 <span>Alerta en</span>
-                <span className="font-bold text-fitzone-amber">{formatMoney(CRM_CONFIG.cpl_thresholds.joven_lima_moderna.cpl_alert)}</span>
+                <span className="font-bold text-fitzone-amber">{formatMoney(CRM_CONFIG.cpl_thresholds.hogar_familiar_lima_moderna.cpl_alert, 0)}</span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm">
                 <span>Pausar en</span>
-                <span className="font-bold text-fitzone-red">{formatMoney(CRM_CONFIG.cpl_thresholds.joven_lima_moderna.cpl_pause)}</span>
+                <span className="font-bold text-fitzone-red">{formatMoney(CRM_CONFIG.cpl_thresholds.hogar_familiar_lima_moderna.cpl_pause, 0)}</span>
               </div>
             </div>
           </div>
 
           <div className="bg-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4">
             <h4 className="font-bold text-sm sm:text-base mb-2 sm:mb-3 flex items-center gap-1.5 sm:gap-2">
-              <Target className="w-4 h-4 sm:w-5 sm:h-5" />
-              Familia Conectada
+              <Store className="w-4 h-4 sm:w-5 sm:h-5" />
+              Negocio PyME Lima
             </h4>
             <div className="space-y-1.5 sm:space-y-2">
               <div className="flex justify-between text-xs sm:text-sm">
-                <span>CPI Target</span>
-                <span className="font-bold">{formatMoney(CRM_CONFIG.cpl_thresholds.familia_conectada.cpl_target)}</span>
+                <span>CPL Target</span>
+                <span className="font-bold">{formatMoney(CRM_CONFIG.cpl_thresholds.negocio_pyme_lima.cpl_target, 0)}</span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm">
                 <span>Alerta en</span>
-                <span className="font-bold text-fitzone-amber">{formatMoney(CRM_CONFIG.cpl_thresholds.familia_conectada.cpl_alert)}</span>
+                <span className="font-bold text-fitzone-amber">{formatMoney(CRM_CONFIG.cpl_thresholds.negocio_pyme_lima.cpl_alert, 0)}</span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm">
                 <span>Pausar en</span>
-                <span className="font-bold text-fitzone-red">{formatMoney(CRM_CONFIG.cpl_thresholds.familia_conectada.cpl_pause)}</span>
+                <span className="font-bold text-fitzone-red">{formatMoney(CRM_CONFIG.cpl_thresholds.negocio_pyme_lima.cpl_pause, 0)}</span>
               </div>
             </div>
           </div>
@@ -457,7 +458,7 @@ export default function OptimizationLayer() {
         <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white/20 rounded-lg">
           <p className="text-xs flex items-start sm:items-center gap-1">
             <Lightbulb className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5 sm:mt-0" />
-            <span><strong>Nota:</strong> Sistema de alertas automáticas configurado para notificación en tiempo real cuando el CPI supera los umbrales por audiencia.</span>
+            <span><strong>Nota:</strong> Sistema de alertas automáticas configurado para notificación en tiempo real cuando el CPL supera los umbrales por audiencia.</span>
           </p>
         </div>
       </div>
@@ -466,7 +467,7 @@ export default function OptimizationLayer() {
       <div className="bg-fitzone-slate rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 lg:p-6 border border-fitzone-purple/20">
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-fitzone-purple" />
-          <h3 className="text-sm sm:text-base font-bold text-white">Alertas del Mercado Telco</h3>
+          <h3 className="text-sm sm:text-base font-bold text-white">Alertas del Mercado de Seguridad</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
           {ALERTS.slice(0, 3).map((alert) => (
@@ -496,9 +497,9 @@ export default function OptimizationLayer() {
 
       {/* Competitor Analysis */}
       <div className="bg-fitzone-slate rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 lg:p-6 border border-fitzone-purple/20">
-        <h3 className="text-sm sm:text-base font-bold text-white mb-3 sm:mb-4">Análisis de Competencia Telco</h3>
+        <h3 className="text-sm sm:text-base font-bold text-white mb-3 sm:mb-4">Análisis de Competencia</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {COMPETITOR_INSIGHTS.filter(c => c.brand !== 'WIN').map((comp, idx) => (
+          {COMPETITOR_INSIGHTS.filter(c => c.brand !== 'Verisure Perú').map((comp, idx) => (
             <div key={idx} className="p-3 sm:p-4 bg-fitzone-charcoal border-2 border-fitzone-slate rounded-lg hover:border-fitzone-purple/50 transition-colors">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="min-w-0">
@@ -541,27 +542,27 @@ export default function OptimizationLayer() {
           ))}
         </div>
 
-        {/* WIN Comparison */}
+        {/* Verisure Comparison */}
         <div className="mt-3 sm:mt-4 p-3 sm:p-4 lg:p-5 bg-fitzone-purple text-white rounded-lg sm:rounded-xl">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div className="flex-1">
               <h4 className="font-bold text-sm sm:text-base mb-1 flex items-center gap-1.5 sm:gap-2">
-                <Wifi className="w-4 h-4 sm:w-5 sm:h-5" />
-                WIN
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
+                Verisure Perú
               </h4>
-              <p className="text-xs text-white/90 mb-2">Operador 100% fibra óptica, reconocido por OSIPTEL en satisfacción al cliente, con red en expansión en Lima Metropolitana</p>
+              <p className="text-xs text-white/90 mb-2">Operador europeo de alarmas monitoreadas con tecnología propietaria ZeroVision, doble verificación por imagen y audio y app My Verisure</p>
               <div className="flex flex-wrap gap-4 sm:gap-6">
                 <div>
                   <p className="text-xs text-white/90">Share of Voice</p>
-                  <p className="text-lg sm:text-xl font-bold">21%</p>
+                  <p className="text-lg sm:text-xl font-bold">34%</p>
                 </div>
                 <div>
                   <p className="text-xs text-white/90">Sentimiento</p>
-                  <p className="text-lg sm:text-xl font-bold">82%</p>
+                  <p className="text-lg sm:text-xl font-bold">78%</p>
                 </div>
                 <div>
-                  <p className="text-xs text-white/90">Distritos</p>
-                  <p className="text-lg sm:text-xl font-bold">40+</p>
+                  <p className="text-xs text-white/90">Zonas Lima</p>
+                  <p className="text-lg sm:text-xl font-bold">10</p>
                 </div>
               </div>
             </div>

@@ -1,43 +1,43 @@
 {
   "generated_at": "2026-05-04T08:30:00.000Z",
-  "client": "WIN",
+  "client": "Verisure Perú",
   "insights": [
     {
       "id": "ml_trend_momentum",
       "type": "multi_source",
       "priority": "high",
-      "title": "Ventana estacional pre Cyber Days detectada",
-      "description": "Las búsquedas de \"internet fibra óptica\" subieron 38% en el último trimestre, alineadas con el calendario de Cyber Days y campañas de fin de año.",
-      "action": "Se sugiere reforzar Meta Ads y YouTube en mensajes de fibra 100% pura y velocidad simétrica",
-      "confidence": 0.86,
-      "impact_score": 8.8,
+      "title": "Ventana estacional previa al pico de fin de año",
+      "description": "Las búsquedas de \"alarma para casa\" y \"cámaras de seguridad\" sostienen niveles altos en Lima, con picos asociados a coberturas mediáticas de inseguridad y al calendario de viajes de fin de año.",
+      "action": "Se sugiere reforzar Meta lead ads y Google Search en mensajes de doble verificación y monitoreo continuo",
+      "confidence": 0.84,
+      "impact_score": 8.6,
       "source": "ML Trend Analysis"
     },
     {
       "id": "trend_rising",
       "type": "trend",
       "priority": "high",
-      "title": "Keywords de marca WIN en aceleración",
-      "description": "WIN y términos asociados crecen 58% en interés de búsqueda en los últimos tres meses, con foco en Lima Metropolitana.",
+      "title": "Keywords de marca Verisure en aceleración",
+      "description": "Verisure y términos asociados crecen 42% en interés de búsqueda en los últimos tres meses, con foco en Lima Metropolitana.",
       "action": "Se recomienda capturar la demanda de marca en Google Search con campaña Brand dedicada",
       "keywords": [
-        "win internet",
-        "win fibra",
-        "win planes lima"
+        "verisure",
+        "verisure peru",
+        "verisure precio"
       ],
       "confidence": 0.85,
-      "impact_score": 8.6,
+      "impact_score": 8.4,
       "source": "Google Trends"
     },
     {
       "id": "social_sentiment_positive",
       "type": "social",
       "priority": "medium",
-      "title": "Sentimiento social favorable",
-      "description": "El 78% de los topics monitoreados muestra sentimiento positivo en Meta y TikTok, con foco en velocidad simétrica y soporte técnico local.",
-      "action": "Se sugiere amplificar contenido educativo sobre fibra 100% óptica y casos de uso reales",
-      "confidence": 0.82,
-      "impact_score": 8.0,
+      "title": "Sentimiento social mixto con foco en protección",
+      "description": "El 74% de los topics monitoreados muestra sentimiento positivo o neutral, con foco en cámaras, vacaciones y monitoreo. El tema de extorsión registra sentimiento negativo asociado al contexto, no a la marca.",
+      "action": "Se sugiere amplificar contenido sobre vacaciones seguras y monitoreo continuo durante el ciclo de viajes",
+      "confidence": 0.80,
+      "impact_score": 7.8,
       "source": "Meta Social Listening"
     },
     {
@@ -45,54 +45,54 @@
       "type": "multi_source",
       "priority": "high",
       "title": "Convergencia entre búsquedas y conversación social",
-      "description": "Cuatro temas aparecen tanto en Google Trends como en redes: fibra óptica, velocidad simétrica, gaming y streaming HD.",
+      "description": "Cuatro temas aparecen tanto en Google Trends como en redes: alarma para casa, cámaras de seguridad, monitoreo 24 horas y protección de negocios.",
       "action": "Se recomienda priorizar estos temas en el calendario editorial",
       "keywords": [
-        "fibra óptica",
-        "velocidad simétrica",
-        "gaming online",
-        "streaming HD"
+        "alarma para casa",
+        "cámaras de seguridad",
+        "monitoreo 24 horas",
+        "alarma para negocio"
       ],
-      "confidence": 0.90,
-      "impact_score": 8.8,
+      "confidence": 0.88,
+      "impact_score": 8.6,
       "source": "Multi-Source Analysis"
     },
     {
       "id": "trend_top_keyword",
       "type": "trend",
       "priority": "high",
-      "title": "\"internet fibra óptica\" lidera las búsquedas",
-      "description": "Con un interés de 84/100 y crecimiento de 38% en el trimestre.",
-      "action": "Se sugiere reforzar la cobertura SEM y de display de esta keyword durante Cyber Days",
-      "metric": 84,
-      "change": "+38%",
-      "confidence": 0.92,
-      "impact_score": 9.0,
+      "title": "\"cámaras de seguridad\" encabeza el interés observado",
+      "description": "Con un interés de 92/100 y crecimiento de 28% en el trimestre, esta keyword sostiene volumen junto con \"alarma para casa\".",
+      "action": "Se sugiere reforzar la cobertura SEM y de display de esta keyword durante el pico estacional de fin de año",
+      "metric": 92,
+      "change": "+28%",
+      "confidence": 0.90,
+      "impact_score": 8.8,
       "source": "Google Trends"
     },
     {
       "id": "budget_optimization",
       "type": "budget",
       "priority": "medium",
-      "title": "Oportunidad de optimización en Meta Ads",
-      "description": "Meta supera el target en CPM y CPI con la audiencia Joven Conectado Lima Moderna.",
-      "action": "Se sugiere subir Meta de 54% a 58% del presupuesto durante la ventana estacional",
+      "title": "Oportunidad de optimización en Meta lead ads",
+      "description": "Meta supera el target de CPL con la audiencia Hogar Familiar Lima Moderna y absorbe escalado sin saturación inmediata.",
+      "action": "Se sugiere subir Meta de 40% a 44% del presupuesto durante la ventana estacional",
       "recommendations": [
         {
           "channel": "meta_ads",
-          "from": 54,
-          "to": 58,
-          "expected_uplift": "+250.000 personas alcanzadas/mes"
+          "from": 40,
+          "to": 44,
+          "expected_uplift": "+180 leads mensuales adicionales"
         },
         {
-          "channel": "google_display",
-          "from": 12,
-          "to": 10,
-          "expected_uplift": "Reasignación a canal de mejor rendimiento"
+          "channel": "google_search",
+          "from": 35,
+          "to": 31,
+          "expected_uplift": "Reasignación hacia canal con CPL más eficiente"
         }
       ],
-      "confidence": 0.84,
-      "impact_score": 8.2,
+      "confidence": 0.82,
+      "impact_score": 8.0,
       "source": "Budget Optimizer"
     }
   ]
