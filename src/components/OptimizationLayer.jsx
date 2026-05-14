@@ -271,6 +271,7 @@ export default function OptimizationLayer() {
                 </Pie>
                 <Tooltip
                   contentStyle={{ backgroundColor: '#141826', border: '1px solid #ED002F', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+                  labelStyle={{ fontWeight: 'bold', color: '#ED002F' }}
                   itemStyle={{ color: '#fff' }}
                   formatter={(value, name) => {
                     const channel = channelData.find(c => c.name === name);

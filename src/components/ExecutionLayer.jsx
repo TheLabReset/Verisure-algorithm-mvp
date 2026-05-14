@@ -182,7 +182,7 @@ export default function ExecutionLayer() {
       <div className="bg-fitzone-slate rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 lg:p-6 border border-fitzone-purple/10">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-fitzone-amber rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
-            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-fitzone-charcoal" />
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold text-white">Recomendaciones de Optimización</h3>
