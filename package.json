@@ -1,17 +1,14 @@
 {
   "name": "the-algorithm-by-reset",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
-  "description": "The Algorithm by Reset - Social Intelligence Template for Digital Marketing Optimization",
+  "description": "The Algorithm by Reset (Verisure Perú) — sistema de inteligencia competitiva de inversión publicitaria outside-in.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "scrape": "cd scrapers && node orchestrator.js"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@nivo/funnel": "^0.99.0",
-    "date-fns": "^2.30.0",
     "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

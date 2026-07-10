@@ -1,7 +1,5 @@
-import Dashboard from './components/Dashboard'
+import AppShell from './components/AppShell'
 
-function App() {
-  return <Dashboard />
+export default function App() {
+  return <AppShell />
 }
-
-export default App

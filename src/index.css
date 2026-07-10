@@ -2,35 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   Tokens de color — docs/DESIGN (Verisure).md §1 (fuente de verdad)
+   Cualquier hex fuera de esta tabla está prohibido.
+   ============================================================ */
+:root {
+  --base:          #FAF8F5;  /* fondo de página — blanco cálido papel */
+  --surface:       #FFFFFF;  /* cards */
+  --ink:           #16181F;  /* texto principal, card oscura ancla, iconos */
+  --ink-2:         #565D6B;  /* texto secundario / labels */
+  --ink-3:         #8A909C;  /* metadatos, ejes (solo texto ≥14px o deshabilitado) */
+  --line:          #E9E5DF;  /* divisores sutiles; usar poco */
+  --verisure:      #ED002F;  /* SOLO: alertas, CTA primario, marca, serie enfatizada */
+  --verisure-deep: #B30024;  /* hover / pressed del rojo */
+  --verisure-tint: #FDEEF1;  /* fondo suave de bloques de alerta / énfasis */
+  --positive:      #0E7A55;  /* único verde (deltas positivos) */
+  --caution:       #9A5B00;  /* único ámbar (advertencias, gauge DIY) */
+  --grad-brand:    linear-gradient(135deg, #ED002F 0%, #7A0E24 100%); /* UN uso: Opportunity Score */
+
+  /* Piso de gris para elementos portadores de dato (DESIGN §1): no bajar de aquí sobre blanco */
+  --data-grey-floor: #C9CDD4;
+}
+
 @layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--base);
+    color: var(--ink);
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    /* Cifras tabulares en todo el producto (DESIGN §3) */
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Foco visible en TODO interactivo (DESIGN §7) */
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
   }
 }
 
 @layer utilities {
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  .animate-fadeIn {
-    animation: fadeIn 0.5s ease-in-out;
+  /* Skeleton shimmer con la forma real del contenido (DESIGN §7).
+     Colores sancionados por DESIGN §7 para el estado de carga. */
+  .skeleton {
+    background: linear-gradient(90deg, #F1EDE6 25%, #FAF8F5 37%, #F1EDE6 63%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
   }
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Scroll horizontal CON indicador de borde (DESIGN §8): fade en los bordes,
+     scrollbar visible. NO ocultamos la barra. */
+  .scroll-x-fade {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
