@@ -15,6 +15,7 @@ export default {
           3: 'var(--ink-3)',
         },
         line: 'var(--line)',
+        wash: 'var(--wash)',
         verisure: {
           DEFAULT: 'var(--verisure)',
           deep: 'var(--verisure-deep)',

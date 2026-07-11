@@ -112,3 +112,83 @@
   color: var(--surface);
   font-weight: 600;
 }
+
+/* ── Carita de MAIA (DESIGN §6.1) ──────────────────────────────────────
+   Squircle --ink, dos ojos ovalados blancos, aura sutil en --verisure-tint
+   (único halo del sistema). Estados por clase; animaciones solo si el usuario
+   no pidió reducir movimiento. */
+.maia-face {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  background: var(--ink);
+  border-radius: 30%;                       /* aproximación de squircle */
+  box-shadow: 0 0 0 3px var(--verisure-tint); /* aura sutil, siempre presente */
+}
+.maia-eye {
+  position: absolute;
+  top: 37%;
+  width: 16%;
+  height: 27%;
+  background: var(--surface);
+  border-radius: 999px;
+  transform-origin: center;
+}
+.maia-eye-l { left: 27%; }
+.maia-eye-r { right: 27%; }
+
+/* Alerta: intensifica el aura con un rojo suave derivado del token (sin hex crudo). */
+.maia-alerta {
+  box-shadow: 0 0 0 3px var(--verisure-tint),
+              0 0 14px 2px color-mix(in srgb, var(--verisure) 32%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .maia-reposo .maia-eye { animation: maia-blink 6s infinite; }
+  .maia-pensando .maia-eye { animation: maia-think 1.5s ease-in-out infinite; }
+  .maia-alerta { animation: maia-alert 2.4s ease-in-out infinite; }
+
+  @keyframes maia-blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.08); }
+  }
+  @keyframes maia-think {
+    0%, 100% { transform: translateX(-14%); }
+    50% { transform: translateX(14%); }
+  }
+  @keyframes maia-alert {
+    0%, 100% { box-shadow: 0 0 0 3px var(--verisure-tint), 0 0 10px 1px color-mix(in srgb, var(--verisure) 20%, transparent); }
+    50% { box-shadow: 0 0 0 3px var(--verisure-tint), 0 0 18px 3px color-mix(in srgb, var(--verisure) 42%, transparent); }
+  }
+}
+
+/* ── Opportunity Score (DESIGN §6.3) — ÚNICO uso de --grad-brand ────────
+   Arco de progreso pintado con el gradiente de marca. Track en --wash; el
+   arco se recorta al valor (--p, 0–100) por intersección de máscaras. Los
+   colores de máscara (black/transparent) son alfa estructural, no tokens. */
+.score-ring {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+.score-ring::before,
+.score-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(farthest-side, transparent 71%, black 72%);
+          mask: radial-gradient(farthest-side, transparent 71%, black 72%);
+}
+.score-ring::before { background: var(--wash); }
+.score-ring::after {
+  background: var(--grad-brand);
+  -webkit-mask:
+    radial-gradient(farthest-side, transparent 71%, black 72%),
+    conic-gradient(black calc(var(--p, 0) * 1%), transparent 0);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(farthest-side, transparent 71%, black 72%),
+    conic-gradient(black calc(var(--p, 0) * 1%), transparent 0);
+  mask-composite: intersect;
+}

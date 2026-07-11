@@ -1,6 +1,6 @@
 // Utilidades de presentación del Radar. Verisure se enfatiza en rojo; la competencia
 // va en escala de grises de --ink (el líder el más oscuro), nunca un color por marca (DESIGN §1).
-import { formatPercent, formatSoles } from '../../utils/format'
+import { formatPercent, formatSoles } from '../../utils/format.js'
 
 // Rampa de grises para competidores, por tokens (no bajar del piso de dato #C9CDD4).
 export const GRAY_RAMP = ['var(--ink)', 'var(--ink-3)', 'var(--ink-2)']
