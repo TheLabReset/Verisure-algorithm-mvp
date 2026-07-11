@@ -37,8 +37,11 @@ export default function DemandaModule() {
   return (
     <div className="space-y-6">
       <SearchVsInvestmentSlope rows={view.svi} />
-      <SearchTrend trends={trends} />
-      <DiyThreatGauge diy={view.diy} />
+      {/* Tendencia de búsqueda junto al índice DIY, 2 columnas en desktop. */}
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+        <SearchTrend trends={trends} />
+        <DiyThreatGauge diy={view.diy} />
+      </div>
     </div>
   )
 }

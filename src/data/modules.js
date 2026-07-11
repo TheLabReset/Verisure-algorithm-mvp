@@ -24,7 +24,7 @@ export const MODULES = [
   {
     id: 'maia',
     label: 'MAIA',
-    freshness: 'MAIA — Media Analyst IA de Reset · lee las 6 fuentes del día',
+    freshness: 'Brief generado 6:04 a. m. · 6 fuentes del día',
   },
 ]
 

@@ -94,11 +94,17 @@ export default function RadarModule() {
 
   return (
     <div className="space-y-6">
-      <PlayOfTheDay piece={piece} lastDetection={view.lastDetection} />
-      <SoiCapsules soi={view.soi} dotted={isDown} />
+      {/* Hero a 2 columnas en desktop (DESIGN / mockup): la jugada del día (card
+          oscura ancla) junto al SOI del día; colapsa a 1 columna en móvil. */}
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch">
+        <PlayOfTheDay piece={piece} lastDetection={view.lastDetection} />
+        <SoiCapsules soi={view.soi} dotted={isDown} />
+      </div>
       <PressureTimeline pressure={view.pressure} events={events} degraded={isDown} />
-      <AdMuseum pieces={view.museum} />
-      <OohMap points={view.ooh} risk={riskDistritos} degraded={isDown} />
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+        <AdMuseum pieces={view.museum} />
+        <OohMap points={view.ooh} risk={riskDistritos} degraded={isDown} />
+      </div>
     </div>
   )
 }

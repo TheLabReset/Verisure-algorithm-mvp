@@ -39,7 +39,7 @@ export default function Capsula({ label, share, value, color, pattern = 'solid',
         </span>
       </div>
       <div
-        className="h-3.5 w-full overflow-hidden rounded-pill"
+        className="h-4 w-full overflow-hidden rounded-pill"
         style={{ background: 'var(--wash)' }}
         role="img"
         aria-label={`${label}: ${formatPercent(pct, 0)}`}

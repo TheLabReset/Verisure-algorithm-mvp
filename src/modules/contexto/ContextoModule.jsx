@@ -27,8 +27,11 @@ export default function ContextoModule() {
 
   return (
     <div className="space-y-6">
-      <CrimeDistricts criminalidad={contexto.criminalidad} />
-      <Seasonality estacionalidad={contexto.estacionalidad} day={day} />
+      {/* Denuncias por distrito junto a la estacionalidad, 2 columnas en desktop. */}
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+        <CrimeDistricts criminalidad={contexto.criminalidad} />
+        <Seasonality estacionalidad={contexto.estacionalidad} day={day} />
+      </div>
       <MacroRow macro={contexto.macro} />
       <NewsList noticias={contexto.noticias} />
     </div>

@@ -14,7 +14,7 @@ export default function SoiCapsules({ soi, dotted = false }) {
     .map((b) => `${brandDisplay(b.maname)} ${signPts(b.deltaPts)}`)
 
   return (
-    <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
+    <section className="flex h-full flex-col rounded-card bg-surface p-5 shadow-card sm:p-6">
       <h3 className="font-display text-xl text-ink sm:text-2xl">
         {dotted ? 'SOI de ayer — sin dato fresco de Integrametrics' : buildSoiInsight(soi)}
       </h3>
@@ -24,7 +24,7 @@ export default function SoiCapsules({ soi, dotted = false }) {
           : `Share of investment del día · ${fmtDayLong(soi?.day)}`}
       </p>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-6 space-y-5">
         {brands.map((b) => (
           <Capsula
             key={b.maname}
@@ -38,7 +38,7 @@ export default function SoiCapsules({ soi, dotted = false }) {
         ))}
       </div>
 
-      <p className="mt-5 text-sm text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
+      <p className="mt-auto pt-5 text-sm text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
         {deltas.length > 0 && !dotted ? (
           <>
             <span className="text-ink-2">vs. semana pasada:</span> {deltas.join(' · ')} ·{' '}

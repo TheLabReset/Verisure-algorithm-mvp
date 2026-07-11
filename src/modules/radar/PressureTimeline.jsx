@@ -1,6 +1,7 @@
 // Presión competitiva 30 días (DESIGN §5): líneas con UNA serie enfatizada (Verisure rojo),
 // competencia en grises, eventos anotados como puntos con etiqueta. SVG propio: sin grid
 // pesado, etiquetas directas al final de cada línea (no leyenda lejana). Baseline en 0.
+import { useState } from 'react'
 import { fmtDayShort } from './dateLabels'
 import { brandDisplay } from './radarUtils'
 
@@ -34,10 +35,18 @@ function insight(pressure) {
 }
 
 export default function PressureTimeline({ pressure = [], events = [], degraded = false }) {
+  const [hidden, setHidden] = useState(() => new Set())
   if (!pressure.length) return null
   const brands = new Set()
   pressure.forEach((p) => Object.keys(p.byBrand || {}).forEach((b) => brands.add(b)))
   const brandList = [...brands]
+  const toggle = (b) =>
+    setHidden((h) => {
+      const n = new Set(h)
+      n.has(b) ? n.delete(b) : n.add(b)
+      return n
+    })
+  const visible = brandList.filter((b) => !hidden.has(b))
 
   const max = Math.max(
     1,
@@ -62,8 +71,31 @@ export default function PressureTimeline({ pressure = [], events = [], degraded 
 
   return (
     <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
-      <h3 className="font-display text-xl text-ink sm:text-2xl">{insight(pressure)}</h3>
-      <p className="mt-1 text-sm text-ink-2">Inversión diaria estimada · últimos 30 días</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="font-display text-xl text-ink sm:text-2xl">{insight(pressure)}</h3>
+          <p className="mt-1 text-sm text-ink-2">Inversión diaria estimada · últimos 30 días</p>
+        </div>
+        {/* Toggles de marca (leyenda interactiva): ocultan/muestran su línea. */}
+        <div className="flex flex-wrap gap-2">
+          {brandList.map((b) => {
+            const off = hidden.has(b)
+            return (
+              <button
+                key={b}
+                type="button"
+                onClick={() => toggle(b)}
+                aria-pressed={!off}
+                className={`flex min-h-[44px] items-center gap-1.5 rounded-pill border border-line px-3 text-xs font-medium ${off ? 'text-ink-3' : 'text-ink'}`}
+                style={{ background: off ? 'transparent' : 'var(--wash)' }}
+              >
+                <span className="h-2 w-2 rounded-pill" style={{ background: off ? 'var(--ink-3)' : styleOf(b).stroke }} />
+                {brandDisplay(b)}
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
       <div className="scroll-x-fade mt-4">
         <svg
@@ -76,7 +108,7 @@ export default function PressureTimeline({ pressure = [], events = [], degraded 
           {/* baseline sutil (única línea de referencia, DESIGN §5) */}
           <line x1={PAD.left} y1={PAD.top + innerH} x2={PAD.left + innerW} y2={PAD.top + innerH} stroke="var(--line)" strokeWidth="1" />
 
-          {brandList.map((b) => {
+          {visible.map((b) => {
             const st = styleOf(b)
             const pts = seriesFor(pressure, b).map((v, i) => `${x(i)},${y(v)}`).join(' ')
             const lastV = seriesFor(pressure, b)[n - 1]
@@ -94,7 +126,7 @@ export default function PressureTimeline({ pressure = [], events = [], degraded 
           {/* eventos anotados */}
           {events.map((ev, k) => {
             const i = dateIdx(ev.fecha)
-            if (i < 0) return null
+            if (i < 0 || hidden.has(ev.maname)) return null
             const v = pressure[i].byBrand?.[ev.maname] || max * 0.5
             return (
               <g key={k}>

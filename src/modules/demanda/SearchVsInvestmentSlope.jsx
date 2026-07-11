@@ -41,47 +41,53 @@ export default function SearchVsInvestmentSlope({ rows = [] }) {
         Share of search vs. share of investment · SoS = Google Trends · SoI = Integrametrics · últimos 30 días
       </p>
 
-      <div className="scroll-x-fade mt-4">
-        <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ minWidth: 460, display: 'block' }} role="img" aria-label="Share of search versus share of investment por competidor">
-          <text x={LX} y="24" fontSize="12" fill="var(--ink-2)" textAnchor="middle" style={{ letterSpacing: '.04em' }}>SHARE OF SEARCH</text>
-          <text x={RX} y="24" fontSize="12" fill="var(--ink-2)" textAnchor="middle" style={{ letterSpacing: '.04em' }}>SHARE OF INVESTMENT</text>
+      {/* Slope a la izquierda, lectura por marca a la derecha (mockup): 2 columnas
+          en desktop, apiladas en móvil. */}
+      <div className="mt-4 grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-center">
+        <div className="scroll-x-fade">
+          <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ minWidth: 460, display: 'block' }} role="img" aria-label="Share of search versus share of investment por competidor">
+            <text x={LX} y="24" fontSize="12" fill="var(--ink-2)" textAnchor="middle" style={{ letterSpacing: '.04em' }}>SHARE OF SEARCH</text>
+            <text x={RX} y="24" fontSize="12" fill="var(--ink-2)" textAnchor="middle" style={{ letterSpacing: '.04em' }}>SHARE OF INVESTMENT</text>
 
-          {rows.map((r) => {
-            const st = styleOf(r.maname)
-            return (
-              <g key={r.maname}>
-                <line x1={LX} y1={y(r.search)} x2={RX} y2={y(r.investment)} stroke={st.color} strokeWidth={st.width} strokeDasharray={r.isVerisure ? undefined : '5 3'} />
-                <circle cx={LX} cy={y(r.search)} r="3.5" fill={st.color} />
-                <circle cx={RX} cy={y(r.investment)} r="3.5" fill={st.color} />
-                <text x={LX - 10} y={y(r.search) + 4} fontSize="12" fill={st.label} textAnchor="end" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {brandDisplay(r.maname)} {formatPercent(r.search, 0)}
-                </text>
-                <text x={RX + 10} y={y(r.investment) + 4} fontSize="12" fill={st.label} textAnchor="start" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {formatPercent(r.investment, 0)}
-                </text>
-              </g>
-            )
-          })}
-        </svg>
-      </div>
+            {rows.map((r) => {
+              const st = styleOf(r.maname)
+              return (
+                <g key={r.maname}>
+                  <line x1={LX} y1={y(r.search)} x2={RX} y2={y(r.investment)} stroke={st.color} strokeWidth={st.width} strokeDasharray={r.isVerisure ? undefined : '5 3'} />
+                  <circle cx={LX} cy={y(r.search)} r="3.5" fill={st.color} />
+                  <circle cx={RX} cy={y(r.investment)} r="3.5" fill={st.color} />
+                  <text x={LX - 10} y={y(r.search) + 4} fontSize="12" fill={st.label} textAnchor="end" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {brandDisplay(r.maname)} {formatPercent(r.search, 0)}
+                  </text>
+                  <text x={RX + 10} y={y(r.investment) + 4} fontSize="12" fill={st.label} textAnchor="start" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {formatPercent(r.investment, 0)}
+                  </text>
+                </g>
+              )
+            })}
+          </svg>
+        </div>
 
-      <div className="mt-4 space-y-1 text-sm text-ink-2">
-        {verisure ? (
-          <p>
-            <span className="font-semibold text-ink">Verisure — {Math.abs(verisure.gap)} pts de brecha.</span>{' '}
-            La demanda de marca existe; la inversión no la acompaña.
-          </p>
-        ) : null}
-        {prosegur && prosegur.gap < 0 ? (
-          <p>
-            <span className="font-semibold text-ink">Prosegur</span> invierte {Math.abs(prosegur.gap)} pts por encima de lo que la gente lo busca: compra presencia.
-          </p>
-        ) : null}
-        {securitas ? (
-          <p>
-            <span className="font-semibold text-ink">Securitas</span> se mantiene con presencia baja y foco B2B.
-          </p>
-        ) : null}
+        <div className="space-y-3 text-sm text-ink-2">
+          {verisure ? (
+            <p className="flex gap-2">
+              <span className="mt-1.5 h-2 w-2 shrink-0 rounded-pill" style={{ background: 'var(--verisure)' }} />
+              <span><span className="font-semibold text-ink">Verisure — {Math.abs(verisure.gap)} pts de brecha.</span> La demanda de marca existe; la inversión no la acompaña.</span>
+            </p>
+          ) : null}
+          {prosegur && prosegur.gap < 0 ? (
+            <p className="flex gap-2">
+              <span className="mt-1.5 h-2 w-2 shrink-0 rounded-pill" style={{ background: 'var(--ink)' }} />
+              <span><span className="font-semibold text-ink">Prosegur</span> invierte {Math.abs(prosegur.gap)} pts por encima de lo que la gente lo busca: compra presencia.</span>
+            </p>
+          ) : null}
+          {securitas ? (
+            <p className="flex gap-2">
+              <span className="mt-1.5 h-2 w-2 shrink-0 rounded-pill" style={{ background: 'var(--ink-3)' }} />
+              <span><span className="font-semibold text-ink">Securitas</span> se mantiene con presencia baja y foco B2B.</span>
+            </p>
+          ) : null}
+        </div>
       </div>
 
       <p className="mt-3 border-t border-line pt-3 text-xs text-ink-2">

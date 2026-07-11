@@ -41,18 +41,22 @@ export default function CrimeDistricts({ criminalidad }) {
         {mesLabel(criminalidad.periodo)} (última publicación mensual)
       </p>
 
-      <div className="space-y-2.5">
-        {distritos.map((d, i) => (
-          <div key={d.distrito} className="flex items-center gap-3">
-            <span className="w-24 shrink-0 text-sm text-ink">{d.distrito}</span>
-            <div className="h-3 flex-1 overflow-hidden rounded-pill" style={{ background: 'var(--wash)' }}>
-              <div className="h-full rounded-pill" style={{ width: `${(d.denuncias / max) * 100}%`, background: i < 3 ? 'var(--ink)' : 'var(--ink-3)' }} />
+      {/* Columnas verticales (mockup): valor arriba, distrito abajo; rampa de gris
+          descendente (el más alto en --ink, resto aclara pero nunca bajo el piso de dato). */}
+      <div className="mt-2 flex items-end justify-between gap-1.5 sm:gap-2">
+        {distritos.map((d, i) => {
+          const barH = Math.round((d.denuncias / max) * 150) + 10
+          const shade = i === 0 ? 'var(--ink)' : i < 3 ? 'var(--ink-2)' : 'var(--ink-3)'
+          return (
+            <div key={d.distrito} className="flex flex-1 flex-col items-center gap-1.5">
+              <span className="text-xs font-semibold text-ink" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {formatThousands(d.denuncias)}
+              </span>
+              <div className="w-full max-w-[46px] rounded-t-pill" style={{ height: barH, background: shade }} />
+              <span className="text-center text-xs leading-tight text-ink-2">{d.distrito}</span>
             </div>
-            <span className="w-14 shrink-0 text-right text-sm font-semibold text-ink" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {formatThousands(d.denuncias)}
-            </span>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <p className="mt-4 border-t border-line pt-3 text-xs text-ink-2">

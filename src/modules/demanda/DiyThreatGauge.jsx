@@ -1,25 +1,31 @@
 // Índice de Amenaza DIY (DEMANDA) — cámaras solas como sustituto del servicio monitoreado.
-// Gauge sobrio de un solo arco (DESIGN §5) en --caution; + 3 componentes con su fuente.
+// Gauge sobrio de un solo arco (DESIGN §5) en --caution, ~270° con hueco inferior; debajo,
+// los 3 componentes como filas (label izq · valor der) con su fuente.
 import { formatSoles } from '../../utils/format'
 
-// Arco de gauge 0–100 (semicírculo). Devuelve el path del arco parcial.
+// Punto polar en coordenadas SVG (y hacia abajo; 0°=E, 90°=S).
+function polar(cx, cy, r, deg) {
+  const rad = (deg * Math.PI) / 180
+  return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)]
+}
+// Arco de gauge: parte en 135° (abajo-izq) y barre en sentido horario `sweep` grados.
 function arcPath(cx, cy, r, frac) {
-  const a0 = Math.PI // 180° (izquierda)
-  const a1 = Math.PI - frac * Math.PI // recorre hacia 0° (derecha)
-  const x0 = cx + r * Math.cos(a0)
-  const y0 = cy + r * Math.sin(a0)
-  const x1 = cx + r * Math.cos(a1)
-  const y1 = cy + r * Math.sin(a1)
-  const large = frac > 0.5 ? 1 : 0
+  const START = 135
+  const SWEEP = 270 * Math.max(0, Math.min(1, frac))
+  const [x0, y0] = polar(cx, cy, r, START)
+  const [x1, y1] = polar(cx, cy, r, START + SWEEP)
+  const large = SWEEP > 180 ? 1 : 0
   return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`
 }
 
-function Component({ label, value, sub }) {
+function Row({ label, value, sub }) {
   return (
-    <div className="rounded-inner border border-line p-3">
-      <p className="text-xs text-ink-2">{label}</p>
-      <p className="mt-0.5 text-base font-semibold text-ink" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</p>
-      {sub ? <p className="text-xs text-ink-2">{sub}</p> : null}
+    <div className="flex items-center justify-between gap-3 py-2.5">
+      <p className="text-sm text-ink-2">{label}</p>
+      <p className="shrink-0 text-right text-sm font-semibold text-ink" style={{ fontVariantNumeric: 'tabular-nums' }}>
+        {value}
+        {sub ? <span className="ml-1.5 font-normal text-ink-2">· {sub}</span> : null}
+      </p>
     </div>
   )
 }
@@ -38,11 +44,11 @@ export default function DiyThreatGauge({ diy }) {
   const delta = diy.deltaSemana
   const c = diy.components || {}
   const cx = 110
-  const cy = 110
-  const r = 88
+  const cy = 108
+  const r = 84
 
   return (
-    <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
+    <section className="flex h-full flex-col rounded-card bg-surface p-5 shadow-card sm:p-6">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="font-display text-xl text-ink sm:text-2xl">{diyTitle(idx, delta)}</h3>
         {delta != null && delta !== 0 ? (
@@ -53,22 +59,22 @@ export default function DiyThreatGauge({ diy }) {
       </div>
       <p className="mt-1 text-sm text-ink-2">Índice de Amenaza DIY (hazlo-tú-mismo) · 0–100 · cámaras solas como sustituto</p>
 
-      <div className="mt-4 grid gap-5 sm:grid-cols-[220px_minmax(0,1fr)] sm:items-center">
-        <svg viewBox="0 0 220 130" width="220" style={{ maxWidth: '100%' }} role="img" aria-label={`Índice de amenaza DIY ${idx} de 100`}>
+      <div className="mt-4 flex justify-center">
+        <svg viewBox="0 0 220 200" width="220" style={{ maxWidth: '100%' }} role="img" aria-label={`Índice de amenaza DIY ${idx} de 100`}>
           <path d={arcPath(cx, cy, r, 1)} fill="none" stroke="var(--wash)" strokeWidth="16" strokeLinecap="round" />
           <path d={arcPath(cx, cy, r, idx / 100)} fill="none" stroke="var(--caution)" strokeWidth="16" strokeLinecap="round" />
-          <text x={cx} y={cy - 6} fontSize="40" fill="var(--ink)" textAnchor="middle" style={{ fontVariantNumeric: 'tabular-nums', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}>{idx}</text>
-          <text x={cx} y={cy + 16} fontSize="13" fill="var(--ink-2)" textAnchor="middle">de 100</text>
+          <text x={cx} y={cy - 4} fontSize="44" fill="var(--ink)" textAnchor="middle" style={{ fontVariantNumeric: 'tabular-nums', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}>{idx}</text>
+          <text x={cx} y={cy + 20} fontSize="13" fill="var(--ink-2)" textAnchor="middle">de 100</text>
         </svg>
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Component label="Búsquedas «cámara wifi»" value={`+${c.busquedas_camara_wifi_growth_90d ?? 0}%`} sub="90 días · Trends" />
-          <Component label="Precio mediano marketplace" value={formatSoles(c.precio_mediano_marketplace)} sub={`${c.precio_delta_vs_abr ?? 0}% vs. abr`} />
-          <Component label="Pauta DIY detectada" value={`${formatSoles(c.pauta_diy_moneda_local ? Math.round(c.pauta_diy_moneda_local / 30 * 7) : 0)}/sem`} sub="Integrametrics · estimado" />
-        </div>
       </div>
 
-      <p className="mt-4 border-t border-line pt-3 text-xs text-ink-2">
+      <div className="mt-2 divide-y divide-line border-t border-line">
+        <Row label="Búsquedas «cámara wifi»" value={`+${c.busquedas_camara_wifi_growth_90d ?? 0}%`} sub="90 días · Trends" />
+        <Row label="Precio mediano marketplace" value={formatSoles(c.precio_mediano_marketplace)} sub={`${c.precio_delta_vs_abr ?? 0}% vs. abr`} />
+        <Row label="Pauta DIY detectada" value={`${formatSoles(c.pauta_diy_moneda_local ? Math.round((c.pauta_diy_moneda_local / 30) * 7) : 0)}/sem`} sub="Integrametrics · estimado" />
+      </div>
+
+      <p className="mt-auto pt-4 text-xs text-ink-2">
         Marcas monitoreadas: {(c.marcas_monitoreadas || []).join(', ')} · rayado = estimado
       </p>
     </section>

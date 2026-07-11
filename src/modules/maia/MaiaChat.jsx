@@ -4,6 +4,7 @@
 // la API de Anthropic (la key vive en el servidor, nunca en el bundle) y muestra el
 // estado "pensando" mientras responde; si falla, cae al motor local.
 import { useState, useRef, useEffect } from 'react'
+import { ArrowUp } from 'lucide-react'
 import MaiaFace from './MaiaFace'
 import { SUGGESTED, maiaAnswer } from './maiaChat'
 import { fmtDayFull } from '../radar/dateLabels'
@@ -111,16 +112,17 @@ export default function MaiaChat({ facts = {} }) {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Escribe tu pregunta…"
+          placeholder="Pregúntale a MAIA sobre el mercado…"
           aria-label="Escribe tu pregunta para MAIA"
-          className="min-h-[44px] flex-1 rounded-inner border border-line bg-surface px-3 text-sm text-ink placeholder:text-ink-3"
+          className="min-h-[44px] flex-1 rounded-pill border border-line bg-surface px-4 text-sm text-ink placeholder:text-ink-3"
         />
         <button
           type="submit"
-          className="min-h-[44px] rounded-inner px-4 text-sm font-semibold text-surface"
-          style={{ background: 'var(--verisure-deep)' }}
+          aria-label="Enviar pregunta"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-pill text-surface"
+          style={{ background: 'var(--verisure)' }}
         >
-          Enviar
+          <ArrowUp size={20} aria-hidden="true" />
         </button>
       </form>
 

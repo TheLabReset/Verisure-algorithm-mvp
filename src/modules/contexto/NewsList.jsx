@@ -9,7 +9,7 @@ export default function NewsList({ noticias }) {
 
       <ul className="mt-4 divide-y divide-line">
         {noticias.map((noticia, i) => (
-          <li key={i} className="py-3">
+          <li key={i} className="flex items-baseline justify-between gap-4 py-3">
             <a
               href={noticia.url || '#'}
               target="_blank"
@@ -18,7 +18,7 @@ export default function NewsList({ noticias }) {
             >
               {noticia.titular}
             </a>
-            <p className="mt-1 text-xs text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            <p className="shrink-0 text-xs text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {noticia.fuente} · {noticia.hora}
             </p>
           </li>

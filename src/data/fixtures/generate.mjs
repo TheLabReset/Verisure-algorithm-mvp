@@ -416,6 +416,18 @@ const trends = {
     const t = d / (DAYS - 1)
     return { fecha: dayISO(DAYS - 1 - d), value: Math.round(62 + 16 * t + (rnd() * 2 - 1) * 3) }
   }),
+  // interés de búsqueda de marca (índice 0-100) para leer las 3 curvas juntas:
+  // categoría (arriba) vs Verisure (medio) vs Prosegur (abajo).
+  series_marca: {
+    VERISURE: Array.from({ length: DAYS }, (_, d) => {
+      const t = d / (DAYS - 1)
+      return { fecha: dayISO(DAYS - 1 - d), value: Math.round(38 + 8 * t + (rnd() * 2 - 1) * 2.5) }
+    }),
+    PROSEGUR: Array.from({ length: DAYS }, (_, d) => {
+      const t = d / (DAYS - 1)
+      return { fecha: dayISO(DAYS - 1 - d), value: Math.round(27 + 6 * t + (rnd() * 2 - 1) * 2.5) }
+    }),
+  },
   diy: {
     // Índice de Amenaza DIY = 58/100 (mockup), +4 esta semana
     delta_semana: 4,

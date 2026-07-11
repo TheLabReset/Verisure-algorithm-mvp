@@ -9,6 +9,7 @@ import EmptyState from '../../components/ui/EmptyState'
 import DailyBrief from './DailyBrief'
 import OpportunityScore from './OpportunityScore'
 import MaiaChat from './MaiaChat'
+import MaiaFace from './MaiaFace'
 import { composeBrief } from './maiaBrief'
 
 function demoParam() {
@@ -28,8 +29,13 @@ export default function MaiaModule() {
     const newPieces = isDown || demo === 'empty' ? [] : detectNewPieces(registros, day)
     const diy = trends ? diyIndex(trends, digital) : null
     const score = opportunityScore(registros, trends, contexto, day)
-    const brief = composeBrief({ day, soi, newPieces, diy, score, contexto })
-    return { day, soi, newPieces, diy, score, brief, contexto }
+    // Delta del Score vs. hace 7 días (varía por la presión competitiva del SOI).
+    const prev = new Date(`${day}T00:00:00Z`)
+    prev.setUTCDate(prev.getUTCDate() - 7)
+    const scorePrev = opportunityScore(registros, trends, contexto, prev.toISOString().slice(0, 10)).score
+    const scoreObj = { ...score, deltaSemana: score.score - scorePrev }
+    const brief = composeBrief({ day, soi, newPieces, diy, score: scoreObj, contexto })
+    return { day, soi, newPieces, diy, score: scoreObj, brief, contexto }
   }, [registros, digital, trends, contexto, day, isDown, demo])
 
   if (demo === 'loading' || (loading && !facts)) {
@@ -54,8 +60,19 @@ export default function MaiaModule() {
 
   return (
     <div className="space-y-6">
-      <DailyBrief brief={facts.brief} />
-      <OpportunityScore score={facts.score} />
+      {/* Identidad de MAIA con carita (DESIGN §6.1). */}
+      <div className="flex items-center gap-3">
+        <MaiaFace state={facts.brief.alerta ? 'alerta' : 'reposo'} size={40} />
+        <div>
+          <p className="font-display text-xl text-ink sm:text-2xl">MAIA</p>
+          <p className="text-sm text-ink-2">Media Analyst IA de Reset · lee las 6 fuentes del día</p>
+        </div>
+      </div>
+      {/* Opportunity Score junto al Daily Brief (card oscura ancla), 2 columnas. */}
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+        <OpportunityScore score={facts.score} day={facts.day} />
+        <DailyBrief brief={facts.brief} />
+      </div>
       <MaiaChat facts={facts} />
     </div>
   )

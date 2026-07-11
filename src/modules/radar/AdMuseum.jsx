@@ -1,39 +1,57 @@
-// Ad Museum — galería creativa viva (blueprint RADAR): timeline visual por pieza con
+// Ad Museum — galería creativa viva (blueprint RADAR): grid 2×2 de piezas con
 // primera emisión, canales e inversión acumulada estimada, y tono EPPM. Ordenada por
-// primera emisión (más recientes primero). "Ver todo" expande de 12 a todas.
+// primera emisión (más recientes primero). "Ver todo" expande de 4 a todas.
 import { useState } from 'react'
-import { Play } from 'lucide-react'
+import { Play, AudioLines, RectangleHorizontal, Smartphone } from 'lucide-react'
 import { formatSoles } from '../../utils/format'
 import { brandDisplay } from './radarUtils'
 import { fmtDayShort } from './dateLabels'
 
-function Thumb() {
+// Ícono de formato derivado del tipo/canal de la pieza (neutro, no color por marca).
+function formatIcon(p) {
+  const t = (p.tname || '').toUpperCase()
+  const ch = (p.channels || []).join(' ').toUpperCase()
+  if (t.includes('VÍA') || t.includes('OOH') || ch.includes('OOH')) return RectangleHorizontal
+  if (t.includes('RADIO')) return AudioLines
+  if (/META|YOUTUBE|DIGITAL|TIKTOK|\bFB\b|\bIG\b/.test(ch)) return Smartphone
+  return Play
+}
+
+// Miniatura clara con ilustración de formato + píldora de tono (callout) e ícono.
+function Thumb({ piece }) {
+  const Icon = formatIcon(piece)
   return (
     <div
       className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-inner"
-      style={{ background: 'var(--ink)', color: 'var(--surface)' }}
+      style={{ background: 'var(--wash)' }}
     >
-      <div
-        className="absolute inset-0 opacity-25"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(45deg, var(--ink-3) 0, var(--ink-3) 1px, transparent 1px, transparent 7px)',
-        }}
-        aria-hidden="true"
-      />
-      <Play size={18} fill="currentColor" aria-hidden="true" />
+      <Icon size={30} strokeWidth={1.5} style={{ color: 'var(--ink-3)' }} aria-hidden="true" />
+      {/* Ícono de formato pequeño, arriba-derecha */}
+      <span
+        className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-pill"
+        style={{ background: 'var(--surface)', color: 'var(--ink-2)' }}
+      >
+        <Icon size={12} strokeWidth={2} aria-hidden="true" />
+      </span>
+      {/* Píldora de tono EPPM, abajo-izquierda */}
+      <span
+        className="absolute bottom-2 left-2 rounded-pill px-2 py-0.5 text-xs font-medium"
+        style={{ background: 'var(--surface)', color: 'var(--ink-2)' }}
+      >
+        {piece.eppm}
+      </span>
     </div>
   )
 }
 
 export default function AdMuseum({ pieces = [] }) {
   const [showAll, setShowAll] = useState(false)
-  const shown = showAll ? pieces : pieces.slice(0, 12)
+  const shown = showAll ? pieces : pieces.slice(0, 4)
 
   if (!pieces.length) return null
 
   return (
-    <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
+    <section className="flex h-full flex-col rounded-card bg-surface p-5 shadow-card sm:p-6">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <h3 className="font-display text-xl text-ink sm:text-2xl">Ad Museum</h3>
@@ -41,7 +59,7 @@ export default function AdMuseum({ pieces = [] }) {
             {pieces.length} piezas activas · ordenadas por primera emisión
           </p>
         </div>
-        {pieces.length > 12 ? (
+        {pieces.length > 4 ? (
           <button
             type="button"
             onClick={() => setShowAll((s) => !s)}
@@ -52,15 +70,11 @@ export default function AdMuseum({ pieces = [] }) {
         ) : null}
       </div>
 
-      <div
-        className="grid gap-4"
-        style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))' }}
-      >
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         {shown.map((p) => (
-          <article key={p.key} className="rounded-inner border border-line p-3">
-            <Thumb />
-            <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-ink-2">{p.eppm}</p>
-            <p className="mt-1 text-sm text-ink">
+          <article key={p.key}>
+            <Thumb piece={p} />
+            <p className="mt-2 text-sm text-ink">
               <span className="font-semibold">{brandDisplay(p.maname)}</span> · «{p.vname}»
             </p>
             <p className="mt-1 text-xs text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
