@@ -445,14 +445,18 @@ const contexto = {
   },
   macro: {
     fuente: 'BCRP',
-    tipo_cambio: { value: 3.68, delta_semana_pct: -0.3 },
-    confianza_consumidor: { value: 47.2, delta_vs_mes_pct: 1.1 },
+    tipo_cambio: { value: 3.68, delta_semana_pct: -0.3, periodo: 'la semana' },
+    confianza_consumidor: { value: 47.2, delta_vs_mes_pct: 1.1, periodo: 'junio' },
     expectativa_economia: { value: 52.4, delta: 0, tramo: 'optimista' },
-    inflacion_12m: { value: 2.6, delta_pts: -0.1 },
+    inflacion_12m: { value: 2.6, delta_pts: -0.1, periodo: 'mayo' },
   },
   estacionalidad: {
     nota: 'Fiestas Patrias (28–29 jul) eleva búsquedas de alarmas +22% y robos a vivienda +9% en agosto',
-    picos: ['jul–ago: pico vacacional', 'nov–dic: pico navideño'],
+    // Picos con meses 0-indexados: la tira y el título se derivan de aquí (no hardcode).
+    picos: [
+      { meses: [6, 7], etiqueta: 'pico vacacional' },
+      { meses: [10, 11], etiqueta: 'pico navideño' },
+    ],
   },
   noticias: [
     { titular: 'PNP refuerza patrullaje en Lima Norte tras ola de robos a viviendas en Los Olivos y Comas', fuente: 'El Comercio', hora: '8:12', url: 'https://elcomercio.pe/' },

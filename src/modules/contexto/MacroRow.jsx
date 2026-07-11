@@ -32,10 +32,10 @@ export default function MacroRow({ macro }) {
         {macro.fuente === 'BCRP' ? ' (Banco Central de Reserva)' : ''} · normaliza el reporting EUR/USD/PEN y el precio del hardware DIY importado
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Cell label="Tipo de cambio" value={`S/ ${formatES(tc.value, 2)}`} sub={`${delta(tc.delta_semana_pct)} en la semana`} />
-        <Cell label="Confianza del consumidor" value={formatES(cc.value, 1)} sub={`${delta(cc.delta_vs_mes_pct, ' pts')} vs. junio`} />
+        <Cell label="Tipo de cambio" value={`S/ ${formatES(tc.value, 2)}`} sub={`${delta(tc.delta_semana_pct)}${tc.periodo ? ` en ${tc.periodo}` : ''}`} />
+        <Cell label="Confianza del consumidor" value={formatES(cc.value, 1)} sub={`${delta(cc.delta_vs_mes_pct, ' pts')}${cc.periodo ? ` vs. ${cc.periodo}` : ''}`} />
         <Cell label="Expectativa de economía" value={formatES(ee.value, 1)} sub={`${delta(ee.delta, ' pts')} · tramo ${ee.tramo || ''}`} />
-        <Cell label="Inflación 12 meses" value={`${formatES(inf.value, 1)}%`} sub={`${delta(inf.delta_pts, ' pts')} vs. mayo`} />
+        <Cell label="Inflación 12 meses" value={`${formatES(inf.value, 1)}%`} sub={`${delta(inf.delta_pts, ' pts')}${inf.periodo ? ` vs. ${inf.periodo}` : ''}`} />
       </div>
     </section>
   )

@@ -9,7 +9,7 @@ import MacroRow from './MacroRow'
 import NewsList from './NewsList'
 
 export default function ContextoModule() {
-  const { loading, contexto } = useData()
+  const { loading, contexto, day } = useData()
 
   if (loading && !contexto) {
     return (
@@ -28,7 +28,7 @@ export default function ContextoModule() {
   return (
     <div className="space-y-6">
       <CrimeDistricts criminalidad={contexto.criminalidad} />
-      <Seasonality estacionalidad={contexto.estacionalidad} />
+      <Seasonality estacionalidad={contexto.estacionalidad} day={day} />
       <MacroRow macro={contexto.macro} />
       <NewsList noticias={contexto.noticias} />
     </div>

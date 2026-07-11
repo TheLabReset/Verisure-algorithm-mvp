@@ -21,7 +21,7 @@ export default function CrimeDistricts({ criminalidad }) {
   const fracLabel =
     top3Frac >= 0.45 ? 'casi la mitad' : top3Frac >= 0.28 ? 'un tercio' : 'una parte importante'
   const restoCount = criminalidad.resto_distritos?.count || 0
-  const totalDistritos = distritos.length + restoCount
+  const restoDenuncias = criminalidad.resto_distritos?.denuncias || 0
 
   return (
     <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
@@ -30,9 +30,9 @@ export default function CrimeDistricts({ criminalidad }) {
           {top3} concentran {fracLabel} de las denuncias de {mesLabel(criminalidad.periodo).split(' ')[0]}
         </h3>
         {restoCount > 0 ? (
-          <button type="button" className="min-h-[44px] rounded-inner px-2 text-sm font-medium text-ink underline-offset-4 hover:underline">
-            Ver los {totalDistritos} distritos →
-          </button>
+          <span className="text-sm text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            +{restoCount} distritos suman {formatThousands(restoDenuncias)}
+          </span>
         ) : null}
       </div>
       <p className="mb-4 text-sm text-ink-2">

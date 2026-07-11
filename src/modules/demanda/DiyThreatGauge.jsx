@@ -51,7 +51,7 @@ export default function DiyThreatGauge({ diy }) {
           </span>
         ) : null}
       </div>
-      <p className="mt-1 text-sm text-ink-2">Índice de Amenaza DIY · 0–100 · cámaras solas como sustituto</p>
+      <p className="mt-1 text-sm text-ink-2">Índice de Amenaza DIY (hazlo-tú-mismo) · 0–100 · cámaras solas como sustituto</p>
 
       <div className="mt-4 grid gap-5 sm:grid-cols-[220px_minmax(0,1fr)] sm:items-center">
         <svg viewBox="0 0 220 130" width="220" style={{ maxWidth: '100%' }} role="img" aria-label={`Índice de amenaza DIY ${idx} de 100`}>

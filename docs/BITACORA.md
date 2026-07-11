@@ -113,3 +113,17 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 - **#7 (SUGERENCIA, adoptada).** Badge "+4 pts esta semana" (`--wash`/`--caution`) en el gauge desde `trends.diy.delta_semana`; tercera línea de insight sobre Securitas (presencia baja, foco B2B).
 
 **Auto-verificación de resoluciones.** 34 tests verdes · fixtures regenerados (registros 321) + `validate:fixtures` ok · build ok · hex fuera de tabla 0 · `--data-grey-floor` definido en `:root` · sin overflow horizontal a 1440/390 · sin errores de consola · capturas 390px de DEMANDA (slope sólido/rayado + leyenda + badge DIY) y CONTEXTO (glosas + barras visibles) revisadas.
+
+**Gate 2 (subagente fresco): APROBADO CON CORRECCIONES** — 0 BLOQUEANTE, 0 MAYOR, 3 MENOR + 2 SUGERENCIA. Cross-check independiente: rederivó los números dorados ejecutando los derivadores contra el fixture crudo (SOI 46,1/33,3/20,6 % total S/ 256.800 · DIY 58 · componentes +24%/S/ 129/S/ 41.673) — todos coinciden; determinismo de dinero confirmado en Node y Chromium (punto); AA de texto respetado (ink-3 solo en marcas gráficas); honestidad sólido/rayado visible; 0 prohibiciones; fuentes auto-hospedadas; sin overflow ni errores de consola a 1440/390.
+
+**Hallazgos Gate 2.** #1 MENOR título de estacionalidad fijo ("Julio abre la ventana de Fiestas Patrias") — date-agnóstico, no deriva del mes/pico. #2 MENOR etiquetas de período macro ("en la semana", "vs. junio", "vs. mayo") hardcodeadas, pueden desalinearse del período real del dato. #3 MENOR botón "Ver los N distritos" es afordancia muerta (sin `onClick`). #4 SUGERENCIA glosar DIY literalmente ("hazlo-tú-mismo"). #5 SUGERENCIA índices de mes de los picos hardcodeados en el componente en vez de parsearse del fixture.
+
+**Resoluciones Gate 2.**
+- **#1 + #5 (MENOR + SUGERENCIA).** `estacionalidad.picos` pasa a objetos `{ meses:[6,7], etiqueta }` (meses 0-indexados) — única fuente de: coloreo de la tira, leyenda (rango `jul–ago` derivado de los índices) y título. `seasonTitle(monthIdx, picos)` deriva del mes vigente (`day` de `useData`): "Julio abre el pico vacacional…" en jul, "Diciembre sostiene el pico navideño…" en dic, "Abril: faltan 3 meses para el pico vacacional" fuera de pico. La tira marca el mes vigente con contorno `--ink` + label en negrita.
+- **#2 (MENOR).** El período de comparación viaja en el fixture (`macro.*.periodo`: "la semana"/"junio"/"mayo") y las etiquetas se derivan de ahí — un snapshot de otro mes traería su propio período.
+- **#3 (MENOR).** El botón muerto se degrada a nota no-interactiva honesta: "+28 distritos suman 6.410" (`--ink-2`, tabular) — informa el agregado sin fingir una acción inexistente (no hay data por-distrito del resto).
+- **#4 (SUGERENCIA, adoptada).** Glosa literal "Índice de Amenaza DIY (hazlo-tú-mismo)".
+
+**Auto-verificación Gate 2.** 34 tests verdes · fixtures regenerados + `validate:fixtures` ok (321 registros) · build ok · títulos/etiquetas rederivados ejecutando la lógica contra el fixture (jul/dic/abr correctos) · `package.json`/`lock` intactos (playwright con `--no-save`) · capturas 1440/390 de CONTEXTO revisadas (título derivado, mes vigente marcado, nota de distritos, etiquetas macro) sin overflow ni errores de consola.
+
+**Criterio de gate.** Gate 2 sin bloqueante/mayor; los 3 menores resueltos y las 2 sugerencias adoptadas (protocolo §1.4, precedente F1/F2). Se procede al merge.
