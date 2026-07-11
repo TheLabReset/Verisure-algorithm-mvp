@@ -16,6 +16,9 @@ import {
   adMuseumPieces,
   oohPoints,
   classifyEPPM,
+  brandKey,
+  investmentShare,
+  searchVsInvestment,
 } from './derive.js'
 
 const FX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures')
@@ -164,4 +167,26 @@ test('classifyEPPM: heurística de tono', () => {
   assert.equal(classifyEPPM('Nada es seguro, salvo tu hogar'), 'miedo → alivio')
   assert.equal(classifyEPPM('Tu negocio, siempre atendido'), 'eficacia')
   assert.equal(classifyEPPM('Respuesta en segundos'), 'alivio')
+})
+
+// ── Derivadores de DEMANDA (Fase 3) ───────────────────────────────────
+test('brandKey: normaliza marca a clave corta', () => {
+  assert.equal(brandKey('PROSEGUR ALARMS'), 'PROSEGUR')
+  assert.equal(brandKey('VERISURE'), 'VERISURE')
+})
+
+test('investmentShare: shares suman ~100 y ordenados desc', () => {
+  const s = investmentShare(registros)
+  const total = s.reduce((a, b) => a + b.share, 0)
+  assert.ok(Math.abs(total - 100) < 1.5, `shares suman ${total}`)
+  for (let i = 1; i < s.length; i++) assert.ok(s[i - 1].share >= s[i].share)
+})
+
+test('searchVsInvestment: cruza SoS (Trends) con SoI, calcula gap; Verisure con brecha +', () => {
+  const rows = searchVsInvestment(registros, trends)
+  const v = rows.find((r) => r.isVerisure)
+  assert.equal(v.search, 44) // del fixture share_of_search
+  assert.ok(v.gap > 0, 'Verisure: búsqueda por encima de inversión (gap +)')
+  const pros = rows.find((r) => r.maname.includes('PROSEGUR'))
+  assert.ok(pros.gap < 0, 'Prosegur: invierte por encima de su búsqueda (gap −)')
 })

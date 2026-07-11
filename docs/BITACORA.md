@@ -85,3 +85,16 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 **Números de oro tras las correcciones:** SOI 46,1/33,3/20,6 (S/256.800) · NUEVA=1 · Ad Museum 22 piezas · OOH 3 marcas · última detección poblada. 31 tests verdes.
 
 **Pendientes declarados.** Servir fixtures desde `public/data/` vía fetch (F4, junto al pipeline). Re-añadir recharts si algún chart lo amerita (hoy todo es SVG propio). Clarificar DESIGN §5 (ejes `--ink-3` vs AA). Vulns de toolchain Vite (major, F5).
+
+---
+
+## Fase 3 — DEMANDA + CONTEXTO · rama `fase-3-demanda-contexto` · merge `<pendiente>`
+
+**Construido.**
+- **DEMANDA:** slope Share of Search vs Investment (SVG propio, Verisure enfatizado, competencia en grises, leyenda de honestidad SoS/SoI, insight "Buscan a Verisure más de lo que Verisure invierte" + brecha derivada); tendencia de búsquedas «alarma para casa» (serie de categoría enfatizada, +18%/90d); card Amenaza DIY (gauge sobrio de un arco en `--caution`, 58/100, + 3 componentes con fuente y "marcas monitoreadas").
+- **CONTEXTO:** cápsulas de denuncias por distrito (SIDPOL, top-3 en `--ink`, resto en gris, mes visible + nota de rezago ~45 días + "Ver los N distritos"); tira de estacionalidad de 12 meses con picos (Fiestas Patrias / navideño) en `--caution`; fila macro BCRP (4 celdas con deltas neutros, sin color bueno/malo); noticias tipográficas (titular fuerte + fuente·hora).
+- Derivadores nuevos: `brandKey`, `investmentShare`, `searchVsInvestment` (cruce ESOV). CONTEXTO es lectura directa del fixture `contexto` vía `useData`.
+
+**Auto-verificación.** 34 tests verdes (3 nuevos) · build ok · hex fuera de tabla 0 · cero data hardcodeada (módulos vía `useData`) · siglas glosadas (SoS/SoI/DIY) · grises de data ≥ `#C9CDD4` (barras en `--ink`/`--ink-3`, tracks en `--wash`) · paridad visual 1440 vs mockup sin overflow ni errores de consola.
+
+**Pendientes/notas.** Deviaciones de calibración vs mockup (brecha 9 pts vs 13, 35 distritos vs 43) — fixtures son la fuente de verdad. SIDPOL/BCRP no glosados (nombres propios de fuente, como el mockup).

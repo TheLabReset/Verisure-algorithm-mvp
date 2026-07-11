@@ -160,6 +160,52 @@ export function computeIMC(trends, contexto) {
   return Math.max(0, Math.min(100, imc))
 }
 
+// ── Normaliza marca a clave corta (para cruzar con share_of_search) ───
+export function brandKey(maname = '') {
+  const m = maname.toUpperCase()
+  if (m.includes('VERISURE')) return 'VERISURE'
+  if (m.includes('PROSEGUR')) return 'PROSEGUR'
+  if (m.includes('SECURITAS')) return 'SECURITAS'
+  return m
+}
+
+// ── Share of investment (30d) por marca ───────────────────────────────
+export function investmentShare(registros) {
+  const byBrand = new Map()
+  let total = 0
+  for (const r of registros) {
+    const inv = Number(r.rinversion) || 0
+    byBrand.set(r.maname, (byBrand.get(r.maname) || 0) + inv)
+    total += inv
+  }
+  return [...byBrand.entries()]
+    .map(([maname, inv]) => ({
+      maname,
+      investment: inv,
+      share: total > 0 ? round((inv / total) * 100, 1) : 0,
+      isVerisure: maname === VERISURE,
+    }))
+    .sort((a, b) => b.share - a.share)
+}
+
+// ── Share of Search vs Share of Investment (DEMANDA, análisis ESOV) ───
+// Cruza el share of search (Trends) con el share of investment (Integrametrics).
+// gap = búsqueda − inversión: positivo => la demanda no está acompañada de inversión.
+export function searchVsInvestment(registros, trends) {
+  const sos = trends?.share_of_search || {}
+  const inv = investmentShare(registros)
+  return inv.map((b) => {
+    const search = Number(sos[brandKey(b.maname)]) || 0
+    return {
+      maname: b.maname,
+      isVerisure: b.isVerisure,
+      search,
+      investment: b.share,
+      gap: round(search - b.share, 0),
+    }
+  })
+}
+
 // ── Día más reciente presente en los registros ────────────────────────
 export function latestDay(registros) {
   let max = ''
