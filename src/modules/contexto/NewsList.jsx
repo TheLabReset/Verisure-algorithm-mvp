@@ -10,9 +10,14 @@ export default function NewsList({ noticias }) {
       <ul className="mt-4 divide-y divide-line">
         {noticias.map((noticia, i) => (
           <li key={i} className="py-3">
-            <p className="text-base font-medium text-ink underline-offset-4 hover:underline">
+            <a
+              href={noticia.url || '#'}
+              target="_blank"
+              rel="noreferrer"
+              className="text-base font-medium text-ink underline-offset-4 hover:text-verisure-deep hover:underline"
+            >
               {noticia.titular}
-            </p>
+            </a>
             <p className="mt-1 text-xs text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {noticia.fuente} · {noticia.hora}
             </p>

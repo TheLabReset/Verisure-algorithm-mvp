@@ -18,7 +18,7 @@ export default function Seasonality({ estacionalidad }) {
           const inPeak = PEAKS.some((p) => i >= p.from && i <= p.to)
           return (
             <div key={m} className="flex-1 text-center">
-              <div className="h-8 rounded-inner" style={{ background: inPeak ? 'var(--caution)' : 'var(--wash)', opacity: inPeak ? 0.85 : 1 }} />
+              <div className="h-8 rounded-inner" style={{ background: inPeak ? 'var(--caution)' : 'var(--data-grey-floor)' }} />
               <span className="mt-1 block text-xs text-ink-2">{m}</span>
             </div>
           )

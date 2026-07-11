@@ -24,9 +24,18 @@ function Component({ label, value, sub }) {
   )
 }
 
+// Título derivado del índice (no hardcodeado): el título afirma sobre el dato.
+function diyTitle(idx, delta) {
+  const rising = delta != null && delta > 0
+  if (idx >= 70) return 'Amenaza DIY alta y creciente'
+  if (idx >= 40) return `Amenaza DIY contenida${rising ? ', pero subiendo' : ''}`
+  return 'Amenaza DIY baja'
+}
+
 export default function DiyThreatGauge({ diy }) {
   if (!diy) return null
   const idx = diy.index ?? 0
+  const delta = diy.deltaSemana
   const c = diy.components || {}
   const cx = 110
   const cy = 110
@@ -34,7 +43,14 @@ export default function DiyThreatGauge({ diy }) {
 
   return (
     <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
-      <h3 className="font-display text-xl text-ink sm:text-2xl">Amenaza DIY contenida, pero subiendo</h3>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="font-display text-xl text-ink sm:text-2xl">{diyTitle(idx, delta)}</h3>
+        {delta != null && delta !== 0 ? (
+          <span className="rounded-pill px-2.5 py-1 text-xs font-semibold" style={{ background: 'var(--wash)', color: 'var(--caution)' }}>
+            {delta > 0 ? '+' : '−'}{Math.abs(delta)} pts esta semana
+          </span>
+        ) : null}
+      </div>
       <p className="mt-1 text-sm text-ink-2">Índice de Amenaza DIY · 0–100 · cámaras solas como sustituto</p>
 
       <div className="mt-4 grid gap-5 sm:grid-cols-[220px_minmax(0,1fr)] sm:items-center">

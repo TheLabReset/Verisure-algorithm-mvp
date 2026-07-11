@@ -97,4 +97,19 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 
 **Auto-verificación.** 34 tests verdes (3 nuevos) · build ok · hex fuera de tabla 0 · cero data hardcodeada (módulos vía `useData`) · siglas glosadas (SoS/SoI/DIY) · grises de data ≥ `#C9CDD4` (barras en `--ink`/`--ink-3`, tracks en `--wash`) · paridad visual 1440 vs mockup sin overflow ni errores de consola.
 
-**Pendientes/notas.** Deviaciones de calibración vs mockup (brecha 9 pts vs 13, 35 distritos vs 43) — fixtures son la fuente de verdad. SIDPOL/BCRP no glosados (nombres propios de fuente, como el mockup).
+**Pendientes/notas.** Deviaciones de calibración vs mockup (brecha 9 pts vs 13, 35 distritos vs 43) — fixtures son la fuente de verdad.
+
+**Gate 1 (subagente fresco): APROBADO CON CORRECCIONES** — 0 BLOQUEANTE, 1 MAYOR + menores/sugerencias.
+
+**Hallazgos.** #1 MAYOR el slope recorta la columna "SHARE OF INVESTMENT" en 390px sin indicador de scroll (DESIGN §8). #2 MENOR el slope no distingue visualmente pauta confirmada (Reset) de estimada (Integrametrics) pese a que DESIGN §2 lo exige. #3 MENOR titulares de noticias y "Ver los N distritos" no son navegables/interactivos (afordancia). #4 MENOR barras no-pico de estacionalidad en `--ink-3` (#8A909C) por debajo del piso de dato legible en fondo blanco. #5 MENOR siglas SIDPOL/BCRP sin glosa (accesibilidad de lectura). #6 SUGERENCIA título DIY hardcodeado, debería afirmar sobre el índice. #7 SUGERENCIA el badge de tendencia semanal del gauge y la tercera línea de insight (Securitas) enriquecen la lectura.
+
+**Resoluciones.**
+- **#1 (MAYOR).** `.scroll-x-fade` (máscara de degradado, DESIGN §8) aplicado al contenedor del slope y de la tendencia de búsqueda; `minWidth: 460` en el SVG para que el fade señale el corte en móvil.
+- **#2 (MENOR).** Vocabulario de honestidad DESIGN §2 en el slope: Verisure sólido (pauta operada por Reset = confirmado), competidores rayados (`strokeDasharray='5 3'` = estimado Integrametrics); leyenda al pie "sólido = confirmado · rayado = estimado".
+- **#3 (MENOR).** Titulares de noticias como `<a href={noticia.url}>` (campo `url` añadido al fixture `contexto.noticias`, 4/4) con `hover:text-verisure-deep`; "Ver los N distritos" como `<button>` con `:focus-visible`.
+- **#4 (MENOR).** Barras no-pico de estacionalidad en `--data-grey-floor` (#C9CDD4, piso de dato DESIGN §5) — visibles en fondo blanco sin competir con los picos en `--caution`.
+- **#5 (MENOR).** Glosas al vuelo: "SIDPOL (denuncias de la PNP)" y "BCRP (Banco Central de Reserva)". Revierte la nota previa de "no glosar" — la legibilidad accesible pesa más que el mimetismo con el mockup.
+- **#6 (SUGERENCIA, adoptada).** `diyTitle(idx, delta)` afirma sobre el índice ("Amenaza DIY contenida, pero subiendo" a 58 con delta +4).
+- **#7 (SUGERENCIA, adoptada).** Badge "+4 pts esta semana" (`--wash`/`--caution`) en el gauge desde `trends.diy.delta_semana`; tercera línea de insight sobre Securitas (presencia baja, foco B2B).
+
+**Auto-verificación de resoluciones.** 34 tests verdes · fixtures regenerados (registros 321) + `validate:fixtures` ok · build ok · hex fuera de tabla 0 · `--data-grey-floor` definido en `:root` · sin overflow horizontal a 1440/390 · sin errores de consola · capturas 390px de DEMANDA (slope sólido/rayado + leyenda + badge DIY) y CONTEXTO (glosas + barras visibles) revisadas.

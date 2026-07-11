@@ -27,7 +27,10 @@ export default function MacroRow({ macro }) {
   return (
     <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
       <h3 className="font-display text-xl text-ink sm:text-2xl">Contexto macro del día</h3>
-      <p className="mt-1 text-sm text-ink-2">{macro.fuente} · normaliza el reporting EUR/USD/PEN y el precio del hardware DIY importado</p>
+      <p className="mt-1 text-sm text-ink-2">
+        {macro.fuente}
+        {macro.fuente === 'BCRP' ? ' (Banco Central de Reserva)' : ''} · normaliza el reporting EUR/USD/PEN y el precio del hardware DIY importado
+      </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Cell label="Tipo de cambio" value={`S/ ${formatES(tc.value, 2)}`} sub={`${delta(tc.delta_semana_pct)} en la semana`} />
         <Cell label="Confianza del consumidor" value={formatES(cc.value, 1)} sub={`${delta(cc.delta_vs_mes_pct, ' pts')} vs. junio`} />

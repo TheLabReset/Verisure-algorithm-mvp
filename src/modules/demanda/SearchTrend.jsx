@@ -28,7 +28,7 @@ export default function SearchTrend({ trends }) {
       </h3>
       <p className="mt-1 text-sm text-ink-2">Interés de búsqueda · Google Trends Perú · índice 0–100</p>
 
-      <div className="mt-4 overflow-x-auto">
+      <div className="scroll-x-fade mt-4">
         <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ minWidth: 480, display: 'block' }} role="img" aria-label="Interés de búsqueda de alarma para casa, índice 0 a 100">
           <line x1={PAD.left} y1={PAD.top + innerH} x2={PAD.left + innerW} y2={PAD.top + innerH} stroke="var(--line)" strokeWidth="1" />
           <polyline points={pts} fill="none" stroke="var(--ink)" strokeWidth="2.25" strokeLinejoin="round" strokeLinecap="round" />

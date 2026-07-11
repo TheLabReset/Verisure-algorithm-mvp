@@ -418,6 +418,7 @@ const trends = {
   }),
   diy: {
     // Índice de Amenaza DIY = 58/100 (mockup), +4 esta semana
+    delta_semana: 4,
     busquedas_camara_wifi_growth_90d: 24,
     precio_mediano_marketplace: 129,
     precio_delta_vs_abr: -12,
@@ -454,10 +455,10 @@ const contexto = {
     picos: ['jul–ago: pico vacacional', 'nov–dic: pico navideño'],
   },
   noticias: [
-    { titular: 'PNP refuerza patrullaje en Lima Norte tras ola de robos a viviendas en Los Olivos y Comas', fuente: 'El Comercio', hora: '8:12' },
-    { titular: 'Extorsiones a bodegas y farmacias crecieron 21% en el primer semestre, según gremio', fuente: 'RPP', hora: '7:40' },
-    { titular: 'Importación de cámaras de seguridad marcó récord en junio: 340 mil unidades', fuente: 'Gestión', hora: '6:55' },
-    { titular: 'Municipalidad de Surco amplía red de serenazgo con 40 cámaras conectadas a central', fuente: 'Latina', hora: '6:30' },
+    { titular: 'PNP refuerza patrullaje en Lima Norte tras ola de robos a viviendas en Los Olivos y Comas', fuente: 'El Comercio', hora: '8:12', url: 'https://elcomercio.pe/' },
+    { titular: 'Extorsiones a bodegas y farmacias crecieron 21% en el primer semestre, según gremio', fuente: 'RPP', hora: '7:40', url: 'https://rpp.pe/' },
+    { titular: 'Importación de cámaras de seguridad marcó récord en junio: 340 mil unidades', fuente: 'Gestión', hora: '6:55', url: 'https://gestion.pe/' },
+    { titular: 'Municipalidad de Surco amplía red de serenazgo con 40 cámaras conectadas a central', fuente: 'Latina', hora: '6:30', url: 'https://latina.pe/' },
   ],
 }
 

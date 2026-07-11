@@ -103,6 +103,7 @@ export function diyIndex(trends, registrosDigital = []) {
   const index = Math.round(0.5 * nSearch + 0.25 * nPrice + 0.25 * nPauta)
   return {
     index: Math.max(0, Math.min(100, index)),
+    deltaSemana: diy.delta_semana != null ? Number(diy.delta_semana) : null,
     components: {
       busquedas_camara_wifi_growth_90d: searchGrowth,
       precio_mediano_marketplace: Number(diy.precio_mediano_marketplace) || null,

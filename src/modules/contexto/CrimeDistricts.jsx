@@ -30,11 +30,15 @@ export default function CrimeDistricts({ criminalidad }) {
           {top3} concentran {fracLabel} de las denuncias de {mesLabel(criminalidad.periodo).split(' ')[0]}
         </h3>
         {restoCount > 0 ? (
-          <span className="text-sm text-ink-2">Ver los {totalDistritos} distritos →</span>
+          <button type="button" className="min-h-[44px] rounded-inner px-2 text-sm font-medium text-ink underline-offset-4 hover:underline">
+            Ver los {totalDistritos} distritos →
+          </button>
         ) : null}
       </div>
       <p className="mb-4 text-sm text-ink-2">
-        Robo a vivienda y local · {criminalidad.fuente} · {mesLabel(criminalidad.periodo)} (última publicación mensual)
+        Robo a vivienda y local · {criminalidad.fuente}
+        {criminalidad.fuente === 'SIDPOL' ? ' (denuncias de la PNP)' : ''} ·{' '}
+        {mesLabel(criminalidad.periodo)} (última publicación mensual)
       </p>
 
       <div className="space-y-2.5">
