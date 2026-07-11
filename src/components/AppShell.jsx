@@ -23,7 +23,10 @@ export default function AppShell() {
       {/* ── Header ─────────────────────────────────────────── */}
       <header className="mx-auto flex max-w-shell flex-col gap-4 px-4 pt-6 sm:flex-row sm:items-end sm:justify-between sm:px-8">
         <div>
-          <p className="font-wordmark text-3xl leading-none tracking-wide text-ink">
+          <p
+            className="font-wordmark leading-none tracking-wide text-ink whitespace-nowrap"
+            style={{ fontSize: 'clamp(20px, 6vw, 32px)' }}
+          >
             THE ALGORITHM
           </p>
           <p className="mt-1 text-sm text-ink-2">by Reset · Verisure Perú</p>

@@ -44,9 +44,10 @@ Reglas de uso:
 
 ## 3. Tipografía
 
-- **Display y números hero:** Space Grotesk 500/700 (Google Fonts, `<link>` + preconnect; verificar carga real).
+- **Display y números hero:** Space Grotesk 500/700.
 - **Texto/UI:** Instrument Sans 400/500/600.
-- **Wordmark THE ALGORITHM:** Brunson Regular como asset local si hay licencia; stand-in oficial: **Anton** (Google Fonts). Uso EXCLUSIVO: wordmark del header (+ "by Reset" en Instrument Sans pequeño) y pantalla de carga. Jamás en títulos de sección o cuerpo.
+- **Wordmark THE ALGORITHM:** Brunson Regular como asset local si hay licencia; stand-in oficial: **Anton**. Uso EXCLUSIVO: wordmark del header (+ "by Reset" en Instrument Sans pequeño) y pantalla de carga. Jamás en títulos de sección o cuerpo.
+- **Carga de fuentes:** auto-hospedadas en `public/fonts/` (woff2 + `fonts.css` local); prohibidas URLs externas de fuentes en runtime; verificar carga con `document.fonts`.
 - **Cifras: `font-variant-numeric: tabular-nums` obligatorio** en todo número, tabla y eje.
 - Escala única: 12 / 14 / 16 / 20 / 24 / 32 / 48 / 64px. Display fluido con `clamp()` (ej. hero: `clamp(32px, 5vw, 64px)`). Mínimo absoluto 12px. Prohibidos tamaños arbitrarios.
 - Jerarquía por tamaño+peso, no por color. **Los títulos de card afirman el insight** ("Prosegur concentró 46% de la presión de hoy"), nunca nombran el eje ("Inversión por competidor").
@@ -110,7 +111,7 @@ Antes de mergear cualquier cambio visual, verificar que NO exista:
 ## 11. Notas de implementación para Claude Code
 
 - Tokens como CSS custom properties en `:root` (o theme de Tailwind mapeado 1:1 a esta tabla con estos NOMBRES — muere el namespace `fitzone-*`).
-- Fuentes: Google Fonts con `preconnect`; verificar en el navegador que Space Grotesk/Instrument Sans/Anton cargan (bug histórico: Inter declarada y nunca cargada).
+- Fuentes: auto-hospedadas en `public/fonts/` (woff2 + `fonts.css` local), sin URLs externas en runtime; verificar en el navegador que Space Grotesk/Instrument Sans/Anton cargan con `document.fonts` (bug histórico: Inter declarada y nunca cargada).
 - El mockup de referencia es HTML plano; la implementación real es React — replicar fielmente el resultado visual, no el código del mockup.
 - Charts: preferir SVG propio o Recharts configurado a estas reglas (sin defaults: grid off/tenue, sin leyenda automática, colores por token).
 - Este documento se actualiza por PR; cualquier excepción visual requiere editarlo primero.
