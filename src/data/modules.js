@@ -30,8 +30,8 @@ export const MODULES = [
 
 export const DEFAULT_MODULE = 'radar'
 
-// PLACEHOLDER Fase 0 — la franja "Hoy" se alimentará de datos reales del Radar en Fase 1.
-// Se conserva la forma del objeto para no reescribir el shell después.
+// PLACEHOLDER — la franja "Hoy" se alimentará de datos reales del Radar (detectNewPieces)
+// al cablear la UI en Fase 2. Se conserva la forma del objeto para no reescribir el shell.
 export const TODAY_PLACEHOLDER = {
   date: 'jue 10 jul 2026',
   alertCount: 0,

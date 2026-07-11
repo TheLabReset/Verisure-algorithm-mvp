@@ -105,3 +105,22 @@ test('borde: fuente caída (data vacía) → derivadores devuelven ceros, no lan
   assert.equal(computeIPC([], DAY), 0)
   assert.equal(diyIndex({ diy: {} }, []).index, 0)
 })
+
+test('detectNewPieces: múltiples nuevas el mismo día, ordenadas por hora', () => {
+  const rows = [
+    { maname: 'SECURITAS', fecha: '2026-07-10 18:00:00', nuevas_versiones: 'NUEVO', vname: 'B' },
+    { maname: 'PROSEGUR ALARMS', fecha: '2026-07-10 09:41:00', nuevas_versiones: 'NUEVO', vname: 'A' },
+    { maname: 'VERISURE', fecha: '2026-07-10 12:00:00', nuevas_versiones: '', vname: 'C' },
+  ]
+  const n = detectNewPieces(rows, '2026-07-10')
+  assert.equal(n.length, 2) // solo las 2 con NUEVO
+  assert.deepEqual(n.map((p) => p.vname), ['A', 'B']) // orden por fecha ascendente
+})
+
+test('detectNewPieces: NUEVO en día no-último solo aparece en ese día', () => {
+  const rows = [
+    { maname: 'PROSEGUR ALARMS', fecha: '2026-07-05 10:00:00', nuevas_versiones: 'NUEVO', vname: 'X' },
+  ]
+  assert.equal(detectNewPieces(rows, '2026-07-10').length, 0) // no es el día 5
+  assert.equal(detectNewPieces(rows, '2026-07-05').length, 1)
+})

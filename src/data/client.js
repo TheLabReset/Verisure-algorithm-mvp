@@ -28,13 +28,16 @@ export const isLive = SOURCE === 'live'
 
 async function loadFixture(name) {
   // Import dinámico: Vite lo resuelve como chunk aparte (no infla el bundle principal).
+  // NOTA: el modo fixtures es browser-only (Vite bundlea el JSON). En Node se usa el
+  // modo live o los tests leen los fixtures por fs; por eso no lleva `with {type:'json'}`.
   const mod = await import(`./fixtures/${name}.json`)
   return mod.default ?? mod
 }
 
 // Filtro local en modo fixtures para reflejar el contrato de live:
-// intervalo semiabierto [startDate, endDate) y filtros por campo (valor o array = OR).
-function applyFilters(rows, filtros = {}) {
+// intervalo SEMIABIERTO [startDate, endDate) y filtros por campo (valor o array = OR).
+// Exportado para poder testear la lógica sin depender del import de JSON del navegador.
+export function applyFilters(rows, filtros = {}) {
   const { startDate, endDate, filters } = filtros
   return rows.filter((r) => {
     if (startDate && r.fecha < startDate) return false

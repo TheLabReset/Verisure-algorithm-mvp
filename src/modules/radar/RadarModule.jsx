@@ -7,7 +7,7 @@ export default function RadarModule() {
   return (
     <EmptyState
       title="Radar de competencia"
-      note="Qué emitió Prosegur, Securitas y la categoría hoy, con inversión estimada y piezas nuevas. Se conecta a Integrametrics en la Fase 1."
+      note="Qué emitió Prosegur, Securitas y la categoría hoy, con inversión estimada y piezas nuevas. Se cablea a la capa de datos en la Fase 2."
     />
   )
 }

@@ -25,3 +25,36 @@ test('getRegistros live sin token → rechaza (el llamador maneja y muestra bann
     client.getRegistros({ startDate: '2026-07-10 00:00:00', endDate: '2026-07-11 00:00:00' }),
   )
 })
+
+// ── applyFilters: mismo contrato que live (semiabierto + OR), testeado en puro ──
+const ROWS = [
+  { maname: 'PROSEGUR ALARMS', fecha: '2026-07-09 23:59:59', tname: 'SPOT TV' },
+  { maname: 'VERISURE', fecha: '2026-07-10 00:00:00', tname: 'SPOT TV' },
+  { maname: 'SECURITAS', fecha: '2026-07-10 12:00:00', tname: 'SPOT RADIO' },
+  { maname: 'PROSEGUR ALARMS', fecha: '2026-07-11 00:00:00', tname: 'SPOT TV' },
+]
+
+test('applyFilters: intervalo SEMIABIERTO [start,end) — start inclusivo, end exclusivo', () => {
+  const r = client.applyFilters(ROWS, {
+    startDate: '2026-07-10 00:00:00',
+    endDate: '2026-07-11 00:00:00',
+  })
+  // incluye 00:00:00 del 10 (inclusivo), excluye 23:59:59 del 9 y 00:00:00 del 11 (exclusivo)
+  assert.equal(r.length, 2)
+  assert.deepEqual(r.map((x) => x.maname), ['VERISURE', 'SECURITAS'])
+})
+
+test('applyFilters: filtro por valor único', () => {
+  const r = client.applyFilters(ROWS, { filters: { tname: 'SPOT RADIO' } })
+  assert.equal(r.length, 1)
+  assert.equal(r[0].maname, 'SECURITAS')
+})
+
+test('applyFilters: filtro por array = OR (IN)', () => {
+  const r = client.applyFilters(ROWS, { filters: { maname: ['VERISURE', 'SECURITAS'] } })
+  assert.equal(r.length, 2)
+})
+
+test('applyFilters: sin filtros → devuelve todo', () => {
+  assert.equal(client.applyFilters(ROWS, {}).length, 4)
+})

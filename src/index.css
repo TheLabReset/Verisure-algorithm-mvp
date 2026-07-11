@@ -18,6 +18,7 @@
   --verisure-tint: #FDEEF1;  /* fondo suave de bloques de alerta / énfasis */
   --positive:      #0E7A55;  /* único verde (deltas positivos) */
   --caution:       #9A5B00;  /* único ámbar (advertencias, gauge DIY) */
+  --wash:          #F1EDE6;  /* wash neutro cálido: hover sutil, skeleton, banners neutros */
   --grad-brand:    linear-gradient(135deg, #ED002F 0%, #7A0E24 100%); /* UN uso: Opportunity Score */
 
   /* Piso de gris para elementos portadores de dato (DESIGN §1): no bajar de aquí sobre blanco */
@@ -53,7 +54,7 @@
   /* Skeleton shimmer con la forma real del contenido (DESIGN §7).
      Colores sancionados por DESIGN §7 para el estado de carga. */
   .skeleton {
-    background: linear-gradient(90deg, #F1EDE6 25%, #FAF8F5 37%, #F1EDE6 63%);
+    background: linear-gradient(90deg, var(--wash) 25%, var(--base) 37%, var(--wash) 63%);
     background-size: 200% 100%;
     animation: shimmer 1.4s ease-in-out infinite;
   }
@@ -101,11 +102,11 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 .nav-pill:hover {
-  background: #F1EDE6;
+  background: var(--wash);
   color: var(--ink);
 }
 .nav-pill[aria-current='page'] {
   background: var(--ink);
-  color: #FFFFFF;
+  color: var(--surface);
   font-weight: 600;
 }

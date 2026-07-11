@@ -20,6 +20,7 @@
   --verisure-tint: #FDEEF1;  /* fondo suave de bloques de alerta/énfasis */
   --positive:      #0E7A55;  /* único verde (deltas positivos) */
   --caution:       #9A5B00;  /* único ámbar (advertencias, gauge DIY) */
+  --wash:          #F1EDE6;  /* wash neutro cálido: hover sutil, fondo de skeleton y de banners neutros */
   --grad-brand: linear-gradient(135deg,#ED002F 0%,#7A0E24 100%); /* UN uso: Opportunity Score */
 }
 ```
