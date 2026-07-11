@@ -21,7 +21,7 @@ export default function TodayStrip({ moduleId, today, onGoToRadar }) {
   if (moduleId === 'radar') {
     return (
       <div className="rounded-inner bg-verisure-tint px-4 py-3 text-sm text-ink border-l-4 border-verisure">
-        <span className="font-semibold text-verisure">
+        <span className="font-semibold text-verisure-deep">
           {alertCount} {alertCount === 1 ? 'alerta' : 'alertas'} hoy
         </span>
         {headline ? <span className="ml-2">{headline}</span> : null}

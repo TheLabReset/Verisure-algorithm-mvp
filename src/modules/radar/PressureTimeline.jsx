@@ -49,10 +49,13 @@ export default function PressureTimeline({ pressure = [], events = [], degraded 
   const x = (i) => PAD.left + (n === 1 ? 0 : (i / (n - 1)) * innerW)
   const y = (v) => PAD.top + innerH - (v / max) * innerH
 
+  // stroke = color de la línea (gris de rampa para competencia); label = color del texto
+  // de la etiqueta directa, siempre legible (AA) aunque la línea sea gris claro.
   const styleOf = (maname) => {
-    if (maname.toUpperCase().includes('VERISURE')) return { stroke: 'var(--verisure)', width: 2.5 }
-    if (maname.toUpperCase().includes('PROSEGUR')) return { stroke: 'var(--ink)', width: 1.75 }
-    return { stroke: 'var(--ink-3)', width: 1.5 }
+    const m = maname.toUpperCase()
+    if (m.includes('VERISURE')) return { stroke: 'var(--verisure)', label: 'var(--verisure)', width: 2.5 }
+    if (m.includes('PROSEGUR')) return { stroke: 'var(--ink)', label: 'var(--ink)', width: 1.75 }
+    return { stroke: 'var(--ink-3)', label: 'var(--ink-2)', width: 1.5 }
   }
 
   const dateIdx = (fecha) => pressure.findIndex((p) => p.fecha === (fecha || '').slice(0, 10))
@@ -81,7 +84,7 @@ export default function PressureTimeline({ pressure = [], events = [], degraded 
               <g key={b}>
                 <polyline points={pts} fill="none" stroke={st.stroke} strokeWidth={st.width} strokeLinejoin="round" strokeLinecap="round" strokeDasharray={degraded ? '4 3' : undefined} />
                 {/* etiqueta directa al final */}
-                <text x={PAD.left + innerW + 8} y={y(lastV) + 4} fontSize="12" fill={st.stroke} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                <text x={PAD.left + innerW + 8} y={y(lastV) + 4} fontSize="12" fill={st.label} style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {brandDisplay(b)}
                 </text>
               </g>

@@ -31,8 +31,9 @@ export default function AppShell() {
   const demo = demoParam()
 
   // Franja "Hoy" desde datos reales (DESIGN §6.2): piezas nuevas + SOI del día.
+  // En fuente caída no afirmamos alertas "de hoy" (el banner ya explica el snapshot).
   const today = useMemo(() => {
-    if (!day || !registros.length || demo === 'empty') {
+    if (!day || !registros.length || demo === 'empty' || demo === 'sourcedown' || sourceDown) {
       return { date: fmtDayFull(day) || '—', alertCount: 0, headline: null }
     }
     const newPieces = detectNewPieces(registros, day)
@@ -42,7 +43,7 @@ export default function AppShell() {
       alertCount: newPieces.length,
       headline: buildTodayHeadline(newPieces, soi),
     }
-  }, [registros, day, demo])
+  }, [registros, day, demo, sourceDown])
 
   return (
     <div className="min-h-full bg-base text-ink">

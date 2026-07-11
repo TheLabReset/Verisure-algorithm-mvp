@@ -18,7 +18,7 @@ import PressureTimeline from './PressureTimeline'
 import AdMuseum from './AdMuseum'
 import OohMap from './OohMap'
 import { brandDisplay, tnameShort } from './radarUtils'
-import { fmtDayLong } from './dateLabels'
+import { fmtDayLong, fmtDayShort } from './dateLabels'
 
 function demoParam() {
   if (typeof window === 'undefined') return null
@@ -76,7 +76,9 @@ export default function RadarModule() {
 
   const isEmpty = demo === 'empty'
   const isDown = demo === 'sourcedown' || sourceDown
-  const newPieces = isEmpty ? [] : view.newPieces
+  // En fuente caída no afirmamos novedad "de hoy": el hero cae a su estado sin-pieza
+  // (última detección) y las series van punteadas — coherente con el banner de snapshot.
+  const newPieces = isEmpty || isDown ? [] : view.newPieces
   const piece = newPieces[0] || null
 
   const events = []
@@ -85,7 +87,7 @@ export default function RadarModule() {
   if (lastOoh) {
     // ancla un evento OOH en su día (si existe en la serie)
     const oohReg = registros.find((r) => r.tname === 'VÍA PÚBLICA' && r.maname === lastOoh.maname)
-    if (oohReg) events.push({ fecha: oohReg.fecha, label: 'OOH', maname: lastOoh.maname })
+    if (oohReg) events.push({ fecha: oohReg.fecha, label: `OOH · ${fmtDayShort(oohReg.fecha)}`, maname: lastOoh.maname })
   }
 
   const riskDistritos = contexto?.criminalidad?.distritos || []

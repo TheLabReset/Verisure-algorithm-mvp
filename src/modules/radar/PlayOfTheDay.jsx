@@ -55,6 +55,9 @@ export default function PlayOfTheDay({ piece, lastDetection }) {
 
   return (
     <section className="rounded-card bg-ink p-6 text-base sm:p-8" style={{ color: 'var(--base)' }}>
+      <p className="mb-4 text-xs uppercase tracking-wide" style={{ color: 'var(--ink-3)' }}>
+        La jugada del día
+      </p>
       <div className="grid gap-6 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] sm:items-center">
         <div>
           <VideoThumb />
