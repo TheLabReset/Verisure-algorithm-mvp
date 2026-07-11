@@ -13,10 +13,17 @@
 
 [build.environment]
   # Versión de Node.js
-  NODE_VERSION = "18"
-  
+  NODE_VERSION = "20"
+
   # Versión de NPM
-  NPM_VERSION = "9"
+  NPM_VERSION = "10"
+
+# Basic Auth de todo el sitio vía Edge Function (netlify/edge-functions/auth.js).
+# Se activa SOLO si BASIC_AUTH_USER y BASIC_AUTH_PASSWORD están en el entorno de
+# Netlify; sin ellas el sitio queda abierto (modo demo). Protege también /data.
+[[edge_functions]]
+  path = "/*"
+  function = "auth"
 
 # Redirects para SPA (Single Page Application)
 [[redirects]]
