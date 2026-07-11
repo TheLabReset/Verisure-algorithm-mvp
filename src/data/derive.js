@@ -54,6 +54,7 @@ export function detectNewPieces(registros, day) {
       rinversion: r.rinversion,
       rfile: r.rfile,
       primera_emision_comercial: r.primera_emision_comercial,
+      eppm: classifyEPPM(r.vname),
       isVerisure: r.maname === VERISURE,
     }))
     .sort((a, b) => (a.fecha < b.fecha ? -1 : 1))
@@ -157,6 +158,94 @@ export function computeIMC(trends, contexto) {
   // Pesos: demanda 0.5, criminalidad 0.25, estacionalidad 0.25 (calibrado al mockup ≈79; ilustrativo)
   const imc = Math.round(0.5 * nDemand + 0.25 * nCrime + 0.25 * nSeason)
   return Math.max(0, Math.min(100, imc))
+}
+
+// ── Día más reciente presente en los registros ────────────────────────
+export function latestDay(registros) {
+  let max = ''
+  for (const r of registros) {
+    const d = dayOf(r.fecha)
+    if (d > max) max = d
+  }
+  return max || null
+}
+
+// ── Comparación SOI vs. N días atrás (para "vs. semana pasada") ────────
+export function soiComparison(registros, day, daysAgo = 7) {
+  const prior = new Date(`${day}T00:00:00Z`)
+  prior.setUTCDate(prior.getUTCDate() - daysAgo)
+  const priorDay = prior.toISOString().slice(0, 10)
+  const now = computeSOI(registros, day)
+  const before = computeSOI(registros, priorDay)
+  const beforeShare = Object.fromEntries(before.brands.map((b) => [b.maname, b.share]))
+  const brands = now.brands.map((b) => ({
+    ...b,
+    deltaPts: round(b.share - (beforeShare[b.maname] || 0), 0),
+  }))
+  return { ...now, priorDay, brands }
+}
+
+// ── Clasificador EPPM (miedo → eficacia → alivio / innovación) ─────────
+// PLACEHOLDER de la Fase 2: heurística por palabras clave sobre el nombre de versión.
+// El clasificador real (keyframes de rfile + Claude) llega en la Fase 4 (blueprint RADAR).
+export function classifyEPPM(vname = '') {
+  const v = vname.toLowerCase()
+  if (/(nada es seguro|robo|miedo|peligro|protección|protege|vigila)/.test(v)) return 'miedo → alivio'
+  if (/(negocio|empresa|comercio|pyme|atendido|b2b)/.test(v)) return 'eficacia'
+  if (/(respuesta|segundos|tranquil|verificad|zerovision|cuida)/.test(v)) return 'alivio'
+  return 'innovación'
+}
+
+// ── Ad Museum: piezas (versiones) agrupadas con inversión acumulada ───
+// Cada versión creativa = una pieza; primera emisión, canales, inversión acumulada, tono EPPM.
+export function adMuseumPieces(registros) {
+  const byVersion = new Map()
+  for (const r of registros) {
+    const key = r.id_versiones_unica ?? `${r.maname}:${r.vname}`
+    let p = byVersion.get(key)
+    if (!p) {
+      p = {
+        key,
+        vname: r.vname,
+        maname: r.maname,
+        isVerisure: r.maname === VERISURE,
+        firstEmission: r.fecha,
+        channels: new Set(),
+        tipos: new Set(),
+        totalInvestment: 0,
+        rfile: r.rfile || null,
+        eppm: classifyEPPM(r.vname),
+      }
+      byVersion.set(key, p)
+    }
+    if (r.fecha < p.firstEmission) p.firstEmission = r.fecha
+    if (r.mname) p.channels.add(r.mname)
+    if (r.gname) p.tipos.add(r.gname)
+    p.totalInvestment += Number(r.rinversion) || 0
+    if (!p.rfile && r.rfile) p.rfile = r.rfile
+  }
+  return [...byVersion.values()]
+    .map((p) => ({
+      ...p,
+      channels: [...p.channels],
+      tipos: [...p.tipos],
+    }))
+    .sort((a, b) => (a.firstEmission < b.firstEmission ? 1 : -1)) // más recientes primero
+}
+
+// ── Puntos OOH (vía pública con lat/long) para el mapa ────────────────
+export function oohPoints(registros) {
+  return registros
+    .filter((r) => r.tname === 'VÍA PÚBLICA' && r.latitud != null && r.longitud != null)
+    .map((r) => ({
+      lat: r.latitud,
+      lng: r.longitud,
+      maname: r.maname,
+      isVerisure: r.maname === VERISURE,
+      investment: Number(r.rinversion) || 0,
+      localidad: r.localidad,
+      direccion: r.direccion,
+    }))
 }
 
 // ── Opportunity Score (0–100) = combinación IPC + IMC ─────────────────

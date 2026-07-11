@@ -58,12 +58,42 @@ const PROGRAMAS = [
 const FRANJAS = ['DIA', 'PRIME', 'NOCHE', 'MADRUGADA']
 const CIUDADES = ['LIMA', 'AREQUIPA', 'TRUJILLO', 'CHICLAYO']
 
-// Nombres de versión (piezas creativas) por marca, con tono EPPM implícito.
-const VERSIONES = {
-  101: ['Nada es seguro, salvo tu hogar', 'Protección que responde', 'Tu casa vigilada'],
-  102: ['Respuesta en segundos', 'Doble verificación', 'ZeroVision te cuida'],
-  103: ['Tu negocio, siempre atendido', 'Seguridad para tu empresa'],
+// Catálogo de versiones creativas (piezas) por marca, con id ESTABLE por versión.
+// La misma pieza se reemite muchos días → agrupa en el Ad Museum (inversión acumulada).
+// "Nada es seguro, salvo tu hogar" NO está aquí: entra hoy como pieza NUEVA (primera emisión).
+const VERSION_CATALOG = {
+  101: [
+    { idv: 6101, vname: 'Protección que responde' },
+    { idv: 6102, vname: 'Tu casa vigilada' },
+    { idv: 6103, vname: 'Alarma con doble verificación' },
+    { idv: 6104, vname: 'Seguridad para tu negocio' },
+    { idv: 6105, vname: 'Respuesta en minutos' },
+    { idv: 6106, vname: 'Vigilancia que no descansa' },
+    { idv: 6107, vname: 'Tu familia, protegida' },
+    { idv: 6108, vname: 'Central de monitoreo 24/7' },
+  ],
+  102: [
+    { idv: 6201, vname: 'Respuesta en segundos' },
+    { idv: 6202, vname: 'Doble verificación' },
+    { idv: 6203, vname: 'ZeroVision te cuida' },
+    { idv: 6204, vname: 'Control desde tu celular' },
+    { idv: 6205, vname: 'Seguridad verificada, no falsas alarmas' },
+    { idv: 6206, vname: 'Protegemos lo que importa' },
+    { idv: 6207, vname: 'Tu hogar bajo control' },
+  ],
+  103: [
+    { idv: 6301, vname: 'Tu negocio, siempre atendido' },
+    { idv: 6302, vname: 'Seguridad para tu empresa' },
+    { idv: 6303, vname: 'Monitoreo para comercios' },
+    { idv: 6304, vname: 'Protección para tu local' },
+    { idv: 6305, vname: 'Respuesta profesional' },
+    { idv: 6306, vname: 'Tu empresa segura' },
+  ],
 }
+// Nombres para /registros-digital (reusa el catálogo).
+const VERSIONES = Object.fromEntries(
+  Object.entries(VERSION_CATALOG).map(([k, v]) => [k, v.map((x) => x.vname)]),
+)
 
 const TC = 3.68 // tipo de cambio S/ por USD (coherente con Contexto del mockup)
 
@@ -92,7 +122,6 @@ function dayTotal(t) {
 }
 
 let idUnico = 3540000
-let idVersion = 600
 const registros = []
 
 function makeRegistro(fecha, marca, medio, tipo, inv, franja, opts = {}) {
@@ -220,10 +249,9 @@ for (let d = 0; d < DAYS; d++) {
     // Prosegur, último día: la primera pieza es la NUEVA ("jugada del día" del mockup),
     // integrada dentro de su total del día (no adicional).
     if (isLastDay && marca.id === 101) {
-      idVersion += 1
       registros.push(
         makeRegistro('2026-07-10 09:41:12', marca, MEDIOS_TV[0], 'SPOT TV', 84300, 'PRIME', {
-          idVersion,
+          idVersion: 6199, // id estable exclusivo de la pieza NUEVA de hoy
           vname: 'Nada es seguro, salvo tu hogar',
           nuevo: true,
           primeraEmision: '2026-07-10 09:41:12',
@@ -257,11 +285,11 @@ for (let d = 0; d < DAYS; d++) {
       const hh = franja === 'PRIME' ? 20 + Math.floor(rnd() * 2) : franja === 'DIA' ? 8 + Math.floor(rnd() * 10) : franja === 'NOCHE' ? 22 + Math.floor(rnd() * 1) : 1 + Math.floor(rnd() * 4)
       const mm = Math.floor(rnd() * 60)
       const fecha = `${fdate} ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(Math.floor(rnd() * 60)).padStart(2, '0')}`
-      idVersion += 1
+      const ver = pick(VERSION_CATALOG[marca.id]) // versión estable → agrupa en el Ad Museum
       const oohOpts = tipo === 'VÍA PÚBLICA'
         ? { lat: -12.09 + (rnd() - 0.5) * 0.1, lng: -77.02 + (rnd() - 0.5) * 0.1, direccion: pick(['Av. Javier Prado 4200', 'Panamericana Norte km 12', 'Av. La Marina 2500']), localidad: pick(['SAN ISIDRO', 'LOS OLIVOS', 'SAN MIGUEL']) }
         : {}
-      registros.push(makeRegistro(fecha, marca, medio, tipo, inv, franja, { idVersion, ...oohOpts }))
+      registros.push(makeRegistro(fecha, marca, medio, tipo, inv, franja, { idVersion: ver.idv, vname: ver.vname, ...oohOpts }))
     }
   }
 }

@@ -11,6 +11,11 @@ import {
   computeIPC,
   computeIMC,
   opportunityScore,
+  latestDay,
+  soiComparison,
+  adMuseumPieces,
+  oohPoints,
+  classifyEPPM,
 } from './derive.js'
 
 const FX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures')
@@ -123,4 +128,40 @@ test('detectNewPieces: NUEVO en día no-último solo aparece en ese día', () =>
   ]
   assert.equal(detectNewPieces(rows, '2026-07-10').length, 0) // no es el día 5
   assert.equal(detectNewPieces(rows, '2026-07-05').length, 1)
+})
+
+// ── Derivadores del Radar (Fase 2) ────────────────────────────────────
+test('latestDay: día más reciente de los registros', () => {
+  assert.equal(latestDay(registros), DAY)
+  assert.equal(latestDay([]), null)
+})
+
+test('soiComparison: deltas vs. N días atrás (Prosegur sube, Securitas baja)', () => {
+  const c = soiComparison(registros, DAY, 7)
+  const d = Object.fromEntries(c.brands.map((b) => [b.maname, b.deltaPts]))
+  assert.ok(d['PROSEGUR ALARMS'] > 0, 'Prosegur debe subir')
+  assert.ok(d['SECURITAS'] <= 0, 'Securitas debe caer o mantenerse')
+  assert.equal(c.total, 256800)
+})
+
+test('adMuseumPieces: agrupa por versión (piezas ≪ emisiones), inversión acumulada', () => {
+  const m = adMuseumPieces(registros)
+  assert.ok(m.length > 0 && m.length < registros.length, 'piezas deben agrupar emisiones')
+  // ordenadas por primera emisión desc
+  for (let i = 1; i < m.length; i++) assert.ok(m[i - 1].firstEmission >= m[i].firstEmission)
+  // la pieza NUEVA de hoy existe con su inversión
+  const nueva = m.find((p) => p.vname === 'Nada es seguro, salvo tu hogar')
+  assert.ok(nueva && nueva.totalInvestment >= 84300)
+})
+
+test('oohPoints: solo vía pública con lat/long', () => {
+  const pts = oohPoints(registros)
+  assert.ok(pts.length > 0)
+  assert.ok(pts.every((p) => p.lat != null && p.lng != null))
+})
+
+test('classifyEPPM: heurística de tono', () => {
+  assert.equal(classifyEPPM('Nada es seguro, salvo tu hogar'), 'miedo → alivio')
+  assert.equal(classifyEPPM('Tu negocio, siempre atendido'), 'eficacia')
+  assert.equal(classifyEPPM('Respuesta en segundos'), 'alivio')
 })

@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react'
-import { MODULES, DEFAULT_MODULE, TODAY_PLACEHOLDER } from '../data/modules'
-import { checkSource } from '../data/client'
+import { useMemo, useState } from 'react'
+import { MODULES, DEFAULT_MODULE } from '../data/modules'
+import { useData } from '../data/DataContext'
+import { detectNewPieces, soiComparison } from '../data/derive'
+import { buildTodayHeadline } from '../modules/radar/radarUtils'
+import { fmtDayFull } from '../modules/radar/dateLabels'
 import Banner from './ui/Banner'
 import TodayStrip from './TodayStrip'
 import RadarModule from '../modules/radar/RadarModule'
@@ -15,23 +18,31 @@ const VIEWS = {
   maia: MaiaModule,
 }
 
+function demoParam() {
+  if (typeof window === 'undefined') return null
+  return new URLSearchParams(window.location.search).get('demo')
+}
+
 export default function AppShell() {
   const [active, setActive] = useState(DEFAULT_MODULE)
-  const [sourceDown, setSourceDown] = useState(null)
+  const { loading, sourceDown, sourceMessage, registros, day } = useData()
   const ActiveView = VIEWS[active]
   const activeModule = MODULES.find((m) => m.id === active)
+  const demo = demoParam()
 
-  // Chequeo honesto de la fuente de datos (DESIGN §7). En modo live sin token
-  // (governance: nunca client-side) esto falla y mostramos el banner, sin crashear.
-  useEffect(() => {
-    let alive = true
-    checkSource().then((r) => {
-      if (alive && !r.ok) setSourceDown(r.message)
-    })
-    return () => {
-      alive = false
+  // Franja "Hoy" desde datos reales (DESIGN §6.2): piezas nuevas + SOI del día.
+  const today = useMemo(() => {
+    if (!day || !registros.length || demo === 'empty') {
+      return { date: fmtDayFull(day) || '—', alertCount: 0, headline: null }
     }
-  }, [])
+    const newPieces = detectNewPieces(registros, day)
+    const soi = soiComparison(registros, day)
+    return {
+      date: fmtDayFull(day),
+      alertCount: newPieces.length,
+      headline: buildTodayHeadline(newPieces, soi),
+    }
+  }, [registros, day, demo])
 
   return (
     <div className="min-h-full bg-base text-ink">
@@ -46,7 +57,9 @@ export default function AppShell() {
           </p>
           <p className="mt-1 text-sm text-ink-2">by Reset · Verisure Perú</p>
         </div>
-        <p className="text-sm text-ink-3">Datos del {TODAY_PLACEHOLDER.date}</p>
+        <p className="text-sm text-ink-3" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          Datos del {today.date}
+        </p>
       </header>
 
       {/* ── Navegación de módulos: tabs píldora, bajo el wordmark ──── */}
@@ -68,18 +81,24 @@ export default function AppShell() {
 
       {/* ── Contenido ──────────────────────────────────────── */}
       <main className="mx-auto max-w-shell px-4 py-5 sm:px-8">
-        {sourceDown ? <Banner message={sourceDown} /> : null}
-        <TodayStrip
-          moduleId={active}
-          today={TODAY_PLACEHOLDER}
-          onGoToRadar={() => setActive('radar')}
-        />
+        {(sourceDown || demo === 'sourcedown') && !loading ? (
+          <Banner
+            message={
+              sourceMessage ||
+              'Integrametrics sin respuesta. Mostrando el último snapshot disponible. Reintento automático cada 30 min.'
+            }
+          />
+        ) : null}
+
+        <TodayStrip moduleId={active} today={today} onGoToRadar={() => setActive('radar')} />
 
         {/* Frescura por fuente del módulo (DESIGN §2). Si la fuente está caída no
             afirmamos frescura: el banner ya explica que es un snapshot anterior. */}
-        {!sourceDown ? (
+        {!sourceDown && demo !== 'sourcedown' ? (
           <p className="mt-5 mb-3 text-xs text-ink-3">{activeModule.freshness}</p>
-        ) : null}
+        ) : (
+          <div className="mt-5" />
+        )}
 
         <ActiveView />
       </main>

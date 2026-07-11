@@ -14,6 +14,11 @@ export const formatThousands = (n) => {
 };
 
 export const formatMoney = (n, decimals = 2) => `$${formatES(n, decimals)}`;
+// Soles con miles en punto (es-PE): S/ 1.240.500
+export const formatSoles = (n) => {
+  if (n === null || n === undefined) return '';
+  return `S/ ${Number(Math.round(n)).toLocaleString('es-PE')}`;
+};
 export const formatPercent = (n, decimals = 1) => `${formatES(n, decimals)}%`;
 export const formatCompact = (n, decimals = 1) => {
   if (n >= 1_000_000) return `${formatES(n / 1_000_000, decimals)}M`;
