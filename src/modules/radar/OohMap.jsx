@@ -78,9 +78,9 @@ export default function OohMap({ points = [], risk = [], degraded = false }) {
           <text x="12" y="24" fontSize="12" fill="var(--ink-2)">océano Pacífico</text>
           {/* avenidas esquemáticas */}
           <line x1={W * 0.16} y1={H * 0.5} x2={W} y2={H * 0.44} stroke="var(--ink-3)" strokeWidth="1.5" strokeDasharray="2 4" />
-          <text x={W * 0.62} y={H * 0.44 - 6} fontSize="11" fill="var(--ink-2)">Av. Javier Prado</text>
+          <text x={W * 0.62} y={H * 0.44 - 6} fontSize="12" fill="var(--ink-2)">Av. Javier Prado</text>
           <line x1={W * 0.45} y1="0" x2={W * 0.4} y2={H} stroke="var(--ink-3)" strokeWidth="1.5" strokeDasharray="2 4" />
-          <text x={W * 0.4 + 6} y="16" fontSize="11" fill="var(--ink-2)">Panamericana N.</text>
+          <text x={W * 0.4 + 6} y="16" fontSize="12" fill="var(--ink-2)">Panamericana N.</text>
 
           {/* capa de riesgo (toggle) */}
           {showRisk
@@ -91,7 +91,7 @@ export default function OohMap({ points = [], risk = [], degraded = false }) {
                 return (
                   <g key={z.name}>
                     <circle cx={z.x} cy={z.y} r={rr} fill="var(--caution)" opacity="0.14" />
-                    <text x={z.x} y={z.y} fontSize="11" fill="var(--caution)" textAnchor="middle">{z.name}</text>
+                    <text x={z.x} y={z.y} fontSize="12" fill="var(--caution)" textAnchor="middle">{z.name}</text>
                   </g>
                 )
               })

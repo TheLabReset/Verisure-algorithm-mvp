@@ -99,7 +99,7 @@ export default function PressureTimeline({ pressure = [], events = [], degraded 
             return (
               <g key={k}>
                 <circle cx={x(i)} cy={y(v)} r="3.5" fill="var(--ink)" />
-                <text x={x(i)} y={y(v) - 8} fontSize="11" fill="var(--ink-2)" textAnchor="middle">
+                <text x={x(i)} y={y(v) - 8} fontSize="12" fill="var(--ink-2)" textAnchor="middle">
                   {ev.label}
                 </text>
               </g>
