@@ -57,7 +57,7 @@ export default function AppShell() {
           </p>
           <p className="mt-1 text-sm text-ink-2">by Reset · Verisure Perú</p>
         </div>
-        <p className="text-sm text-ink-3" style={{ fontVariantNumeric: 'tabular-nums' }}>
+        <p className="text-sm text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
           Datos del {today.date}
         </p>
       </header>
@@ -95,7 +95,7 @@ export default function AppShell() {
         {/* Frescura por fuente del módulo (DESIGN §2). Si la fuente está caída no
             afirmamos frescura: el banner ya explica que es un snapshot anterior. */}
         {!sourceDown && demo !== 'sourcedown' ? (
-          <p className="mt-5 mb-3 text-xs text-ink-3">{activeModule.freshness}</p>
+          <p className="mt-5 mb-3 text-xs text-ink-2">{activeModule.freshness}</p>
         ) : (
           <div className="mt-5" />
         )}
@@ -104,7 +104,7 @@ export default function AppShell() {
       </main>
 
       {/* ── Footer ─────────────────────────────────────────── */}
-      <footer className="mx-auto mt-8 max-w-shell border-t border-line px-4 py-6 text-xs text-ink-3 sm:px-8">
+      <footer className="mx-auto mt-8 max-w-shell border-t border-line px-4 py-6 text-xs text-ink-2 sm:px-8">
         The Algorithm by Reset · Verisure Perú · inteligencia externa outside-in ·
         actualizado hoy 6:00 a. m.
       </footer>

@@ -35,13 +35,29 @@ const FRANJA_LABEL = {
   MADRUGADA: 'la madrugada',
 }
 
-function horaOf(fecha = '') {
+export function formatHora(fecha = '') {
   const t = fecha.slice(11, 16) // "09:41"
   if (!t) return ''
   const [h, m] = t.split(':').map(Number)
   const ampm = h < 12 ? 'a. m.' : 'p. m.'
   const hh = h % 12 === 0 ? 12 : h % 12
   return `${hh}:${String(m).padStart(2, '0')} ${ampm}`
+}
+const horaOf = formatHora
+
+// Etiqueta corta del tipo de aviso para copy fluido ("spot", no "spot tv").
+export function tnameShort(tname = '') {
+  const t = tname.toUpperCase()
+  if (t === 'SPOT TV') return 'spot'
+  if (t === 'SPOT RADIO') return 'spot de radio'
+  if (t === 'VÍA PÚBLICA') return 'pieza de vía pública'
+  return (tname || 'pieza').toLowerCase()
+}
+
+// Delta con signo tipográfico (− real, no guion).
+export function signPts(pts) {
+  if (pts === undefined || pts === null || pts === 0) return null
+  return `${pts > 0 ? '+' : '−'}${Math.abs(pts)} pts`
 }
 
 // Titular de la franja "Hoy" (Radar) desde la pieza nueva + SOI. null si no hay novedad.
@@ -55,7 +71,7 @@ export function buildTodayHeadline(newPieces, soi) {
   const hora = horaOf(p.fecha)
   const meShare = shareOf[p.maname] != null ? `${formatPercent(shareOf[p.maname], 0)}` : null
   const veriShare = shareOf['VERISURE'] != null ? `${formatPercent(shareOf['VERISURE'], 0)}` : null
-  let s = `${marca} lanzó un ${(p.tname || 'spot').toLowerCase()}${dur} en ${franja} de ${p.mname}`
+  let s = `${marca} lanzó un ${tnameShort(p.tname)}${dur} en ${franja} de ${p.mname}`
   if (hora) s += ` (${hora})`
   if (meShare) s += ` y su share of investment del día sube a ${meShare}`
   s += '.'

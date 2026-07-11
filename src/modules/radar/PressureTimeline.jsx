@@ -33,7 +33,7 @@ function insight(pressure) {
   }`
 }
 
-export default function PressureTimeline({ pressure = [], events = [] }) {
+export default function PressureTimeline({ pressure = [], events = [], degraded = false }) {
   if (!pressure.length) return null
   const brands = new Set()
   pressure.forEach((p) => Object.keys(p.byBrand || {}).forEach((b) => brands.add(b)))
@@ -62,7 +62,7 @@ export default function PressureTimeline({ pressure = [], events = [] }) {
       <h3 className="font-display text-xl text-ink sm:text-2xl">{insight(pressure)}</h3>
       <p className="mt-1 text-sm text-ink-2">Inversión diaria estimada · últimos 30 días</p>
 
-      <div className="mt-4 overflow-x-auto">
+      <div className="scroll-x-fade mt-4">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           width="100%"
@@ -79,7 +79,7 @@ export default function PressureTimeline({ pressure = [], events = [] }) {
             const lastV = seriesFor(pressure, b)[n - 1]
             return (
               <g key={b}>
-                <polyline points={pts} fill="none" stroke={st.stroke} strokeWidth={st.width} strokeLinejoin="round" strokeLinecap="round" />
+                <polyline points={pts} fill="none" stroke={st.stroke} strokeWidth={st.width} strokeLinejoin="round" strokeLinecap="round" strokeDasharray={degraded ? '4 3' : undefined} />
                 {/* etiqueta directa al final */}
                 <text x={PAD.left + innerW + 8} y={y(lastV) + 4} fontSize="12" fill={st.stroke} style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {brandDisplay(b)}
@@ -103,9 +103,9 @@ export default function PressureTimeline({ pressure = [], events = [] }) {
             )
           })}
 
-          {/* eje X: primera, media y última fecha */}
-          {[0, Math.floor((n - 1) / 2), n - 1].map((i) => (
-            <text key={i} x={x(i)} y={H - 8} fontSize="12" fill="var(--ink-3)" textAnchor={i === 0 ? 'start' : i === n - 1 ? 'middle' : 'middle'} style={{ fontVariantNumeric: 'tabular-nums' }}>
+          {/* eje X: 5 marcas de fecha */}
+          {[...new Set([0, Math.floor((n - 1) / 4), Math.floor((n - 1) / 2), Math.floor((3 * (n - 1)) / 4), n - 1])].map((i) => (
+            <text key={i} x={x(i)} y={H - 8} fontSize="12" fill="var(--ink-2)" textAnchor={i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'} style={{ fontVariantNumeric: 'tabular-nums' }}>
               {fmtDayShort(pressure[i].fecha)}
             </text>
           ))}

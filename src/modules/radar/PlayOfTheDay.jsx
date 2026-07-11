@@ -3,7 +3,7 @@
 // estimada (rayado = Integrametrics) y tono EPPM. Si no hay novedad: estado vacío útil.
 import { Play, Sparkles } from 'lucide-react'
 import { formatSoles } from '../../utils/format'
-import { brandDisplay } from './radarUtils'
+import { brandDisplay, formatHora } from './radarUtils'
 
 function VideoThumb() {
   // Placeholder de captura de emisión (rfile es un .mp4/.jpg; no se reproduce en el dashboard).
@@ -51,7 +51,7 @@ export default function PlayOfTheDay({ piece, lastDetection }) {
   }
 
   const marca = brandDisplay(piece.maname)
-  const hhmm = piece.fecha?.slice(11, 16) || ''
+  const hhmm = formatHora(piece.fecha)
 
   return (
     <section className="rounded-card bg-ink p-6 text-base sm:p-8" style={{ color: 'var(--base)' }}>

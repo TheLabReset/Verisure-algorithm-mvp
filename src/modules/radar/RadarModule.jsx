@@ -17,7 +17,7 @@ import SoiCapsules from './SoiCapsules'
 import PressureTimeline from './PressureTimeline'
 import AdMuseum from './AdMuseum'
 import OohMap from './OohMap'
-import { brandDisplay } from './radarUtils'
+import { brandDisplay, tnameShort } from './radarUtils'
 import { fmtDayLong } from './dateLabels'
 
 function demoParam() {
@@ -32,7 +32,10 @@ function lastDetectionLabel(registros, day) {
     if (r.fecha.slice(0, 10) >= day) continue
     if (!best || r.fecha > best.fecha) best = r
   }
-  return best ? `${fmtDayLong(best.fecha)}, ${brandDisplay(best.maname)}` : null
+  if (!best) return null
+  const canal = best.mname ? ` en ${best.mname}` : ''
+  const dur = best.duraseg ? ` ${best.duraseg} s` : ''
+  return `${fmtDayLong(best.fecha)} · ${brandDisplay(best.maname)} · ${tnameShort(best.tname)}${dur}${canal}`
 }
 
 function RadarSkeleton() {
@@ -91,9 +94,9 @@ export default function RadarModule() {
     <div className="space-y-6">
       <PlayOfTheDay piece={piece} lastDetection={view.lastDetection} />
       <SoiCapsules soi={view.soi} dotted={isDown} />
-      <PressureTimeline pressure={view.pressure} events={events} />
+      <PressureTimeline pressure={view.pressure} events={events} degraded={isDown} />
       <AdMuseum pieces={view.museum} />
-      <OohMap points={view.ooh} risk={riskDistritos} />
+      <OohMap points={view.ooh} risk={riskDistritos} degraded={isDown} />
     </div>
   )
 }

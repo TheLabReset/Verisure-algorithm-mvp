@@ -64,11 +64,13 @@
     100% { background-position: -200% 0; }
   }
 
-  /* Scroll horizontal CON indicador de borde (DESIGN §8): fade en los bordes,
-     scrollbar visible. NO ocultamos la barra. */
+  /* Scroll horizontal CON indicador de borde (DESIGN §8): fade en el borde derecho
+     que señala "hay más contenido". Scrollbar visible; NO la ocultamos. */
   .scroll-x-fade {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
   }
 }
 

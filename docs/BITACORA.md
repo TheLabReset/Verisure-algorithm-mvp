@@ -59,3 +59,29 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 **Criterio de gate.** Gate 2 sin bloqueante/mayor; menores resueltos o justificados por escrito (protocolo §1.4). Se procede al merge.
 
 **Pendientes declarados.** Cablear módulos a la capa de datos (F2). Servir fixtures desde `public/data/` vía fetch (F2). Vulns de toolchain Vite (major, F5 o cuando aplique). Re-añadir recharts para charts (F2).
+
+---
+
+## Fase 2 — RADAR · rama `fase-2-radar` · merge `<pendiente>`
+
+**Construido.** DataProvider (context) que carga los datos del día una vez y los comparte (franja + módulos); **cero data hardcodeada en JSX**. Franja "Hoy" real (piezas nuevas + SOI → titular honesto). "La jugada del día" (card ancla oscura con captura rfile, NUEVA, inversión estimada rayada, tono EPPM). SOI cápsulas con vocabulario de honestidad (Verisure sólido, competencia rayada, leyenda, delta vs semana pasada). Timeline 30d en SVG propio (una serie enfatizada, competencia en grises, eventos anotados, etiquetas directas, sin grid pesado — SWD). Ad Museum (piezas agrupadas por versión con catálogo estable, EPPM, inversión acumulada). Mapa OOH (SVG esquemático de Lima, puntos ∝ inversión, toggle capa riesgo SIDPOL). Estados: skeleton, vacío (última detección), fuente caída (cápsulas+timeline+OOH punteados); forzables con `?demo=loading|empty|sourcedown`.
+
+**Auto-verificación.** 31 tests verdes · build fixtures+live · §10 limpio (hex fuera de tabla 0, fitzone 0, focus-visible, tabular-nums) · cero data hardcodeada (módulos vía useData/derive) · 4 estados por screenshot 1440/390 sin overflow ni errores de consola.
+
+**Gate 1 (subagente fresco): APROBADO CON CORRECCIONES** — 1 BLOQUEANTE + 2 MAYOR + menores.
+
+**Resoluciones (cada una verificada en navegador):**
+- **#1 BLOQUEANTE** (dinero con coma en Chromium por `toLocaleString('es-PE')`): `formatSoles`/`formatThousands` ahora agrupan miles con PUNTO de forma determinista (regex), independiente del ICU. Verificado: DOM muestra `S/ 84.300` (charcode 46).
+- **#2 MAYOR** (estado vacío sin "última detección", por atarse al flag same-day `NUEVO`): el generador marca la PRIMERA emisión de cada versión como NUEVA (detección histórica), excluyendo hoy salvo el hero → `detectNewPieces(hoy)` sigue = 1; `lastDetectionLabel` deriva la última detección (tipo + duración + canal). Verificado: "mié 17 jun · Prosegur · spot 15 s en LATINA".
+- **#3 MAYOR** (contraste AA: `--ink-3` a 12px sobre blanco = 3.21:1): todos los TEXTOS en `--ink-3` sobre superficies claras pasan a `--ink-2` (6.62:1); los elementos GRÁFICOS (colores de serie/puntos, tramas, líneas de avenida) mantienen `--ink-3` (marcas de dato sobre el piso `#C9CDD4`, no texto). Nota: DESIGN §5 dice "ejes en --ink-3" pero eso también falla AA; se priorizó §10 (AA) usando `--ink-2` en ejes. *Propuesta de clarificación de DESIGN §5 pendiente (no bloqueante).*
+- **#5 MENOR** código muerto: eliminados `Pill.jsx` (F2) y `Card.jsx` (preexistente, sin uso).
+- **#6 MENOR** honestidad incompleta: el estado fuente-caída ahora propaga `degraded` al timeline (líneas dashed) y al mapa OOH (puntos punteados), no solo a las cápsulas.
+- **#7 MENOR** scroll-x sin indicador: `.scroll-x-fade` implementa fade de borde derecho (mask-image) y se aplica al timeline (DESIGN §8).
+- **#8 SUGERENCIA** título OOH hardcodeado: ahora se deriva del dato (distrito con más inversión).
+- **#9 SUGERENCIA** rojo en iconos del Ad Museum: iconos ▶ neutros (DESIGN §1, sin migajas de rojo).
+- **#10 paridad**: hora "9:41 a. m." (no "09:41"), "spot" (no "spot tv"), signo menos tipográfico "−", 5 marcas en el eje X, y OOH con las 3 marcas (Securitas ahora tiene vía pública).
+- **#4 MENOR** (chunk de fixtures en build live): **diferido a F4** con justificación — la ruta de servido de fixtures (`fetch` desde `public/data/`) debe diseñarse en concierto con el pipeline de F4, que fija el contrato de salida `public/data/`. Hacerlo en F2 y rehacerlo en F4 sería churn. Impacto actual bajo (code-split, nunca cargado en runtime live).
+
+**Números de oro tras las correcciones:** SOI 46,1/33,3/20,6 (S/256.800) · NUEVA=1 · Ad Museum 22 piezas · OOH 3 marcas · última detección poblada. 31 tests verdes.
+
+**Pendientes declarados.** Servir fixtures desde `public/data/` vía fetch (F4, junto al pipeline). Re-añadir recharts si algún chart lo amerita (hoy todo es SVG propio). Clarificar DESIGN §5 (ejes `--ink-3` vs AA). Vulns de toolchain Vite (major, F5).

@@ -3,7 +3,7 @@
 // El título AFIRMA el insight (líder de presión), no nombra el eje (DESIGN §3).
 import Capsula from '../../components/ui/Capsula'
 import { formatSoles } from '../../utils/format'
-import { assignBrandStyle, buildSoiInsight, brandDisplay } from './radarUtils'
+import { assignBrandStyle, buildSoiInsight, brandDisplay, signPts } from './radarUtils'
 import { fmtDayLong } from './dateLabels'
 
 export default function SoiCapsules({ soi, dotted = false }) {
@@ -11,7 +11,7 @@ export default function SoiCapsules({ soi, dotted = false }) {
 
   const deltas = (soi?.brands || [])
     .filter((b) => b.deltaPts !== undefined && b.deltaPts !== 0)
-    .map((b) => `${brandDisplay(b.maname)} ${b.deltaPts > 0 ? '+' : ''}${b.deltaPts} pts`)
+    .map((b) => `${brandDisplay(b.maname)} ${signPts(b.deltaPts)}`)
 
   return (
     <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
@@ -41,13 +41,13 @@ export default function SoiCapsules({ soi, dotted = false }) {
       <p className="mt-5 text-sm text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
         {deltas.length > 0 && !dotted ? (
           <>
-            <span className="text-ink-3">vs. semana pasada:</span> {deltas.join(' · ')} ·{' '}
+            <span className="text-ink-2">vs. semana pasada:</span> {deltas.join(' · ')} ·{' '}
           </>
         ) : null}
         <span className="font-semibold text-ink">Total del día {formatSoles(soi?.total || 0)}</span>
       </p>
 
-      <p className="mt-3 border-t border-line pt-3 text-xs text-ink-3">
+      <p className="mt-3 border-t border-line pt-3 text-xs text-ink-2">
         sólido = confirmado (pauta operada por Reset) · rayado = estimado (Integrametrics)
       </p>
     </section>

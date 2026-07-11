@@ -29,7 +29,7 @@ function brandColor(maname) {
   return 'var(--ink-3)'
 }
 
-export default function OohMap({ points = [], risk = [] }) {
+export default function OohMap({ points = [], risk = [], degraded = false }) {
   const [showRisk, setShowRisk] = useState(false)
 
   const maxInv = Math.max(1, ...points.map((p) => p.investment))
@@ -38,6 +38,16 @@ export default function OohMap({ points = [], risk = [] }) {
   const counts = {}
   for (const p of points) counts[p.maname] = (counts[p.maname] || 0) + 1
 
+  // Insight derivado del dato: distrito con más inversión OOH.
+  const byLoc = {}
+  for (const p of points) if (p.localidad) byLoc[p.localidad] = (byLoc[p.localidad] || 0) + p.investment
+  const topLoc = Object.entries(byLoc).sort((a, b) => b[1] - a[1])[0]?.[0]
+  const titleCase = (s) =>
+    s.toLowerCase().replace(/(^|\s)\p{L}/gu, (c) => c.toUpperCase())
+  const title = topLoc
+    ? `${titleCase(topLoc)} concentra la inversión rival en vía pública`
+    : 'Inversión rival en vía pública'
+
   const maxDen = Math.max(1, ...risk.map((d) => d.denuncias || 0))
   const riskByName = Object.fromEntries(risk.map((d) => [d.distrito, d.denuncias]))
 
@@ -45,9 +55,7 @@ export default function OohMap({ points = [], risk = [] }) {
     <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h3 className="font-display text-xl text-ink sm:text-2xl">
-            Javier Prado concentra la inversión rival en vía pública
-          </h3>
+          <h3 className="font-display text-xl text-ink sm:text-2xl">{title}</h3>
           <p className="mt-1 text-sm text-ink-2">
             {points.length} paneles · tamaño del punto = inversión mensual estimada
           </p>
@@ -67,12 +75,12 @@ export default function OohMap({ points = [], risk = [] }) {
         <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Mapa OOH de Lima con paneles por competidor" style={{ display: 'block' }}>
           {/* océano (izquierda) */}
           <rect x="0" y="0" width={W * 0.16} height={H} fill="var(--line)" />
-          <text x="12" y="24" fontSize="12" fill="var(--ink-3)">océano Pacífico</text>
+          <text x="12" y="24" fontSize="12" fill="var(--ink-2)">océano Pacífico</text>
           {/* avenidas esquemáticas */}
           <line x1={W * 0.16} y1={H * 0.5} x2={W} y2={H * 0.44} stroke="var(--ink-3)" strokeWidth="1.5" strokeDasharray="2 4" />
-          <text x={W * 0.62} y={H * 0.44 - 6} fontSize="11" fill="var(--ink-3)">Av. Javier Prado</text>
+          <text x={W * 0.62} y={H * 0.44 - 6} fontSize="11" fill="var(--ink-2)">Av. Javier Prado</text>
           <line x1={W * 0.45} y1="0" x2={W * 0.4} y2={H} stroke="var(--ink-3)" strokeWidth="1.5" strokeDasharray="2 4" />
-          <text x={W * 0.4 + 6} y="16" fontSize="11" fill="var(--ink-3)">Panamericana N.</text>
+          <text x={W * 0.4 + 6} y="16" fontSize="11" fill="var(--ink-2)">Panamericana N.</text>
 
           {/* capa de riesgo (toggle) */}
           {showRisk
@@ -92,7 +100,12 @@ export default function OohMap({ points = [], risk = [] }) {
           {/* paneles OOH */}
           {points.map((p, i) => {
             const { x, y } = project(p.lat, p.lng)
-            return <circle key={i} cx={x} cy={y} r={r(p.investment)} fill={brandColor(p.maname)} opacity={p.isVerisure ? 0.9 : 0.7} />
+            const c = brandColor(p.maname)
+            // Fuente caída: puntos punteados (contorno, sin relleno) — DESIGN §2.
+            if (degraded) {
+              return <circle key={i} cx={x} cy={y} r={r(p.investment)} fill="none" stroke={c} strokeWidth="1.5" strokeDasharray="2 2" />
+            }
+            return <circle key={i} cx={x} cy={y} r={r(p.investment)} fill={c} opacity={p.isVerisure ? 0.9 : 0.7} />
           })}
         </svg>
       </div>
@@ -108,7 +121,7 @@ export default function OohMap({ points = [], risk = [] }) {
             </span>
           ))}
         {showRisk ? (
-          <span className="inline-flex items-center gap-1.5 text-ink-3">
+          <span className="inline-flex items-center gap-1.5 text-ink-2">
             <span className="inline-block h-2.5 w-2.5 rounded-pill" style={{ background: 'var(--caution)', opacity: 0.4 }} />
             riesgo por distrito (SIDPOL)
           </span>

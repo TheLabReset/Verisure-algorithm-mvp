@@ -269,13 +269,13 @@ for (let d = 0; d < DAYS; d++) {
         : Math.round((remaining / (nPieces - i)) * (1 + (rnd() * 2 - 1) * 0.25))
       remaining -= inv
       if (inv <= 0) continue
-      // mezcla de medios: mayormente TV, algo de radio (Securitas más B2B/radio), OOH ocasional
+      // mezcla de medios: OOH ~12% para todas las marcas; Securitas más B2B/radio.
       const r = rnd()
       let medio, tipo
-      if (marca.id === 103 && r < 0.5) {
-        medio = pick(MEDIOS_RADIO); tipo = 'SPOT RADIO'
-      } else if (r < 0.12) {
+      if (r < 0.12) {
         medio = null; tipo = 'VÍA PÚBLICA'
+      } else if (marca.id === 103 && r < 0.55) {
+        medio = pick(MEDIOS_RADIO); tipo = 'SPOT RADIO'
       } else if (r < 0.28) {
         medio = pick(MEDIOS_RADIO); tipo = 'SPOT RADIO'
       } else {
@@ -291,6 +291,26 @@ for (let d = 0; d < DAYS; d++) {
         : {}
       registros.push(makeRegistro(fecha, marca, medio, tipo, inv, franja, { idVersion: ver.idv, vname: ver.vname, ...oohOpts }))
     }
+  }
+}
+
+// ── Detecciones históricas: marca la PRIMERA emisión de cada versión como NUEVA ──
+// Así el monitoreo diario tiene "última detección" en días previos (no solo hoy).
+// Excluimos primeras emisiones de HOY (salvo el hero 6199) para que "N alertas hoy"
+// sea exactamente la jugada del día.
+{
+  const firstByVersion = new Map()
+  for (const r of registros) {
+    const k = r.id_versiones_unica
+    const cur = firstByVersion.get(k)
+    if (!cur || r.fecha < cur.fecha) firstByVersion.set(k, r)
+  }
+  for (const [k, first] of firstByVersion) {
+    if (k === 6199) continue // hero de hoy: ya marcado
+    if (first.fecha.slice(0, 10) === '2026-07-10') continue // no ensuciar el conteo de hoy
+    first.nuevas_versiones = 'NUEVO'
+    first.primera_emision_comercial = first.fecha
+    first.primera_emision_version = first.fecha
   }
 }
 

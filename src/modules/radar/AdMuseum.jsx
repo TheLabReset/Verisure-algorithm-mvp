@@ -7,7 +7,7 @@ import { formatSoles } from '../../utils/format'
 import { brandDisplay } from './radarUtils'
 import { fmtDayShort } from './dateLabels'
 
-function Thumb({ isVerisure }) {
+function Thumb() {
   return (
     <div
       className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-inner"
@@ -21,7 +21,7 @@ function Thumb({ isVerisure }) {
         }}
         aria-hidden="true"
       />
-      <Play size={18} fill="currentColor" aria-hidden="true" style={isVerisure ? { color: 'var(--verisure)' } : undefined} />
+      <Play size={18} fill="currentColor" aria-hidden="true" />
     </div>
   )
 }
@@ -58,12 +58,12 @@ export default function AdMuseum({ pieces = [] }) {
       >
         {shown.map((p) => (
           <article key={p.key} className="rounded-inner border border-line p-3">
-            <Thumb isVerisure={p.isVerisure} />
-            <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-ink-3">{p.eppm}</p>
+            <Thumb />
+            <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-ink-2">{p.eppm}</p>
             <p className="mt-1 text-sm text-ink">
               <span className="font-semibold">{brandDisplay(p.maname)}</span> · «{p.vname}»
             </p>
-            <p className="mt-1 text-xs text-ink-3" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            <p className="mt-1 text-xs text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {fmtDayShort(p.firstEmission)} · {p.channels.slice(0, 2).join(', ') || p.tipos[0] || '—'} ·{' '}
               {formatSoles(p.totalInvestment)} acum.
             </p>

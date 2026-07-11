@@ -8,16 +8,24 @@ export const formatES = (n, decimals = null) => {
   return fixed.replace('.', ',');
 };
 
+// Agrupa miles con PUNTO de forma DETERMINISTA (no depende del ICU del navegador:
+// toLocaleString('es-PE') devuelve coma en algunos runtimes como Chromium).
+const groupThousands = (n) => {
+  const neg = n < 0;
+  const s = String(Math.round(Math.abs(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${neg ? '-' : ''}${s}`;
+};
+
 export const formatThousands = (n) => {
   if (n === null || n === undefined) return '';
-  return Number(n).toLocaleString('es-PE');
+  return groupThousands(n);
 };
 
 export const formatMoney = (n, decimals = 2) => `$${formatES(n, decimals)}`;
 // Soles con miles en punto (es-PE): S/ 1.240.500
 export const formatSoles = (n) => {
   if (n === null || n === undefined) return '';
-  return `S/ ${Number(Math.round(n)).toLocaleString('es-PE')}`;
+  return `S/ ${groupThousands(n)}`;
 };
 export const formatPercent = (n, decimals = 1) => `${formatES(n, decimals)}%`;
 export const formatCompact = (n, decimals = 1) => {

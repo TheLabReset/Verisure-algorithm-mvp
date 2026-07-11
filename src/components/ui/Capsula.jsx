@@ -34,7 +34,7 @@ export default function Capsula({ label, share, value, color, pattern = 'solid',
           {value ? ' · ' : ''}
           {formatPercent(pct, 0)}
           {delta ? (
-            <span style={{ color: deltaPts > 0 ? 'var(--ink-2)' : 'var(--ink-3)' }}> · {delta}</span>
+            <span className="text-ink-2"> · {delta}</span>
           ) : null}
         </span>
       </div>
