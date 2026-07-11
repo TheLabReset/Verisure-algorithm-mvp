@@ -64,6 +64,11 @@
     100% { background-position: -200% 0; }
   }
 
+  /* Sin movimiento si el usuario lo pidió: el skeleton queda estático, no parpadea. */
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton { animation: none; }
+  }
+
   /* Scroll horizontal CON indicador de borde (DESIGN §8): fade en el borde derecho
      que señala "hay más contenido". Scrollbar visible; NO la ocultamos. */
   .scroll-x-fade {
