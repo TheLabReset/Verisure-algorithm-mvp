@@ -23,7 +23,7 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 
 ---
 
-## Fase 1 — Capa de datos, fixtures y derivadores · rama `fase-1-datos` · merge `<pendiente>`
+## Fase 1 — Capa de datos, fixtures y derivadores · rama `fase-1-datos` · merge `f16d9e2`
 
 **Construido.**
 - Cliente único dual `source=fixtures|live` (env `VITE_DATA_SOURCE`). Live = Integrametrics Bearer (token solo en Node, nunca en el bundle; governance), paginación por día para el límite de 90.000, intervalo semiabierto `[start,end)` en hora local, errores manejados → banner honesto (DESIGN §7), sin crash.
@@ -62,7 +62,7 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 
 ---
 
-## Fase 2 — RADAR · rama `fase-2-radar` · merge `<pendiente>`
+## Fase 2 — RADAR · rama `fase-2-radar` · merge `d0b00c0`
 
 **Construido.** DataProvider (context) que carga los datos del día una vez y los comparte (franja + módulos); **cero data hardcodeada en JSX**. Franja "Hoy" real (piezas nuevas + SOI → titular honesto). "La jugada del día" (card ancla oscura con captura rfile, NUEVA, inversión estimada rayada, tono EPPM). SOI cápsulas con vocabulario de honestidad (Verisure sólido, competencia rayada, leyenda, delta vs semana pasada). Timeline 30d en SVG propio (una serie enfatizada, competencia en grises, eventos anotados, etiquetas directas, sin grid pesado — SWD). Ad Museum (piezas agrupadas por versión con catálogo estable, EPPM, inversión acumulada). Mapa OOH (SVG esquemático de Lima, puntos ∝ inversión, toggle capa riesgo SIDPOL). Estados: skeleton, vacío (última detección), fuente caída (cápsulas+timeline+OOH punteados); forzables con `?demo=loading|empty|sourcedown`.
 
@@ -88,7 +88,7 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 
 ---
 
-## Fase 3 — DEMANDA + CONTEXTO · rama `fase-3-demanda-contexto` · merge `<pendiente>`
+## Fase 3 — DEMANDA + CONTEXTO · rama `fase-3-demanda-contexto` · merge `b24fabf`
 
 **Construido.**
 - **DEMANDA:** slope Share of Search vs Investment (SVG propio, Verisure enfatizado, competencia en grises, leyenda de honestidad SoS/SoI, insight "Buscan a Verisure más de lo que Verisure invierte" + brecha derivada); tendencia de búsquedas «alarma para casa» (serie de categoría enfatizada, +18%/90d); card Amenaza DIY (gauge sobrio de un arco en `--caution`, 58/100, + 3 componentes con fuente y "marcas monitoreadas").
@@ -127,3 +127,17 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 **Auto-verificación Gate 2.** 34 tests verdes · fixtures regenerados + `validate:fixtures` ok (321 registros) · build ok · títulos/etiquetas rederivados ejecutando la lógica contra el fixture (jul/dic/abr correctos) · `package.json`/`lock` intactos (playwright con `--no-save`) · capturas 1440/390 de CONTEXTO revisadas (título derivado, mes vigente marcado, nota de distritos, etiquetas macro) sin overflow ni errores de consola.
 
 **Criterio de gate.** Gate 2 sin bloqueante/mayor; los 3 menores resueltos y las 2 sugerencias adoptadas (protocolo §1.4, precedente F1/F2). Se procede al merge.
+
+---
+
+## Fase 4 — MAIA + pipeline diario · rama `fase-4-maia-pipeline` · merge `<pendiente>`
+
+**Construido.**
+- **MAIA (módulo 4):** carita `MaiaFace` (squircle `--ink`, ojos, aura `--verisure-tint`; 3 estados CSS reposo/pensando/alerta con `prefers-reduced-motion`, DESIGN §6.1). **Daily Brief** — única card oscura ancla (`--ink`), redactada por `composeBrief` a partir de SOI/piezas/DIY/Score (cero prosa hardcodeada; la carita entra en `alerta` cuando mueve la competencia). **Opportunity Score** — ÚNICO uso de `--grad-brand` (arco de progreso enmascarado por intersección conic∩radial) + IPC/IMC como barras con lectura de una frase y siglas glosadas (DESIGN §6.3). **Chat** — respuestas derivadas del día (motor puro `maiaAnswer`, sin latencia artificial); ruta LLM tras `VITE_MAIA_CHAT='live'` (Netlify Function que proxea Anthropic, key server-side).
+- **Pipeline diario:** `scripts/run-pipeline.mjs` corre los derivadores y publica el snapshot en `public/data/` (datasets crudos + `algorithm.json` agregado + `export.csv` en dimensiones §A.7 + `meta.json`). Dry-run **determinista** sobre fixtures; live con token (Integrametrics SOLO en Node). `.github/workflows/pipeline.yml`: cron `0 11 * * *` (06:00 Lima) + `workflow_dispatch`, valida+testea antes de publicar, commitea el snapshot si cambió.
+- **Contrato único de datos (deferred F3 #4):** el navegador ahora fetchea `/data/*.json` (`client.js` reescrito como fetcher puro; elimina Integrametrics y el token del bundle — governance). Efecto colateral: el bundle baja de ~590 KB a **202 KB** (los fixtures ya no se empacan) — desaparece el warning de chunk >500 KB.
+- `.env.example`: `VITE_MAIA_CHAT`. `client.test.js` reescrito (fetch + governance). 9 tests nuevos (brief golden, intents del chat, cliente por fetch).
+
+**Auto-verificación.** 43 tests verdes · build ok · `validate:fixtures` ok (321) · pipeline **determinista** (re-corrida → sin diff) · hex fuera de tabla 0 (el único uso de rojo con alfa es `color-mix(var(--verisure)…)`, sin hex crudo) · sin `Date.now`/`Math.random`/`toLocaleString` en código (solo comentario) · `new Date()` solo en el pipeline (I/O, no derivador) · texto en `--ink-2` (único `--ink-3` = placeholder del input, hint no-contenido) · sin `console.log` · sin overflow a 1440/390 en RADAR/DEMANDA/CONTEXTO/MAIA · cero errores de consola / requests fallidos · carita respeta `prefers-reduced-motion` · dinero determinista (S/ 118.400 con punto en el chat) · `package.json`/`lock` intactos (playwright `--no-save`).
+
+**Notas de diseño.** El arco del Score usa máscara `conic ∩ radial` (colores de máscara `black`/`transparent`, alfa estructural). Texto claro sobre la card oscura vía `color-mix(var(--base)…)` (~8:1 sobre `--ink`, AA holgado). Placeholder del chat en `--ink-3`: convención de hint, no texto de contenido; el input lleva `aria-label` y `:focus-visible` global.
