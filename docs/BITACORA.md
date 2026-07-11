@@ -130,7 +130,7 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 
 ---
 
-## Fase 4 — MAIA + pipeline diario · rama `fase-4-maia-pipeline` · merge `<pendiente>`
+## Fase 4 — MAIA + pipeline diario · rama `fase-4-maia-pipeline` · merge `8a0454e`
 
 **Construido.**
 - **MAIA (módulo 4):** carita `MaiaFace` (squircle `--ink`, ojos, aura `--verisure-tint`; 3 estados CSS reposo/pensando/alerta con `prefers-reduced-motion`, DESIGN §6.1). **Daily Brief** — única card oscura ancla (`--ink`), redactada por `composeBrief` a partir de SOI/piezas/DIY/Score (cero prosa hardcodeada; la carita entra en `alerta` cuando mueve la competencia). **Opportunity Score** — ÚNICO uso de `--grad-brand` (arco de progreso enmascarado por intersección conic∩radial) + IPC/IMC como barras con lectura de una frase y siglas glosadas (DESIGN §6.3). **Chat** — respuestas derivadas del día (motor puro `maiaAnswer`, sin latencia artificial); ruta LLM tras `VITE_MAIA_CHAT='live'` (Netlify Function que proxea Anthropic, key server-side).
@@ -154,3 +154,17 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 **Auto-verificación Gate 1.** 43 tests verdes (nuevo: singular del delta) · build ok · chips medidos a 44px · `?demo=nodata` → EmptyState · sin overflow ni errores de consola a 390 · `package.json`/`lock` intactos.
 
 **Criterio de gate.** Gate 1 sin bloqueante; el mayor resuelto y las 2 sugerencias adoptadas (protocolo §1.4, precedente F1–F3). Se procede al merge.
+
+---
+
+## Fase 5 — Hardening · rama `fase-5-hardening` · merge `<pendiente>`
+
+**Construido.**
+- **Code-split por módulo:** `React.lazy` + `Suspense` en `AppShell` — cada vista (RADAR/DEMANDA/CONTEXTO/MAIA) es su propio chunk; solo se descarga el del módulo activo. Fallback = skeletons con la forma del contenido (DESIGN §7). Bundle inicial **202 KB → 160 KB**; módulos 7–17 KB bajo demanda.
+- **Basic Auth de todo el sitio:** Edge Function de Netlify (`netlify/edge-functions/auth.js`, registrada en `netlify.toml` con `path="/*"`). Se activa solo si `BASIC_AUTH_USER`/`BASIC_AUTH_PASSWORD` están en el entorno de Netlify (fail-open en demo; comparación de tiempo constante). Credenciales solo por env, nunca en el repo. Protege también `/data`.
+- **README v2:** reescrito para el producto outside-in (4 módulos, arquitectura de datos `/data`, pipeline, governance, deploy, estructura). El anterior describía el template v1 retirado.
+- **Metadata:** `index.html` ya traía title/description/OG/theme-color/favicon; el favicon **es la carita de MAIA** (squircle `--ink` + ojos + punto `--verisure`), on-brand. `netlify.toml`: Node 20 / npm 10.
+- **Cleanup:** `@types/react`/`@types/react-dom` eliminados (JS puro, sin TS; muertos por depcheck). 4 labels SVG `11px → 12px` (piso tipográfico §10).
+- `.env.example`: `BASIC_AUTH_USER`/`PASSWORD`.
+
+**Auto-verificación (checklist §10 completo).** 43 tests verdes · build ok · `validate:fixtures` ok · pipeline determinista · **fuentes auto-hospedadas cargan** (Anton/Instrument Sans/Space Grotesk vía `document.fonts`) con **0 requests externos** (§11) · **sin overflow en las 8 vistas** (4 módulos × 1440/390) · `prefers-reduced-motion: reduce` apaga la animación de la carita (`animationName: none`) · **0 errores de consola / requests fallidos** · sin dark-mode default · una sola card oscura (MAIA) · `--grad-brand` un solo uso · sin arcoíris ni gradiente decorativo · sin texto <12px (SVG subidos a 12) · AA en texto (`--ink-2`) · estados diseñados (loading/empty/sourcedown/nodata) · hex fuera de tabla 0 · tabular-nums global + explícito · `:focus-visible` global · `package.json`/`lock` sin playwright.
