@@ -38,7 +38,7 @@ export default function SearchTrend({ trends }) {
   const ticks = [...new Set([0, Math.floor((n - 1) / 2), n - 1])]
 
   return (
-    <section className="flex h-full flex-col rounded-card bg-surface p-5 shadow-card sm:p-6">
+    <section className="flex h-full min-w-0 flex-col rounded-card bg-surface p-5 shadow-card sm:p-6">
       <h3 className="font-display text-xl text-ink sm:text-2xl">
         «Alarma para casa»{growth != null ? ` crece ${growth}% en 90 días` : ''} y entra a su pico estacional
       </h3>
@@ -53,7 +53,7 @@ export default function SearchTrend({ trends }) {
         ))}
       </div>
 
-      <div className="scroll-x-fade mt-3 flex flex-1 items-center">
+      <div className="scroll-x-fade mt-3">
         <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ minWidth: 480, display: 'block' }} role="img" aria-label="Interés de búsqueda: categoría, Verisure y Prosegur, índice 0 a 100">
           <line x1={PAD.left} y1={PAD.top + innerH} x2={PAD.left + innerW} y2={PAD.top + innerH} stroke="var(--line)" strokeWidth="1" />
           {series.map((s) => (

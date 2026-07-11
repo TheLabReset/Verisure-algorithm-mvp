@@ -16,8 +16,8 @@ export default function DailyBrief({ brief }) {
   const fecha = (fmtDayFull(brief.day) || '').split(' ').slice(0, 3).join(' ').toUpperCase()
   const words = brief.paragraphs.join(' ').split(/\s+/).filter(Boolean).length
   const secs = Math.max(20, Math.round(words / 3 / 5) * 5)
-  const collapsible = brief.paragraphs.length > 2
-  const shown = expanded || !collapsible ? brief.paragraphs : brief.paragraphs.slice(0, 2)
+  const collapsible = brief.paragraphs.length > 3
+  const shown = expanded || !collapsible ? brief.paragraphs : brief.paragraphs.slice(0, 3)
 
   return (
     <section className="flex h-full flex-col rounded-card p-6 shadow-card sm:p-7" style={{ background: 'var(--ink)' }}>

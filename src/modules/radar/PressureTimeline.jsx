@@ -86,7 +86,7 @@ export default function PressureTimeline({ pressure = [], events = [], degraded 
                 type="button"
                 onClick={() => toggle(b)}
                 aria-pressed={!off}
-                className={`flex min-h-[44px] items-center gap-1.5 rounded-pill border border-line px-3 text-xs font-medium ${off ? 'text-ink-3' : 'text-ink'}`}
+                className={`flex min-h-[44px] items-center gap-1.5 rounded-pill border border-line px-3 text-xs font-medium ${off ? 'text-ink-2' : 'text-ink'}`}
                 style={{ background: off ? 'transparent' : 'var(--wash)' }}
               >
                 <span className="h-2 w-2 rounded-pill" style={{ background: off ? 'var(--ink-3)' : styleOf(b).stroke }} />
