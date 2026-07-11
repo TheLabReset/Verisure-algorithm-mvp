@@ -18,7 +18,14 @@ export default function SearchTrend({ trends }) {
   const innerH = H - PAD.top - PAD.bottom
   const n = cat.length
   const x = (i) => PAD.left + (n === 1 ? 0 : (i / (n - 1)) * innerW)
-  const y = (v) => PAD.top + innerH - (v / 100) * innerH // índice 0–100
+  // Escala al rango de datos (con margen) para que las 3 series usen toda la altura.
+  const vals = [...cat, ...veri, ...pro].map((p) => p.value)
+  const lo = Math.min(...vals)
+  const hi = Math.max(...vals)
+  const m = (hi - lo) * 0.15 || 1
+  const yLo = Math.max(0, lo - m)
+  const yHi = hi + m
+  const y = (v) => PAD.top + innerH - ((v - yLo) / (yHi - yLo)) * innerH
   const lineOf = (serie) => serie.map((p, i) => `${x(i)},${y(p.value)}`).join(' ')
 
   const series = [

@@ -20,7 +20,7 @@ function scoreTitle(s) {
   return 'Momento de cautela'
 }
 
-function IndexBar({ label, value, read }) {
+function IndexBar({ label, value, read, shade = 'var(--ink)' }) {
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2">
@@ -28,7 +28,7 @@ function IndexBar({ label, value, read }) {
         <p className="text-sm font-semibold text-ink" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</p>
       </div>
       <div className="mt-1.5 h-2 overflow-hidden rounded-pill" style={{ background: 'var(--wash)' }}>
-        <div className="h-full rounded-pill" style={{ width: `${value}%`, background: 'var(--ink)' }} />
+        <div className="h-full rounded-pill" style={{ width: `${value}%`, background: shade }} />
       </div>
       <p className="mt-1.5 text-xs text-ink-2">{read}</p>
     </div>
@@ -59,8 +59,8 @@ export default function OpportunityScore({ score, day }) {
       </div>
 
       <div className="mt-6 space-y-4">
-        <IndexBar label="Presión competitiva (IPC)" value={ipc} read={ipcRead(ipc)} />
-        <IndexBar label="Momento de categoría (IMC)" value={imc} read={imcRead(imc)} />
+        <IndexBar label="Presión competitiva (IPC)" value={ipc} read={ipcRead(ipc)} shade="var(--ink-2)" />
+        <IndexBar label="Momento de categoría (IMC)" value={imc} read={imcRead(imc)} shade="var(--ink)" />
       </div>
 
       <p className="mt-auto border-t border-line pt-3 text-xs text-ink-2">

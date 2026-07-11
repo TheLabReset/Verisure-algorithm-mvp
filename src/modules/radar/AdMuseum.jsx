@@ -10,10 +10,10 @@ import { fmtDayShort } from './dateLabels'
 // Ícono de formato derivado del tipo/canal de la pieza (neutro, no color por marca).
 function formatIcon(p) {
   const t = (p.tname || '').toUpperCase()
-  const ch = (p.channels || []).join(' ').toUpperCase()
-  if (t.includes('VÍA') || t.includes('OOH') || ch.includes('OOH')) return RectangleHorizontal
-  if (t.includes('RADIO')) return AudioLines
+  const ch = [...(p.channels || []), ...(p.tipos || [])].join(' ').toUpperCase()
+  if (t.includes('VÍA') || t.includes('OOH') || ch.includes('OOH') || ch.includes('VÍA')) return RectangleHorizontal
   if (/META|YOUTUBE|DIGITAL|TIKTOK|\bFB\b|\bIG\b/.test(ch)) return Smartphone
+  if (t.includes('RADIO') || /\bRADIO\b|RPP|EXITOSA/.test(ch)) return AudioLines
   return Play
 }
 
@@ -70,7 +70,7 @@ export default function AdMuseum({ pieces = [] }) {
         ) : null}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
         {shown.map((p) => (
           <article key={p.key}>
             <Thumb piece={p} />

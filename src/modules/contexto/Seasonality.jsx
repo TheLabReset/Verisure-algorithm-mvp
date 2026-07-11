@@ -36,7 +36,7 @@ export default function Seasonality({ estacionalidad, day }) {
           const isNow = i === monthIdx
           return (
             <div key={m} className="flex-1 text-center">
-              <div className="h-8 rounded-inner" style={{ background: inPeak ? 'var(--caution)' : 'var(--data-grey-floor)', outline: isNow ? '2px solid var(--ink)' : 'none', outlineOffset: '1px' }} />
+              <div className="h-12 rounded-inner" style={{ background: inPeak ? 'var(--caution)' : 'var(--data-grey-floor)', outline: isNow ? '2px solid var(--ink)' : 'none', outlineOffset: '1px' }} />
               <span className={`mt-1 block text-xs ${isNow ? 'font-semibold text-ink' : 'text-ink-2'}`}>{m}</span>
             </div>
           )

@@ -44,8 +44,8 @@ export default function SearchVsInvestmentSlope({ rows = [] }) {
       {/* Slope a la izquierda, lectura por marca a la derecha (mockup): 2 columnas
           en desktop, apiladas en móvil. */}
       <div className="mt-4 grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-center">
-        <div className="scroll-x-fade">
-          <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ minWidth: 460, display: 'block' }} role="img" aria-label="Share of search versus share of investment por competidor">
+        <div>
+          <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block' }} role="img" aria-label="Share of search versus share of investment por competidor">
             <text x={LX} y="24" fontSize="12" fill="var(--ink-2)" textAnchor="middle" style={{ letterSpacing: '.04em' }}>SHARE OF SEARCH</text>
             <text x={RX} y="24" fontSize="12" fill="var(--ink-2)" textAnchor="middle" style={{ letterSpacing: '.04em' }}>SHARE OF INVESTMENT</text>
 

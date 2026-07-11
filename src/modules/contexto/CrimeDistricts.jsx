@@ -52,7 +52,7 @@ export default function CrimeDistricts({ criminalidad }) {
               <span className="text-xs font-semibold text-ink" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {formatThousands(d.denuncias)}
               </span>
-              <div className="w-full max-w-[46px] rounded-t-pill" style={{ height: barH, background: shade }} />
+              <div className="w-full max-w-[46px] rounded-pill" style={{ height: barH, background: shade }} />
               <span className="text-center text-xs leading-tight text-ink-2">{d.distrito}</span>
             </div>
           )

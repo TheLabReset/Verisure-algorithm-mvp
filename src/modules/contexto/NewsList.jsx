@@ -9,7 +9,7 @@ export default function NewsList({ noticias }) {
 
       <ul className="mt-4 divide-y divide-line">
         {noticias.map((noticia, i) => (
-          <li key={i} className="flex items-baseline justify-between gap-4 py-3">
+          <li key={i} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
             <a
               href={noticia.url || '#'}
               target="_blank"
