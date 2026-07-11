@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { MODULES, DEFAULT_MODULE } from '../data/modules'
 import { useData } from '../data/DataContext'
 import { detectNewPieces, soiComparison } from '../data/derive'
@@ -6,16 +6,32 @@ import { buildTodayHeadline } from '../modules/radar/radarUtils'
 import { fmtDayFull } from '../modules/radar/dateLabels'
 import Banner from './ui/Banner'
 import TodayStrip from './TodayStrip'
-import RadarModule from '../modules/radar/RadarModule'
-import DemandaModule from '../modules/demanda/DemandaModule'
-import ContextoModule from '../modules/contexto/ContextoModule'
-import MaiaModule from '../modules/maia/MaiaModule'
+import Skeleton from './ui/Skeleton'
+
+// Carga diferida por módulo: cada vista es su propio chunk (DESIGN §11 / performance).
+// Solo se descarga el JS del módulo activo; el resto llega al cambiar de pestaña.
+const RadarModule = lazy(() => import('../modules/radar/RadarModule'))
+const DemandaModule = lazy(() => import('../modules/demanda/DemandaModule'))
+const ContextoModule = lazy(() => import('../modules/contexto/ContextoModule'))
+const MaiaModule = lazy(() => import('../modules/maia/MaiaModule'))
 
 const VIEWS = {
   radar: RadarModule,
   demanda: DemandaModule,
   contexto: ContextoModule,
   maia: MaiaModule,
+}
+
+// Fallback mientras el chunk del módulo carga: skeletons con la forma del contenido
+// (DESIGN §7, nunca spinner de página).
+function ModuleFallback() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-56 w-full" />
+      <Skeleton className="h-64 w-full" />
+      <Skeleton className="h-40 w-full" />
+    </div>
+  )
 }
 
 function demoParam() {
@@ -101,7 +117,9 @@ export default function AppShell() {
           <div className="mt-5" />
         )}
 
-        <ActiveView />
+        <Suspense fallback={<ModuleFallback />}>
+          <ActiveView />
+        </Suspense>
       </main>
 
       {/* ── Footer ─────────────────────────────────────────── */}
