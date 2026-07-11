@@ -141,3 +141,16 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 **Auto-verificación.** 43 tests verdes · build ok · `validate:fixtures` ok (321) · pipeline **determinista** (re-corrida → sin diff) · hex fuera de tabla 0 (el único uso de rojo con alfa es `color-mix(var(--verisure)…)`, sin hex crudo) · sin `Date.now`/`Math.random`/`toLocaleString` en código (solo comentario) · `new Date()` solo en el pipeline (I/O, no derivador) · texto en `--ink-2` (único `--ink-3` = placeholder del input, hint no-contenido) · sin `console.log` · sin overflow a 1440/390 en RADAR/DEMANDA/CONTEXTO/MAIA · cero errores de consola / requests fallidos · carita respeta `prefers-reduced-motion` · dinero determinista (S/ 118.400 con punto en el chat) · `package.json`/`lock` intactos (playwright `--no-save`).
 
 **Notas de diseño.** El arco del Score usa máscara `conic ∩ radial` (colores de máscara `black`/`transparent`, alfa estructural). Texto claro sobre la card oscura vía `color-mix(var(--base)…)` (~8:1 sobre `--ink`, AA holgado). Placeholder del chat en `--ink-3`: convención de hint, no texto de contenido; el input lleva `aria-label` y `:focus-visible` global.
+
+**Gate 1 (subagente fresco): APROBADO CON CORRECCIONES** — 0 BLOQUEANTE, 1 MAYOR, 0 MENOR de peso, 2 SUGERENCIA. Cross-check independiente: rederivó los dorados desde el fixture crudo (SOI 46,1/33,3/20,6 % · S/ 256.800 · DIY 58 · Score 71/IPC 64/IMC 78) — coinciden con `algorithm.json`, el Daily Brief y el chat; confirmó en el bundle real (`dist/assets/*.js`) que NO viaja token/`process.env`/`integra-metrics.com`/`Bearer` (governance); arco del Score pintado con `--grad-brand` (no sólido); una sola card oscura; `prefers-reduced-motion: reduce` apaga toda animación de la carita; AA holgado (BODY 16,7:1, "Enviar" 7,1:1); CSV §A.7 completo y escapado; determinismo del pipeline (doble corrida sin diff); RADAR/DEMANDA/CONTEXTO cargan del snapshot `/data` sin errores.
+
+**Hallazgos Gate 1.** #1 MAYOR chips de preguntas del chat a 36px < 44px (DESIGN §7 exige touch targets ≥44px). #2 SUGERENCIA concordancia de plural ("1 pts" → "1 pt") en brief/chat. #3 SUGERENCIA `?demo=empty` muestra "día tranquilo", no el EmptyState real de datos ausentes.
+
+**Resoluciones Gate 1.**
+- **#1 (MAYOR).** Chips con `min-h-[44px]` (medido: los 5 a 44px en 1440 y 390); sin overflow.
+- **#2 (SUGERENCIA, adoptada).** Helper `ptsLabel(n)` en `format.js` (1 → "pt", resto → "pts"); aplicado en `deltaFrase`/DIY del brief y en el motor del chat. Brief golden: "…Verisure queda en 33%, **1 pt menos**…". Test que fija el singular y prohíbe "1 pts".
+- **#3 (SUGERENCIA, adoptada).** `?demo=nodata` fuerza el EmptyState real de MAIA (verificado en runtime: "Sin datos del día para sintetizar…").
+
+**Auto-verificación Gate 1.** 43 tests verdes (nuevo: singular del delta) · build ok · chips medidos a 44px · `?demo=nodata` → EmptyState · sin overflow ni errores de consola a 390 · `package.json`/`lock` intactos.
+
+**Criterio de gate.** Gate 1 sin bloqueante; el mayor resuelto y las 2 sugerencias adoptadas (protocolo §1.4, precedente F1–F3). Se procede al merge.

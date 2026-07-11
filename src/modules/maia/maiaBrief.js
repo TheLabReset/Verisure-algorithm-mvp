@@ -3,12 +3,13 @@
 // (SOI, piezas nuevas, amenaza DIY, Opportunity Score). Cero prosa hardcodeada:
 // cada frase afirma sobre un dato. Testeable con node:test.
 import { brandDisplay } from '../radar/radarUtils.js'
-import { formatPercent } from '../../utils/format.js'
+import { formatPercent, ptsLabel } from '../../utils/format.js'
 
 // Delta de share de Verisure vs. hace una semana → frase honesta.
 function deltaFrase(pts) {
   if (pts == null || pts === 0) return ', estable en la semana'
-  return pts > 0 ? `, ${pts} pts más que hace una semana` : `, ${Math.abs(pts)} pts menos que hace una semana`
+  const u = ptsLabel(pts)
+  return pts > 0 ? `, ${pts} ${u} más que hace una semana` : `, ${Math.abs(pts)} ${u} menos que hace una semana`
 }
 
 // Lectura estratégica derivada de Score/IPC/IMC (EPPM: cuándo pisar eficacia/alivio).
@@ -53,7 +54,7 @@ export function composeBrief({ day, soi, newPieces = [], diy, score, contexto } 
   // 3. Amenaza DIY (sustitución por cámaras solas).
   if (diy && diy.index != null) {
     const d = diy.deltaSemana
-    const mov = d > 0 ? ` y sube ${d} pts en la semana` : d < 0 ? ` y cede ${Math.abs(d)} pts en la semana` : ''
+    const mov = d > 0 ? ` y sube ${d} ${ptsLabel(d)} en la semana` : d < 0 ? ` y cede ${Math.abs(d)} ${ptsLabel(d)} en la semana` : ''
     paragraphs.push(
       `La amenaza DIY marca ${diy.index}/100${mov}: las cámaras solas siguen ganando terreno como sustituto de bajo costo.`,
     )

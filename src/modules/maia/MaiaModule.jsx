@@ -42,7 +42,8 @@ export default function MaiaModule() {
     )
   }
 
-  if (!facts) {
+  // Sin datos para sintetizar (o previsualización del estado con ?demo=nodata).
+  if (demo === 'nodata' || !facts) {
     return (
       <EmptyState
         title="MAIA — Media Analyst IA de Reset"

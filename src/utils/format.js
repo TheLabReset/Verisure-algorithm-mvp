@@ -28,6 +28,8 @@ export const formatSoles = (n) => {
   return `S/ ${groupThousands(n)}`;
 };
 export const formatPercent = (n, decimals = 1) => `${formatES(n, decimals)}%`;
+// Concordancia de plural para "punto/puntos porcentuales": 1 pt · 4 pts.
+export const ptsLabel = (n) => (Math.abs(Number(n)) === 1 ? 'pt' : 'pts');
 export const formatCompact = (n, decimals = 1) => {
   if (n >= 1_000_000) return `${formatES(n / 1_000_000, decimals)}M`;
   if (n >= 1_000) return `${formatES(n / 1_000, decimals)}K`;

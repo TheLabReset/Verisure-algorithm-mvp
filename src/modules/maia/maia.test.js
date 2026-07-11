@@ -37,6 +37,9 @@ test('composeBrief: nota derivada con SOI, DIY y Score del día', () => {
   assert.match(all, new RegExp(`${diy.index}/100`))
   // El Score cierra el brief.
   assert.match(all, new RegExp(`Opportunity Score cierra en ${score.score}`))
+  // Concordancia de plural: el delta de Verisure es −1 pt (singular), nunca "1 pts".
+  assert.match(all, /\b1 pt (más|menos)/)
+  assert.doesNotMatch(all, /\b1 pts\b/)
 })
 
 test('composeBrief: headline y alerta se derivan de las piezas nuevas', () => {

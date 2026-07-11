@@ -93,7 +93,7 @@ export default function MaiaChat({ facts = {} }) {
             key={q}
             type="button"
             onClick={() => ask(q)}
-            className="rounded-pill border border-line px-3 py-2 text-xs text-ink-2 transition-colors hover:bg-wash hover:text-ink"
+            className="min-h-[44px] rounded-pill border border-line px-3.5 text-xs text-ink-2 transition-colors hover:bg-wash hover:text-ink"
           >
             {q}
           </button>

@@ -4,7 +4,7 @@
 // para responder, lo dice. La conversación abierta con LLM (Netlify Function que
 // proxea la API de Anthropic; la key jamás vive en el bundle) se activa aparte.
 import { brandDisplay } from '../radar/radarUtils.js'
-import { formatSoles, formatPercent } from '../../utils/format.js'
+import { formatSoles, formatPercent, ptsLabel } from '../../utils/format.js'
 
 // Preguntas sugeridas (chips) — cada una tiene una respuesta derivada del día.
 export const SUGGESTED = [
@@ -64,14 +64,14 @@ function answerIntent(intent, facts) {
     case 'diy': {
       const d = facts.diy
       if (!d || d.index == null) return 'No tengo el índice DIY del día.'
-      const mov = d.deltaSemana > 0 ? `, +${d.deltaSemana} pts en la semana` : d.deltaSemana < 0 ? `, ${d.deltaSemana} pts en la semana` : ''
+      const mov = d.deltaSemana > 0 ? `, +${d.deltaSemana} ${ptsLabel(d.deltaSemana)} en la semana` : d.deltaSemana < 0 ? `, ${d.deltaSemana} ${ptsLabel(d.deltaSemana)} en la semana` : ''
       return `La amenaza DIY marca ${d.index}/100${mov}: cámaras solas ganando terreno como sustituto de bajo costo.`
     }
     case 'soi_verisure': {
       if (!veri) return 'No veo a Verisure en el corte de hoy.'
       const leader = brands[0]
       const pos = leader && !leader.isVerisure ? ` ${brandDisplay(leader.maname)} lidera con ${formatPercent(leader.share, 0)}.` : ' Verisure lidera hoy.'
-      const delta = veri.deltaPts > 0 ? ` (+${veri.deltaPts} pts vs. hace una semana)` : veri.deltaPts < 0 ? ` (${veri.deltaPts} pts vs. hace una semana)` : ''
+      const delta = veri.deltaPts > 0 ? ` (+${veri.deltaPts} ${ptsLabel(veri.deltaPts)} vs. hace una semana)` : veri.deltaPts < 0 ? ` (${veri.deltaPts} ${ptsLabel(veri.deltaPts)} vs. hace una semana)` : ''
       return `Verisure tiene ${formatPercent(veri.share, 0)} del share of investment de hoy${delta}.${pos}`
     }
     default:
