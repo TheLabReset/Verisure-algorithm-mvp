@@ -1,0 +1,57 @@
+# Pipeline diario de The Algorithm (blueprint §B.6).
+# Corre los derivadores y publica el snapshot en public/data/ (JSON + export CSV).
+# Cron a las 11:00 UTC = 06:00 America/Lima; workflow_dispatch de respaldo porque el
+# cron de Actions puede retrasarse o no disparar en repos sin actividad (plan free).
+name: Pipeline diario
+
+on:
+  schedule:
+    - cron: '0 11 * * *'
+  workflow_dispatch: {}
+
+# Necesario para commitear el snapshot de vuelta al repo.
+permissions:
+  contents: write
+
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Guardas: los fixtures y los derivadores deben estar sanos antes de publicar.
+      - name: Validar fixtures
+        run: node scripts/validate-fixtures.mjs
+
+      - name: Tests
+        run: node --test
+
+      # Fuente: live si hay token en Secrets; si no, dry-run determinista sobre fixtures.
+      # El token vive SOLO aquí (Secret de Actions), nunca en el bundle del navegador.
+      - name: Correr pipeline y publicar snapshot
+        env:
+          DATA_SOURCE: live
+          INTEGRAMETRICS_TOKEN: ${{ secrets.INTEGRAMETRICS_TOKEN }}
+        run: |
+          export PIPELINE_STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          node scripts/run-pipeline.mjs
+
+      - name: Commit del snapshot si cambió
+        run: |
+          git config user.name "algorithm-pipeline[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data
+          if git diff --cached --quiet; then
+            echo "Sin cambios en el snapshot: nada que commitear."
+          else
+            git commit -m "chore(pipeline): snapshot público del día [skip ci]"
+            git push
+          fi

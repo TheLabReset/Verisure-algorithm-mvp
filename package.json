@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "node --test",
     "gen:fixtures": "node src/data/fixtures/generate.mjs",
-    "validate:fixtures": "node scripts/validate-fixtures.mjs"
+    "validate:fixtures": "node scripts/validate-fixtures.mjs",
+    "pipeline": "node scripts/run-pipeline.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.294.0",
