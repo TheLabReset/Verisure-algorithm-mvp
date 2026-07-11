@@ -75,8 +75,11 @@ export default function AppShell() {
           onGoToRadar={() => setActive('radar')}
         />
 
-        {/* Frescura por fuente del módulo (DESIGN §2) */}
-        <p className="mt-5 mb-3 text-xs text-ink-3">{activeModule.freshness}</p>
+        {/* Frescura por fuente del módulo (DESIGN §2). Si la fuente está caída no
+            afirmamos frescura: el banner ya explica que es un snapshot anterior. */}
+        {!sourceDown ? (
+          <p className="mt-5 mb-3 text-xs text-ink-3">{activeModule.freshness}</p>
+        ) : null}
 
         <ActiveView />
       </main>

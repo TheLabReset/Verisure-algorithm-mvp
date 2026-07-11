@@ -1,6 +1,6 @@
 # DESIGN.md — Sistema de diseño de The Algorithm by Reset (instancia Verisure Perú)
 
-> **Autoridad de este documento.** Este archivo gobierna TODA decisión visual del producto. Si el código contradice este documento, el código está mal. La referencia visual canónica es el mockup aprobado `design/reference/The_Algorithm_Verisure.html` (iteración 2 de Claude Design): ante ambigüedad, replicar el mockup.
+> **Autoridad de este documento.** Este archivo gobierna TODA decisión visual del producto. Si el código contradice este documento, el código está mal. La referencia visual canónica es el mockup aprobado `design/reference/The Algorithm Verisure.html` (iteración 2 de Claude Design): ante ambigüedad, replicar el mockup.
 > Principio rector: **tranquilidad vigilante** — central de monitoreo profesional en calma. El rojo aparece solo cuando algo pasó. Si todo grita, nada alerta.
 
 ---
