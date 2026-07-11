@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MODULES, DEFAULT_MODULE, TODAY_PLACEHOLDER } from '../data/modules'
+import { checkSource } from '../data/client'
+import Banner from './ui/Banner'
 import TodayStrip from './TodayStrip'
 import RadarModule from '../modules/radar/RadarModule'
 import DemandaModule from '../modules/demanda/DemandaModule'
@@ -15,8 +17,21 @@ const VIEWS = {
 
 export default function AppShell() {
   const [active, setActive] = useState(DEFAULT_MODULE)
+  const [sourceDown, setSourceDown] = useState(null)
   const ActiveView = VIEWS[active]
   const activeModule = MODULES.find((m) => m.id === active)
+
+  // Chequeo honesto de la fuente de datos (DESIGN §7). En modo live sin token
+  // (governance: nunca client-side) esto falla y mostramos el banner, sin crashear.
+  useEffect(() => {
+    let alive = true
+    checkSource().then((r) => {
+      if (alive && !r.ok) setSourceDown(r.message)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   return (
     <div className="min-h-full bg-base text-ink">
@@ -64,6 +79,7 @@ export default function AppShell() {
 
       {/* ── Contenido ──────────────────────────────────────── */}
       <main className="mx-auto max-w-shell px-4 py-5 sm:px-8">
+        {sourceDown ? <Banner message={sourceDown} /> : null}
         <TodayStrip
           moduleId={active}
           today={TODAY_PLACEHOLDER}

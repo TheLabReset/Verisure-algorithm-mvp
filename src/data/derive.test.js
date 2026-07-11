@@ -1,0 +1,107 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+import {
+  computeSOI,
+  detectNewPieces,
+  pressureSeries,
+  diyIndex,
+  computeIPC,
+  computeIMC,
+  opportunityScore,
+} from './derive.js'
+
+const FX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures')
+const read = (f) => JSON.parse(readFileSync(join(FX, f), 'utf8'))
+const registros = read('registros.json')
+const digital = read('registros-digital.json')
+const trends = read('trends.json')
+const contexto = read('contexto.json')
+const DAY = '2026-07-10'
+
+// ── Test de oro: SOI del jue 10 jul reproduce el mockup (46/33/21) ────
+test('SOI gold: último día = mockup (46,1/33,3/20,6 · S/256.800)', () => {
+  const soi = computeSOI(registros, DAY)
+  assert.equal(soi.total, 256800)
+  const byName = Object.fromEntries(soi.brands.map((b) => [b.maname, b.share]))
+  assert.equal(byName['PROSEGUR ALARMS'], 46.1)
+  assert.equal(byName['VERISURE'], 33.3)
+  assert.equal(byName['SECURITAS'], 20.6)
+  // Verisure marcado, competidores no
+  assert.equal(soi.brands.find((b) => b.maname === 'VERISURE').isVerisure, true)
+  assert.equal(soi.brands.find((b) => b.maname === 'PROSEGUR ALARMS').isVerisure, false)
+  // ordenado desc por inversión
+  assert.equal(soi.brands[0].maname, 'PROSEGUR ALARMS')
+})
+
+// ── Detección de pieza NUEVA (alerta same-day) ────────────────────────
+test('detectNewPieces: hoy hay 1 NUEVA de Prosegur "Nada es seguro, salvo tu hogar"', () => {
+  const nuevas = detectNewPieces(registros, DAY)
+  assert.equal(nuevas.length, 1)
+  assert.equal(nuevas[0].maname, 'PROSEGUR ALARMS')
+  assert.equal(nuevas[0].vname, 'Nada es seguro, salvo tu hogar')
+  assert.equal(nuevas[0].mname, 'AMÉRICA TV')
+  assert.equal(nuevas[0].franja, 'PRIME')
+  assert.ok(nuevas[0].rfile) // link al video para la alerta
+})
+
+// ── Serie de presión 30d ──────────────────────────────────────────────
+test('pressureSeries: 30 puntos, fechas ascendentes, último = 256.800', () => {
+  const s = pressureSeries(registros, DAY, 30)
+  assert.equal(s.length, 30)
+  assert.equal(s[29].fecha, DAY)
+  assert.equal(s[29].total, 256800)
+  for (let i = 1; i < s.length; i++) assert.ok(s[i].fecha > s[i - 1].fecha)
+})
+
+// ── Índice DIY = 58 (mockup) ──────────────────────────────────────────
+test('diyIndex: = 58 (coherente con el mockup)', () => {
+  const d = diyIndex(trends, digital)
+  assert.equal(d.index, 58)
+  assert.deepEqual(d.components.marcas_monitoreadas, ['Ezviz', 'Imou', 'TP-Link Tapo'])
+})
+
+// ── IPC / IMC / Opportunity Score cerca del mockup (64/79/72) ─────────
+test('IPC/IMC/Score reproducen el mockup dentro de tolerancia', () => {
+  const ipc = computeIPC(registros, DAY)
+  const imc = computeIMC(trends, contexto)
+  const { score } = opportunityScore(registros, trends, contexto, DAY)
+  assert.equal(ipc, 64) // mockup 64
+  assert.ok(imc >= 76 && imc <= 80, `IMC ${imc} fuera de [76,80]`) // mockup 79
+  assert.ok(score >= 70 && score <= 74, `Score ${score} fuera de [70,74]`) // mockup 72
+})
+
+// ── Casos borde ───────────────────────────────────────────────────────
+test('borde: día sin registros → total 0, sin marcas, sin crash', () => {
+  const soi = computeSOI(registros, '2020-01-01')
+  assert.equal(soi.total, 0)
+  assert.deepEqual(soi.brands, [])
+  assert.deepEqual(detectNewPieces(registros, '2020-01-01'), [])
+})
+
+test('borde: empate exacto → shares 50/50', () => {
+  const tie = [
+    { maname: 'A', fecha: '2026-07-10 10:00:00', rinversion: 1000, nuevas_versiones: '' },
+    { maname: 'B', fecha: '2026-07-10 11:00:00', rinversion: 1000, nuevas_versiones: '' },
+  ]
+  const soi = computeSOI(tie, DAY)
+  assert.equal(soi.total, 2000)
+  assert.equal(soi.brands[0].share, 50)
+  assert.equal(soi.brands[1].share, 50)
+})
+
+test('borde: mes incompleto (pocos días) → serie del largo pedido con ceros', () => {
+  const few = registros.filter((r) => r.fecha.startsWith('2026-07-10'))
+  const s = pressureSeries(few, DAY, 5)
+  assert.equal(s.length, 5)
+  assert.equal(s[4].total, 256800)
+  assert.equal(s[0].total, 0) // días previos sin data → 0, no crash
+})
+
+test('borde: fuente caída (data vacía) → derivadores devuelven ceros, no lanzan', () => {
+  assert.equal(computeSOI([], DAY).total, 0)
+  assert.equal(computeIPC([], DAY), 0)
+  assert.equal(diyIndex({ diy: {} }, []).index, 0)
+})
