@@ -49,32 +49,21 @@ export default function AppShell() {
         <p className="text-sm text-ink-3">Datos del {TODAY_PLACEHOLDER.date}</p>
       </header>
 
-      {/* ── Navegación de módulos ──────────────────────────── */}
-      <nav
-        aria-label="Módulos"
-        className="mx-auto mt-4 max-w-shell border-b border-line px-4 sm:px-8"
-      >
-        <ul className="scroll-x-fade flex gap-1">
-          {MODULES.map((m) => {
-            const isActive = m.id === active
-            return (
-              <li key={m.id} className="shrink-0">
-                <button
-                  type="button"
-                  aria-current={isActive ? 'page' : undefined}
-                  onClick={() => setActive(m.id)}
-                  className={`-mb-px min-h-[44px] px-4 py-2 text-base transition-colors ${
-                    isActive
-                      ? 'border-b-2 border-verisure font-semibold text-ink'
-                      : 'border-b-2 border-transparent text-ink-2 hover:text-ink'
-                  }`}
-                >
-                  {m.label}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
+      {/* ── Navegación de módulos: tabs píldora, bajo el wordmark ──── */}
+      <nav aria-label="Módulos" className="mx-auto mt-5 max-w-shell px-4 sm:px-8">
+        <div className="nav-pills">
+          {MODULES.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              className="nav-pill"
+              aria-current={m.id === active ? 'page' : undefined}
+              onClick={() => setActive(m.id)}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
       </nav>
 
       {/* ── Contenido ──────────────────────────────────────── */}

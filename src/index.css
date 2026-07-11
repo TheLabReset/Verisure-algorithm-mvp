@@ -70,3 +70,42 @@
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* ── Navegación de módulos: tabs píldora (pixel-perfect al mockup) ──────
+   Contenedor píldora blanco; tab activo píldora --ink con texto blanco;
+   inactivo texto --ink-2 con hover suave. Altura mínima 44px (DESIGN §7,
+   touch target) — única micro-desviación del mockup (~36px), legislada. */
+.nav-pills {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 6px;
+  box-shadow: 0 1px 2px rgba(22, 24, 31, 0.06);
+  overflow-x: auto;
+  max-width: 100%;
+}
+.nav-pill {
+  flex: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink-2);
+  background: transparent;
+  border-radius: 999px;
+  padding: 0 20px;
+  min-height: 44px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.nav-pill:hover {
+  background: #F1EDE6;
+  color: var(--ink);
+}
+.nav-pill[aria-current='page'] {
+  background: var(--ink);
+  color: #FFFFFF;
+  font-weight: 600;
+}
