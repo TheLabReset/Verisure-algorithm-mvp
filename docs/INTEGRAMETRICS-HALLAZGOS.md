@@ -25,10 +25,11 @@ Verisure y Prosegur **no comparten rama** en la taxonomía Integrametrics:
 | PROSEGUR | 4 | S/ 29.076 | 3 | solo vía pública (OOH) |
 | HUNTER | 5 | S/ 2.080 | 1 | TV abierta |
 
-**Implicaciones:**
-- No hay "carrera de SOI": en ATL **Verisure es prácticamente monopolio**. Prosegur (OOH) y Hunter son marginales. El fixture v1 (Prosegur liderando 46%) es ficticio y debe reencuadrarse.
-- **SECURITAS no está** en estos subsectores (es aseguradora, "seguros" ≠ "seguridad") → se descarta.
-- La inteligencia competitiva real (Prosegur digital, marcas DIY: Xiaomi/Hikvision/Ezviz/Imou/TP-Link) **vive en digital**, no en ATL → ver §5.
+**Set competitivo del producto = VERISURE + PROSEGUR** (decisión de negocio):
+- **HUNTER** = seguridad corporativa/B2B → excluido (no compite en residencial/consumo).
+- **SECURITAS** = aseguradora ("seguros" ≠ "seguridad"), ni aparece en los subsectores → excluido.
+- No hay "carrera de SOI": en ATL **Verisure es prácticamente monopolio**; Prosegur casi solo OOH. El fixture v1 (Prosegur liderando 46%) es ficticio y debe reencuadrarse.
+- La competencia de Prosegur es sobre todo **digital** (§6), no ATL.
 
 ## 3. Tipos de inversión — cuál usar
 
@@ -59,18 +60,17 @@ Verificado contra la API (difiere de la doc en algunos puntos):
 
 ## 6. Capa digital (`/registros-digital`) — la que sí mueve la competencia
 
-Sin filtros server-side (~64.667 registros/día, todas las marcas → filtrar en cliente). 1 día real, seguridad/DIY:
+Sin filtros server-side (~64.667 registros/día, todas las marcas → filtrar en cliente **por subsector**, NO por nombre de marca). 1 día real, filtrado a subsectores de seguridad:
 
 | Marca | Inversión local/día | Impresiones | Plataforma |
 |---|---|---|---|
 | VERISURE | S/ 114.941 | 34,2M | Facebook |
-| **XIAOMI** (DIY) | S/ 18.052 | 3,2M | Facebook + Falabella |
 | PROSEGUR | S/ 611 | 182k | Facebook |
 
-- **128/128 piezas traen `advertisement` = URL del asset creativo (S3)** → el Ad Museum puede mostrar piezas DIGITALES reales de la competencia.
-- El **DIY (Xiaomi) es real y medible aquí** (no requiere scraping de marketplace). Prosegur compite en digital, no en ATL.
-- Plataformas: Instagram, Facebook, YouTube, TikTok, Google Search + decenas de webs peruanas.
-- Complemento opcional futuro: **Meta Ad Library** (público) para piezas activas de competencia.
+- Set digital de seguridad = **solo Verisure + Prosegur** (ambos Facebook). Verisure domina también en digital.
+- **Piezas con `advertisement` = URL del asset creativo (S3)** → el Ad Museum puede mostrar piezas DIGITALES reales.
+- ⚠️ **Corrección:** un grep por nombre había colado a **XIAOMI como "DIY"**, pero validado por subsector es **CELULARES/TABLETS** (IT y Comunicaciones), no seguridad — **excluido**. **HUNTER** (seguridad corporativa B2B) también **excluido** por decisión de negocio.
+- **El "DIY threat" (cámaras Ezviz/Imou/TP-Link/Hikvision) NO está sustentado en Integrametrics** (no pautan en la categoría de seguridad, ni ATL ni digital) → si se quiere, requiere marketplace/Meta Ad Library como fuente externa.
 
 ## 7. Campos ricos — qué SÍ y qué NO está poblado (validado sobre Verisure)
 
@@ -93,9 +93,9 @@ OOH: **4 puntos reales, todos PROSEGUR** (lat/long Lima: Miraflores/La Victoria/
 | RADAR · timeline de presión 30d | `rinversion` diario | ✅ sí |
 | RADAR · Ad Museum (piezas + video + tono) | `id_versiones_unica`+`rfile`+`vname` | ✅ sí · tono EPPM = heurística (aprox., no de la API) |
 | RADAR · mapa OOH | `latitud`/`longitud` | ✅ sí — pero solo Prosegur tiene OOH |
-| **DIGITAL · SOI + Ad Museum digital + DIY** | `/registros-digital` + `advertisement` | ✅ **sí — la data más rica, hoy** |
+| **DIGITAL · SOI + Ad Museum digital** (Verisure+Prosegur) | `/registros-digital` + `advertisement` | ✅ **sí — data rica, hoy** |
 | DEMANDA · share of search / tendencia | Google Trends (EXTERNO) | ⚠️ requiere fuente externa; puede moverse poco |
-| DEMANDA · amenaza DIY | digital (Xiaomi) ✅ + precio marketplace (EXTERNO) | 🟡 parcial: el spend DIY es real; precio/búsqueda son externos |
+| DEMANDA · amenaza DIY (cámaras) | NO está en Integrametrics | ⚠️ requiere marketplace/Meta; hoy no sustentado |
 | CONTEXTO · macro | API BCRP (pública) | 🟡 factible (conector pendiente) |
 | CONTEXTO · criminalidad SIDPOL | policía (EXTERNO) | ⚠️ requiere scraper |
 | CONTEXTO · estacionalidad | derivable del histórico Integrametrics | ✅ sí (tenemos 6.5 meses) |
