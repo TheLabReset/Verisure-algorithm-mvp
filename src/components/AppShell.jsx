@@ -34,7 +34,7 @@ function demoParam() {
 
 export default function AppShell() {
   const [active, setActive] = useState(DEFAULT_MODULE)
-  const { loading, sourceDown, sourceMessage, contract, range, setRange, bounds, day } = useData()
+  const { loading, sourceDown, sourceMessage, contract, range, setRange, bounds } = useData()
   const ActiveView = VIEWS[active]
   const activeModule = MODULES.find((m) => m.id === active)
   const demo = demoParam()
