@@ -36,16 +36,33 @@ const readFx = (f) => JSON.parse(readFileSync(join(FX, f), 'utf8'))
 const token = process.env.INTEGRAMETRICS_TOKEN || null
 const wantLive = process.env.DATA_SOURCE === 'live' && Boolean(token)
 
+// Universo competitivo = subsectores de seguridad del árbol Integrametrics.
+// Verisure vive en "SEGURIDAD Y ALARMAS"; Prosegur/Hunter en "SEGURIDAD PRIVADA".
+// Filtrar por aquí acota el firehose (40–70k registros/día de TODAS las marcas) al
+// universo relevante y respeta el límite de 90.000/consulta. `filters` usa NOMBRES
+// (ssid no es filtrable). Configurable por env para sumar marcas/subsectores.
+const SECURITY_SUBSECTORS = (process.env.PIPELINE_SUBSECTORS || 'SEGURIDAD Y ALARMAS,SEGURIDAD PRIVADA')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+
 async function loadRegistros() {
   if (!wantLive) return { registros: readFx('registros.json'), source: 'fixtures' }
-  // Live: ventana de 30 días hasta hoy (o PIPELINE_DAY). Trends/contexto aún de fixtures.
+  // Live: ventana [PIPELINE_START, PIPELINE_DAY]. Por defecto 30 días hasta hoy; para
+  // backfill histórico se pasa PIPELINE_START (ej. 2026-01-01). fetchRegistros pagina
+  // por día internamente para no topar el límite. Trends/contexto aún de fixtures.
   const end = process.env.PIPELINE_DAY || new Date().toISOString().slice(0, 10)
-  const start = new Date(`${end}T00:00:00Z`)
-  start.setUTCDate(start.getUTCDate() - 30)
+  let start = process.env.PIPELINE_START
+  if (!start) {
+    const d = new Date(`${end}T00:00:00Z`)
+    d.setUTCDate(d.getUTCDate() - 30)
+    start = d.toISOString().slice(0, 10)
+  }
   const registros = await fetchRegistros({
     token,
-    startDate: `${start.toISOString().slice(0, 10)} 00:00:00`,
+    startDate: `${start} 00:00:00`,
     endDate: `${end} 23:59:59`,
+    filters: { ssname: SECURITY_SUBSECTORS },
   })
   return { registros, source: 'live' }
 }

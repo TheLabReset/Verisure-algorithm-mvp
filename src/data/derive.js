@@ -282,8 +282,10 @@ export function adMuseumPieces(registros) {
 
 // ── Puntos OOH (vía pública con lat/long) para el mapa ────────────────
 export function oohPoints(registros) {
+  // OOH = registros con geolocalización (doc API: latitud/longitud solo se pueblan en vía
+  // pública). No filtrar por tname: en real el tipo es "TORRE UNIPOLAR"/"PANTALLA DIGITAL".
   return registros
-    .filter((r) => r.tname === 'VÍA PÚBLICA' && r.latitud != null && r.longitud != null)
+    .filter((r) => r.latitud != null && r.longitud != null)
     .map((r) => ({
       lat: r.latitud,
       lng: r.longitud,

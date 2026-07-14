@@ -32,9 +32,12 @@ export function registrosToCSV(registros, { tipoCambio = null } = {}) {
   const lines = [CSV_COLUMNS.join(',')]
   for (const r of registros) {
     const fecha = (r.fecha || '').slice(0, 10)
+    // La doc lista HOUR/MINUTE en mayúscula, pero la API real los devuelve en minúscula.
+    const hh = r.HOUR ?? r.hour
+    const mm = r.MINUTE ?? r.minute
     const hora =
-      r.HOUR != null && r.MINUTE != null
-        ? `${String(r.HOUR).padStart(2, '0')}:${String(r.MINUTE).padStart(2, '0')}`
+      hh != null && mm != null
+        ? `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`
         : (r.fecha || '').slice(11, 16)
     const zona = r.localidad || r.ciuname || ''
     const inv = Number(r.rinversion) || 0
