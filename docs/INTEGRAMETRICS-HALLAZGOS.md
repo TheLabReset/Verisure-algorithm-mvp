@@ -59,12 +59,54 @@ Verificado contra la API (difiere de la doc en algunos puntos):
 
 ## 6. Capa digital (`/registros-digital`) — la que sí mueve la competencia
 
-- Volumen enorme: **~104.829 registros/día** (todas las marcas). Campos: `impresiones`, `inversion_dolares`, `inversion_moneda_local`, `medio_digital` (FACEBOOK, etc.), `advertisement` (**URL del asset creativo**), marca/sector/categoría.
-- Aquí es donde Prosegur y las marcas DIY realmente compiten. Complementar con **Meta Ad Library** (público) para nutrir el Ad Museum con piezas digitales de la competencia → alinea con la tesis outside-in.
+Sin filtros server-side (~64.667 registros/día, todas las marcas → filtrar en cliente). 1 día real, seguridad/DIY:
 
-## 7. Qué queda por decidir/hacer
+| Marca | Inversión local/día | Impresiones | Plataforma |
+|---|---|---|---|
+| VERISURE | S/ 114.941 | 34,2M | Facebook |
+| **XIAOMI** (DIY) | S/ 18.052 | 3,2M | Facebook + Falabella |
+| PROSEGUR | S/ 611 | 182k | Facebook |
 
-1. **Reencuadrar el relato:** de "duelo de SOI con Prosegur" a "huella propia de Verisure + alerta de estreno + capa digital/competitiva". Decisión de producto.
-2. **Backfill real** (2026-01-01→hoy) y publicar snapshot real (queda tras Basic Auth, F5).
-3. **Capa digital + Meta Ad Library** para el Ad Museum competitivo (Prosegur/DIY).
-4. Verificar nombres exactos de marcas/subsectores al primer uso live (hecho: Verisure 105 / Prosegur 1883; subsectores 885/719).
+- **128/128 piezas traen `advertisement` = URL del asset creativo (S3)** → el Ad Museum puede mostrar piezas DIGITALES reales de la competencia.
+- El **DIY (Xiaomi) es real y medible aquí** (no requiere scraping de marketplace). Prosegur compite en digital, no en ATL.
+- Plataformas: Instagram, Facebook, YouTube, TikTok, Google Search + decenas de webs peruanas.
+- Complemento opcional futuro: **Meta Ad Library** (público) para piezas activas de competencia.
+
+## 7. Campos ricos — qué SÍ y qué NO está poblado (validado sobre Verisure)
+
+| Campo | Poblado | Uso |
+|---|---|---|
+| `progname` / `genname` | 1550/1790 | ✅ **dónde pauta** (Verisure concentra en NOTICIEROS) |
+| `mabierta_cable` | 1485/1790 | ✅ split TV abierta vs cable |
+| `posicion_tanda` | 1543/1790 | ✅ posición en tanda (placement) |
+| `duracion_tv` | 1790/1790 | ✅ duraciones normalizadas |
+| `rating` / `audiencia` / `alcance` | **0/1790** | ❌ **vacíos — descartar ángulo de audiencia** |
+
+OOH: **4 puntos reales, todos PROSEGUR** (lat/long Lima: Miraflores/La Victoria/Surco). **Verisure no hace OOH** → el mapa es de competencia.
+
+## 8. Matriz de validación — ¿es posible en producción hoy?
+
+| Elemento del algoritmo | Fuente real | ¿Prod hoy? |
+|---|---|---|
+| RADAR · jugada del día (pieza nueva + video) | `nuevas_versiones` + `rfile` | ✅ sí (evento raro, alta señal) |
+| RADAR · SOI por competidor (ATL) | `rinversion` por subsector seguridad | ✅ sí — pero Verisure ~98.5% (dominancia, no carrera) |
+| RADAR · timeline de presión 30d | `rinversion` diario | ✅ sí |
+| RADAR · Ad Museum (piezas + video + tono) | `id_versiones_unica`+`rfile`+`vname` | ✅ sí · tono EPPM = heurística (aprox., no de la API) |
+| RADAR · mapa OOH | `latitud`/`longitud` | ✅ sí — pero solo Prosegur tiene OOH |
+| **DIGITAL · SOI + Ad Museum digital + DIY** | `/registros-digital` + `advertisement` | ✅ **sí — la data más rica, hoy** |
+| DEMANDA · share of search / tendencia | Google Trends (EXTERNO) | ⚠️ requiere fuente externa; puede moverse poco |
+| DEMANDA · amenaza DIY | digital (Xiaomi) ✅ + precio marketplace (EXTERNO) | 🟡 parcial: el spend DIY es real; precio/búsqueda son externos |
+| CONTEXTO · macro | API BCRP (pública) | 🟡 factible (conector pendiente) |
+| CONTEXTO · criminalidad SIDPOL | policía (EXTERNO) | ⚠️ requiere scraper |
+| CONTEXTO · estacionalidad | derivable del histórico Integrametrics | ✅ sí (tenemos 6.5 meses) |
+| CONTEXTO · noticias | prensa (EXTERNO) | ⚠️ requiere scraper |
+| MAIA · Score/IPC/IMC/Brief/chat/deltas | derivado de lo anterior | ✅ sí (pesos ilustrativos; deltas requieren serie histórica) |
+
+**Lectura:** RADAR + DIGITAL son producción-real HOY con solo Integrametrics. DEMANDA/CONTEXTO dependen de fuentes externas (Trends, SIDPOL, prensa) aún no construidas; BCRP y estacionalidad son factibles pronto.
+
+## 9. Recomendación de reencuadre + backfill
+
+1. **Elevar la capa DIGITAL a ciudadano de primera** (SOI digital Verisure/Xiaomi/Prosegur, Ad Museum con assets digitales, amenaza DIY real). Es lo más rico y ya está.
+2. **SOI = unir subsectores de seguridad** (885+719), no marcas hardcodeadas; mostrar ATL y digital. En ATL, relato de dominancia; en digital, competencia real.
+3. **Contrato de datos con FECHA** (serie histórica, no snapshot) → date-picker en el front + deltas semanales en MAIA. Backfill ene 2026→hoy chunkeado por día (una sola llamada de 6.5 meses excede tamaño/memoria).
+4. Diferir/secundarizar lo externo (Google Trends, SIDPOL, prensa); BCRP vía API pública cuando se priorice.
