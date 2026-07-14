@@ -3,7 +3,18 @@
 // (SOI, piezas nuevas, amenaza DIY, Opportunity Score). Cero prosa hardcodeada:
 // cada frase afirma sobre un dato. Testeable con node:test.
 import { brandDisplay } from '../radar/radarUtils.js'
-import { formatPercent, ptsLabel } from '../../utils/format.js'
+import { formatPercent, formatCompact, ptsLabel } from '../../utils/format.js'
+
+// Frase de tendencia del período (deltas vs. período anterior de igual longitud).
+function tendenciaFrase(d) {
+  if (!d) return null
+  const mov = (p) => (p == null ? 'se mantiene' : p > 0 ? `sube ${p}%` : p < 0 ? `baja ${Math.abs(p)}%` : 'se mantiene')
+  const dig = d.digitalLeader
+  const digTail = dig ? ` En digital, ${brandDisplay(dig.maname)} lidera con ${formatPercent(dig.share, 0)}` +
+    (dig.isVerisure ? '' : ', el terreno donde la competencia sí pelea') + '.' : ''
+  return `En los últimos ${d.days} días la inversión ATL ${mov(d.atlTotalDeltaPct)} y la digital ${mov(d.digitalTotalDeltaPct)} ` +
+    `frente al período anterior${d.digitalTotal ? ` (S/ ${formatCompact(d.digitalTotal, 1)} digital)` : ''}.${digTail}`
+}
 
 // Delta de share de Verisure vs. hace una semana → frase honesta.
 function deltaFrase(pts) {
@@ -20,38 +31,42 @@ function lecturaScore({ score, ipc, imc }) {
   return `${momento} con ${presion}; ${accion}`
 }
 
-export function composeBrief({ day, soi, newPieces = [], diy, score, contexto } = {}) {
+export function composeBrief({ day, soi, newPieces = [], diy, score, contexto, deltas } = {}) {
   const paragraphs = []
   const brands = soi?.brands || []
   const leader = brands[0]
   const veri = brands.find((b) => b.isVerisure)
   const comp = newPieces.find((p) => !p.isVerisure)
 
-  // 1. Movimiento creativo del día.
+  // 1. Movimiento creativo del período.
   if (comp) {
     paragraphs.push(
-      `${brandDisplay(comp.maname)} abrió el día con una pieza nueva (tono ${comp.eppm}); ` +
-        `primera emisión detectada hoy, es la señal a vigilar.`,
+      `${brandDisplay(comp.maname)} estrenó una pieza nueva (tono ${comp.eppm}) en el período; ` +
+        `es la señal a vigilar.`,
     )
   } else if (newPieces.length) {
-    paragraphs.push('Verisure estrenó pieza hoy y la competencia no movió creatividades nuevas.')
+    paragraphs.push('Verisure estrenó pieza en el período y la competencia no movió creatividades nuevas.')
   } else {
-    paragraphs.push('Sin piezas nuevas de competencia hoy: el tablero creativo se mantiene estable.')
+    paragraphs.push('Sin piezas nuevas de competencia en el período: el tablero creativo se mantiene estable.')
   }
 
-  // 2. Reparto de inversión del día (SOI).
+  // 2. Reparto de inversión del período (SOI).
   if (leader && veri) {
     if (leader.isVerisure) {
-      paragraphs.push(`Verisure lidera la inversión del día con ${formatPercent(veri.share, 0)}${deltaFrase(veri.deltaPts)}.`)
+      paragraphs.push(`Verisure lidera la inversión del período con ${formatPercent(veri.share, 0)}${deltaFrase(veri.deltaPts)}.`)
     } else {
       paragraphs.push(
-        `En inversión del día, ${brandDisplay(leader.maname)} lidera con ${formatPercent(leader.share, 0)} y ` +
+        `En inversión del período, ${brandDisplay(leader.maname)} lidera con ${formatPercent(leader.share, 0)} y ` +
           `Verisure queda en ${formatPercent(veri.share, 0)}${deltaFrase(veri.deltaPts)}.`,
       )
     }
   }
 
-  // 3. Amenaza DIY (sustitución por cámaras solas).
+  // 3. Tendencia del período (deltas ATL/digital vs. período anterior).
+  const tend = tendenciaFrase(deltas)
+  if (tend) paragraphs.push(tend)
+
+  // 4. Amenaza DIY (sustitución por cámaras solas).
   if (diy && diy.index != null) {
     const d = diy.deltaSemana
     const mov = d > 0 ? ` y sube ${d} ${ptsLabel(d)} en la semana` : d < 0 ? ` y cede ${Math.abs(d)} ${ptsLabel(d)} en la semana` : ''
@@ -60,7 +75,7 @@ export function composeBrief({ day, soi, newPieces = [], diy, score, contexto } 
     )
   }
 
-  // 4. Lectura estratégica (Opportunity Score).
+  // 5. Lectura estratégica (Opportunity Score).
   if (score && score.score != null) {
     paragraphs.push(`El Opportunity Score cierra en ${score.score}: ${lecturaScore(score)}.`)
   }

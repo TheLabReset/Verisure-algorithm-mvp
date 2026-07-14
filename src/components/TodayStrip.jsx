@@ -13,14 +13,14 @@ export default function TodayStrip({ moduleId, today, onGoToRadar }) {
   if (!hasAlerts) {
     return (
       <div className="rounded-card bg-surface px-4 py-3 text-sm text-ink-2 shadow-card">
-        Sin movimientos relevantes de la competencia hoy. SOI estable.
+        Sin estrenos de la competencia en el período. SOI estable.
       </div>
     )
   }
 
   const pill = (
     <span className="shrink-0 rounded-pill bg-surface px-2.5 py-1 text-xs font-semibold text-verisure-deep">
-      {alertCount} {alertCount === 1 ? 'alerta' : 'alertas'} hoy
+      {alertCount} {alertCount === 1 ? 'novedad' : 'novedades'} en el período
     </span>
   )
 

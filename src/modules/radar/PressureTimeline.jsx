@@ -28,13 +28,13 @@ function insight(pressure) {
   const sorted = [...brands].sort((a, b) => trend[b] - trend[a])
   const riser = sorted[0]
   const faller = sorted[sorted.length - 1]
-  if (!riser || trend[riser] <= 0) return 'Inversión diaria estimada · últimos 30 días'
-  return `La presión de ${brandDisplay(riser)} crece desde fines de junio${
+  if (!riser || trend[riser] <= 0) return 'Inversión diaria estimada'
+  return `La presión de ${brandDisplay(riser)} crece en la segunda mitad del período${
     faller && trend[faller] < 0 ? `; ${brandDisplay(faller)} se apaga` : ''
   }`
 }
 
-export default function PressureTimeline({ pressure = [], events = [], degraded = false }) {
+export default function PressureTimeline({ pressure = [], events = [], periodLabel = '', degraded = false }) {
   const [hidden, setHidden] = useState(() => new Set())
   if (!pressure.length) return null
   const brands = new Set()
@@ -74,7 +74,7 @@ export default function PressureTimeline({ pressure = [], events = [], degraded 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="font-display text-xl text-ink sm:text-2xl">{insight(pressure)}</h3>
-          <p className="mt-1 text-sm text-ink-2">Inversión diaria estimada · últimos 30 días</p>
+          <p className="mt-1 text-sm text-ink-2">Inversión diaria estimada · {periodLabel || `${pressure.length} días`}</p>
         </div>
         {/* Toggles de marca (leyenda interactiva): ocultan/muestran su línea. */}
         <div className="flex flex-wrap gap-2">

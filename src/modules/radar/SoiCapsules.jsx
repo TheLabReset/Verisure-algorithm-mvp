@@ -4,9 +4,8 @@
 import Capsula from '../../components/ui/Capsula'
 import { formatSoles } from '../../utils/format'
 import { assignBrandStyle, buildSoiInsight, brandDisplay, signPts } from './radarUtils'
-import { fmtDayLong } from './dateLabels'
 
-export default function SoiCapsules({ soi, dotted = false }) {
+export default function SoiCapsules({ soi, periodLabel = '', dotted = false }) {
   const brands = assignBrandStyle(soi?.brands || [], dotted ? { pattern: 'dotted' } : undefined)
 
   const deltas = (soi?.brands || [])
@@ -16,12 +15,12 @@ export default function SoiCapsules({ soi, dotted = false }) {
   return (
     <section className="flex h-full flex-col rounded-card bg-surface p-5 shadow-card sm:p-6">
       <h3 className="font-display text-xl text-ink sm:text-2xl">
-        {dotted ? 'SOI de ayer — sin dato fresco de Integrametrics' : buildSoiInsight(soi)}
+        {dotted ? 'SOI del período — sin dato fresco de Integrametrics' : buildSoiInsight(soi)}
       </h3>
       <p className="mt-1 text-sm text-ink-2">
         {dotted
-          ? `Snapshot ${fmtDayLong(soi?.day)} · punteado = sin dato de hoy`
-          : `Share of investment del día · ${fmtDayLong(soi?.day)}`}
+          ? `${periodLabel} · punteado = sin dato fresco`
+          : `Share of investment · ${periodLabel}`}
       </p>
 
       <div className="mt-6 space-y-5">
@@ -41,10 +40,10 @@ export default function SoiCapsules({ soi, dotted = false }) {
       <p className="mt-auto pt-5 text-sm text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
         {deltas.length > 0 && !dotted ? (
           <>
-            <span className="text-ink-2">vs. semana pasada:</span> {deltas.join(' · ')} ·{' '}
+            <span className="text-ink-2">vs. período anterior:</span> {deltas.join(' · ')} ·{' '}
           </>
         ) : null}
-        <span className="font-semibold text-ink">Total del día {formatSoles(soi?.total || 0)}</span>
+        <span className="font-semibold text-ink">Total del período {formatSoles(soi?.total || 0)}</span>
       </p>
 
       <p className="mt-3 border-t border-line pt-3 text-xs text-ink-2">

@@ -73,7 +73,7 @@ export function buildTodayHeadline(newPieces, soi) {
   const veriShare = shareOf['VERISURE'] != null ? `${formatPercent(shareOf['VERISURE'], 0)}` : null
   let s = `${marca} lanzó un ${tnameShort(p.tname)}${dur} en ${franja} de ${p.mname}`
   if (hora) s += ` (${hora})`
-  if (meShare) s += ` y su share of investment del día sube a ${meShare}`
+  if (meShare) s += ` y su share of investment del período es ${meShare}`
   s += '.'
   if (veriShare) s += ` Verisure queda en ${veriShare}.`
   return s
@@ -81,9 +81,9 @@ export function buildTodayHeadline(newPieces, soi) {
 
 // Insight (título de card SOI): el líder de la presión del día.
 export function buildSoiInsight(soi) {
-  if (!soi?.brands?.length) return 'Sin inversión detectada hoy'
+  if (!soi?.brands?.length) return 'Sin inversión detectada en el período'
   const top = soi.brands[0]
-  return `${brandDisplay(top.maname)} concentró ${formatPercent(top.share, 0)} de la presión de hoy`
+  return `${brandDisplay(top.maname)} concentró ${formatPercent(top.share, 0)} de la presión del período`
 }
 
 export function totalLine(soi) {

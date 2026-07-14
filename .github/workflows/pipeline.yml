@@ -1,15 +1,24 @@
-# Pipeline diario de The Algorithm (blueprint §B.6).
-# Corre los derivadores y publica el snapshot en public/data/ (JSON + export CSV).
-# Cron a las 11:00 UTC = 06:00 America/Lima; workflow_dispatch de respaldo porque el
-# cron de Actions puede retrasarse o no disparar en repos sin actividad (plan free).
-name: Pipeline diario
+# Pipeline de datos de The Algorithm (Fase 7 · Integrametrics real).
+# INCREMENTAL por defecto: cada corrida jala los ÚLTIMOS 7 DÍAS (incluyendo hoy) y hace
+# merge idempotente sobre el contrato commiteado (public/data/algorithm.json) — sin
+# duplicar, reescribiendo por clave estable. Así las llamadas son ligeras (no reconstruye
+# todo 2026). Con ~1 día de rezago de la fuente, la ventana de 7 días recupera lo que llega
+# tarde y corrige cualquier ajuste de la semana.
+# BACKFILL manual: workflow_dispatch con `start_date` (ej. 2026-01-01) reconstruye el rango.
+# Cron 11:00 UTC = 06:00 America/Lima; workflow_dispatch de respaldo.
+name: Pipeline de datos
 
 on:
   schedule:
-    - cron: '0 11 * * *'
-  workflow_dispatch: {}
+    - cron: '0 11 * * *'   # diario 06:00 Lima → incremental 7 días (rápido)
+    - cron: '0 10 * * 0'   # domingo → backfill completo (re-cuadra acumulados exactos)
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: 'Backfill desde esta fecha (YYYY-MM-DD). Vacío = incremental 7 días.'
+        required: false
+        default: ''
 
-# Necesario para commitear el snapshot de vuelta al repo.
 permissions:
   contents: write
 
@@ -20,6 +29,10 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
+    env:
+      # Expone el secret como env para poder guardar los pasos que escriben data:
+      # sin token NO corremos el pipeline (evita sobrescribir el contrato real con fixtures).
+      INTEGRAMETRICS_TOKEN: ${{ secrets.INTEGRAMETRICS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,31 +40,45 @@ jobs:
         with:
           node-version: 20
 
-      # Guardas: los fixtures y los derivadores deben estar sanos antes de publicar.
-      - name: Validar fixtures
-        run: node scripts/validate-fixtures.mjs
+      - name: Instalar dependencias
+        run: npm ci
 
       - name: Tests
         run: node --test
 
-      # Fuente: live si hay token en Secrets; si no, dry-run determinista sobre fixtures.
-      # El token vive SOLO aquí (Secret de Actions), nunca en el bundle del navegador.
-      - name: Correr pipeline y publicar snapshot
+      - name: Aviso si falta el token
+        if: ${{ env.INTEGRAMETRICS_TOKEN == '' }}
+        run: echo "::warning::Sin INTEGRAMETRICS_TOKEN en Secrets — se omite la actualización de datos (no se sobrescribe el contrato real)."
+
+      # Fuente live: incremental (7 días) o backfill si se pasó start_date. El token vive
+      # SOLO aquí (Secret de Actions), nunca en el bundle del navegador (governance §B.2).
+      # start_date sale del input manual, o de la fecha piso de datos (2026-01-01) cuando
+      # dispara el cron dominical (backfill semanal). En el cron diario queda vacío → incremental.
+      - name: Actualizar datos (incremental 7 días o backfill)
+        if: ${{ env.INTEGRAMETRICS_TOKEN != '' }}
         env:
           DATA_SOURCE: live
-          INTEGRAMETRICS_TOKEN: ${{ secrets.INTEGRAMETRICS_TOKEN }}
+          MANUAL_START: ${{ github.event.inputs.start_date }}
+          SCHEDULE: ${{ github.event.schedule }}
+          PIPELINE_WINDOW: '7'
         run: |
           export PIPELINE_STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          if [ -n "$MANUAL_START" ]; then
+            export PIPELINE_START="$MANUAL_START"
+          elif [ "$SCHEDULE" = "0 10 * * 0" ]; then
+            export PIPELINE_START="2026-01-01"   # backfill completo semanal
+          fi
           node scripts/run-pipeline.mjs
 
-      - name: Commit del snapshot si cambió
+      - name: Commit del contrato si cambió
+        if: ${{ env.INTEGRAMETRICS_TOKEN != '' }}
         run: |
           git config user.name "algorithm-pipeline[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/data
           if git diff --cached --quiet; then
-            echo "Sin cambios en el snapshot: nada que commitear."
+            echo "Sin cambios en el contrato: nada que commitear."
           else
-            git commit -m "chore(pipeline): snapshot público del día [skip ci]"
+            git commit -m "chore(pipeline): actualización de datos Integrametrics [skip ci]"
             git push
           fi

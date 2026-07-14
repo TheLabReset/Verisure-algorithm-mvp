@@ -17,19 +17,19 @@ Verisure y Prosegur **no comparten rama** en la taxonomía Integrametrics:
 
 ## 2. La realidad competitiva (medios tradicionales / ATL)
 
-7 días, subsectores de seguridad:
+**Backfill completo 2026 (1 ene → 13 jul, 45.624 registros ATL de Verisure+Prosegur):**
 
-| Marca | Spots | Inversión bruta | Piezas | Medios |
-|---|---|---|---|---|
-| **VERISURE** | 1.790 | **S/ 2.054.502** (~98.5%) | 6 | TV abierta, OTT, radio, cable |
-| PROSEGUR | 4 | S/ 29.076 | 3 | solo vía pública (OOH) |
-| HUNTER | 5 | S/ 2.080 | 1 | TV abierta |
+| Marca | Inversión bruta 2026 | SOI ATL | Piezas | OOH (paneles) | Medios |
+|---|---|---|---|---|---|
+| **VERISURE** | **S/ 53.672.556** | **~98.7%** | 29 | 49 | TV abierta, radio, cable, OOH |
+| PROSEGUR | S/ 712.004 | ~1.3% | 9 | 52 | OOH + radio/TV puntual |
 
 **Set competitivo del producto = VERISURE + PROSEGUR** (decisión de negocio):
 - **HUNTER** = seguridad corporativa/B2B → excluido (no compite en residencial/consumo).
 - **SECURITAS** = aseguradora ("seguros" ≠ "seguridad"), ni aparece en los subsectores → excluido.
-- No hay "carrera de SOI": en ATL **Verisure es prácticamente monopolio**; Prosegur casi solo OOH. El fixture v1 (Prosegur liderando 46%) es ficticio y debe reencuadrarse.
-- La competencia de Prosegur es sobre todo **digital** (§6), no ATL.
+- No hay "carrera de SOI" en ATL: **Verisure es prácticamente monopolio** (~98.7% del año). El fixture v1 (Prosegur liderando 46%) era ficticio → **reencuadrado**: RADAR cuenta dominancia ATL.
+- La competencia real de Prosegur está en **digital** (§6). El algoritmo ahora eleva la capa digital a ciudadano de primera.
+- ⚠️ **Corrección vs. muestra de 7 días:** con el año completo, **ambas marcas hacen OOH** (Verisure 49 paneles + Prosegur 52). La muestra de 7 días había concluido "solo Prosegur hace OOH" — el histórico lo refuta. El mapa es competitivo.
 
 ## 3. Tipos de inversión — cuál usar
 
@@ -60,15 +60,13 @@ Verificado contra la API (difiere de la doc en algunos puntos):
 
 ## 6. Capa digital (`/registros-digital`) — la que sí mueve la competencia
 
-Sin filtros server-side (~64.667 registros/día, todas las marcas → filtrar en cliente **por subsector**, NO por nombre de marca). 1 día real, filtrado a subsectores de seguridad:
+Sin filtros server-side (los `filters` se ignoran; ~50–100k registros/día, todas las marcas → filtrar en cliente **por subsector** de seguridad + marca V/P). Backfill digital 2026 = **4.293 filas de seguridad** (2.825 Verisure + 1.468 Prosegur).
 
-| Marca | Inversión local/día | Impresiones | Plataforma |
-|---|---|---|---|
-| VERISURE | S/ 114.941 | 34,2M | Facebook |
-| PROSEGUR | S/ 611 | 182k | Facebook |
+**Inversión digital 2026 (contrato):** Verisure **S/ 9.98M** · Prosegur **S/ 3.62M** → SOI digital ≈ **73/27**. En ventana de 30 días llega a **13% Prosegur** (vs. 1.3% en ATL). En algunos períodos la inversión digital total **supera a la ATL**.
 
-- Set digital de seguridad = **solo Verisure + Prosegur** (ambos Facebook). Verisure domina también en digital.
-- **Piezas con `advertisement` = URL del asset creativo (S3)** → el Ad Museum puede mostrar piezas DIGITALES reales.
+- Set digital de seguridad = **Verisure + Prosegur**. Plataformas reales: **Facebook, Google Search, YouTube**.
+- **`advertisement` = URL del asset creativo (imágenes S3 · videos · links de YouTube)** → el Ad Museum digital muestra la ARTE real (1.559 piezas digitales en el contrato).
+- **La competencia SÍ existe — en digital.** Este es el reencuadre honesto del algoritmo: ATL = dominancia; digital = pelea.
 - ⚠️ **Corrección:** un grep por nombre había colado a **XIAOMI como "DIY"**, pero validado por subsector es **CELULARES/TABLETS** (IT y Comunicaciones), no seguridad — **excluido**. **HUNTER** (seguridad corporativa B2B) también **excluido** por decisión de negocio.
 - **El "DIY threat" (cámaras Ezviz/Imou/TP-Link/Hikvision) NO está sustentado en Integrametrics** (no pautan en la categoría de seguridad, ni ATL ni digital) → si se quiere, requiere marketplace/Meta Ad Library como fuente externa.
 
@@ -82,7 +80,7 @@ Sin filtros server-side (~64.667 registros/día, todas las marcas → filtrar en
 | `duracion_tv` | 1790/1790 | ✅ duraciones normalizadas |
 | `rating` / `audiencia` / `alcance` | **0/1790** | ❌ **vacíos — descartar ángulo de audiencia** |
 
-OOH: **4 puntos reales, todos PROSEGUR** (lat/long Lima: Miraflores/La Victoria/Surco). **Verisure no hace OOH** → el mapa es de competencia.
+OOH (backfill completo): **101 paneles reales** con lat/long en Lima — **49 Verisure + 52 Prosegur** (San Borja, Miraflores, Surco, La Victoria…). Cada panel trae su ARTE (`rfile`: foto/video). El mapa Leaflet (Opción A · OSM) los pinta por marca con la arte en el popup. (La muestra de 7 días había dicho "solo Prosegur" — refutado por el histórico.)
 
 ## 8. Matriz de validación — ¿es posible en producción hoy?
 
@@ -110,3 +108,14 @@ OOH: **4 puntos reales, todos PROSEGUR** (lat/long Lima: Miraflores/La Victoria/
 2. **SOI = unir subsectores de seguridad** (885+719), no marcas hardcodeadas; mostrar ATL y digital. En ATL, relato de dominancia; en digital, competencia real.
 3. **Contrato de datos con FECHA** (serie histórica, no snapshot) → date-picker en el front + deltas semanales en MAIA. Backfill ene 2026→hoy chunkeado por día (una sola llamada de 6.5 meses excede tamaño/memoria).
 4. Diferir/secundarizar lo externo (Google Trends, SIDPOL, prensa); BCRP vía API pública cuando se priorice.
+
+## 10. Arquitectura de datos (Fase 7 · implementado)
+
+- **Contrato** `public/data/algorithm.json` (~880 KB, gzip ~120 KB): `{ meta, daily, pieces, ooh, events, digital }`. El navegador fetchea SOLO esto (ya no 32 MB de registros crudos). `views.js` lo corta por rango de fecha y deriva SOI/presión/deltas/museo/OOH.
+- **Agregación** (`src/data/aggregate.js`): colapsa spots repetitivos en entidades únicas con rollups **aditivos exactos** (probado bit-a-bit) + `asset={url,kind}` por pieza/panel/estreno. Cada entidad lleva **clave estable única** (id_versiones_unica · lat,lng,id · id_unico · marca:version:advertisement).
+- **Pipeline** (`scripts/run-pipeline.mjs`):
+  - **Incremental** (cron diario): jala los **últimos 7 días** (incl. hoy), `mergeAlgorithm` idempotente sobre el contrato commiteado. `daily` = upsert por fecha (exacto). Entidades = unión monotónica por clave (descubre nuevas, conserva el rollup más completo). Sin duplicar.
+  - **Backfill** (cron dominical / `workflow_dispatch` con `start_date`): reconstruye todo el rango → re-cuadra los acumulados de entidades de forma exacta.
+  - CSV (`export.csv`) spot-a-spot para el BI: incremental reemplaza la ventana por fecha; backfill lo reescribe.
+- **Governance:** token SOLO en Node/Secrets de Actions, jamás en el bundle. Sin token, la Action omite la escritura (no sobrescribe el contrato real con fixtures).
+- **Assets:** verificados HTTP 200 públicos (video/mp4, audio/mpeg, image/jpeg·png) + tiles OSM 200. `AssetView` degrada a ilustración si un asset caduca (nunca imagen rota).

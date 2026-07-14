@@ -1,21 +1,19 @@
-// RADAR — la pantalla que vende. Cablea la capa de datos (fixtures/live) y compone:
-// jugada del día, SOI cápsulas, timeline 30d, Ad Museum y mapa OOH. Estados diseñados
-// (DESIGN §7): cargando (skeleton), vacío (sin novedad), fuente caída (series punteadas).
-// Los estados se pueden forzar para demo con ?demo=loading|empty|sourcedown.
+// RADAR — la pantalla que vende. Consume el CONTRATO (algorithm.json) y el rango del
+// date-picker; compone: jugada del día (estreno más reciente del período con su arte),
+// SOI ATL, timeline de presión, capa digital (SOI + Ad Museum digital), Ad Museum ATL y
+// mapa OOH Leaflet con la arte de cada panel. Estados diseñados (DESIGN §7); se pueden
+// forzar con ?demo=loading|empty|sourcedown.
 import { useMemo } from 'react'
 import { useData } from '../../data/DataContext'
 import {
-  soiComparison,
-  detectNewPieces,
-  pressureSeries,
-  adMuseumPieces,
-  oohPoints,
-} from '../../data/derive'
+  soiComparison, pressureInRange, piecesInRange, oohInRange, eventsInRange, digitalSoi,
+} from '../../data/views'
 import Skeleton from '../../components/ui/Skeleton'
 import PlayOfTheDay from './PlayOfTheDay'
 import SoiCapsules from './SoiCapsules'
 import PressureTimeline from './PressureTimeline'
 import AdMuseum from './AdMuseum'
+import DigitalPanel from './DigitalPanel'
 import OohMap from './OohMap'
 import { brandDisplay, tnameShort } from './radarUtils'
 import { fmtDayLong, fmtDayShort } from './dateLabels'
@@ -25,17 +23,12 @@ function demoParam() {
   return new URLSearchParams(window.location.search).get('demo')
 }
 
-function lastDetectionLabel(registros, day) {
-  let best = null
-  for (const r of registros) {
-    if (r.nuevas_versiones !== 'NUEVO') continue
-    if (r.fecha.slice(0, 10) >= day) continue
-    if (!best || r.fecha > best.fecha) best = r
-  }
-  if (!best) return null
-  const canal = best.mname ? ` en ${best.mname}` : ''
-  const dur = best.duraseg ? ` ${best.duraseg} s` : ''
-  return `${fmtDayLong(best.fecha)} · ${brandDisplay(best.maname)} · ${tnameShort(best.tname)}${dur}${canal}`
+// Etiqueta corta de la última detección (para el estado vacío del hero).
+function detectionLabel(ev) {
+  if (!ev) return null
+  const canal = ev.mname ? ` en ${ev.mname}` : ''
+  const dur = ev.duraseg ? ` ${ev.duraseg} s` : ''
+  return `${fmtDayLong(ev.fecha)} · ${brandDisplay(ev.maname)} · ${tnameShort(ev.tname)}${dur}${canal}`
 }
 
 function RadarSkeleton() {
@@ -49,61 +42,60 @@ function RadarSkeleton() {
 }
 
 export default function RadarModule() {
-  const { loading, sourceDown, registros, contexto, day } = useData()
+  const { loading, sourceDown, contract, range } = useData()
   const demo = demoParam()
+  const { from, to } = range || {}
+  const periodLabel = from && to ? `${fmtDayShort(from)} – ${fmtDayShort(to)}` : ''
 
   const view = useMemo(() => {
-    if (!day || !registros.length) return null
-    return {
-      soi: soiComparison(registros, day),
-      newPieces: detectNewPieces(registros, day),
-      pressure: pressureSeries(registros, day, 30),
-      museum: adMuseumPieces(registros),
-      ooh: oohPoints(registros),
-      lastDetection: lastDetectionLabel(registros, day),
+    if (!contract || !from || !to) return null
+    const events = eventsInRange(contract, from, to)
+    const atlPieces = piecesInRange(contract, from, to)
+    // Jugada del día = estreno más reciente del período, enriquecido con inversión y medio.
+    let play = null
+    if (events.length) {
+      const ev = events[0]
+      const match = atlPieces.find((p) => p.maname === ev.maname && p.vname === ev.vname)
+      play = { ...ev, medio: 'ATL', spend: match ? match.spend : null }
     }
-  }, [registros, day])
+    // Última detección para el estado vacío: el estreno más reciente del contrato entero.
+    const lastEver = (contract.events || [])[0]
+    return {
+      soi: soiComparison(contract, from, to),
+      pressure: pressureInRange(contract, from, to),
+      atlPieces,
+      digitalSoi: digitalSoi(contract, from, to),
+      digitalPieces: piecesInRange(contract, from, to, 'digital'),
+      ooh: oohInRange(contract, from, to),
+      events,
+      play,
+      lastDetection: detectionLabel(play || lastEver),
+    }
+  }, [contract, from, to])
 
-  // Estado de carga.
   if (demo === 'loading' || (loading && !view)) return <RadarSkeleton />
-
-  // Sin datos (fuente caída dura, sin snapshot).
-  if (!view) {
-    return (
-      <PlayOfTheDay piece={null} lastDetection={null} />
-    )
-  }
+  if (!view) return <PlayOfTheDay piece={null} lastDetection={null} />
 
   const isEmpty = demo === 'empty'
   const isDown = demo === 'sourcedown' || sourceDown
-  // En fuente caída no afirmamos novedad "de hoy": el hero cae a su estado sin-pieza
-  // (última detección) y las series van punteadas — coherente con el banner de snapshot.
-  const newPieces = isEmpty || isDown ? [] : view.newPieces
-  const piece = newPieces[0] || null
+  const play = isEmpty || isDown ? null : view.play
 
-  const events = []
-  if (piece) events.push({ fecha: view.day || day, label: 'Spot · hoy', maname: piece.maname })
-  const lastOoh = view.ooh[view.ooh.length - 1]
-  if (lastOoh) {
-    // ancla un evento OOH en su día (si existe en la serie)
-    const oohReg = registros.find((r) => r.tname === 'VÍA PÚBLICA' && r.maname === lastOoh.maname)
-    if (oohReg) events.push({ fecha: oohReg.fecha, label: `OOH · ${fmtDayShort(oohReg.fecha)}`, maname: lastOoh.maname })
-  }
-
-  const riskDistritos = contexto?.criminalidad?.distritos || []
+  // Eventos anotados sobre el timeline (estrenos del período).
+  const events = view.events.slice(0, 3).map((e) => ({
+    fecha: e.fecha, maname: e.maname, label: `${tnameShort(e.tname)} · ${fmtDayShort(e.fecha)}`,
+  }))
 
   return (
     <div className="space-y-6">
-      {/* Hero a 2 columnas en desktop (DESIGN / mockup): la jugada del día (card
-          oscura ancla) junto al SOI del día; colapsa a 1 columna en móvil. */}
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch">
-        <PlayOfTheDay piece={piece} lastDetection={view.lastDetection} />
-        <SoiCapsules soi={view.soi} dotted={isDown} />
+        <PlayOfTheDay piece={play} lastDetection={view.lastDetection} />
+        <SoiCapsules soi={view.soi} periodLabel={periodLabel} dotted={isDown} />
       </div>
-      <PressureTimeline pressure={view.pressure} events={events} degraded={isDown} />
+      <PressureTimeline pressure={view.pressure} events={events} periodLabel={periodLabel} degraded={isDown} />
+      <DigitalPanel soi={view.digitalSoi} pieces={view.digitalPieces} periodLabel={periodLabel} />
       <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
-        <AdMuseum pieces={view.museum} />
-        <OohMap points={view.ooh} risk={riskDistritos} degraded={isDown} />
+        <AdMuseum pieces={view.atlPieces} title="Ad Museum" subtitle={`${view.atlPieces.length} piezas ATL activas · ordenadas por inversión`} />
+        <OohMap points={view.ooh} />
       </div>
     </div>
   )
