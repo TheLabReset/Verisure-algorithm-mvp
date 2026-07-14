@@ -36,15 +36,27 @@ const readFx = (f) => JSON.parse(readFileSync(join(FX, f), 'utf8'))
 const token = process.env.INTEGRAMETRICS_TOKEN || null
 const wantLive = process.env.DATA_SOURCE === 'live' && Boolean(token)
 
-// Universo competitivo = subsectores de seguridad del árbol Integrametrics.
-// Verisure vive en "SEGURIDAD Y ALARMAS"; Prosegur/Hunter en "SEGURIDAD PRIVADA".
-// Filtrar por aquí acota el firehose (40–70k registros/día de TODAS las marcas) al
-// universo relevante y respeta el límite de 90.000/consulta. `filters` usa NOMBRES
-// (ssid no es filtrable). Configurable por env para sumar marcas/subsectores.
-const SECURITY_SUBSECTORS = (process.env.PIPELINE_SUBSECTORS || 'SEGURIDAD Y ALARMAS,SEGURIDAD PRIVADA')
+// Set competitivo del producto = Verisure + Prosegur (Hunter=B2B y Securitas=seguros
+// quedan fuera; validado contra la API). Se filtra por NOMBRE de marca (más chico que
+// por subsector). `filters` usa nombres; `ssid`/`maid` no son campos filtrables.
+const BRANDS = (process.env.PIPELINE_BRANDS || 'VERISURE,PROSEGUR')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean)
+
+// Adelgazado: cada registro ATL trae ~150 campos (decenas de audiencia vacíos). Guardamos
+// SOLO los que consumen los derivadores/export → el año completo pasa de ~150MB a ~12MB.
+const KEEP = [
+  'id_unico', 'maname', 'fecha', 'rinversion', 'rinversion_dolares', 'hour', 'minute',
+  'mname', 'gname', 'tname', 'mabierta_cable', 'vname', 'id_versiones_unica', 'franja',
+  'duraseg', 'rfile', 'nuevas_versiones', 'primera_emision_comercial', 'primera_emision_version',
+  'latitud', 'longitud', 'direccion', 'localidad', 'ciuname', 'progname', 'genname',
+]
+const slim = (r) => {
+  const o = {}
+  for (const k of KEEP) if (r[k] !== undefined) o[k] = r[k]
+  return o
+}
 
 async function loadRegistros() {
   if (!wantLive) return { registros: readFx('registros.json'), source: 'fixtures' }
@@ -58,13 +70,13 @@ async function loadRegistros() {
     d.setUTCDate(d.getUTCDate() - 30)
     start = d.toISOString().slice(0, 10)
   }
-  const registros = await fetchRegistros({
+  const raw = await fetchRegistros({
     token,
     startDate: `${start} 00:00:00`,
     endDate: `${end} 23:59:59`,
-    filters: { ssname: SECURITY_SUBSECTORS },
+    filters: { maname: BRANDS },
   })
-  return { registros, source: 'live' }
+  return { registros: raw.map(slim), source: 'live' }
 }
 
 async function main() {
