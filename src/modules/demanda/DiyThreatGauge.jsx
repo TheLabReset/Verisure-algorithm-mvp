@@ -1,18 +1,20 @@
 // Índice de Amenaza DIY (DEMANDA) — cámaras solas como sustituto del servicio monitoreado.
-// Gauge sobrio de un solo arco (DESIGN §5) en --caution, ~270° con hueco inferior; debajo,
-// los 3 componentes como filas (label izq · valor der) con su fuente.
+// Gauge sobrio de un solo arco (DESIGN §5) en --caution: semicírculo superior (arco sobre
+// el número); debajo, los 3 componentes como filas (label izq · valor der) con su fuente.
 import { formatSoles } from '../../utils/format'
 
-// Arco de gauge 0–100 (semicírculo superior, arco sobre el número). Devuelve el path.
+// Arco de gauge 0–100 = semicírculo SUPERIOR. En coordenadas SVG (y hacia abajo) el ángulo
+// AUMENTA de 180° (izquierda) pasando por 270° (arriba) hasta 360° (derecha), de modo que el
+// recorrido queda siempre por encima del centro (no cae por debajo ni se recorta).
 function arcPath(cx, cy, r, frac) {
-  const a0 = Math.PI // 180° (izquierda)
-  const a1 = Math.PI - Math.max(0, Math.min(1, frac)) * Math.PI // recorre hacia 0° (derecha)
+  const f = Math.max(0, Math.min(1, frac))
+  const a0 = Math.PI // 180° — extremo izquierdo (cx − r, cy)
+  const a1 = Math.PI + f * Math.PI // recorre por ARRIBA hacia 360° (extremo derecho)
   const x0 = cx + r * Math.cos(a0)
   const y0 = cy + r * Math.sin(a0)
   const x1 = cx + r * Math.cos(a1)
   const y1 = cy + r * Math.sin(a1)
-  const large = frac > 0.5 ? 1 : 0
-  return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`
+  return `M ${x0} ${y0} A ${r} ${r} 0 0 1 ${x1} ${y1}` // large-arc=0 (≤180°), sweep=1 (por arriba)
 }
 
 function Row({ label, value, sub }) {
