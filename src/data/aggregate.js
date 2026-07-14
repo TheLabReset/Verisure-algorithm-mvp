@@ -102,12 +102,13 @@ function buildOoh(registros) {
         key, maname: r.maname, lat: num(r.latitud), lng: num(r.longitud),
         direccion: r.direccion || null, localidad: r.localidad || r.ciuname || null,
         tipo: r.tname || null, vname: r.vname, spots: 0, spend: 0,
-        lastFecha: r.fecha, asset: assetOf(r.rfile),
+        firstFecha: r.fecha, lastFecha: r.fecha, asset: assetOf(r.rfile),
       })
     }
     const p = byP.get(key)
     p.spots += 1
     p.spend += num(r.rinversion)
+    if (r.fecha < p.firstFecha) p.firstFecha = r.fecha
     if (r.fecha > p.lastFecha) p.lastFecha = r.fecha
     if (!p.asset && r.rfile) p.asset = assetOf(r.rfile)
   }
@@ -213,6 +214,7 @@ export function mergeAlgorithm(base, fresh) {
         impresiones: Math.max(b.impresiones || 0, f.impresiones || 0),
         firstEmission: b.firstEmission && f.firstEmission ? (b.firstEmission < f.firstEmission ? b.firstEmission : f.firstEmission) : (b.firstEmission || f.firstEmission),
         lastEmission: b.lastEmission && f.lastEmission ? (b.lastEmission > f.lastEmission ? b.lastEmission : f.lastEmission) : (b.lastEmission || f.lastEmission),
+        firstFecha: b.firstFecha && f.firstFecha ? (b.firstFecha < f.firstFecha ? b.firstFecha : f.firstFecha) : (b.firstFecha || f.firstFecha),
         lastFecha: b.lastFecha && f.lastFecha ? (b.lastFecha > f.lastFecha ? b.lastFecha : f.lastFecha) : (b.lastFecha || f.lastFecha),
         asset: f.asset || b.asset,
       })

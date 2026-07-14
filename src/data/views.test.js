@@ -43,6 +43,7 @@ test('soiComparison: deltaPts vs. período anterior', () => {
 test('pressureInRange / piecesInRange / oohInRange / eventsInRange: cortan por rango', () => {
   assert.equal(pressureInRange(C, '2026-07-01', '2026-07-01').length, 1)
   assert.equal(oohInRange(C, '2026-07-01', '2026-07-31').length, 1)
+  assert.equal(oohInRange(C, '2026-06-01', '2026-06-30').length, 0) // panel de julio, fuera del rango
   assert.equal(eventsInRange(C, '2026-07-01', '2026-07-05').length, 1)
   // pieza C (radio, 2026-07-10) no solapa 2026-07-01..02
   const p = piecesInRange(C, '2026-07-01', '2026-07-02').map((x) => x.key)

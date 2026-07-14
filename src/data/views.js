@@ -85,10 +85,16 @@ export function piecesInRange(contract, from, to, key = 'pieces') {
     .sort((a, b) => (a.spend < b.spend ? 1 : -1)) // por inversión desc (más relevante primero)
 }
 
-// ── OOH: paneles con actividad hasta el fin del rango ─────────────────
+// ── OOH: paneles ACTIVOS en el rango (su intervalo de aparición lo solapa) ──
+// Igual criterio que piecesInRange → el date-picker afecta al mapa de forma consistente.
+// firstFecha llega desde el backfill; si un contrato viejo no lo trae, cae a lastFecha.
 export function oohInRange(contract, from, to) {
   return (contract?.ooh || [])
-    .filter((p) => (!to || dOf(p.lastFecha) <= to))
+    .filter((p) => {
+      const first = dOf(p.firstFecha || p.lastFecha)
+      const last = dOf(p.lastFecha || p.firstFecha)
+      return (!to || first <= to) && (!from || last >= from)
+    })
     .map((p) => ({ ...p, investment: p.spend, isVerisure: isVeri(p.maname) }))
 }
 
@@ -149,8 +155,14 @@ export function deltas(contract, from, to) {
 import { brandKey } from './derive.js'
 export function searchVsInvestment(contract, trends, from, to) {
   const sos = trends?.share_of_search || {}
-  return soiInRange(contract, from, to).brands.map((b) => {
-    const search = Number(sos[brandKey(b.maname)]) || 0
+  const brands = soiInRange(contract, from, to).brands
+  // El share_of_search del fixture puede incluir marcas fuera del universo de inversión
+  // (V+P). Re-normalizamos el search al MISMO conjunto de marcas para que gap sea
+  // comparable (mismo denominador), no búsqueda-de-3 vs inversión-de-2.
+  const rawSearch = brands.map((b) => Number(sos[brandKey(b.maname)]) || 0)
+  const searchTotal = rawSearch.reduce((s, v) => s + v, 0)
+  return brands.map((b, i) => {
+    const search = searchTotal > 0 ? round((rawSearch[i] / searchTotal) * 100, 0) : 0
     return { maname: b.maname, isVerisure: b.isVerisure, search, investment: b.share, gap: round(search - b.share, 0) }
   })
 }
