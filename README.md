@@ -27,25 +27,30 @@ Es _outside-in_: se construye solo con señales externas (inversión publicitari
 
 ## Arquitectura
 
-- **Frontend:** React 18 + Vite 5 + Tailwind 3. Sin dependencias de charting: los gráficos son SVG propio.
+- **Frontend:** React 18 + Vite 5 + Tailwind 3. Los gráficos son SVG propio (sin librería de charting); el mapa OOH usa **Leaflet + OpenStreetMap** (Opción A).
 - **Ley visual:** `docs/DESIGN (Verisure).md` es la fuente de verdad. Tokens de color como CSS custom properties en `src/index.css`, mapeados 1:1 en `tailwind.config.js`. Ningún hex fuera de esa tabla. Fuentes auto-hospedadas (Space Grotesk, Instrument Sans, Anton) en `public/fonts/` — sin URLs externas.
 - **Vocabulario de honestidad (DESIGN §2):** sólido = confirmado (pauta operada por Reset) · rayado = estimado (Integrametrics) · punteado = sin data fresca. Cada afirmación de dato lleva su frescura y su fuente.
-- **Datos:** el navegador **solo** lee el snapshot publicado en `public/data/*.json`. No habla con Integrametrics ni ve ningún token (governance). El pipeline es el único que toca la API.
+- **Datos:** el navegador **solo** lee el CONTRATO agregado `public/data/algorithm.json` (`{ meta, daily, pieces, ooh, events, digital }`, serie histórica con fecha + entidades únicas con su arte). No descarga registros crudos, no habla con Integrametrics ni ve ningún token (governance). `src/data/views.js` corta el contrato por rango de fecha (date-picker) y deriva SOI, presión, deltas, museo, OOH y digital. El pipeline es el único que toca la API.
 - **Determinismo:** los fixtures se generan con un PRNG sembrado (seed `20260710`); los derivadores son funciones puras sin `Date.now`/`Math.random`; el dinero se agrupa con regex (no `toLocaleString`, que varía entre navegadores).
 
 ### Flujo de datos
 
 ```
-Integrametrics / Trends / SIDPOL / BCRP        (fuentes externas)
+Integrametrics (/registros + /registros-digital)      (fuente real)
         │
         ▼
-scripts/run-pipeline.mjs   ──►   public/data/*.json  +  export.csv  +  meta.json
-  (derivadores puros)              (snapshot publicado, contrato único)
+scripts/run-pipeline.mjs   ──►   public/data/algorithm.json + export.csv + meta.json
+  (aggregate.js: contrato)         (contrato agregado ~880 KB · trends/contexto de fixtures)
         │                                   │
-   GitHub Actions (cron diario)        el navegador fetchea /data/*.json
+   GitHub Actions                     el navegador fetchea /data/algorithm.json
+   · cron diario  → incremental 7 días (merge idempotente)
+   · cron domingo → backfill completo (re-cuadra acumulados)
 ```
 
-En modo demostración (sin token) el pipeline corre un **dry-run determinista sobre los fixtures**: produce el mismo snapshot siempre.
+**Incremental vs. backfill:** la corrida diaria jala solo los últimos 7 días (incluido hoy)
+y los fusiona en el contrato commiteado sin duplicar (upsert de días por fecha, unión de
+entidades por clave estable). El backfill semanal reconstruye todo el rango. En modo
+demostración (sin token) el pipeline agrega los **fixtures deterministas**.
 
 ---
 
@@ -70,7 +75,7 @@ La app funciona sin credenciales: lee el snapshot de `public/data/` (versionado 
 | `npm test` | Tests (`node --test`) |
 | `npm run gen:fixtures` | Regenera los fixtures deterministas |
 | `npm run validate:fixtures` | Valida los fixtures contra el esquema del PDF de Integrametrics |
-| `npm run pipeline` | Corre los derivadores y publica el snapshot en `public/data/` |
+| `npm run pipeline` | Agrega los datos y publica el contrato en `public/data/algorithm.json` |
 
 ### Estados de demostración
 
@@ -80,7 +85,11 @@ Añade `?demo=` a la URL para previsualizar estados diseñados: `loading`, `empt
 
 ## Pipeline diario
 
-`.github/workflows/pipeline.yml` corre a las **06:00 America/Lima** (`0 11 * * *` UTC) y con `workflow_dispatch` de respaldo. Valida fixtures y tests, corre `scripts/run-pipeline.mjs` y commitea `public/data/` si cambió.
+`.github/workflows/pipeline.yml` corre a las **06:00 America/Lima** (`0 11 * * *` UTC) en modo
+incremental (7 días), los **domingos** (`0 10 * * 0`) en backfill completo, y con `workflow_dispatch`
+de respaldo (input `start_date` para backfill puntual). Corre los tests, ejecuta `scripts/run-pipeline.mjs`
+y commitea `public/data/` si cambió. Sin `INTEGRAMETRICS_TOKEN` en Secrets, omite la escritura
+(no sobrescribe el contrato real con fixtures).
 
 El **export CSV** (`public/data/export.csv`) usa las dimensiones compartidas del BI de Verisure (§A.7 del blueprint): fecha, hora, zona, taxonomía de canal, marca, versión, inversión (S/ y USD) y tipo de cambio. Flujo en una sola dirección: hacia su Power BI.
 

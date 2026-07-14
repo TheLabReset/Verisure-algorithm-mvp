@@ -1,8 +1,10 @@
-// DEMANDA — Google Trends, share of search vs investment e índice de amenaza DIY.
-// Cablea la capa de datos (fixtures/live). Cero data hardcodeada.
+// DEMANDA — Google Trends, share of search vs investment (real, del contrato) e índice de
+// amenaza DIY. El share of search viene de Trends (fixture honesto hasta su conector); el
+// share of investment es REAL (contrato). Cero data hardcodeada.
 import { useMemo } from 'react'
 import { useData } from '../../data/DataContext'
-import { searchVsInvestment, diyIndex } from '../../data/derive'
+import { searchVsInvestment } from '../../data/views'
+import { diyIndex } from '../../data/derive'
 import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
 import SearchVsInvestmentSlope from './SearchVsInvestmentSlope'
@@ -10,15 +12,16 @@ import SearchTrend from './SearchTrend'
 import DiyThreatGauge from './DiyThreatGauge'
 
 export default function DemandaModule() {
-  const { loading, registros, digital, trends } = useData()
+  const { loading, contract, trends, range } = useData()
+  const { from, to } = range || {}
 
   const view = useMemo(() => {
-    if (!trends) return null
+    if (!trends || !contract || !from || !to) return null
     return {
-      svi: searchVsInvestment(registros, trends),
-      diy: diyIndex(trends, digital),
+      svi: searchVsInvestment(contract, trends, from, to),
+      diy: diyIndex(trends, []),
     }
-  }, [registros, digital, trends])
+  }, [contract, trends, from, to])
 
   if (loading && !view) {
     return (
@@ -37,7 +40,6 @@ export default function DemandaModule() {
   return (
     <div className="space-y-6">
       <SearchVsInvestmentSlope rows={view.svi} />
-      {/* Tendencia de búsqueda junto al índice DIY, 2 columnas en desktop. */}
       <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
         <SearchTrend trends={trends} />
         <DiyThreatGauge diy={view.diy} />

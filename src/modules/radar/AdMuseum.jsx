@@ -1,63 +1,34 @@
-// Ad Museum — galería creativa viva (blueprint RADAR): grid 2×2 de piezas con
-// primera emisión, canales e inversión acumulada estimada, y tono EPPM. Ordenada por
-// primera emisión (más recientes primero). "Ver todo" expande de 4 a todas.
+// Ad Museum — galería creativa viva (blueprint RADAR): grid de piezas con su ARTE real
+// (video/audio/imagen desde el contrato), marca, tono EPPM, primera emisión, canales e
+// inversión acumulada estimada. Ordenada por inversión (más relevante primero). "Ver todo"
+// expande. Sirve tanto piezas ATL como digitales (prop `pieces`).
 import { useState } from 'react'
-import { Play, AudioLines, RectangleHorizontal, Smartphone } from 'lucide-react'
 import { formatSoles } from '../../utils/format'
+import AssetView from '../../components/AssetView'
 import { brandDisplay } from './radarUtils'
 import { fmtDayShort } from './dateLabels'
 
-// Ícono de formato derivado del tipo/canal de la pieza (neutro, no color por marca).
-function formatIcon(p) {
-  const t = (p.tname || '').toUpperCase()
-  const ch = [...(p.channels || []), ...(p.tipos || [])].join(' ').toUpperCase()
-  if (t.includes('VÍA') || t.includes('OOH') || ch.includes('OOH') || ch.includes('VÍA')) return RectangleHorizontal
-  if (/META|YOUTUBE|DIGITAL|TIKTOK|\bFB\b|\bIG\b/.test(ch)) return Smartphone
-  if (t.includes('RADIO') || /\bRADIO\b|RPP|EXITOSA/.test(ch)) return AudioLines
-  return Play
+// Etiqueta de medio para la píldora sobre la arte.
+function medioLabel(p) {
+  if (p.medio === 'DIGITAL') return p.plataforma || 'Digital'
+  const ch = (p.channels || [])[0]
+  if (/RADIO|RPP|EXITOSA/i.test(ch || '') || p.franja === undefined) return ch || 'Radio'
+  return ch || p.medio || 'TV'
 }
 
-// Miniatura clara con ilustración de formato + píldora de tono (callout) e ícono.
-function Thumb({ piece }) {
-  const Icon = formatIcon(piece)
-  return (
-    <div
-      className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-inner"
-      style={{ background: 'var(--wash)' }}
-    >
-      <Icon size={30} strokeWidth={1.5} style={{ color: 'var(--ink-3)' }} aria-hidden="true" />
-      {/* Ícono de formato pequeño, arriba-derecha */}
-      <span
-        className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-pill"
-        style={{ background: 'var(--surface)', color: 'var(--ink-2)' }}
-      >
-        <Icon size={12} strokeWidth={2} aria-hidden="true" />
-      </span>
-      {/* Píldora de tono EPPM, abajo-izquierda */}
-      <span
-        className="absolute bottom-2 left-2 rounded-pill px-2 py-0.5 text-xs font-medium"
-        style={{ background: 'var(--surface)', color: 'var(--ink-2)' }}
-      >
-        {piece.eppm}
-      </span>
-    </div>
-  )
-}
-
-export default function AdMuseum({ pieces = [] }) {
+export default function AdMuseum({ pieces = [], title = 'Ad Museum', subtitle }) {
   const [showAll, setShowAll] = useState(false)
   const shown = showAll ? pieces : pieces.slice(0, 4)
-
   if (!pieces.length) return null
+
+  const sub = subtitle || `${pieces.length} ${pieces.length === 1 ? 'pieza activa' : 'piezas activas'} · ordenadas por inversión`
 
   return (
     <section className="flex h-full flex-col rounded-card bg-surface p-5 shadow-card sm:p-6">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h3 className="font-display text-xl text-ink sm:text-2xl">Ad Museum</h3>
-          <p className="mt-1 text-sm text-ink-2">
-            {pieces.length} piezas activas · ordenadas por primera emisión
-          </p>
+          <h3 className="font-display text-xl text-ink sm:text-2xl">{title}</h3>
+          <p className="mt-1 text-sm text-ink-2">{sub}</p>
         </div>
         {pieces.length > 4 ? (
           <button
@@ -70,16 +41,15 @@ export default function AdMuseum({ pieces = [] }) {
         ) : null}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {shown.map((p) => (
           <article key={p.key}>
-            <Thumb piece={p} />
+            <AssetView asset={p.asset} medio={p.medio} label={p.tone} alt={`${brandDisplay(p.maname)} — ${p.vname}`} />
             <p className="mt-2 text-sm text-ink">
               <span className="font-semibold">{brandDisplay(p.maname)}</span> · «{p.vname}»
             </p>
             <p className="mt-1 text-xs text-ink-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {fmtDayShort(p.firstEmission)} · {p.channels.slice(0, 2).join(', ') || p.tipos[0] || '—'} ·{' '}
-              {formatSoles(p.totalInvestment)} acum.
+              {fmtDayShort(p.firstEmission)} · {medioLabel(p)} · {formatSoles(p.spend)} acum.
             </p>
           </article>
         ))}
