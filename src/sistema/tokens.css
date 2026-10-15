@@ -59,8 +59,8 @@
   --p-ro-1: #34363d; --p-ro-2: #4a4c54; --p-ro-3: #666870; --p-ro-4: #8b8d94; --p-ro-5: #b1b2b7; --p-ro-6: #d5d6d8; --p-ro-7: #f5f5f3;
 
   /* ── Primitivos: estado (reservados, nunca serie) ── */
-  --p-ambar-700: #8c5b10;
-  --p-ambar-300: #ffbc63;
+  --p-prosegur: #ffc800;    /* el amarillo de Prosegur, medido en sus piezas digitales: los rellenos de la competencia en foco */
+  --p-prosegur-ocre: #a67c00; /* el mismo tono, oscurecido: las líneas finas de la competencia en claro (un amarillo de 2 px no se ve sobre blanco) */
 
   /* ── Primitivos: categorías, orden fijo, validadas para daltonismo en las dos superficies ── */
   --p-cat-menta: #0c8a66;
@@ -91,10 +91,12 @@
   --foco: var(--p-tinta);                /* anillo de foco */
   --mejora: var(--p-verde-oscuro);       /* variación favorable: siempre con flecha y signo */
   --empeora: var(--p-rojo-texto);        /* variación desfavorable */
-  --atencion: var(--p-ambar-700);        /* pocos casos, dato parcial */
-  --s1: var(--p-tinta);                  /* la serie propia: tinta, como la marca */
-  --resalte: var(--p-tinta);             /* la serie de Verisure: tinta. El rojo es identidad, nunca dato */
-  --serie-1: var(--resalte);            /* barras y líneas de dato: el color de la marca para datos */
+  --atencion: var(--p-tinta);            /* pocos casos, dato parcial: en tinta con su ícono, para no confundirse con el amarillo de la competencia */
+  --s1: var(--resalte);                  /* puntos de la serie en foco */
+  --resalte: var(--p-prosegur);          /* rellenos de la serie en foco: la competencia, en su amarillo. El rojo es identidad, nunca dato */
+  --resalte-borde: var(--p-tinta);       /* el borde que hace visible el amarillo sobre blanco (relleno con borde, ver quincha.md) */
+  --resalte-anillo: var(--p-tinta);      /* el anillo de los puntos y círculos en foco */
+  --serie-1: var(--p-prosegur-ocre);     /* líneas de la serie en foco: el amarillo oscurecido, porque una línea no lleva borde */
   --serie-resto: var(--p-n-200);  /* el resto, cuando un gráfico resalta una sola marca */
   --resalte-suave: color-mix(in oklab, var(--resalte) 10%, var(--superficie));
   --s2: var(--p-cat-menta);              /* categorías en orden fijo */
@@ -165,9 +167,11 @@
     --foco: var(--p-cal);
     --mejora: var(--p-verde);
     --empeora: var(--p-rojo-claro);
-    --atencion: var(--p-ambar-300);
-    --s1: var(--p-cal);
-    --resalte: var(--p-cal);
+    --atencion: var(--p-cal);
+    --s1: var(--resalte);
+    --resalte: var(--p-prosegur);
+    --resalte-borde: transparent;
+    --resalte-anillo: var(--superficie);
     --serie-1: var(--resalte);
     --serie-resto: var(--p-o-600);
     --resalte-suave: color-mix(in oklab, var(--resalte) 18%, var(--superficie));
@@ -210,9 +214,11 @@
   --foco: var(--p-cal);
   --mejora: var(--p-verde);
   --empeora: var(--p-rojo-claro);
-  --atencion: var(--p-ambar-300);
-  --s1: var(--p-cal);
-  --resalte: var(--p-cal);
+  --atencion: var(--p-cal);
+  --s1: var(--resalte);
+  --resalte: var(--p-prosegur);
+  --resalte-borde: transparent;
+  --resalte-anillo: var(--superficie);
   --serie-1: var(--resalte);
   --serie-resto: var(--p-o-600);
   --resalte-suave: color-mix(in oklab, var(--resalte) 18%, var(--superficie));

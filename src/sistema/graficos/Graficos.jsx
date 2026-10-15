@@ -165,10 +165,11 @@ export function Pesas({ filas, formato = numero, max, min = 0, rotuloA, rotuloB,
                   {centro != null && <line className="q-separador" x1={x(centro)} x2={x(centro)} y1={cy - 10} y2={cy + 10} />}
                   {f.a != null && f.b != null && <line className="q-pesa" x1={x(f.a)} x2={x(f.b)} y1={cy} y2={cy} />}
                   {f.a != null && <circle className="q-punto-previo" cx={x(f.a)} cy={cy} r="5" data-valor={f.a} />}
-                  {f.b != null && <circle className="q-punto-actual" cx={x(f.b)} cy={cy} r="6" data-valor={f.b} />}
+                  {f.b != null && <circle className={f.resto ? 'q-punto-actual-resto' : 'q-punto-actual'} cx={x(f.b)} cy={cy} r="6" data-valor={f.b} />}
                   {/* la cifra va junto a su punto (el del período): a la derecha si queda adelante de la comparación, si no a la izquierda */}
-                  {f.b != null && (f.a == null || f.b >= f.a
-                    ? <text className="q-rotulo-valor" x={x(f.b) + 12} y={cy + 4}>{formato(f.b)}</text>
+                  {/* a la izquierda solo si cabe sin pisar el nombre de la fila; si no, a la derecha del punto más alejado */}
+                  {f.b != null && (f.a == null || f.b >= f.a || x(f.b) - m.l < 44
+                    ? <text className="q-rotulo-valor" x={x(Math.max(f.b, f.a ?? f.b)) + 12} y={cy + 4}>{formato(f.b)}</text>
                     : <text className="q-rotulo-valor" x={x(f.b) - 12} y={cy + 4} textAnchor="end">{formato(f.b)}</text>)}
                 </g>
               );
@@ -249,7 +250,7 @@ export function Bala({ filas, max, formato = numero, formatoEje, etiqueta }) {
 }
 
 // ─────────────── Barras ordenadas, con el valor de comparación como raya ───────────────
-export function Barras({ filas, formato = numero, max: maxComun, margen, margenDer, resaltar, rotuloPrevio, etiqueta }) {
+export function Barras({ filas, formato = numero, max: maxComun, margen, margenDer, resaltar, rotuloPrevio, etiqueta, tono }) {
   const hayPrevio = filas.some((f) => f.previo != null);
   const tabla = { columnas: ['', 'Valor', ...(hayPrevio ? ['Comparación'] : [])], filas: filas.map((f) => [f.nombre, formato(f.valor), ...(hayPrevio ? [f.previo == null ? 'sin dato' : formato(f.previo)] : [])]) };
   return (
@@ -273,7 +274,7 @@ export function Barras({ filas, formato = numero, max: maxComun, margen, margenD
                   <Zona x={0} y={cy} w={ancho} h={fila} pista={`${f.nombre}\n${f.valor == null ? f.nota || 'sin dato' : formato(f.valor) + (f.nota ? ` · ${f.nota}` : '')}${f.previo != null ? `\ncomparación: ${formato(f.previo)}` : ''}`} />
                   <text className={`q-rotulo-fila${r ? ' q-fuerte' : ''}`} x={m.l - 10} y={cy + fila / 2 + 4} textAnchor="end">{recortar(f.nombre, m.l)}</text>
                   {f.valor == null ? <text className="q-nota" x={m.l} y={cy + fila / 2 + 4}>{f.nota || 'sin dato'}</text> : <>
-                    {f.valor > 0 && <rect className={r ? 'q-barra-acento' : resaltar ? 'q-barra-resto' : 'q-barra'} x={x(0)} y={cy + 7} width={Math.max(1, x(f.valor) - x(0))} height={fila - 14} rx="2" data-valor={f.valor} />}
+                    {f.valor > 0 && <rect className={tono === 'resto' ? 'q-barra-resto-fuerte' : r ? 'q-barra-acento' : resaltar ? 'q-barra-resto' : 'q-barra'} x={x(0)} y={cy + 7} width={Math.max(1, x(f.valor) - x(0))} height={fila - 14} rx="2" data-valor={f.valor} />}
                     {f.previo != null && <line className="q-raya-previa" x1={x(f.previo)} x2={x(f.previo)} y1={cy + 3} y2={cy + fila - 3} data-valor={f.previo} />}
                     <text className="q-rotulo-valor" x={x(Math.max(f.valor, f.previo ?? 0)) + 8} y={cy + fila / 2 + 4}>{formato(f.valor)}{conNota && f.nota && <tspan className="q-nota"> · {f.nota}</tspan>}</text>
                   </>}
@@ -515,7 +516,7 @@ export function Proyeccion({ historia, meses, formato = numero, etiqueta }) {
 
 // ─────────────── Columnas verticales: una medida por categoría ordenada (horas, días, tramos) ───────────────
 // rotulo: si se pasa, cada barra lleva su cifra encima (pocas barras); si no, solo la más alta de las resaltadas
-export function Histograma({ barras, formato = numero, rotulo, resaltar = [], etiqueta, alto: altoPedido = 180 }) {
+export function Histograma({ barras, formato = numero, rotulo, resaltar = [], etiqueta, alto: altoPedido = 180, tono }) {
   const tabla = { columnas: ['', 'Valor'], filas: barras.map((b) => [b.nombre, formato(b.valor)]) };
   return (
     <Grafico etiqueta={etiqueta} tabla={tabla}>
@@ -534,7 +535,7 @@ export function Histograma({ barras, formato = numero, rotulo, resaltar = [], et
               return (
                 <g key={b.nombre}>
                   <Zona x={m.l + i * paso} y={m.t} w={paso} h={alto - m.b - m.t} pista={`${b.nombre}\n${formato(b.valor)}`} />
-                  {b.valor > 0 && <rect className={r ? 'q-barra-acento' : resaltar.length ? 'q-barra-resto' : 'q-barra'} x={x} y={y(b.valor)} width={w} height={y(0) - y(b.valor)} rx="2" data-valor={b.valor} />}
+                  {b.valor > 0 && <rect className={r ? (tono === 'resto' ? 'q-barra-resto-fuerte' : 'q-barra-acento') : resaltar.length || tono === 'resto' ? 'q-barra-resto' : 'q-barra'} x={x} y={y(b.valor)} width={w} height={y(0) - y(b.valor)} rx="2" data-valor={b.valor} />}
                   {/* rótulos a intervalo fijo; una barra resaltada fuera del intervalo se rotula solo si cabe */}
                   {(i % cada === 0 || (r && cada === 1)) && <text className={`q-eje${r ? ' q-fuerte' : ''}`} x={x + w / 2} y={alto - 8} textAnchor="middle">{b.corto ?? b.nombre}</text>}
                   {(rotulo || i === tope) && <text className="q-rotulo-valor" x={x + w / 2} y={y(b.valor ?? 0) - 6} textAnchor="middle">{rotulo ? rotulo(b) : formato(b.valor)}</text>}

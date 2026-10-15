@@ -208,3 +208,5 @@ Ajustes pedidos por The Lab después de ver el rediseño.
 - **OOH con su apartado y un mapa Leaflet** sobre OpenStreetMap: cada ubicación se elige y abre su foto o video. El distrito sale de las coordenadas (límites de OpenStreetMap), no del texto de Integrametrics. CARTO se descartó: sin clave sus mosaicos salen con marca de agua.
 - **Gráficos variados:** cronograma de versiones, mancuernas, pendiente, franjas de partes, mapa de calor día × hora y la pauta semanal (con selector ATL, digital o todo). Rampa de magnitud en tinta, no en verde.
 - **Corrección:** los selectores dentro de una tarjeta abrían columnas implícitas y dejaban los gráficos angostos, con un hueco a la derecha. Ahora cada gráfico mide lo mismo que su tarjeta.
+
+- **Prosegur en su amarillo** (#FFC800, medido en sus piezas): relleno con borde de tinta en claro, amarillo puro en oscuro, líneas en ocre. «Atención» pasa a tinta y Radio a tinta en las franjas de medios, para no chocar con el amarillo. El chequeo de Quincha mide el borde de un relleno que lo tiene.

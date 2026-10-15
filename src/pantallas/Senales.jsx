@@ -112,7 +112,7 @@ export default function Senales({ capa, vista: v }) {
         {!L.ooh ? <Bloque titulo="Dónde están los paneles" universo="atl" estado={sinDato('no-cargo')} /> : <>
           <Bloque universo="atl" {...oohLectura(L.ooh, P)}
             ayuda={<p>Integrametrics recorre la ciudad y registra cada panel con su foto o video, sus coordenadas y una inversión estimada. Cada círculo es una ubicación: las caras de una misma torre van juntas. El distrito sale de las coordenadas, con los límites de OpenStreetMap.</p>}
-            pie={<span>Paneles detectados en el período · mapa base © OpenStreetMap y CARTO.</span>}>
+            pie={<span>Paneles detectados en el período · mapa base © colaboradores de OpenStreetMap.</span>}>
             {L.ooh.paneles.length > 0 ? <Ooh o={L.ooh} t={tPaneles} nota={`detectados en ${periodoTexto(P)}`} /> : <p className="q-nota-bloque">Sin paneles detectados en el período.</p>}
           </Bloque>
           <Bloque universo="atl" ancho="mitad" {...distritosLectura(L.ooh)}

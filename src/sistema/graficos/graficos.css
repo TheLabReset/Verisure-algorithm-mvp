@@ -39,16 +39,19 @@
 /* Puntos y pesas */
 .q-svg .q-pesa { stroke: var(--borde-control); stroke-width: 2; }
 .q-svg .q-punto-previo { fill: var(--superficie); stroke: var(--previa); stroke-width: 2; }
-.q-svg .q-punto-actual { fill: var(--s1); stroke: var(--superficie); stroke-width: 2; }
+.q-svg .q-punto-actual { fill: var(--s1); stroke: var(--resalte-anillo); stroke-width: 1.5; }
 .q-svg .q-pendiente { stroke: var(--previa); stroke-width: 1.5; }
-.q-svg .q-pendiente-propia { stroke: var(--s1); stroke-width: 3; }
+.q-svg .q-pendiente-propia { stroke: var(--serie-1); stroke-width: 3; }
 
 /* Barras: gris neutro; la que se lee primero, en la serie propia */
-.q-svg .q-barra { fill: var(--serie-1); }
+.q-svg .q-barra { fill: var(--resalte); stroke: var(--resalte-borde); stroke-width: 1.25; }
 .q-svg .q-barra-resto { fill: var(--serie-resto); }
-.q-svg .q-barra-valor { fill: var(--s1); }
+/* la marca de referencia cuando un gráfico la muestra sola: gris, más oscuro en lo resaltado */
+.q-svg .q-barra-resto-fuerte { fill: var(--borde-control); }
+.q-svg .q-punto-actual-resto { fill: var(--borde-control); stroke: var(--superficie); stroke-width: 2; }
+.q-svg .q-barra-valor { fill: var(--s1); stroke: var(--resalte-borde); stroke-width: 1.25; }
 /* la barra resaltada: la menta de la marca, una por gráfico */
-.q-svg .q-barra-acento { fill: var(--resalte); }
+.q-svg .q-barra-acento { fill: var(--resalte); stroke: var(--resalte-borde); stroke-width: 1.25; }
 .q-svg .q-barra-rayada { fill: var(--rayado); }
 .q-svg .q-rayado-fondo { fill: var(--superficie); }
 .q-svg .q-rayado-linea { stroke: var(--atencion); stroke-width: 2; }
@@ -70,6 +73,8 @@
 .q-p2 { fill: var(--s2); background: var(--s2); }
 /* «el resto»: el único gris de un gráfico de partes */
 .q-p5 { fill: var(--borde-control); background: var(--borde-control); }
+/* una categoría en tinta: cuando el naranja de categoría choca con el color de una marca (el amarillo de la competencia) */
+.q-p-tinta { fill: var(--texto-1); background: var(--texto-1); }
 /* partes de una retícula: la resaltada en menta, dos en color de categoría (azul y naranja, validados para
    daltonismo en ese orden), el resto en un solo gris y lo perdido hueco. Nunca dos grises vecinos. */
 .q-g0 { fill: var(--resalte); background: var(--resalte); }
@@ -101,7 +106,7 @@
 .q-leyenda .q-nota { color: var(--texto-3); }
 .q-leyenda-pesas { margin: 0 0 var(--e-2); }
 .q-muestra-previa { border-radius: 50%; border: 2px solid var(--previa); background: transparent; }
-.q-muestra-actual { border-radius: 50%; background: var(--s1); }
+.q-muestra-actual { border-radius: 50%; background: var(--s1); border: 1px solid var(--resalte-borde); }
 .q-muestra { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: var(--e-2); vertical-align: -1px; }
 .q-escala { display: flex; align-items: center; gap: 2px; margin-top: var(--e-2); font-size: var(--t-12); color: var(--texto-3); }
 .q-escala span { padding-inline: var(--e-2); }
@@ -130,7 +135,7 @@
 .q-svg .q-elegible text { pointer-events: none; }
 .q-svg .q-elegible:focus { outline: none; }
 .q-svg .q-blanco { fill: transparent; }
-.q-svg .q-punto { fill: var(--s1); stroke: var(--superficie); stroke-width: 2; }
+.q-svg .q-punto { fill: var(--s1); stroke: var(--resalte-anillo); stroke-width: 1.5; }
 .q-svg .q-punto-propio { fill: var(--resalte); }
 .q-svg .q-anillo { fill: none; stroke: transparent; stroke-width: 1.5; }
 .q-svg .q-elegido .q-anillo { stroke: var(--texto-1); }
@@ -147,19 +152,19 @@
 .q-svg .q-llave text { fill: var(--texto-1); font-weight: var(--peso-rotulo); }
 /* Cronograma: ATL lleno, digital en contorno; el período elegido con la superficie de capítulo detrás */
 .q-svg .q-zona-periodo { fill: var(--superficie-capitulo); }
-.q-svg .q-tramo { fill: var(--resalte); }
-.q-svg .q-tramo-contorno { fill: var(--resalte-suave); stroke: var(--resalte); stroke-width: 1.5; }
+.q-svg .q-tramo { fill: var(--resalte); stroke: var(--resalte-borde); stroke-width: 1.25; }
+.q-svg .q-tramo-contorno { fill: var(--resalte-suave); stroke: var(--serie-1); stroke-width: 1.5; }
 .q-svg .q-elegible:hover .q-tramo { opacity: 0.85; }
 .q-svg .q-elegible:focus-visible .q-zona { fill: var(--superficie-capitulo); stroke: var(--foco); stroke-width: 2; }
-.q-muestra-tramo { background: var(--resalte); }
-.q-muestra-contorno { background: var(--resalte-suave); border: 1.5px solid var(--resalte); }
+.q-muestra-tramo { background: var(--resalte); border: 1px solid var(--resalte-borde); }
+.q-muestra-contorno { background: var(--resalte-suave); border: 1.5px solid var(--serie-1); }
 
 /* Mapa de paneles (Leaflet). El mapa base es de OpenStreetMap, calmado con --mapa-filtro; lo de encima sale de los tokens */
 .q-mapa { height: clamp(360px, 52vw, 560px); border-radius: var(--r-control); background: var(--superficie-capitulo); border: 1px solid var(--borde); z-index: 0; }
 .q-mapa.leaflet-container { font-family: var(--f-texto); }
 .q-mapa .leaflet-tile-pane { filter: var(--mapa-filtro); }
 .q-mapa .leaflet-interactive.q-mapa-punto { stroke: var(--superficie); stroke-opacity: 1; fill-opacity: 0.88; cursor: pointer; }
-.q-mapa .leaflet-interactive.q-mapa-foco { fill: var(--resalte); }
+.q-mapa .leaflet-interactive.q-mapa-foco { fill: var(--resalte); stroke: var(--resalte-anillo); }
 .q-mapa .leaflet-interactive.q-mapa-resto { fill: var(--borde-control); }
 .q-mapa .leaflet-interactive.q-mapa-punto:hover { fill-opacity: 1; }
 .q-mapa .q-mapa-anillo { stroke: var(--texto-1); fill: none; }
@@ -170,5 +175,5 @@
 .q-mapa .leaflet-control-zoom a:hover { background: var(--superficie-capitulo); }
 .q-mapa.leaflet-container .leaflet-control-attribution { background: color-mix(in oklab, var(--superficie) 85%, transparent); color: var(--texto-3); font-size: var(--t-12); }
 .q-mapa.leaflet-container .leaflet-control-attribution a { color: var(--texto-2); }
-.q-muestra-mapa-foco { border-radius: 50%; background: var(--resalte); }
+.q-muestra-mapa-foco { border-radius: 50%; background: var(--resalte); border: 1px solid var(--resalte-anillo); }
 .q-muestra-mapa-resto { border-radius: 50%; background: var(--borde-control); }

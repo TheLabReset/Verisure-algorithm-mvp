@@ -63,6 +63,7 @@ Antes de cualquier decisión, la pregunta es la misma: **¿esto lo vamos a poder
   - Si un gráfico resalta algo (la página nueva, las cuatro horas más altas, el día que más tiene), lo resaltado va en ese color y el resto en gris claro (`--serie-resto`).
   - Una sola marca resaltada por gráfico.
   - **Quién va resaltado lo decide el foco del algoritmo.** Si lo principal es la competencia (un algoritmo de inteligencia competitiva), la competencia va en el color de datos y la marca propia en gris, para comparar; las lecturas empiezan por la competencia. La vista lo marca con `foco` en cada marca y las pantallas no deciden. El color sigue a la marca en todo el panel.
+  - **El color de datos puede ser el de la marca en foco** si pasa contraste: directo, o con la regla de relleno con borde de Quincha cuando es un color claro (un amarillo). Nunca el rojo si el rojo ya significa «empeora». Si el color de foco choca con un color de estado o de categoría (un amarillo contra el ámbar de «atención»), se mueve el otro.
   - Las partes de un todo van en azul, naranja y menta, en ese orden, más un gris para «el resto». Si se comparan varias franjas, cada categoría lleva siempre el mismo color (el color sigue a la categoría, no al orden).
 - **Área clara** bajo la serie propia en las líneas.
 - **«Ver como tabla»** visible debajo de cada gráfico. Se apaga solo si la tarjeta ya muestra esa tabla justo debajo.

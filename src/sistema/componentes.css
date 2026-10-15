@@ -293,7 +293,7 @@
 
 /* ── Tablas: barra junto a la cifra, subtítulo gris, cifra con tono, fila destacada ── */
 .q-celda-barra { display: grid; grid-template-columns: minmax(48px, 1fr) auto; align-items: center; gap: var(--e-2); min-width: 128px; }
-.q-celda-barra i { display: block; height: 6px; border-radius: 0 2px 2px 0; background: var(--serie-1); justify-self: start; }
+.q-celda-barra i { display: block; height: 6px; border-radius: 0 2px 2px 0; background: var(--borde-control); justify-self: start; }
 .q-celda-barra > span { text-align: right; min-width: 3.5em; }
 .q-tabla-sub { display: block; font-size: var(--t-12); color: var(--texto-3); }
 .q-tabla .q-tono-empeora { color: var(--empeora); }

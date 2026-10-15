@@ -108,6 +108,8 @@ Están en `src/sistema/graficos`. Son SVG propios, y cada marca lleva su valor e
 
 **En reserva**, porque hoy no los usa ninguna pantalla de este algoritmo: `Bala` (contra un objetivo) y `Multiplos`. Lo que se use o no depende de cada algoritmo; la plantilla los tiene todos.
 
+**Relleno con borde.** Un color de marca claro (el amarillo de una competencia) no llega a 3 : 1 sobre blanco. Entra igual si el relleno lleva borde de tinta: `--resalte` es el relleno, `--resalte-borde` el borde (tinta en claro, `transparent` en oscuro, donde el relleno ya contrasta solo) y `--resalte-anillo` el anillo de los puntos. Las líneas no llevan borde, así que `--serie-1` es el mismo tono oscurecido. El chequeo lo sabe: si un color de datos tiene su `--X-borde`, mide el borde contra el fondo.
+
 El mapa base es lo único que viene de afuera: los mosaicos de OpenStreetMap (sin clave, para un uso liviano, con atribución). `--mapa-filtro` es un token como cualquier otro: gris tenue en claro e invertido en oscuro, definido en los dos bloques oscuros.
 
 Reglas de forma:

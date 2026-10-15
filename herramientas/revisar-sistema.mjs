@@ -23,6 +23,9 @@ const TEXTO = ['texto-1', 'texto-2', 'texto-3', 'acento-texto', 'mejora', 'empeo
 const INTERFAZ = ['borde-control', 'acento', 'foco'];
 // marcas de datos: 3:1 sobre las superficies donde hay gráficos
 const GRAFICO = ['s1', 'resalte', 's2', 's3', 's4', 'previa'];
+// Un relleno con borde: si un color de datos tiene su --X-borde (o lo hereda de un alias), lo que se ve contra el
+// fondo es el borde. Así entra un color de marca claro (un amarillo) sin perder contraste: relleno de marca y borde
+// de tinta. Un borde «transparent» (en el tema donde el relleno ya contrasta solo) vuelve a medir el relleno.
 // colores que conviven en un mismo gráfico: tienen que separarse entre sí, no solo del fondo.
 // Regla de la casa: nunca dos grises vecinos que se confundan (asumo 1,2:1 entre escalones como piso perceptible
 // para rellenos grandes; 2:1 entre la serie y su comparación).
@@ -106,7 +109,19 @@ export function revisar(archivos) {
     return v && /^#[0-9a-f]{3,8}$/i.test(v) ? v : null;
   };
   for (const [nombre, tema] of [[temaBase, base], [temaAlterno, { ...base, ...altBoton }]]) {
-    const medir = (a, b, minimo, tipo) => {
+    // el borde de un relleno: el --X-borde del token o de su alias (s1 → resalte → resalte-borde)
+    const bordeDe = (k) => {
+      for (let n = k, i = 0; n && i < 4; i++) {
+        const b = tema[`${n}-borde`] ?? base[`${n}-borde`];
+        if (b) return b.trim() === 'transparent' ? null : `${n}-borde`;
+        const v = tema[n] ?? base[n];
+        n = v?.startsWith('var(') ? v.match(/var\(--([\w-]+)\)/)[1] : null;
+      }
+      return null;
+    };
+    const medir = (a0, b, minimo, tipo) => {
+      const conBorde = (tipo === 'gráfico' || tipo === 'conviven') && bordeDe(a0);
+      const a = conBorde || a0;
       const ca = resolver(tema, a), cb = resolver(tema, b);
       if (!ca || !cb) { err(TOKENS, `no se pudo resolver --${a} o --${b} en el tema ${nombre}`); return; }
       const c = contraste(ca, cb);

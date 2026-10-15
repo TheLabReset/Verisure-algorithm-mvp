@@ -25,7 +25,7 @@ function TablaShare({ u, etiqueta, conImpresiones }) {
 function ShareMarcas({ u, etiqueta, rotuloA }) {
   const orden = [...u.marcas].sort((a, b) => Number(a.propia) - Number(b.propia));
   return <Pesas etiqueta={etiqueta} formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} max={100} rotuloA={rotuloA} rotuloB="Este período"
-    filas={orden.map((m) => ({ nombre: m.nombre, a: m.sharePrevio, b: m.share }))} />;
+    filas={orden.map((m) => ({ nombre: m.nombre, a: m.sharePrevio, b: m.share, resto: !m.foco }))} />;
 }
 
 export default function Rendimiento({ capa, vista: v }) {

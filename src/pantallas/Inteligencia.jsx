@@ -40,7 +40,7 @@ function PautaSemanal({ pauta, P }) {
         {filas.map((f) => (
           <div key={f.id} className="q-pauta-marca">
             <h4>{f.marca}<span>{solesCompacto(f.total)} en el año</span></h4>
-            <Histograma etiqueta={`Inversión semanal de ${f.marca}`} formato={(n) => (n == null ? 'sin registros' : soles(n))} alto={150}
+            <Histograma etiqueta={`Inversión semanal de ${f.marca}`} tono={f.foco ? undefined : 'resto'} formato={(n) => (n == null ? 'sin registros' : soles(n))} alto={150}
               resaltar={f.semanas.map((s, i) => (s.hasta >= P.desde && s.fecha <= P.hasta ? i : -1)).filter((i) => i >= 0)}
               barras={f.semanas.map((s, i, todas) => ({ nombre: `Semana del ${fechaCorta(s.fecha)}${s.parcial ? ' (incompleta)' : ''}`, corto: etiquetaSemana(s, i, todas), valor: s.valor }))} />
           </div>
