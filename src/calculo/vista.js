@@ -1,6 +1,9 @@
-// armarVista(contrato, medios, filtros, estado) devuelve todo lo que pintan las cuatro capas. Es la única puerta
-// entre la data y la pantalla: los componentes no calculan. Puro: sin fechas del sistema (el atraso de la fuente
-// llega en `estado.hoy`, que lo mide la app).
+// armarVista(contrato, medios, filtros, estado, { mapa, busquedas }) devuelve todo lo que pintan las cuatro capas y
+// MAIA. Es la única puerta entre la data y la pantalla: los componentes no calculan. Puro: sin fechas del sistema
+// (el atraso de la fuente llega en `estado.hoy`, que lo mide la app).
+//
+// Foco: lo principal es la competencia. Cada marca trae `foco` (la competencia) para que los gráficos la resalten;
+// la marca propia va como referencia, para comparar.
 //
 // Universos: la inversión ATL (TV, radio, cable, OTT, vía pública) y la digital (Meta, Google, YouTube) las estima
 // Integrametrics con métodos distintos: se leen lado a lado y nunca se suman.
@@ -8,6 +11,10 @@
 import { CLIENTE } from '../cliente.js';
 import { rango, diasEntre, diaSemana, periodoDelMes, mesesDisponibles } from './periodo.js';
 import { agruparAnuncios, nombrePlataforma } from './anuncios.js';
+import { leerOoh } from './ooh.js';
+import { versionesDelAnio, cronograma, pautaDiaria, shareSemanal, pautaSemanal } from './competencia.js';
+import { leerBusquedas } from './busquedas.js';
+import { hechosDeLaSemana } from './semana.js';
 
 export { mesesDisponibles };
 
@@ -18,6 +25,8 @@ export const UMBRALES = {
   subidaShareDigital: 5,
   dominioAtl: 90,        // share ATL de la marca propia que se lee como dominio de la categoría
   atrasoFuente: 3,       // días sin datos nuevos para decir que la fuente está atrasada
+  subidaCompetencia: 30, // % de subida de la inversión de la competencia frente a la comparación
+  subidaDiy: 15,         // % de subida de las búsquedas de cámaras frente a las mismas semanas del año anterior
 };
 
 const PROPIA = CLIENTE.marcaFuente;
@@ -40,6 +49,8 @@ export function partes(valores) {
   for (const [, i] of orden) { if (falta <= 0) break; base[i] += 1; falta -= 1; }
   return base;
 }
+
+const reparto = (obj) => { const ks = Object.keys(obj); const ps = partes(ks.map((k) => obj[k])); return Object.fromEntries(ks.map((k, i) => [k, ps[i]])); };
 
 export const MEDIOS = { 'TV ABIERTA': 'TV abierta', CABLE: 'Cable', RADIO: 'Radio', OTT: 'OTT y streaming', OOH: 'Vía pública', 'OTT STREAMING/LIVE': 'OTT y streaming', 'VIA PUBLICA': 'Vía pública' };
 export const FRANJAS = { DIA: 'Día', PRIME: 'Prime', NOCHE: 'Noche', MADRUGADA: 'Madrugada' };
@@ -69,9 +80,11 @@ function leerUniverso(serie, P) {
   const ahora = sumarTramo(serie, P.desde, P.hasta);
   const antes = P.compararDesde ? sumarTramo(serie, P.compararDesde, P.compararHasta) : null;
   const marcas = MARCAS.map((m) => ({
-    id: m, nombre: nombreMarca(m), propia: m === PROPIA,
+    id: m, nombre: nombreMarca(m), propia: m === PROPIA, foco: m !== PROPIA,
     inversion: ahora.porMarca[m].inversion, share: ahora.shares[m], spots: ahora.porMarca[m].spots, impresiones: ahora.porMarca[m].impresiones,
     medios: ahora.porMarca[m].medios, franjas: ahora.porMarca[m].franjas, plataformas: ahora.porMarca[m].plataformas,
+    // partes de su propio total (suman 100): cómo reparte cada marca, no cuánto pone frente a la otra
+    mezclaMedios: reparto(ahora.porMarca[m].medios), mezclaFranjas: reparto(ahora.porMarca[m].franjas),
     inversionPrevia: antes ? antes.porMarca[m].inversion : null,
     sharePrevio: antes ? antes.shares[m] : null,
     cambioPts: antes && antes.shares[m] != null && ahora.shares[m] != null ? ahora.shares[m] - antes.shares[m] : null,
@@ -127,21 +140,37 @@ function abanicoDigital(contrato, P) {
   return abanico(items, (x) => x.marca);
 }
 
-// Vía pública: los paneles detectados en el período, con su foto o video, y la cuenta por distrito
-function viaPublica(contrato, P) {
-  const paneles = (contrato.ooh || []).filter((p) => dia(p.firstFecha || p.lastFecha) <= P.hasta && dia(p.lastFecha || p.firstFecha) >= P.desde);
-  const items = paneles.map((p) => ({
-    marca: p.maname,
-    pieza: pieza({ ...p, key: p.key, vname: p.vname, firstEmission: p.firstFecha }, { titulo: p.direccion || p.localidad || 'Panel sin dirección', texto: p.vname ? `«${p.vname}»` : '', plataformas: [p.tipo, p.localidad].filter(Boolean) }),
-  }));
-  const distritos = new Map();
-  for (const p of paneles) {
-    const d = p.localidad || 'Sin distrito';
-    if (!distritos.has(d)) distritos.set(d, Object.fromEntries(MARCAS.map((m) => [m, 0])));
-    if (distritos.get(d)[p.maname] != null) distritos.get(d)[p.maname] += 1;
-  }
-  const porDistrito = [...distritos.entries()].map(([nombre, c]) => ({ nombre, ...c, total: suma(Object.values(c)) })).sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
-  return { paneles: paneles.length, porMarca: Object.fromEntries(MARCAS.map((m) => [m, paneles.filter((p) => p.maname === m).length])), porDistrito, abanico: abanico(items, (x) => x.marca) };
+// OOH: los paneles detectados en el período, con su foto o video, sobre el mapa y por distrito
+function ooh(contrato, mapa, P) {
+  const paneles = (contrato.ooh || []).filter((p) => MARCAS.includes(p.maname) && dia(p.firstFecha || p.lastFecha) <= P.hasta && dia(p.lastFecha || p.firstFecha) >= P.desde)
+    .map((p) => ({ ...p, marca: p.maname }));
+  const mapaLeido = leerOoh(paneles, mapa, MARCAS);
+  // La comparación: en qué distritos tenía paneles cada marca antes (Integrametrics registra cada panel el día que lo
+  // detecta, así que lo nuevo no es el panel sino el distrito)
+  const previos = P.compararDesde ? (contrato.ooh || []).filter((p) => MARCAS.includes(p.maname) && dia(p.firstFecha || p.lastFecha) <= P.compararHasta && dia(p.lastFecha || p.firstFecha) >= P.compararDesde).map((p) => ({ ...p, marca: p.maname })) : null;
+  const leidoAntes = previos ? leerOoh(previos, mapa, MARCAS) : null;
+  const zonasDe = (leido, m) => new Set([...leido.porDistrito, ...leido.fueraDeLima].filter((d) => d[m] > 0).map((d) => d.nombre));
+  const conPieza = (p) => ({
+    id: String(p.key), marca: p.maname, nombre: nombreMarca(p.maname), propia: p.maname === PROPIA, lat: p.lat, lng: p.lng,
+    version: p.vname || null, direccion: p.direccion || null, localidad: p.localidad || null, tipo: p.tipo || null,
+    desde: dia(p.firstFecha), hasta: dia(p.lastFecha || p.firstFecha), inversion: p.spend || 0, asset: p.asset || null,
+    pieza: pieza({ ...p, firstEmission: p.firstFecha }, { titulo: p.direccion || p.localidad || 'Panel sin dirección', texto: p.vname ? `«${p.vname}»` : '', plataformas: [p.tipo, p.localidad].filter(Boolean) }),
+  });
+  const lista = paneles.map(conPieza);
+  // distrito y ciudad de cada panel, ya asignados por coordenadas
+  const ubicacion = new Map();
+  for (const q of mapaLeido.puntos) for (const x of q.paneles) ubicacion.set(String(x.key), { distrito: q.distrito, ubicacion: q.id });
+  return {
+    ubicaciones: mapaLeido.puntos.map((u) => ({ id: u.id, marca: u.marca, nombre: nombreMarca(u.marca), foco: u.marca !== PROPIA, lat: u.lat, lng: u.lng, zona: u.zona, distrito: u.distrito, inversion: u.inversion, paneles: u.paneles.map((x) => String(x.key)) })),
+    zonas: mapaLeido.zonas,
+    paneles: lista.map((p) => ({ ...p, distrito: ubicacion.get(p.id)?.distrito ?? null, ubicacion: ubicacion.get(p.id)?.ubicacion ?? null })).sort((a, b) => Number(a.propia) - Number(b.propia) || b.inversion - a.inversion),
+    porMarca: Object.fromEntries(MARCAS.map((m) => [m, paneles.filter((p) => p.maname === m).length])),
+    inversionPorMarca: Object.fromEntries(MARCAS.map((m) => [m, suma(paneles.filter((p) => p.maname === m).map((p) => p.spend))])),
+    porMarcaAntes: previos ? Object.fromEntries(MARCAS.map((m) => [m, previos.filter((p) => p.maname === m).length])) : null,
+    zonasNuevas: leidoAntes ? Object.fromEntries(MARCAS.map((m) => { const antes = zonasDe(leidoAntes, m); return [m, [...zonasDe(mapaLeido, m)].filter((z) => !antes.has(z) && z !== 'Sin coordenadas')]; })) : null,
+    porDistrito: mapaLeido.porDistrito, fueraDeLima: mapaLeido.fueraDeLima, enLima: mapaLeido.enLima, fuera: mapaLeido.fuera,
+    abanico: abanico(lista.map((p) => ({ marca: p.marca, pieza: p.pieza })), (x) => x.marca),
+  };
 }
 
 // Estrenos: primera emisión de una versión nueva, con su arte
@@ -162,12 +191,15 @@ function horarioYCanales(medios, P) {
     const b = m[marca];
     if (!b) return [marca, null];
     const porHora = b.horas.map((n) => n / dias.length);
+    // emisiones promedio en cada hora de cada día de la semana: la cuenta del mes dividida por cuántas veces cae ese día
+    const matriz = (b.horaDia || []).map((fila, i) => fila.map((n) => (cuantosDia[i] ? n / cuantosDia[i] : null)));
     const porDiaSemana = b.dias.map((n, i) => (cuantosDia[i] ? n / cuantosDia[i] : null));
     const horasAltas = porHora.map((v, h) => [v, h]).sort((a, z) => z[0] - a[0]).slice(0, 4).filter(([v]) => v > 0).map(([, h]) => h);
     const max = Math.max(...porDiaSemana.map((v) => v ?? -1));
-    const top = (obj, n) => Object.entries(obj).sort((a, z) => z[1] - a[1] || a[0].localeCompare(z[0])).slice(0, n).map(([nombre, valor]) => ({ nombre, valor }));
+    // Integrametrics marca «DESCONOCIDO» el canal que no identificó
+    const top = (obj, n) => Object.entries(obj).sort((a, z) => z[1] - a[1] || a[0].localeCompare(z[0])).slice(0, n).map(([nombre, valor]) => ({ nombre: nombre === 'DESCONOCIDO' ? 'Canal sin registrar' : nombre, valor }));
     return [marca, {
-      emisiones: b.emisiones, porHora, porDiaSemana, horasAltas, diaMayor: max > 0 ? porDiaSemana.indexOf(max) : null,
+      emisiones: b.emisiones, porHora, porDiaSemana, matriz, horasAltas, diaMayor: max > 0 ? porDiaSemana.indexOf(max) : null,
       canales: top(b.canales, 8), programas: top(b.programas, 8), zonas: top(b.zonas, 8), totalCanales: Object.keys(b.canales).length, totalProgramas: Object.keys(b.programas).length,
     }];
   }));
@@ -178,6 +210,43 @@ function temporada(contrato) {
   const meses = mesesDisponibles(contrato.meta);
   const fila = (serie, mes) => Object.fromEntries(MARCAS.map((m) => [m, suma(serie.filter((f) => f.fecha.startsWith(mes)).map((f) => f.brands[m]?.spend || 0))]));
   return meses.map((mes) => ({ mes, parcial: periodoDelMes(contrato.meta, mes).parcial, atl: fila(contrato.daily, mes), digital: fila(contrato.digital?.daily || [], mes) }));
+}
+
+// Pauta del año, día por día: la competencia primero, cada universo por su lado
+function pautaDelAnio(contrato, ok) {
+  const dias = rango(contrato.meta.firstDay, contrato.meta.lastDay);
+  const filas = [];
+  for (const m of [...COMPETENCIA, PROPIA]) {
+    if (ok.atl) filas.push({ id: `${m}-atl`, marca: nombreMarca(m), universo: 'ATL', foco: m !== PROPIA, serie: pautaDiaria(contrato.daily, m, dias) });
+    if (ok.digital) filas.push({ id: `${m}-digital`, marca: nombreMarca(m), universo: 'digital', foco: m !== PROPIA, serie: pautaDiaria(contrato.digital?.daily || [], m, dias) });
+  }
+  return filas.map((f) => {
+    const activos = f.serie.filter((d) => d.valor > 0);
+    return { ...f, nombre: `${f.marca} · ${f.universo}`, diasConInversion: activos.length, diasConData: f.serie.filter((d) => d.valor != null).length, total: suma(f.serie.map((d) => d.valor)), primerDia: activos[0]?.fecha ?? null, ultimoDia: activos.at(-1)?.fecha ?? null };
+  });
+}
+// Pauta del año por semana, para leer rápido cuándo se prende cada marca. ATL, digital y, a pedido, los dos juntos:
+// «todo» suma dos estimaciones hechas con métodos distintos, así que se lee como encendido y apagado, no como monto
+function pautaPorSemana(contrato, ok) {
+  const dias = rango(contrato.meta.firstDay, contrato.meta.lastDay);
+  const fuentes = { atl: ok.atl ? [contrato.daily] : null, digital: ok.digital ? [contrato.digital?.daily || []] : null };
+  fuentes.todo = ok.atl && ok.digital ? [contrato.daily, contrato.digital?.daily || []] : null;
+  return Object.fromEntries(Object.entries(fuentes).filter(([, f]) => f).map(([u, series]) => [u, [...COMPETENCIA, PROPIA].map((m) => {
+    const semanas = pautaSemanal(series, m, dias);
+    const activas = semanas.filter((x) => x.valor > 0);
+    return { id: m, marca: nombreMarca(m), foco: m !== PROPIA, semanas, semanasConInversion: activas.length, semanasConData: semanas.filter((x) => x.valor != null).length, primera: activas[0]?.fecha ?? null, total: suma(semanas.map((x) => x.valor)) };
+  })]));
+}
+
+// Share semanal de la competencia principal en el año, en ATL y en digital (cada uno sobre su universo)
+function shareDelAnio(contrato, ok) {
+  const dias = rango(contrato.meta.firstDay, contrato.meta.lastDay);
+  const m = COMPETENCIA[0];
+  return {
+    marca: nombreMarca(m),
+    atl: ok.atl ? shareSemanal(contrato.daily, m, MARCAS, dias) : null,
+    digital: ok.digital ? shareSemanal(contrato.digital?.daily || [], m, MARCAS, dias) : null,
+  };
 }
 
 // ── Qué mirar: cada alerta sale de una regla con umbral fijo y trae su dato ──
@@ -206,15 +275,38 @@ function queMirar(v, P) {
     if (propia.share != null && propia.share >= UMBRALES.dominioAtl) out.push({ id: 'dominio-atl', nivel: 'bien', sostiene: '4.1', fuente: 'Integrametrics', share: propia.share });
     if (v.lee.atl.sinDato.length) out.push({ id: 'dias-sin-dato', nivel: 'revisar', sostiene: '4.1', fuente: 'Integrametrics', dias: v.lee.atl.sinDato });
   }
+  // La competencia sube su inversión frente a la comparación (ATL y digital por separado)
+  for (const [u, fuente] of [[v.lee.atl, 'Integrametrics'], [v.lee.digital, 'Integrametrics digital']]) {
+    if (u.estado !== 'ok') continue;
+    for (const m of comp(u)) {
+      const sube = m.inversionPrevia ? Math.round(((m.inversion - m.inversionPrevia) / m.inversionPrevia) * 100) : null;
+      if (sube != null && sube >= UMBRALES.subidaCompetencia) out.push({ id: 'sube-competencia', nivel: 'atencion', sostiene: '4.1', fuente, marca: m.nombre, universo: u === v.lee.atl ? 'ATL' : 'digital', sube, monto: m.inversion, antes: m.inversionPrevia });
+    }
+  }
+  if (v.lee.ooh?.zonasNuevas) {
+    for (const c of CLIENTE.competencia) {
+      const zonas = v.lee.ooh.zonasNuevas[c.marcaFuente];
+      if (zonas.length) out.push({ id: 'paneles-competencia', nivel: 'revisar', sostiene: '1.2', fuente: 'Integrametrics', marca: c.nombre, zonas, cuantos: v.lee.ooh.porMarca[c.marcaFuente], antes: v.lee.ooh.porMarcaAntes[c.marcaFuente] });
+    }
+  }
+  if (v.lee.abanicoDigital) {
+    for (const g of v.lee.abanicoDigital.grupos) {
+      if (g.anuncios.length) out.push({ id: 'digital-competencia', nivel: 'revisar', sostiene: '1.1', fuente: 'Integrametrics digital', marca: g.nombre, cuantas: g.anuncios.length, ultima: g.anuncios[0]?.titulo });
+    }
+  }
+  const b = v.analiza.busquedas;
+  if (b?.camaras?.crecimiento != null && b.camaras.crecimiento >= UMBRALES.subidaDiy) out.push({ id: 'diy-sube', nivel: 'atencion', sostiene: '2.2', fuente: 'Google Trends', crecimiento: b.camaras.crecimiento, razon: b.razon, desde: b.desde, hasta: b.hasta });
   if (v.lee.digital.estado === 'ok') {
     const propia = v.lee.digital.marcas.find((m) => m.propia);
     if (propia.cambioPts != null && propia.cambioPts <= -UMBRALES.caidaShareDigital) out.push({ id: 'share-digital', nivel: 'atencion', sostiene: '4.1', fuente: 'Integrametrics digital', share: propia.share, antes: propia.sharePrevio });
     if (propia.cambioPts != null && propia.cambioPts >= UMBRALES.subidaShareDigital) out.push({ id: 'share-digital-sube', nivel: 'bien', sostiene: '4.1', fuente: 'Integrametrics digital', share: propia.share, antes: propia.sharePrevio });
   }
-  return out;
+  // Lo de la competencia va primero dentro de cada nivel: es lo principal del panel
+  const deCompetencia = (a) => ['estreno-competencia', 'sube-competencia', 'pico-competencia', 'medio-nuevo', 'paneles-competencia', 'digital-competencia'].includes(a.id);
+  return out.map((a) => ({ ...a, competencia: deCompetencia(a) })).sort((a, z) => Number(z.competencia) - Number(a.competencia));
 }
 
-export function armarVista(contrato, medios, filtros, estado = {}) {
+export function armarVista(contrato, medios, filtros, estado = {}, { mapa = null, busquedas = null } = {}) {
   const meta = contrato.meta;
   const P = periodoDelMes(meta, filtros.mes);
   const caidas = new Set(estado.fuentesCaidas || []);
@@ -224,6 +316,10 @@ export function armarVista(contrato, medios, filtros, estado = {}) {
     { id: 'atl', nombre: 'Integrametrics ATL', estado: caidas.has('atl') ? 'no-cargo' : atrasada ? 'parcial' : 'ok', corte: meta.lastDay, atraso, sinDato: [] },
     { id: 'digital', nombre: 'Integrametrics digital', estado: caidas.has('digital') ? 'no-cargo' : atrasada ? 'parcial' : 'ok', corte: contrato.digital?.daily?.at(-1)?.fecha ?? meta.lastDay, atraso, sinDato: [] },
   ];
+  // Google Trends es semanal: se atrasa si pasan más de dos semanas desde la última semana completa
+  const ultimaSemana = busquedas?.categoria?.semanas?.filter((_, i) => !busquedas.categoria.parcial[i]).at(-1) ?? null;
+  const atrasoTrends = ultimaSemana && estado.hoy ? diasEntre(ultimaSemana, estado.hoy) : 0;
+  fuentes.push({ id: 'trends', nombre: 'Google Trends', estado: caidas.has('trends') || !busquedas ? 'no-cargo' : atrasoTrends > 21 ? 'parcial' : 'ok', corte: ultimaSemana, atraso: atrasoTrends, sinDato: [] });
   const ok = (id) => !caidas.has(id);
   const atl = ok('atl') ? leerUniverso(contrato.daily, P) : { estado: 'no-cargo' };
   const digital = ok('digital') ? leerUniverso(contrato.digital?.daily || [], P) : { estado: 'no-cargo' };
@@ -237,19 +333,29 @@ export function armarVista(contrato, medios, filtros, estado = {}) {
       { titulo: 'Subsectores de Integrametrics', items: CLIENTE.subsectores },
       { titulo: 'Medios ATL', items: ['TV abierta', 'Cable', 'Radio', 'OTT y streaming', 'Vía pública'] },
       { titulo: 'Plataformas digitales', items: ['Facebook', 'Instagram', 'Google Search', 'YouTube'] },
-      { titulo: 'Por conectar', items: ['Google Trends', 'Denuncias SIDPOL', `Power BI de ${CLIENTE.nombre}`] },
+      { titulo: 'Búsquedas en Google Trends', items: [...CLIENTE.busquedas.categoria, ...CLIENTE.busquedas.marcasDiy].map((b) => b.nombre) },
+      { titulo: 'Por conectar', items: ['Precios de cámaras en marketplaces', 'Anuncios de marcas de cámaras (Meta Ad Library)', 'Denuncias SIDPOL', `Power BI de ${CLIENTE.nombre}`] },
     ],
     lee: {
       atl, digital, atlPrevio,
       estrenos: ok('atl') ? estrenos(contrato, P) : null,
       abanicoAtl: ok('atl') ? abanicoAtl(contrato, P) : null,
       abanicoDigital: ok('digital') ? abanicoDigital(contrato, P) : null,
-      viaPublica: ok('atl') ? viaPublica(contrato, P) : null,
+      ooh: ok('atl') ? ooh(contrato, mapa, P) : null,
       medios: ok('atl') ? horarioYCanales(medios, P) : null,
+      // las versiones del año de la competencia principal (la primera de cliente.js)
+      cronograma: ok('atl') ? cronograma(versionesDelAnio(contrato, COMPETENCIA[0])) : null,
     },
-    analiza: { temporada: temporada(contrato), franjas: ORDEN_FRANJAS },
+    analiza: {
+      temporada: temporada(contrato), franjas: ORDEN_FRANJAS,
+      pauta: pautaDelAnio(contrato, { atl: ok('atl'), digital: ok('digital') }),
+      pautaSemanal: pautaPorSemana(contrato, { atl: ok('atl'), digital: ok('digital') }),
+      shareSemanal: shareDelAnio(contrato, { atl: ok('atl'), digital: ok('digital') }),
+      busquedas: ok('trends') ? leerBusquedas(busquedas) : null,
+    },
     sugiere: {},
   };
+  vista.sugiere.semana = ok('atl') ? hechosDeLaSemana(contrato, { propia: PROPIA, competencia: COMPETENCIA, nombreMarca, busquedas: vista.analiza.busquedas }) : null;
   vista.sugiere.queMirar = queMirar(vista, P).filter((a) => a.nivel !== 'bien');
   vista.sugiere.queVaBien = queMirar(vista, P).filter((a) => a.nivel === 'bien');
   return vista;

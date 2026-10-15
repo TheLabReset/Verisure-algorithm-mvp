@@ -506,3 +506,89 @@
 .q-estreno-cuerpo span { font-size: var(--t-13); color: var(--texto-2); }
 @media (max-width: 640px) { .q-estrenos li { grid-template-columns: minmax(0, 1fr); gap: var(--e-1); } }
 .q-control-bloque { grid-column: span 12; display: flex; align-items: center; gap: var(--e-3); }
+/* un control dentro de una tarjeta: el cuerpo de la tarjeta es una grilla de una columna, así que no abre columnas
+   (con span 12 crearía columnas implícitas y el gráfico de abajo quedaría angosto, con un hueco a la derecha) */
+.q-control-tarjeta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-3); }
+
+/* ── Competencia primero: los estrenos de la competencia con su nombre en tinta ── */
+.q-estreno-foco .q-estreno-marca { color: var(--texto-1); }
+.q-leyenda-arriba { margin: 0 0 var(--e-2); }
+.q-chip-boton { cursor: pointer; background: var(--superficie); font: inherit; font-size: var(--t-12); }
+.q-chip-boton:hover { border-color: var(--texto-2); color: var(--texto-1); }
+.q-chip-boton[aria-pressed="true"] { background: var(--texto-1); color: var(--superficie); border-color: var(--texto-1); }
+.q-chip-boton:disabled { opacity: 0.5; cursor: default; }
+
+/* ── OOH: el mapa y la ficha de la ubicación elegida ── */
+.q-ooh { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(16rem, 1fr); gap: var(--e-6); align-items: start; }
+@media (max-width: 900px) { .q-ooh { grid-template-columns: minmax(0, 1fr); } }
+.q-ooh-mapa { display: grid; gap: var(--e-3); min-width: 0; }
+.q-ooh-zonas { flex-wrap: wrap; }
+.q-mapa-cargando { display: grid; place-items: center; color: var(--texto-3); font-size: var(--t-13); }
+.q-ficha-panel { display: grid; gap: var(--e-4); }
+.q-ficha-arte { aspect-ratio: 4 / 3; max-width: 100%; border-radius: var(--r-control); overflow: hidden; background: var(--superficie-capitulo); display: grid; place-items: center; }
+.q-ficha-arte img, .q-ficha-arte video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.q-ficha-sin-arte { padding: var(--e-4); font-size: var(--t-13); color: var(--texto-3); text-align: center; }
+.q-ficha-cuerpo { display: grid; gap: var(--e-2); min-width: 0; }
+.q-ficha-cuerpo h4 { font-family: var(--f-titulo); font-size: var(--t-17); font-weight: var(--peso-titulo); color: var(--texto-1); line-height: 1.2; }
+.q-ficha-marca { font-size: var(--t-12); font-weight: var(--peso-rotulo); text-transform: uppercase; letter-spacing: 0.04em; color: var(--texto-3); }
+.q-ficha-foco { color: var(--texto-1); }
+.q-ficha-version { font-size: var(--t-13); color: var(--texto-2); }
+.q-ficha-datos { display: grid; gap: var(--e-1); margin: var(--e-2) 0 0; font-size: var(--t-13); }
+.q-ficha-datos div { display: flex; justify-content: space-between; gap: var(--e-3); padding: var(--e-1) 0; border-top: 1px solid var(--borde); }
+.q-ficha-datos dt { color: var(--texto-3); }
+.q-ficha-datos dd { margin: 0; color: var(--texto-1); text-align: right; font-variant-numeric: tabular-nums; }
+.q-ficha-caras { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-1); font-size: var(--t-12); color: var(--texto-3); }
+.q-ficha-caras > span { margin-right: var(--e-1); }
+.q-ficha-todos { justify-self: start; margin-top: var(--e-2); }
+
+/* ── Reparto por medio: una franja por marca ── */
+.q-mezclas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-6); margin-bottom: var(--e-4); }
+@media (max-width: 720px) { .q-mezclas { grid-template-columns: minmax(0, 1fr); } }
+.q-mezcla h4 { display: flex; justify-content: space-between; gap: var(--e-2); font-size: var(--t-15); font-weight: var(--peso-rotulo); color: var(--texto-1); margin-bottom: var(--e-2); }
+.q-mezcla h4 span { font-size: var(--t-13); font-weight: var(--peso-lectura); color: var(--texto-3); }
+
+/* ── Lo que falta conectar ── */
+.q-por-conectar { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e-3); }
+.q-por-conectar li { display: grid; gap: var(--e-1); padding: var(--e-3) 0; border-top: 1px solid var(--borde); }
+.q-por-conectar li:first-child { border-top: 0; padding-top: 0; }
+.q-por-conectar b { color: var(--texto-1); font-weight: var(--peso-rotulo); font-size: var(--t-15); }
+.q-por-conectar span { color: var(--texto-2); font-size: var(--t-13); }
+
+/* ── MAIA: botón en la barra, reporte y consulta en el panel lateral ── */
+.q-maia-marca { display: inline-grid; place-items: center; width: 22px; height: 22px; flex: none; border-radius: var(--r-marca); background: var(--acento); color: var(--superficie); font-family: var(--f-titulo); font-weight: var(--peso-titulo); font-size: var(--t-12); line-height: 1; }
+.q-barra .q-boton-maia { color: var(--sobre-barra); gap: var(--e-2); font-weight: var(--peso-rotulo); }
+.q-barra .q-boton-maia .q-maia-marca { background: var(--sobre-barra); color: var(--barra); }
+.q-panel-maia { width: min(36rem, 100vw); }
+.q-panel-maia .q-panel-cuerpo > .q-grupo { justify-self: start; }
+.q-maia-reporte { display: grid; gap: var(--e-6); }
+.q-maia-reporte h3 { font-family: var(--f-titulo); font-size: var(--t-17); font-weight: var(--peso-titulo); color: var(--texto-1); margin-bottom: var(--e-2); }
+.q-maia-reporte section p { font-size: var(--t-15); color: var(--texto-2); line-height: 1.55; margin-bottom: var(--e-2); max-width: 65ch; }
+.q-maia-semana { font-size: var(--t-13); color: var(--texto-3); }
+.q-maia-aviso { padding: var(--e-3) var(--e-4); border-radius: var(--r-control); background: var(--superficie-capitulo); font-size: var(--t-13) !important; }
+.q-maia-firma { font-size: var(--t-12) !important; color: var(--texto-3) !important; }
+.q-maia-hechos { list-style: none; margin: 0; padding: 0; display: grid; }
+.q-maia-hechos li { display: grid; gap: 2px; padding: var(--e-3) 0; border-top: 1px solid var(--borde); }
+.q-maia-hechos li:first-child { border-top: 0; padding-top: 0; }
+.q-maia-hechos b { color: var(--texto-1); font-weight: var(--peso-rotulo); font-size: var(--t-15); }
+.q-maia-hechos span { color: var(--texto-2); font-size: var(--t-13); }
+.q-maia-consulta { display: grid; gap: var(--e-4); }
+.q-maia-log { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e-3); max-height: 52dvh; overflow-y: auto; overscroll-behavior: contain; }
+.q-maia-log li { display: flex; gap: var(--e-2); align-items: flex-start; }
+.q-maia-log p { margin: 0; padding: var(--e-2) var(--e-3); border-radius: var(--r-bloque); font-size: var(--t-15); line-height: 1.5; max-width: 85%; white-space: pre-line; }
+.q-maia-maia p { background: var(--superficie-capitulo); color: var(--texto-1); }
+.q-maia-usuario { justify-content: flex-end; }
+.q-maia-usuario p { background: var(--texto-1); color: var(--superficie); }
+.q-maia-nota p { background: transparent; border: 1px dashed var(--borde-control); color: var(--texto-2); font-size: var(--t-13); max-width: 100%; }
+.q-maia-pensando p { color: var(--texto-3); }
+.q-maia-sugeridas { display: flex; flex-wrap: wrap; gap: var(--e-2); }
+.q-maia-sugeridas .q-chip-boton { white-space: normal; text-align: left; }
+.q-maia-form { display: flex; gap: var(--e-2); }
+.q-maia-form input { flex: 1; min-width: 0; font: inherit; font-size: var(--t-15); padding: var(--e-2) var(--e-3); border: 1px solid var(--borde-control); border-radius: var(--r-control); background: var(--superficie); color: var(--texto-1); }
+.q-maia-form input:focus-visible { outline: 2px solid var(--foco); outline-offset: 1px; }
+.q-boton-maia-enviar { background: var(--texto-1); color: var(--superficie); border-color: var(--texto-1); }
+.q-boton-maia-enviar:disabled { opacity: 0.4; }
+
+/* ── La pauta semana a semana: un panel por marca, uno debajo del otro para que las semanas se alineen ── */
+.q-pauta-semanal { display: grid; gap: var(--e-5); }
+.q-pauta-marca h4 { display: flex; justify-content: space-between; gap: var(--e-2); font-size: var(--t-15); font-weight: var(--peso-rotulo); color: var(--texto-1); margin-bottom: var(--e-1); }
+.q-pauta-marca h4 span { font-size: var(--t-13); font-weight: var(--peso-lectura); color: var(--texto-3); }

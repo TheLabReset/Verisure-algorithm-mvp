@@ -1,59 +1,78 @@
-// Capa 3 · Activación estratégica: dónde y cuándo está la inversión de cada marca, según Integrametrics.
-// Medios, franjas y canales (dónde), y horas, días y programas (cuándo). No calcula: pinta la vista.
+// Capa 3 · Activación estratégica: dónde y cuándo está la inversión de la competencia, con la marca propia para
+// comparar. Reparto por medio (partes de un todo por marca), franjas (mancuernas), canales, la semana día × hora
+// (mapa de calor) y programas. No calcula: pinta la vista.
 import { useState } from 'react';
 import { Bloque, Tabla, Resumen, Grupo } from '../sistema/Componentes.jsx';
-import { Columnas, Barras } from '../sistema/graficos/Graficos.jsx';
+import { Franja, Pesas, Barras, MapaCalor } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, soles, solesCompacto } from '../sistema/formato.js';
-import { MarcoCapa, SeccionDe, HorasYDias, sinDato } from './comun.jsx';
+import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import { periodoTexto, version, horasTexto } from '../textos/comun.js';
 import { mediosLectura, franjasLectura, canalesLectura, horarioLectura, programasLectura, textosMarca } from '../textos/lecturas.js';
 import { MEDIOS, FRANJAS } from '../calculo/vista.js';
 import { CLIENTE } from '../cliente.js';
 
-const MARCAS = [CLIENTE.marcaFuente, ...CLIENTE.competencia.map((c) => c.marcaFuente)];
-const ORDEN_MEDIOS = ['TV ABIERTA', 'CABLE', 'RADIO', 'OTT', 'OOH'];
+const COMPETENCIA = CLIENTE.competencia[0];
+const MARCAS = [...CLIENTE.competencia.map((c) => c.marcaFuente), CLIENTE.marcaFuente];
+const ORDEN_MEDIOS = ['TV ABIERTA', 'RADIO', 'OOH', 'CABLE', 'OTT'];
+// Color fijo por medio en todas las franjas (el color sigue al medio, no al orden): tres de categoría y el resto en gris
+const CLASE_MEDIO = { 'TV ABIERTA': 'q-p0', RADIO: 'q-p1', OOH: 'q-p2', CABLE: 'q-p5', OTT: 'q-p5' };
+
+function MezclaMedios({ m }) {
+  const principales = ['TV ABIERTA', 'RADIO', 'OOH'].map((k) => ({ nombre: MEDIOS[k], valor: m.medios[k] || 0, pct: m.mezclaMedios[k] ?? 0, clase: CLASE_MEDIO[k] }));
+  const resto = ['CABLE', 'OTT'].reduce((s, k) => s + (m.medios[k] || 0), 0);
+  const restoPct = ['CABLE', 'OTT'].reduce((s, k) => s + (m.mezclaMedios[k] ?? 0), 0);
+  const partes = [...principales, { nombre: 'Cable y OTT', valor: resto, pct: restoPct, clase: 'q-p5' }].filter((p) => p.valor > 0);
+  return (
+    <div className="q-mezcla">
+      <h4>{m.nombre}<span>{solesCompacto(m.inversion)} en ATL</span></h4>
+      {partes.length ? <Franja etiqueta={`Reparto de la inversión ATL de ${m.nombre} por medio`} partes={partes} verTabla={false} /> : <p className="q-nota-bloque">Sin inversión ATL en el período.</p>}
+    </div>
+  );
+}
 
 export default function Activacion({ capa, vista: v }) {
   const [s31, s32] = capa.secciones;
   const P = v.periodo, atl = v.lee.atl, med = v.lee.medios;
-  const [marca, setMarca] = useState(CLIENTE.marcaFuente);
+  const [marca, setMarca] = useState(COMPETENCIA.marcaFuente);
   const ok = atl.estado === 'ok';
-  const [a, b] = ok ? atl.marcas : [];
+  const orden = ok ? [...atl.marcas].sort((a, b) => Number(a.propia) - Number(b.propia)) : [];
+  const [r, p] = orden;
   const deMarca = med?.[marca];
-  const propiaMed = med?.[CLIENTE.marcaFuente];
+  const compMed = med?.[COMPETENCIA.marcaFuente];
   const opcionesMarca = MARCAS.map((m) => ({ valor: m, texto: textosMarca.nombreMarca(m), desactivada: !med?.[m] }));
-  const pctDe = (obj, k) => { const t = Object.values(obj).reduce((s, x) => s + x, 0); return t ? Math.round((obj[k] || 0) / t * 100) : null; };
+  const principal = (m) => Object.entries(m.mezclaMedios).sort((a, b) => b[1] - a[1])[0];
+  const control = <div className="q-control q-control-tarjeta"><span>Marca</span><Grupo etiqueta="Marca" valor={marca} onCambiar={setMarca} opciones={opcionesMarca} /></div>;
   return (
     <MarcoCapa capa={capa} vista={v}>
       <Resumen titulo={`Resumen de ${periodoTexto(P)}`}
         pie={<span>Inversión estimada por Integrametrics a precio de tarifa; emisiones registradas en TV, radio, cable, OTT y vía pública.</span>}
         items={[
-          { rotulo: `Medio principal de ${CLIENTE.nombre}`, universo: 'atl', ir: s31.id, irTexto: s31.titulo, valor: ok && a.inversion ? (MEDIOS[Object.entries(a.medios).sort((x, y) => y[1] - x[1])[0][0]] ?? null) : null, nota: ok && a.inversion ? `${porcentaje(pctDe(a.medios, Object.entries(a.medios).sort((x, y) => y[1] - x[1])[0][0]))} de su inversión ATL` : null },
-          { rotulo: `Canales de ${CLIENTE.nombre}`, universo: 'atl', ir: s31.id, irTexto: s31.titulo, valor: propiaMed ? numero(propiaMed.totalCanales) : null, nota: propiaMed?.canales[0] ? `${propiaMed.canales[0].nombre} es el principal` : null },
-          { rotulo: `Emisiones de ${CLIENTE.nombre}`, universo: 'atl', ir: s32.id, irTexto: s32.titulo, valor: propiaMed ? numero(propiaMed.emisiones) : null, nota: propiaMed?.horasAltas.length ? `más ${horasTexto(propiaMed.horasAltas)}` : null },
-          { rotulo: 'Programas', universo: 'atl', ir: s32.id, irTexto: s32.titulo, valor: propiaMed ? numero(propiaMed.totalProgramas) : null, nota: propiaMed ? `con emisiones de ${CLIENTE.nombre}` : null },
+          { rotulo: `Medio principal de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s31.id, irTexto: s31.titulo, valor: ok && r.inversion ? MEDIOS[principal(r)[0]] ?? null : null, nota: ok && r.inversion ? `${porcentaje(principal(r)[1])} de su inversión ATL` : null },
+          { rotulo: `Emisiones de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s32.id, irTexto: s32.titulo, valor: compMed ? numero(compMed.emisiones) : null, nota: med?.[CLIENTE.marcaFuente] ? `${numero(med[CLIENTE.marcaFuente].emisiones)} de ${CLIENTE.nombre}` : null },
+          { rotulo: `Canales de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s31.id, irTexto: s31.titulo, valor: compMed ? numero(compMed.totalCanales) : null, nota: compMed?.canales[0] ? `${compMed.canales[0].nombre} es el principal` : null },
+          { rotulo: `Hora con más emisiones de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s32.id, irTexto: s32.titulo, valor: compMed?.horasAltas.length ? `${compMed.horasAltas[0]} h` : null, nota: compMed?.horasAltas.length ? `más ${horasTexto(compMed.horasAltas)}` : null },
         ]} />
 
       <SeccionDe def={s31} vista={v}>
-        {!ok ? <Bloque titulo="Inversión por medio" universo="atl" estado={sinDato(atl.estado)} /> : <>
+        {!ok ? <Bloque titulo="Cómo reparte cada marca su inversión ATL" universo="atl" estado={sinDato(atl.estado)} /> : <>
           <Bloque universo="atl" {...mediosLectura(v, MEDIOS)}
-            ayuda={<p>Cada columna tiene su propia escala: compara cómo reparte cada marca su inversión, no cuánto pone una frente a la otra. Para eso está el share, en Rendimiento.</p>}
+            ayuda={<p>Cada franja es el total ATL de una marca repartido por medio: compara cómo reparte cada una, no cuánto pone frente a la otra (para eso está el share, en Rendimiento). Cada medio tiene siempre el mismo color.</p>}
             pie={<span>Inversión ATL estimada por medio. Las emisiones de OTT llegan sin inversión estimada de Integrametrics.</span>}>
-            <Columnas etiqueta="Inversión ATL por medio y marca" tituloA={a.nombre} tituloB={b?.nombre} formatoA={solesCompacto} formatoB={solesCompacto}
-              filas={ORDEN_MEDIOS.map((k) => ({ nombre: MEDIOS[k], a: a.medios[k] || 0, b: b ? b.medios[k] || 0 : null }))} />
+            <div className="q-mezclas">{orden.map((m) => <MezclaMedios key={m.id} m={m} />)}</div>
             <Tabla etiqueta="Inversión ATL por medio y marca, en soles y en parte de cada marca" numericas={[1, 2, 3, 4]}
-              columnas={['Medio', a.nombre, 'De su total', b?.nombre, 'De su total']}
-              filas={ORDEN_MEDIOS.map((k) => [MEDIOS[k], soles(a.medios[k] || 0), porcentaje(pctDe(a.medios, k)), b ? soles(b.medios[k] || 0) : 'sin dato', b ? porcentaje(pctDe(b.medios, k)) : 'sin dato'])} />
+              columnas={['Medio', r.nombre, 'De su total', p?.nombre, 'De su total']}
+              filas={ORDEN_MEDIOS.map((k) => [MEDIOS[k], soles(r.medios[k] || 0), porcentaje(r.mezclaMedios[k] ?? 0), p ? soles(p.medios[k] || 0) : 'sin dato', p ? porcentaje(p.mezclaMedios[k] ?? 0) : 'sin dato'])} />
           </Bloque>
           <Bloque universo="atl" ancho="mitad" {...franjasLectura(v, FRANJAS)}
-            pie={<span>Parte de las emisiones de cada marca en cada franja horaria de la TV y la radio.</span>}>
-            <Tabla etiqueta="Emisiones por franja y marca" numericas={[1, 2]}
-              columnas={['Franja', ...atl.marcas.map((m) => m.nombre)]}
-              filas={v.analiza.franjas.map((k) => [FRANJAS[k], ...atl.marcas.map((m) => porcentaje(pctDe(m.franjas, k)))])} />
+            ayuda={<p>Parte de las emisiones de cada marca en cada franja horaria. Cada fila une a las dos marcas en la misma escala, de 0 a 100 %.</p>}
+            pie={<span>Emisiones de TV y radio por franja horaria.</span>}>
+            <Pesas etiqueta="Parte de las emisiones de cada marca por franja" formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} max={100} rotuloA={p?.nombre} rotuloB={r.nombre}
+              filas={v.analiza.franjas.map((k) => ({ nombre: FRANJAS[k], a: p?.mezclaFranjas[k] ?? 0, b: r.mezclaFranjas[k] ?? 0 }))} />
           </Bloque>
-          <Bloque universo="atl" ancho="mitad" {...canalesLectura(propiaMed, CLIENTE.marcaFuente)}
-            pie={<span>Los ocho canales con más inversión estimada de {CLIENTE.nombre} en el mes.</span>}>
-            {propiaMed ? <Barras etiqueta={`Inversión de ${CLIENTE.nombre} por canal`} formato={solesCompacto} filas={propiaMed.canales.map((c) => ({ nombre: c.nombre, valor: c.valor }))} />
+          <Bloque universo="atl" ancho="mitad" {...canalesLectura(deMarca, marca)}
+            pie={<span>Los ocho canales con más inversión estimada de la marca en el mes.</span>}>
+            {control}
+            {deMarca?.canales.length ? <Barras etiqueta={`Inversión de ${textosMarca.nombreMarca(marca)} por canal`} formato={solesCompacto} filas={deMarca.canales.map((c) => ({ nombre: c.nombre, valor: c.valor }))} />
               : <p className="q-nota-bloque">Sin emisiones en el período.</p>}
           </Bloque>
         </>}
@@ -61,16 +80,16 @@ export default function Activacion({ capa, vista: v }) {
 
       <SeccionDe def={s32} vista={v}>
         {!med ? <Bloque titulo="Cuándo sale al aire" universo="atl" estado={sinDato(ok ? 'sin-datos' : atl.estado)} /> : <>
-          <div className="q-control q-control-bloque"><span>Marca</span><Grupo etiqueta="Marca" valor={marca} onCambiar={setMarca} opciones={opcionesMarca} /></div>
           <Bloque universo="atl" {...horarioLectura(deMarca, marca)}
-            ayuda={<p>Emisiones registradas por Integrametrics con su hora exacta: promedio por día del período en cada hora, y promedio por cada día de la semana. Es el insumo para que el BI de {CLIENTE.nombre} cruce las emisiones con su curva de llamadas.</p>}
-            pie={<span>Emisiones de TV, radio, cable y OTT con hora registrada.</span>}>
-            {deMarca ? <HorasYDias porHora={deMarca.porHora} horasAltas={deMarca.horasAltas} porDiaSemana={deMarca.porDiaSemana} diaMayor={deMarca.diaMayor} que="Emisiones" formato={(n) => (n == null ? 'sin dato' : numero(n, n < 10 ? 1 : 0))} />
-              : <p className="q-nota-bloque">Sin emisiones en el período.</p>}
+            ayuda={<p>Emisiones registradas por Integrametrics con su hora exacta. Cada celda es el promedio de emisiones en esa hora de ese día de la semana, en el período. Es el insumo para que el BI de {CLIENTE.nombre} cruce las emisiones de la competencia con su curva de llamadas.</p>}
+            pie={<span>Emisiones de TV, radio, cable y OTT con hora registrada · promedio por día de la semana.</span>}>
+            {control}
+            {deMarca?.matriz?.length ? <MapaCalor etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por día de la semana y hora`} matriz={deMarca.matriz} formato={(n) => (n == null ? 'sin dato' : numero(n, n > 0 && n < 10 ? 1 : 0))} />
+              : <p className="q-nota-bloque">Sin emisiones con hora en el período.</p>}
           </Bloque>
           <Bloque universo="atl" {...programasLectura(deMarca, marca)}
-            pie={<span>Los ocho programas con más emisiones en el mes.</span>}>
-            {deMarca?.programas.length ? <Barras etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por programa`} formato={(n) => numero(n)} filas={deMarca.programas.map((p) => ({ nombre: version(p.nombre), valor: p.valor }))} />
+            pie={<span>Los ocho programas con más emisiones de la marca en el mes.</span>}>
+            {deMarca?.programas.length ? <Barras etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por programa`} formato={(n) => numero(n)} filas={deMarca.programas.map((x) => ({ nombre: version(x.nombre), valor: x.valor }))} />
               : <p className="q-nota-bloque">Sin programas registrados en el período.</p>}
           </Bloque>
         </>}

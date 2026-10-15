@@ -166,7 +166,10 @@ export function Pesas({ filas, formato = numero, max, min = 0, rotuloA, rotuloB,
                   {f.a != null && f.b != null && <line className="q-pesa" x1={x(f.a)} x2={x(f.b)} y1={cy} y2={cy} />}
                   {f.a != null && <circle className="q-punto-previo" cx={x(f.a)} cy={cy} r="5" data-valor={f.a} />}
                   {f.b != null && <circle className="q-punto-actual" cx={x(f.b)} cy={cy} r="6" data-valor={f.b} />}
-                  <text className="q-rotulo-valor" x={x(Math.max(f.a ?? min, f.b ?? min)) + 10} y={cy + 4}>{formato(f.b)}</text>
+                  {/* la cifra va junto a su punto (el del período): a la derecha si queda adelante de la comparación, si no a la izquierda */}
+                  {f.b != null && (f.a == null || f.b >= f.a
+                    ? <text className="q-rotulo-valor" x={x(f.b) + 12} y={cy + 4}>{formato(f.b)}</text>
+                    : <text className="q-rotulo-valor" x={x(f.b) - 12} y={cy + 4} textAnchor="end">{formato(f.b)}</text>)}
                 </g>
               );
             })}
@@ -614,6 +617,20 @@ export function Dispersion({ puntos, elegido, onElegir, rotuloX, rotuloY, format
   );
 }
 
+// Rótulos del eje de tiempo: hasta 45 puntos, uno por semana; con más, el primer punto de cada mes (semanas que
+// empiezan cualquier día incluidas), sin pisarse: cada rótulo deja al menos 48 px con el anterior
+function rotulosX(base, x) {
+  if (base.length <= 45) return base.map((p, i) => ({ i, texto: fechaCorta(p.fecha) })).filter(({ i }) => i % 7 === 0);
+  const out = [];
+  base.forEach((p, i) => {
+    if (i > 0 && p.fecha.slice(0, 7) === base[i - 1].fecha.slice(0, 7)) return;
+    if (out.length && x(i) - x(out.at(-1).i) < 48) return;
+    const m = +p.fecha.slice(5, 7);
+    out.push({ i, texto: m === 1 || !out.length ? `${mesCorto(m)} ${p.fecha.slice(2, 4)}` : mesCorto(m) });
+  });
+  return out;
+}
+
 // ─────────────── Varias series en la misma escala: la propia resaltada, el resto en gris ───────────────
 // Un día sin dato es un hueco en todas las series. El rótulo final de cada serie va al lado de su último punto.
 export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta }) {
@@ -633,7 +650,7 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
         return (
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
             {ys.map((v) => <g key={v}><line className="q-rejilla" x1={m.l} x2={ancho - m.r} y1={y(v)} y2={y(v)} /><text className="q-eje" x={m.l - 8} y={y(v) + 4} textAnchor="end">{formato(v)}</text></g>)}
-            {base.map((p, i) => (base.length <= 45 ? i % 7 === 0 : p.fecha.endsWith('-01')) ? <text key={p.fecha} className="q-eje" x={x(i)} y={alto - 8} textAnchor="middle">{fechaCorta(p.fecha)}</text> : null)}
+            {rotulosX(base, x).map(({ i, texto }) => <text key={base[i].fecha} className="q-eje" x={x(i)} y={alto - 8} textAnchor="middle">{texto}</text>)}
             {base.map((p, i) => (series.every((s) => s.serie[i]?.valor == null) && i > 0 && i < base.length - 1 ? <rect key={'h' + p.fecha} className="q-hueco" x={x(i) - 3} y={m.t} width={6} height={alto - m.b - m.t} /> : null))}
             {base.map((p, i) => <Zona key={'z' + p.fecha} x={x(i) - (x(1) - x(0)) / 2} y={m.t} w={x(1) - x(0)} h={alto - m.b - m.t} pista={`${fecha(p.fecha)}\n${series.map((s) => `${s.nombre}: ${formato(s.serie[i]?.valor)}`).join('\n')}`} />)}
             {orden.map((s) => <path key={s.nombre} className={s.resaltada ? 'q-linea' : 'q-linea-resto'} d={camino(s.serie, x, y)} />)}
@@ -648,6 +665,90 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
               );
             })}
             {series.flatMap((s) => s.serie.map((p, i) => (p.valor != null ? <circle key={s.nombre + p.fecha} className="q-punto-oculto" cx={x(i)} cy={y(p.valor)} r="3" data-serie={s.nombre} data-fecha={p.fecha} data-valor={p.valor} /> : null)))}
+          </Svg>
+        );
+      }}
+    </Grafico>
+  );
+}
+
+// ─────────────── Tiras: un día por celda, una fila por serie, cada fila con su escala ───────────────
+// Para leer encendidos y apagados de una pauta en el año: cuándo se prende cada marca, no cuánto frente a la otra.
+// Un día sin registros de la fuente va punteado (hueco), un día sin inversión va vacío. El período elegido se
+// marca arriba con una llave.
+export function Tiras({ filas, formato = numero, periodo, etiqueta }) {
+  const dias = filas[0]?.serie.map((p) => p.fecha) || [];
+  const tabla = { columnas: ['Serie', 'Días con inversión', 'Días con data', 'Total'], filas: filas.map((f) => [f.nombre, numero(f.diasConInversion), numero(f.diasConData), formato(f.total)]) };
+  return (
+    <Grafico etiqueta={etiqueta} tabla={tabla}>
+      {(ancho) => {
+        const angosto = ancho < 560;
+        const m = { t: 34, r: 4, b: 4, l: angosto ? 96 : 150 }, alto1 = 22, hueco = 8;
+        const grupos = filas.map((f, i) => (i > 0 && f.marca !== filas[i - 1].marca ? 12 : 0));
+        const ys = filas.map((_, i) => m.t + i * (alto1 + hueco) + grupos.slice(0, i + 1).reduce((s, g) => s + g, 0));
+        const alto = (ys.at(-1) ?? m.t) + alto1 + m.b;
+        const cw = (ancho - m.l - m.r) / Math.max(1, dias.length);
+        const xi = (i) => m.l + i * cw;
+        const meses = dias.map((d, i) => [d, i]).filter(([d]) => d.endsWith('-01'));
+        const pi = periodo ? [dias.findIndex((d) => d >= periodo.desde), dias.findLastIndex((d) => d <= periodo.hasta)] : null;
+        return (
+          <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
+            {meses.map(([d, i]) => <g key={d}><line className="q-rejilla" x1={xi(i)} x2={xi(i)} y1={m.t - 6} y2={alto - m.b} /><text className="q-eje" x={xi(i) + 3} y={m.t - 10}>{mesCorto(+d.slice(5, 7))}</text></g>)}
+            {pi && pi[0] >= 0 && <g className="q-llave"><path d={`M${xi(pi[0])} ${m.t - 24}v-4h${xi(pi[1] + 1) - xi(pi[0])}v4`} /><text x={(xi(pi[0]) + xi(pi[1] + 1)) / 2} y={m.t - 30} textAnchor="middle">{periodo.nombre}</text></g>}
+            {filas.map((f, k) => {
+              const max = Math.max(1, ...f.serie.map((p) => p.valor ?? 0));
+              return (
+                <g key={f.id}>
+                  <text className={`q-rotulo-fila${f.foco ? ' q-fuerte' : ''}`} x={m.l - 10} y={ys[k] + alto1 / 2 + 4} textAnchor="end">{recortar(f.nombre, m.l)}</text>
+                  {f.serie.map((p, i) => {
+                    const e = p.valor > 0 ? escalon(p.valor, max) : null;
+                    const clase = p.valor == null ? 'q-celda q-sin-dato' : p.valor === 0 ? 'q-celda q-celda-cero' : `q-celda q-q${Math.max(1, e)}`;
+                    return <rect key={p.fecha} className={clase} x={xi(i)} y={ys[k]} width={Math.max(1, cw - (cw > 3 ? 1 : 0))} height={alto1} data-valor={p.valor ?? ''} data-pista={`${f.nombre}\n${fecha(p.fecha)}\n${p.valor == null ? 'sin registros de la fuente' : formato(p.valor)}`} />;
+                  })}
+                </g>
+              );
+            })}
+          </Svg>
+        );
+      }}
+    </Grafico>
+  );
+}
+
+// ─────────────── Cronograma: cada versión como un tramo en el tiempo ───────────────
+// Lleno: ATL (primera a última emisión). Contorno: digital (primera a última variante vista). El período elegido
+// va con la superficie de capítulo detrás. Cada fila se abre con clic o con el teclado.
+export function Cronograma({ filas, inicio, fin, periodo, formato = numero, onElegir, etiqueta }) {
+  const tabla = { columnas: ['Versión', 'Universo', 'Desde', 'Hasta', 'Inversión'], filas: filas.map((f) => [f.nombre, f.universo === 'atl' ? 'ATL' : 'Digital', fechaCorta(f.desde), fechaCorta(f.hasta), formato(f.valor)]) };
+  const t = (d) => new Date(`${d}T00:00:00Z`).getTime();
+  return (
+    <Grafico etiqueta={etiqueta} tabla={tabla}>
+      {(ancho) => {
+        const angosto = ancho < 560;
+        const fila = 30, m = { t: 26, r: angosto ? 8 : 84, b: 6, l: angosto ? Math.round(ancho * 0.42) : Math.min(300, Math.round(ancho * 0.36)) };
+        const alto = m.t + filas.length * fila + m.b;
+        const x = lineal(t(inicio), t(fin), m.l, ancho - m.r);
+        const meses = [];
+        for (let d = new Date(`${inicio.slice(0, 7)}-01T00:00:00Z`); d.getTime() <= t(fin); d.setUTCMonth(d.getUTCMonth() + 1)) if (d.getTime() >= t(inicio)) meses.push(d.toISOString().slice(0, 10));
+        return (
+          <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
+            {periodo && <rect className="q-zona-periodo" x={x(t(periodo.desde))} y={m.t - 6} width={Math.max(2, x(t(periodo.hasta)) - x(t(periodo.desde)))} height={alto - m.t - m.b + 6} />}
+            {meses.map((d) => <g key={d}><line className="q-rejilla" x1={x(t(d))} x2={x(t(d))} y1={m.t - 6} y2={alto - m.b} /><text className="q-eje" x={x(t(d)) + 3} y={14}>{mesCorto(+d.slice(5, 7))}</text></g>)}
+            {filas.map((f, i) => {
+              const cy = m.t + i * fila, x0 = x(t(f.desde)), x1 = Math.max(x0 + 4, x(t(f.hasta)) + 2);
+              const pista = `${f.nombre}\n${f.universo === 'atl' ? 'ATL' : 'Digital'}${f.nota ? ` · ${f.nota}` : ''}\n${fechaCorta(f.desde)} a ${fechaCorta(f.hasta)}\n${formato(f.valor)}`;
+              const elegir = () => onElegir && onElegir(f.id);
+              return (
+                <g key={f.id} className={onElegir ? 'q-elegible' : undefined} role={onElegir ? 'button' : undefined} tabIndex={onElegir ? 0 : undefined}
+                  aria-label={onElegir ? `${f.nombre}, ${f.universo === 'atl' ? 'ATL' : 'digital'}, del ${fechaCorta(f.desde)} al ${fechaCorta(f.hasta)}. Ver la pieza` : undefined}
+                  onClick={elegir} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); elegir(); } }}>
+                  <rect className="q-zona" x={0} y={cy} width={ancho} height={fila} data-pista={pista} />
+                  <text className="q-rotulo-fila" x={m.l - 10} y={cy + fila / 2 + 4} textAnchor="end">{recortar(f.nombre, m.l)}</text>
+                  <rect className={f.universo === 'atl' ? 'q-tramo' : 'q-tramo q-tramo-contorno'} x={x0} y={cy + 8} width={x1 - x0} height={fila - 16} rx="3" data-valor={f.valor} />
+                  {!angosto && <text className="q-rotulo-valor" x={ancho - m.r + 8} y={cy + fila / 2 + 4}>{formato(f.valor)}</text>}
+                </g>
+              );
+            })}
           </Svg>
         );
       }}

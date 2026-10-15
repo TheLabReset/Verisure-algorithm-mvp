@@ -197,3 +197,14 @@ El panel se rehizo entero sobre la plantilla Reset-The-Algorithm, antes de prese
 - **Pipeline:** falla en rojo sin token (antes quedaba verde sin hacer nada y la data quedó en el 13 de julio), arma `medios.json` al final y deja de escribir fixtures.
 - **Pruebas:** 47, incluida la vista con la data real de todos los meses, los textos (sin undefined, sin rayas largas, dos frases como máximo) y la marca solo en `src/cliente.js`.
 - **Dependencias:** de 134 a 67 paquetes.
+
+## La competencia primero, MAIA y el mapa (octubre de 2026)
+
+Ajustes pedidos por The Lab después de ver el rediseño.
+
+- **Prosegur primero:** cada capa y cada lectura empiezan por la competencia; en los gráficos y el mapa Prosegur va en tinta y Verisure en gris. Alertas nuevas de competencia: sube su inversión, versiones digitales nuevas, paneles en zonas donde no tenía.
+- **Cámaras DIY de vuelta, con data real:** Google Trends Perú (cámaras de seguridad y cámara wifi frente a «verisure», y cinco marcas de cámaras). El índice anterior salía de fixtures. Marketplaces y Meta Ad Library quedan por conectar.
+- **MAIA de vuelta, sin simular:** los hechos de la semana salen con reglas; la lectura la escribe el modelo cada lunes en el pipeline; la consulta va a una función de Netlify con la clave en el servidor. Sin clave, el panel lo dice.
+- **OOH con su apartado y un mapa Leaflet** sobre OpenStreetMap: cada ubicación se elige y abre su foto o video. El distrito sale de las coordenadas (límites de OpenStreetMap), no del texto de Integrametrics. CARTO se descartó: sin clave sus mosaicos salen con marca de agua.
+- **Gráficos variados:** cronograma de versiones, mancuernas, pendiente, franjas de partes, mapa de calor día × hora y la pauta semanal (con selector ATL, digital o todo). Rampa de magnitud en tinta, no en verde.
+- **Corrección:** los selectores dentro de una tarjeta abrían columnas implícitas y dejaban los gráficos angostos, con un hueco a la derecha. Ahora cada gráfico mide lo mismo que su tarjeta.

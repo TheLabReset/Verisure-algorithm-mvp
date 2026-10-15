@@ -12,12 +12,17 @@
     "sistema": "node herramientas/revisar-sistema.mjs",
     "artefacto": "node herramientas/armar-artefacto.mjs",
     "pipeline": "node scripts/run-pipeline.mjs",
-    "medios": "node scripts/armar-medios.mjs"
+    "medios": "node scripts/armar-medios.mjs",
+    "busquedas": "node scripts/bajar-busquedas.mjs",
+    "contexto": "node scripts/armar-contexto.mjs",
+    "maia": "node scripts/maia-reporte.mjs",
+    "mapa": "node scripts/armar-mapa.mjs"
   },
   "dependencies": {
     "@fontsource-variable/sofia-sans": "5.3.0",
     "@fontsource-variable/sofia-sans-condensed": "5.3.0",
     "@fontsource-variable/sofia-sans-semi-condensed": "5.3.0",
+    "leaflet": "1.9.4",
     "lucide-react": "1.49.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

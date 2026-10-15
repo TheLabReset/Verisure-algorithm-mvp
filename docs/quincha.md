@@ -88,7 +88,14 @@ Están en `src/sistema/graficos`. Son SVG propios, y cada marca lleva su valor e
 
 **En uso:**
 - `Linea` (con comparación en gris y área clara);
-- `Barras`;
+- `Lineas` (varias series en la misma escala; la de foco resaltada, el resto en gris; el eje rotula semanas o meses sin pisarse);
+- `Barras` (para rankings);
+- `Pesas` (dos valores de la misma escala por fila; la cifra va junto a su punto);
+- `Pendiente` (dos momentos, una escala);
+- `MapaCalor` (día × hora);
+- `Tiras` (un día por celda, una fila por serie, cada fila con su escala; para series cortas: con muchas filas marea);
+- `Cronograma` (cada versión como un tramo en el tiempo; lleno y contorno para dos universos; filas que se abren);
+- `MapaPaneles` (Leaflet, cargado aparte con `React.lazy`; puntos clicables por ubicación, tamaño por valor; el mapa base se calma con `--mapa-filtro`);
 - `Histograma`;
 - `Columnas` (dos medidas lado a lado, cada una con su escala);
 - `Franja` (partes de un todo);
@@ -99,7 +106,9 @@ Están en `src/sistema/graficos`. Son SVG propios, y cada marca lleva su valor e
 - `DosLineas`;
 - `Acumulado`.
 
-**En reserva**, porque hoy no los usa ninguna pantalla: `Bala` (contra un objetivo), `Multiplos`, `Pesas`, `Pendiente` y `MapaCalor`.
+**En reserva**, porque hoy no los usa ninguna pantalla de este algoritmo: `Bala` (contra un objetivo) y `Multiplos`. Lo que se use o no depende de cada algoritmo; la plantilla los tiene todos.
+
+El mapa base es lo único que viene de afuera: los mosaicos de OpenStreetMap (sin clave, para un uso liviano, con atribución). `--mapa-filtro` es un token como cualquier otro: gris tenue en claro e invertido en oscuro, definido en los dos bloques oscuros.
 
 Reglas de forma:
 - una sola escala por gráfico, nunca doble eje;

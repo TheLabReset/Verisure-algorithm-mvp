@@ -495,8 +495,9 @@ export function Datos({ pares }) {
 }
 
 // ── Panel lateral (Qué se monitorea): se abre desde la cabecera de la capa; Esc o la X lo cierran ──
-export function PanelLateral({ titulo, bajada, abierto, onCerrar, children }) {
+export function PanelLateral({ titulo, bajada, abierto, onCerrar, children, className = '' }) {
   const ref = useRef(null);
+  const tituloId = useId();
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
@@ -504,10 +505,10 @@ export function PanelLateral({ titulo, bajada, abierto, onCerrar, children }) {
     if (!abierto && d.open) d.close();
   }, [abierto]);
   return (
-    <dialog ref={ref} className="q-panel" aria-labelledby="panel-t" onClose={onCerrar} onClick={(e) => { if (e.target === ref.current) onCerrar(); }}>
+    <dialog ref={ref} className={`q-panel ${className}`} aria-labelledby={tituloId} onClose={onCerrar} onClick={(e) => { if (e.target === ref.current) onCerrar(); }}>
       <div className="q-panel-cuerpo">
         <header className="q-panel-cab">
-          <div><h2 id="panel-t">{titulo}</h2>{bajada && <p>{bajada}</p>}</div>
+          <div><h2 id={tituloId}>{titulo}</h2>{bajada && <p>{bajada}</p>}</div>
           <button type="button" className="q-boton q-boton-quieto" onClick={onCerrar} aria-label="Cerrar"><X size={18} aria-hidden="true" /></button>
         </header>
         {children}
@@ -670,10 +671,11 @@ function Mazo({ g, onAbrir, propio, t }) {
   );
 }
 
-// ── Abanico de anuncios: un mazo por anunciante (la marca propia primero, aparte) y la ventana con todos ──
+// ── Abanico de anuncios: un mazo por anunciante (la marca propia aparte) y la ventana con todos ──
 // `abierta` vive en quien lo usa, para que otro control pueda abrir la misma ventana. Los textos llegan en `t`.
-export function Abanico({ lista, abierta, onAbrir, t, nota }) {
-  const todos = [lista.propio, ...lista.grupos].filter(Boolean);
+// propioAlFinal: cuando lo principal es la competencia, la marca propia va última, para comparar.
+export function Abanico({ lista, abierta, onAbrir, t, nota, propioAlFinal = false }) {
+  const todos = (propioAlFinal ? [...lista.grupos, lista.propio] : [lista.propio, ...lista.grupos]).filter(Boolean);
   const grupo = todos.find((g) => g.nombre === abierta) ?? null;
   const volver = () => document.querySelector(`[data-anunciante="${window.CSS.escape(abierta ?? '')}"]`)?.focus();
   return (

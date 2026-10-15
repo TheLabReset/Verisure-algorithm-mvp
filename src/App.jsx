@@ -11,6 +11,7 @@ import Senales from './pantallas/Senales.jsx';
 import Inteligencia from './pantallas/Inteligencia.jsx';
 import Activacion from './pantallas/Activacion.jsx';
 import Rendimiento from './pantallas/Rendimiento.jsx';
+import Maia, { BotonMaia } from './pantallas/Maia.jsx';
 import { CLIENTE } from './cliente.js';
 import logoCliente from '../public/marca/logo-barra.svg?raw'; // logo oficial del cliente en negativo, sobre la barra oscura
 
@@ -31,16 +32,18 @@ const ancla = () => (typeof location !== 'undefined' ? location.hash.slice(1) : 
 const capaDeLaUrl = () => capaDeAncla(ancla()) || INICIO;
 const hoyIso = () => new Date().toISOString().slice(0, 10); // solo para medir el atraso de la fuente
 
-// El contrato y los medios, desde public/data (los publica el pipeline)
+// La data publicada por el pipeline (public/data). Solo el contrato es obligatorio: si otra fuente no carga, sus
+// capítulos lo dicen y el resto sigue
 function useData() {
   const [r, setR] = useState({ estado: 'cargando' });
   useEffect(() => {
     let vivo = true;
     const base = import.meta.env.BASE_URL;
-    Promise.all([fetch(`${base}data/algorithm.json`), fetch(`${base}data/medios.json`)])
-      .then(async ([a, m]) => {
+    const opcional = (f) => fetch(`${base}data/${f}`).then((x) => (x.ok ? x.json() : null)).catch(() => null);
+    Promise.all([fetch(`${base}data/algorithm.json`), opcional('medios.json'), opcional('mapa-lima.json'), opcional('busquedas.json'), opcional('maia.json')])
+      .then(async ([a, medios, mapa, busquedas, maia]) => {
         if (!a.ok) throw new Error(`contrato ${a.status}`);
-        return { contrato: await a.json(), medios: m.ok ? await m.json() : null };
+        return { contrato: await a.json(), medios, mapa, busquedas, maia };
       })
       .then((d) => vivo && setR({ estado: 'ok', ...d }))
       .catch((e) => vivo && setR({ estado: 'no-cargo', error: e.message }));
@@ -58,6 +61,7 @@ export default function App() {
   const [tema, setTema] = useState(() => leerPref('tema-elegido', 'light'));
   const [demo, setDemo] = useState('datos');
   const [presentar, setPresentar] = useState(false);
+  const [maiaAbierta, setMaiaAbierta] = useState(false);
   useEffect(() => { document.documentElement.dataset.theme = tema; }, [tema]);
   useEffect(() => { if (presentar) document.documentElement.dataset.presentar = ''; else delete document.documentElement.dataset.presentar; }, [presentar]);
   const cambiarTema = () => { const t = tema === 'dark' ? 'light' : 'dark'; setTema(t); guardarPref('tema-elegido', t); };
@@ -88,8 +92,8 @@ export default function App() {
 
   const vista = useMemo(() => {
     if (data.estado !== 'ok' || !mesActivo) return null;
-    const caidas = demo === 'atl' ? ['atl'] : demo === 'digital' ? ['digital'] : [];
-    return armarVista(data.contrato, data.medios, { mes: mesActivo }, { fuentesCaidas: caidas, hoy: hoyIso() });
+    const caidas = ['atl', 'digital', 'trends'].includes(demo) ? [demo] : [];
+    return armarVista(data.contrato, data.medios, { mes: mesActivo }, { fuentesCaidas: caidas, hoy: hoyIso() }, { mapa: data.mapa, busquedas: data.busquedas });
   }, [data, mesActivo, demo]);
   const actual = CAPAS.find((c) => c.id === capa);
   const Pantalla = PANTALLAS[capa];
@@ -105,6 +109,7 @@ export default function App() {
           </a>
           <div className="q-barra-controles">
             {data.contrato && <span className="q-sello-datos">Datos al {fecha(data.contrato.meta.lastDay)}</span>}
+            {vista && <BotonMaia onClick={() => setMaiaAbierta(true)} />}
             <a className="q-boton q-boton-quieto q-boton-export" href={`${import.meta.env.BASE_URL}data/export.csv`} download>
               <Download size={16} aria-hidden="true" /><span>Export para su BI</span>
             </a>
@@ -144,11 +149,12 @@ export default function App() {
       </main>
       <BarraDemo valor={demo} onCambiar={setDemo} opciones={[
         { valor: 'datos', texto: 'Datos' }, { valor: 'cargando', texto: 'Cargando' },
-        { valor: 'atl', texto: 'ATL no cargó' }, { valor: 'digital', texto: 'Digital no cargó' },
+        { valor: 'atl', texto: 'ATL no cargó' }, { valor: 'digital', texto: 'Digital no cargó' }, { valor: 'trends', texto: 'Trends no cargó' },
       ]} />
+      {vista && <Maia abierta={maiaAbierta} onCerrar={() => setMaiaAbierta(false)} vista={vista} reporte={data.maia} />}
 
       <footer className="q-envoltura q-pie">
-        <p>Toda cifra sale de Integrametrics, estimada a precio de tarifa, y de una sola capa de cálculo; ningún número está escrito en un componente. Es inteligencia externa: el panel no toca la data de ventas ni de clientes de {CLIENTE.nombre}.</p>
+        <p>Toda cifra sale de Integrametrics (inversión estimada a precio de tarifa) o de Google Trends, y de una sola capa de cálculo; ningún número está escrito en un componente. Es inteligencia externa: el panel no toca la data de ventas ni de clientes de {CLIENTE.nombre}.</p>
         <p>The Algorithm · By The Lab · sistema de diseño Quincha</p>
       </footer>
     </div>

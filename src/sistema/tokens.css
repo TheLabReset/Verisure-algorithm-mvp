@@ -53,9 +53,10 @@
   --p-o-300: #a4a7ae;
   --p-o-200: #c9cacd;
 
-  /* ── Primitivos: rampa de menta para magnitud (mapa de calor), de menos a más ── */
-  --p-m-1: #e9f8f2; --p-m-2: #b9e6d4; --p-m-3: #86d2b8; --p-m-4: #4fb796; --p-m-5: #239676; --p-m-6: #0e7258; --p-m-7: #08493a;
-  --p-mo-1: #21403a; --p-mo-2: #1d5e4f; --p-mo-3: #1b7d65; --p-mo-4: #26a07f; --p-mo-5: #4fc29f; --p-mo-6: #8fdcc1; --p-mo-7: #cff4e6;
+  /* ── Primitivos: rampa de tinta para magnitud (mapa de calor, tiras), de menos a más ── */
+  /* rampa secuencial de tinta: del gris del fondo a la tinta de la marca; en oscuro, del gris oscuro a la cal */
+  --p-r-1: #efefec; --p-r-2: #d9d9d5; --p-r-3: #bcbcb7; --p-r-4: #96968f; --p-r-5: #6e6e69; --p-r-6: #464644; --p-r-7: #1d1d1f;
+  --p-ro-1: #34363d; --p-ro-2: #4a4c54; --p-ro-3: #666870; --p-ro-4: #8b8d94; --p-ro-5: #b1b2b7; --p-ro-6: #d5d6d8; --p-ro-7: #f5f5f3;
 
   /* ── Primitivos: estado (reservados, nunca serie) ── */
   --p-ambar-700: #8c5b10;
@@ -100,13 +101,14 @@
   --s3: var(--p-cat-naranja);
   --s4: var(--p-cat-azul);
   --previa: var(--p-n-400);              /* período de comparación: siempre gris */
-  --q0: var(--p-m-1);                    /* rampa secuencial en menta, de menos a más: un solo tono */
-  --q1: var(--p-m-2);
-  --q2: var(--p-m-3);
-  --q3: var(--p-m-4);
-  --q4: var(--p-m-5);
-  --q5: var(--p-m-6);
-  --q6: var(--p-m-7);
+  --mapa-filtro: grayscale(0.9) contrast(0.9) brightness(1.04);  /* el mapa base, tenue: lo que se lee son los puntos */
+  --q0: var(--p-r-1);                    /* rampa secuencial de tinta, de menos a más: un solo tono, el del foco */
+  --q1: var(--p-r-2);
+  --q2: var(--p-r-3);
+  --q3: var(--p-r-4);
+  --q4: var(--p-r-5);
+  --q5: var(--p-r-6);
+  --q6: var(--p-r-7);
   --banda-0: var(--p-n-100);             /* la zona hasta el objetivo en una bala: un solo gris, nunca escalones */
   --sombra-flota: 0 10px 28px rgb(18 19 24 / 0.14);
   color-scheme: light;
@@ -173,13 +175,14 @@
     --s3: var(--p-cat-naranja-o);
     --s4: var(--p-cat-azul-o);
     --previa: var(--p-o-400);
-    --q0: var(--p-mo-1);
-    --q1: var(--p-mo-2);
-    --q2: var(--p-mo-3);
-    --q3: var(--p-mo-4);
-    --q4: var(--p-mo-5);
-    --q5: var(--p-mo-6);
-    --q6: var(--p-mo-7);
+    --mapa-filtro: invert(1) hue-rotate(180deg) grayscale(0.85) brightness(0.8) contrast(0.95);
+    --q0: var(--p-ro-1);
+    --q1: var(--p-ro-2);
+    --q2: var(--p-ro-3);
+    --q3: var(--p-ro-4);
+    --q4: var(--p-ro-5);
+    --q5: var(--p-ro-6);
+    --q6: var(--p-ro-7);
     --banda-0: var(--p-o-700);
     --sombra-flota: 0 12px 32px rgb(0 0 0 / 0.45);
     color-scheme: dark;
@@ -217,13 +220,14 @@
   --s3: var(--p-cat-naranja-o);
   --s4: var(--p-cat-azul-o);
   --previa: var(--p-o-400);
-  --q0: var(--p-mo-1);
-  --q1: var(--p-mo-2);
-  --q2: var(--p-mo-3);
-  --q3: var(--p-mo-4);
-  --q4: var(--p-mo-5);
-  --q5: var(--p-mo-6);
-  --q6: var(--p-mo-7);
+  --mapa-filtro: invert(1) hue-rotate(180deg) grayscale(0.85) brightness(0.8) contrast(0.95);
+  --q0: var(--p-ro-1);
+  --q1: var(--p-ro-2);
+  --q2: var(--p-ro-3);
+  --q3: var(--p-ro-4);
+  --q4: var(--p-ro-5);
+  --q5: var(--p-ro-6);
+  --q6: var(--p-ro-7);
   --banda-0: var(--p-o-700);
   --sombra-flota: 0 12px 32px rgb(0 0 0 / 0.45);
   color-scheme: dark;

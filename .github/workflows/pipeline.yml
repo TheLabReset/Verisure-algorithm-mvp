@@ -2,6 +2,7 @@
 # Incremental por omisión: los últimos 7 días, incluido hoy, con merge idempotente (la fuente llega con ~1 día de
 # rezago y a veces corrige la semana). Backfill: workflow_dispatch con start_date, o el cron del domingo.
 # Cron 10:52 UTC = 05:52 de Lima (minuto corrido para no caer en la hora en punto, cuando GitHub atrasa los crones).
+# Cada día arma también el contexto de MAIA. Los lunes baja Google Trends y MAIA escribe su lectura de la semana.
 # Presupuesto de minutos y por qué falla en rojo sin token: docs/produccion-actions.md y README.
 name: Pipeline de datos
 
@@ -15,6 +16,10 @@ on:
         description: 'Backfill desde esta fecha (AAAA-MM-DD). Vacío = incremental de 7 días.'
         required: false
         default: ''
+      semanal:
+        description: 'Correr también lo de los lunes (Google Trends y la lectura de MAIA).'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -64,6 +69,25 @@ jobs:
             export PIPELINE_START="2026-01-01"
           fi
           node scripts/run-pipeline.mjs
+
+      # Los lunes (o a mano): Google Trends es semanal y la lectura de MAIA es de la semana que cerró el domingo.
+      # Sin ANTHROPIC_API_KEY este paso falla en rojo, igual que el de Integrametrics sin su token.
+      - name: Búsquedas y lectura de MAIA (lunes)
+        if: ${{ github.event.inputs.semanal == 'true' || (github.event.schedule == '52 10 * * *' && github.event_name == 'schedule') }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.semanal }}" != "true" ] && [ "$(date -u +%u)" != "1" ]; then
+            echo "No es lunes: se omite."
+            exit 0
+          fi
+          node scripts/bajar-busquedas.mjs
+          node scripts/armar-contexto.mjs
+          node scripts/maia-reporte.mjs
+
+      # Cada día: el contexto que lee MAIA cuando le preguntan, con la data recién bajada
+      - name: Contexto de MAIA
+        run: node scripts/armar-contexto.mjs
 
       - name: Commit de la data si cambió
         run: |

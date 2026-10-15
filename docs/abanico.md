@@ -126,3 +126,8 @@ En cada caso se escribe la normalización de esa fuente en el dominio (como `anu
 - **Antes era un carrusel**, y después quedó reducido a tres textos cortados dentro del panel de un punto de otro gráfico: una marca con anuncios y sin ese punto no tenía por dónde abrirse. Por eso la sección es propia y la ficha es solo un atajo.
 - **El respaldo del scraper es una página HTML**, no una imagen. Sin la lista blanca, el `<img>` intentaba cargar una página.
 - **El estado sin imagen se diseña desde el principio**, porque las imágenes vencen.
+
+
+## La marca propia al final
+
+Cuando lo principal del algoritmo es la competencia, `Abanico` recibe `propioAlFinal`: los mazos de la competencia van primero y el de la marca propia al final, con su rótulo «los propios, para comparar». La ventana y los textos no cambian.

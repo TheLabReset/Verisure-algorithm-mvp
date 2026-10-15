@@ -1,5 +1,5 @@
-// Medios por mes y marca, desde el CSV de emisiones (public/data/export.csv): hora, día de la semana, canal,
-// programa, zona y grupo de medio. Corre en el pipeline (Node) y deja public/data/medios.json, que la capa 3 lee.
+// Medios por mes y marca, desde el CSV de emisiones (public/data/export.csv): hora, día de la semana, la matriz
+// día × hora, canal, programa, zona y grupo de medio. Corre en el pipeline (Node) y deja public/data/medios.json.
 // El CSV es la grilla emisión por emisión que ya va al Power BI del cliente: una sola fuente para las dos cosas.
 
 // CSV con comillas: los nombres de programa pueden traer comas
@@ -30,12 +30,13 @@ export function mediosDesdeCsv(texto) {
     if (!fecha || !r.marca) continue;
     const mes = fecha.slice(0, 7);
     const m = (meses[mes] ??= {});
-    const b = (m[r.marca] ??= { emisiones: 0, horas: Array(24).fill(0), dias: Array(7).fill(0), canales: {}, programas: {}, zonas: {}, grupos: {} });
+    const b = (m[r.marca] ??= { emisiones: 0, horas: Array(24).fill(0), dias: Array(7).fill(0), horaDia: Array.from({ length: 7 }, () => Array(24).fill(0)), canales: {}, programas: {}, zonas: {}, grupos: {} });
     const inv = Number(r.inversion_soles) || 0;
     b.emisiones += 1;
     const h = Number((r.hora || '').slice(0, 2));
-    if (r.hora && h >= 0 && h < 24) b.horas[h] += 1;
-    b.dias[diaSemana(fecha)] += 1;
+    const d = diaSemana(fecha);
+    if (r.hora && h >= 0 && h < 24) { b.horas[h] += 1; b.horaDia[d][h] += 1; }
+    b.dias[d] += 1;
     sumar(b.canales, r.medio, inv);
     sumar(b.programas, r.programa, 1);
     sumar(b.zonas, r.zona, inv);
