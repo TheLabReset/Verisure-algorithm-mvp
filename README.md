@@ -1,144 +1,92 @@
-# The Algorithm by Reset — Verisure Perú
+# The Algorithm by The Lab · Verisure Perú
 
-**Inteligencia competitiva de inversión publicitaria, _outside-in_.**
+Panel de inteligencia competitiva de inversión publicitaria para Verisure Perú. Es *outside-in*: se arma solo con lo que Integrametrics registra al aire (TV, radio, cable, OTT, vía pública y digital) y no toca la data de ventas del cliente. El cruce con sus llamadas y ventas lo hace su Power BI, con el CSV que el panel le entrega.
 
-The Algorithm responde tres preguntas cada mañana, sin tocar la data de ventas del cliente:
+Sigue el estándar de The Algorithm: cuatro capas, el sistema de diseño Quincha y las reglas de datos honestos de [`docs/guia-algoritmo.md`](docs/guia-algoritmo.md). La plantilla de referencia es el repo Reset-The-Algorithm.
 
-- **¿Qué emitió hoy la competencia?** — piezas nuevas detectadas el mismo día, con inversión estimada y tono.
-- **¿Cuánto invierte la categoría y quién lidera?** — share of investment (SOI) diario por competidor.
-- **¿Cómo viene la demanda y el contexto?** — búsquedas, amenaza DIY, criminalidad, macro y prensa.
+## Las cuatro capas
 
-Es _outside-in_: se construye solo con señales externas (inversión publicitaria observada, demanda, contexto). El cruce con ventas/L2B/CPS ocurre en casa de Verisure, con su propio BI; Reset entrega el insumo estandarizado.
+1. **Captura de señales:** qué salió al aire. Las piezas que se estrenaron, las versiones ATL al aire de cada marca, las piezas digitales nuevas (en abanico, con su video, audio o imagen) y la vía pública por distrito.
+2. **Inteligencia de mercado:** qué mirar en el período (alertas con umbral fijo y lo que va bien) y cómo viene el año, mes por mes, en ATL y en digital.
+3. **Activación estratégica:** dónde está la inversión (medios, franjas, canales) y cuándo sale al aire (horas, días de la semana, programas) de cada marca.
+4. **Rendimiento y optimización:** share of investment en ATL y en digital frente al período anterior, y la inversión ATL día por día.
 
----
+Se compara siempre un mes cerrado con el mes anterior entero, y el mes en curso con los mismos días del mes anterior. ATL y digital se estiman distinto: van lado a lado y nunca se suman.
 
-## Los 4 módulos
+## Correr el panel
 
-| Módulo | Qué muestra | Fuente |
-| --- | --- | --- |
-| **RADAR** | La jugada del día (pieza nueva), SOI por competidor, presión 30 días, Ad Museum, mapa OOH | Integrametrics |
-| **DEMANDA** | Share of search vs. share of investment (ESOV), tendencia de búsquedas, índice de amenaza DIY | Google Trends · marketplaces |
-| **CONTEXTO** | Denuncias por distrito, estacionalidad, macro, barrido de prensa | SIDPOL · BCRP · prensa |
-| **MAIA** | Daily Brief editorial, Opportunity Score (IPC/IMC), chat sobre la data del día | Síntesis de las anteriores |
-
-**MAIA** — _Media Analyst IA de Reset_: redacta el brief y responde preguntas apoyándose **solo** en los datos derivados del día.
-
----
-
-## Arquitectura
-
-- **Frontend:** React 18 + Vite 5 + Tailwind 3. Los gráficos son SVG propio (sin librería de charting); el mapa OOH usa **Leaflet + OpenStreetMap** (Opción A).
-- **Ley visual:** `docs/DESIGN (Verisure).md` es la fuente de verdad. Tokens de color como CSS custom properties en `src/index.css`, mapeados 1:1 en `tailwind.config.js`. Ningún hex fuera de esa tabla. Fuentes auto-hospedadas (Space Grotesk, Instrument Sans, Anton) en `public/fonts/` — sin URLs externas.
-- **Vocabulario de honestidad (DESIGN §2):** sólido = confirmado (pauta operada por Reset) · rayado = estimado (Integrametrics) · punteado = sin data fresca. Cada afirmación de dato lleva su frescura y su fuente.
-- **Datos:** el navegador **solo** lee el CONTRATO agregado `public/data/algorithm.json` (`{ meta, daily, pieces, ooh, events, digital }`, serie histórica con fecha + entidades únicas con su arte). No descarga registros crudos, no habla con Integrametrics ni ve ningún token (governance). `src/data/views.js` corta el contrato por rango de fecha (date-picker) y deriva SOI, presión, deltas, museo, OOH y digital. El pipeline es el único que toca la API.
-- **Determinismo:** los fixtures se generan con un PRNG sembrado (seed `20260710`); los derivadores son funciones puras sin `Date.now`/`Math.random`; el dinero se agrupa con regex (no `toLocaleString`, que varía entre navegadores).
-
-### Flujo de datos
-
-```
-Integrametrics (/registros + /registros-digital)      (fuente real)
-        │
-        ▼
-scripts/run-pipeline.mjs   ──►   public/data/algorithm.json + export.csv + meta.json
-  (aggregate.js: contrato)         (contrato agregado ~880 KB · trends/contexto de fixtures)
-        │                                   │
-   GitHub Actions                     el navegador fetchea /data/algorithm.json
-   · cron diario  → incremental 7 días (merge idempotente)
-   · cron domingo → backfill completo (re-cuadra acumulados)
-```
-
-**Incremental vs. backfill:** la corrida diaria jala solo los últimos 7 días (incluido hoy)
-y los fusiona en el contrato commiteado sin duplicar (upsert de días por fecha, unión de
-entidades por clave estable). El backfill semanal reconstruye todo el rango. En modo
-demostración (sin token) el pipeline agrega los **fixtures deterministas**.
-
----
-
-## Puesta en marcha
-
-Requiere Node 20+.
+Necesita Node 18 o más nuevo.
 
 ```bash
-npm install
-npm run dev              # servidor de desarrollo (Vite)
+npm ci
+npm run dev                          # panel en local
+npm run prueba                       # cálculo, textos, marca y chequeo del sistema
+npm run sistema                      # tokens, contraste y bordes de Quincha
+npm run build                        # build de producción en dist/
+npm run medios                       # rearma public/data/medios.json desde export.csv
+npm run pipeline                     # baja lo nuevo de Integrametrics (necesita INTEGRAMETRICS_TOKEN)
 ```
 
-La app funciona sin credenciales: lee el snapshot de `public/data/` (versionado en el repo).
+`npm run prueba` y `npm run sistema` se corren antes de cada commit.
 
-### Scripts
+## Cómo está armado
 
-| Comando | Qué hace |
-| --- | --- |
-| `npm run dev` | Servidor de desarrollo |
-| `npm run build` | Build de producción a `dist/` |
-| `npm run preview` | Sirve el build |
-| `npm test` | Tests (`node --test`) |
-| `npm run gen:fixtures` | Regenera los fixtures deterministas |
-| `npm run validate:fixtures` | Valida los fixtures contra el esquema del PDF de Integrametrics |
-| `npm run pipeline` | Agrega los datos y publica el contrato en `public/data/algorithm.json` |
-
-### Estados de demostración
-
-Añade `?demo=` a la URL para previsualizar estados diseñados: `loading`, `empty`, `sourcedown` (RADAR/otros) y `nodata` (MAIA).
-
----
-
-## Pipeline diario
-
-`.github/workflows/pipeline.yml` corre a las **06:00 America/Lima** (`0 11 * * *` UTC) en modo
-incremental (7 días), los **domingos** (`0 10 * * 0`) en backfill completo, y con `workflow_dispatch`
-de respaldo (input `start_date` para backfill puntual). Corre los tests, ejecuta `scripts/run-pipeline.mjs`
-y commitea `public/data/` si cambió. Sin `INTEGRAMETRICS_TOKEN` en Secrets, omite la escritura
-(no sobrescribe el contrato real con fixtures).
-
-El **export CSV** (`public/data/export.csv`) usa las dimensiones compartidas del BI de Verisure (§A.7 del blueprint): fecha, hora, zona, taxonomía de canal, marca, versión, inversión (S/ y USD) y tipo de cambio. Flujo en una sola dirección: hacia su Power BI.
-
----
-
-## Variables de entorno
-
-Copia `.env.example` a `.env` (nunca commitees `.env`). Todo es opcional para el modo demostración.
-
-| Variable | Uso |
-| --- | --- |
-| `VITE_DATA_SOURCE` | `fixtures` (default) o `live` — resuelto por el pipeline, no por el navegador |
-| `INTEGRAMETRICS_TOKEN` | Token de Integrametrics. **Solo en Node/pipeline**, jamás en el bundle |
-| `ANTHROPIC_API_KEY` | Para MAIA (Daily Brief + chat) vía Netlify Function, nunca client-side |
-| `VITE_MAIA_CHAT` | `demo` (default) o `live` (delega el chat en `/api/maia`) |
-| `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD` | Protección Basic Auth del sitio (Edge Function). Sin ellas, sitio abierto |
-
----
-
-## Despliegue (Netlify)
-
-`netlify.toml` define el build (`npm run build` → `dist/`), el redirect SPA, el cacheo de `/data/*` y una **Edge Function de Basic Auth** (`netlify/edge-functions/auth.js`) que protege todo el sitio cuando `BASIC_AUTH_USER`/`BASIC_AUTH_PASSWORD` están configuradas en el entorno de Netlify (scope Functions). Sin esas variables, el sitio queda abierto para demostración.
-
----
-
-## Estructura
+Ninguna cifra se escribe en un componente. La data entra por un solo lado, se calcula en un solo lado y las pantallas solo pintan.
 
 ```
 src/
-  components/        AppShell, franja "Hoy", primitivas de UI, MaiaFace
-  data/              client (fetch de /data) · derive (derivadores puros) ·
-                     integrametrics (cliente live, solo pipeline) · csvExport · fixtures
-  modules/           radar · demanda · contexto · maia
-  utils/             format (dinero/porcentaje deterministas)
-scripts/             run-pipeline.mjs · validate-fixtures.mjs
-netlify/edge-functions/  auth.js (Basic Auth)
-public/              fonts/ (auto-hospedadas) · data/ (snapshot publicado)
-docs/                DESIGN (Verisure).md · blueprint · BITACORA · auditoría
+├── cliente.js        Quién es el cliente y su competencia, con sus nombres en Integrametrics. Único archivo que nombra a la marca
+├── fuentes/          Integrametrics: cliente de la API, contrato agregado, CSV para el BI y medios por mes (corren en Node)
+├── calculo/          Reglas puras: vista.js es la única puerta entre la data y la pantalla; periodo.js arma los meses
+├── textos/           Las lecturas, en español peruano: observan, no ordenan
+├── capas/            Las cuatro capas y sus capítulos
+├── pantallas/        Una pantalla por capa; solo pintan
+└── sistema/          Quincha: tokens con la paleta de Verisure, componentes, gráficos SVG propios y formato de cifras
+scripts/              El pipeline y el armado de medios.json
+pruebas/              node --test: fuentes, vista con la data real, textos, marca y sistema
+herramientas/         El chequeo del sistema y el armado del artefacto
+public/data/          Lo que lee el panel: algorithm.json, medios.json, export.csv y meta.json
+public/marca/         Logo oficial en negativo para la barra
 ```
 
----
+**Dependencias:** React 18, Vite 5, los íconos de Lucide y Sofia Sans (`@fontsource-variable`), la tipografía por defecto del estándar mientras no tengamos la de la marca. Los gráficos son SVG propios.
+
+## La data
+
+| Archivo | Qué tiene | Quién lo escribe |
+|---|---|---|
+| `public/data/algorithm.json` | Inversión diaria por marca (ATL y digital), piezas con su arte, paneles de vía pública y estrenos | `npm run pipeline` |
+| `public/data/export.csv` | Una fila por emisión, con las dimensiones que comparte con el Power BI del cliente (fecha, hora, zona, canal, programa) | `npm run pipeline` |
+| `public/data/medios.json` | Canales, programas, horas y días por mes y marca, armado desde el CSV | `npm run medios`, y el pipeline al final |
+| `public/data/meta.json` | Cuándo corrió, desde y hasta qué día hay data, cuántos registros | `npm run pipeline` |
+
+El navegador solo lee estos archivos: no habla con Integrametrics ni ve el token. El botón «Export para su BI» descarga el CSV.
+
+La data cubre del 1 de enero al 13 de julio de 2026. El panel dice cuántos días lleva sin datos nuevos; con el token en Secrets, el pipeline la pone al día.
+
+## Producción
+
+El pipeline corre en GitHub Actions ([`.github/workflows/pipeline.yml`](.github/workflows/pipeline.yml)): cada día un incremental de 7 días y cada domingo un backfill desde enero.
+
+- **Falla en rojo sin `INTEGRAMETRICS_TOKEN`.** Antes quedaba verde sin hacer nada y la data se quedó en julio sin que nadie lo notara. El token va en Settings, Secrets and variables, Actions.
+- **GitHub apaga los crones de un repo sin actividad por 60 días.** Si pasa, se vuelven a activar en la pestaña Actions.
+- **Minutos:** el repo público no paga minutos. Si pasa a privado, el presupuesto se arma con [`docs/produccion-actions.md`](docs/produccion-actions.md). Estimación sin medir (asumo): unos 2 minutos el incremental diario y unos 10 el backfill del domingo, unos 100 minutos al mes. Se mide en la primera semana con token y se corrige acá.
+- **Acceso:** con `BASIC_AUTH_USER` y `BASIC_AUTH_PASSWORD` en Netlify, la función `netlify/edge-functions/auth.js` pide clave para todo el sitio, incluida la data.
+
+## Lo que falta conectar
+
+Se muestra solo lo que tenemos. En «Qué se monitorea» quedan a la vista las fuentes por conectar: Google Trends, denuncias SIDPOL y el Power BI de Verisure, que sería lo último en activarse.
 
 ## Documentación
 
-- **`docs/DESIGN (Verisure).md`** — ley visual (tokens, honestidad, tipografía, estados, checklist).
-- **`docs/verisure-ecosistema-bi-y-blueprint-v2.md`** — blueprint del ecosistema y arquitectura.
-- **`docs/BITACORA.md`** — bitácora de construcción por fases, con gates de verificación.
-- **`docs/AUDITORIA-ALGORITHM.md`** — auditoría de arranque del template heredado.
-
----
-
-_The Algorithm by Reset · Verisure Perú · inteligencia externa outside-in._
+| Documento | Para qué |
+|---|---|
+| [`docs/guia-algoritmo.md`](docs/guia-algoritmo.md) | Cómo se diseña un algoritmo: capas, tarjeta, gráficos y datos honestos |
+| [`docs/quincha.md`](docs/quincha.md) | El sistema de diseño y su chequeo |
+| [`docs/abanico.md`](docs/abanico.md) | Cómo se muestran las piezas: el abanico y su ventana |
+| [`docs/marca-verisure.md`](docs/marca-verisure.md) | La marca en el panel: colores, logo, tipografía, fuentes y supuestos |
+| [`docs/INTEGRAMETRICS-HALLAZGOS.md`](docs/INTEGRAMETRICS-HALLAZGOS.md) | Lo que se aprendió de la API de Integrametrics |
+| [`docs/produccion-actions.md`](docs/produccion-actions.md) | Minutos de GitHub Actions antes de pasar a producción |
+| [`docs/nuevo-algoritmo.md`](docs/nuevo-algoritmo.md) | Cómo se arma un algoritmo para otra marca desde la plantilla |
+| [`docs/BITACORA.md`](docs/BITACORA.md) | Historia del proyecto |
+| [`CLAUDE.md`](CLAUDE.md) | Las reglas que sigue Claude Code en este repo |

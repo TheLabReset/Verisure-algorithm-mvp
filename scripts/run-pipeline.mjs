@@ -1,44 +1,35 @@
-// Pipeline de datos de The Algorithm (Fase 7 · data real Integrametrics).
-// PUBLICA en public/data/ un CONTRATO digerible que el frontend fetchea:
+// Pipeline de datos de The Algorithm: baja lo nuevo de Integrametrics y publica en public/data/ lo que lee el panel.
 //   algorithm.json → contrato agregado { meta, daily, pieces, ooh, events, digital }
-//                    (serie temporal + entidades únicas con assets; ~120 KB, no 32 MB)
-//   export.csv     → grid spot-a-spot en dimensiones compartidas con el BI (§A.7)
-//   meta.json      → { generated, source, firstDay, lastDay, days, registros } salud/frescura
-//   trends.json · contexto.json · catalogos.json → capas EXTERNAS (Trends/BCRP/SIDPOL) aún
-//                    servidas de fixtures honestos hasta que aterricen sus conectores (§B.6)
+//   export.csv     → grilla emisión por emisión, con las dimensiones que comparte con el BI del cliente
+//   medios.json    → canales, programas, horas y días por mes y marca, armado desde export.csv
+//   meta.json      → { generated, source, firstDay, lastDay, days, registros, mode }
 //
 // Dos modos:
-//   • BACKFILL  (PIPELINE_START set): reconstruye TODO el rango → reescribe el contrato + CSV.
-//   • INCREMENTAL (por defecto en CI): ventana de 7 días incluyendo hoy → mergeAlgorithm
-//     idempotente sobre el contrato commiteado (upsert por clave, sin duplicar) + CSV de la
-//     ventana reemplazado en su rango. Llamadas ligeras (~7 días, no todo 2026).
+//   • BACKFILL  (PIPELINE_START): reconstruye todo el rango y reescribe el contrato y el CSV.
+//   • INCREMENTAL (por omisión): los últimos 7 días, incluido hoy, con merge idempotente sobre lo commiteado.
 //
-// Fuente: fixtures deterministas por defecto. Con DATA_SOURCE=live + INTEGRAMETRICS_TOKEN,
-// ATL sale de /registros (paginado por día, filtrado a Verisure+Prosegur) y digital de
-// /registros-digital (sin filtro server-side → se filtra por subsector en cliente).
-// El token vive SOLO aquí (Node); jamás en el bundle del navegador (governance §B.2).
+// Sin INTEGRAMETRICS_TOKEN el pipeline falla en rojo: un workflow que no puede hacer su trabajo no puede quedar verde
+// (docs/produccion-actions.md). El token vive solo acá, en Node; nunca en el bundle del navegador.
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildAlgorithm, mergeAlgorithm } from '../src/data/aggregate.js'
-import { registrosToCSV } from '../src/data/csvExport.js'
-import { fetchRegistros, fetchRegistrosDigital } from '../src/data/integrametrics.js'
+import { buildAlgorithm, mergeAlgorithm } from '../src/fuentes/agregado.js'
+import { registrosToCSV } from '../src/fuentes/exportCsv.js'
+import { fetchRegistros, fetchRegistrosDigital } from '../src/fuentes/integrametrics.js'
+import { armarMedios } from './armar-medios.mjs'
+import { CLIENTE } from '../src/cliente.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const FX = join(ROOT, 'src', 'data', 'fixtures')
 const OUT = join(ROOT, 'public', 'data')
-const readFx = (f) => JSON.parse(readFileSync(join(FX, f), 'utf8'))
 const readOut = (f) => (existsSync(join(OUT, f)) ? JSON.parse(readFileSync(join(OUT, f), 'utf8')) : null)
 
 const token = process.env.INTEGRAMETRICS_TOKEN || null
-const wantLive = process.env.DATA_SOURCE === 'live' && Boolean(token)
 
-// Set competitivo del producto = Verisure + Prosegur (Hunter=B2B y Securitas=seguros
-// quedan fuera; validado contra la API). ATL se filtra server-side por NOMBRE de marca.
-const BRANDS = (process.env.PIPELINE_BRANDS || 'VERISURE,PROSEGUR')
+// Marcas que se siguen: la propia y su competencia, con su nombre en Integrametrics (src/cliente.js).
+// ATL se filtra en el servidor por marca; digital no acepta filtros y se filtra acá por subsector y marca.
+const BRANDS = (process.env.PIPELINE_BRANDS || [CLIENTE.marcaFuente, ...CLIENTE.competencia.map((c) => c.marcaFuente)].join(','))
   .split(',').map((s) => s.trim()).filter(Boolean)
-// Digital NO acepta filtros server-side → se filtra en cliente por subsector de seguridad.
-const SEC_RE = /SEGURIDAD/i
+const SEC_RE = new RegExp(CLIENTE.subsectores.map((s) => s.split(' ')[0]).filter((x, i, a) => a.indexOf(x) === i).join('|'), 'i')
 const BRAND_RE = new RegExp(BRANDS.join('|'), 'i')
 
 // ATL: cada registro trae ~150 campos (decenas de audiencia vacíos). Guardamos SOLO
@@ -87,9 +78,7 @@ async function fetchDigitalWindow(start, end) {
 }
 
 async function loadData() {
-  if (!wantLive) {
-    return { registros: readFx('registros.json'), digital: readFx('registros-digital.json'), source: 'fixtures', isBackfill: true }
-  }
+  if (!token) throw new Error('falta INTEGRAMETRICS_TOKEN: sin token no hay data nueva, y el contrato commiteado no se toca')
   const { start, end, isBackfill } = resolveWindow()
   const rawAtl = await fetchRegistros({
     token, startDate: `${start} 00:00:00`, endDate: `${end} 23:59:59`, filters: { maname: BRANDS },
@@ -132,10 +121,8 @@ async function main() {
   const csv = mergeCsv(registrosToCSV(registros), isBackfill, start, end)
   write('export.csv', csv)
 
-  // Capas externas (fixtures honestos hasta que aterricen sus conectores).
-  write('trends.json', readFx('trends.json'))
-  write('contexto.json', readFx('contexto.json'))
-  write('catalogos.json', readFx('catalogos.json'))
+  // Canales, programas, horas y días: salen del CSV ya mergeado, sin otra llamada a la API
+  const medios = armarMedios()
 
   write('meta.json', {
     generated: algorithm.meta.generated,
@@ -151,6 +138,7 @@ async function main() {
   const lead = topBrand ? Object.entries(topBrand).sort((a, b) => b[1].spend - a[1].spend)[0]?.[0] : '—'
   console.log(`✅ pipeline (${source} · ${isBackfill ? 'backfill' : 'incremental'}) · ${algorithm.meta.firstDay}→${algorithm.meta.lastDay}`)
   console.log(`   ${algorithm.meta.days.length} días · ${algorithm.pieces.length} piezas · ${algorithm.ooh.length} OOH · ${algorithm.events.length} estrenos · líder ${lead}`)
+  console.log(`   medios.json · ${Object.keys(medios.meses).length} meses`)
 }
 
 main().catch((e) => {

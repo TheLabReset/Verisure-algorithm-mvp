@@ -182,3 +182,18 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 **Auto-verificación Gate 1.** 43 tests verdes · build ok · snapshot regenerado (reproducible) · skeleton estático bajo `reduce` · docs v1 fuera · `package.json`/`lock` intactos.
 
 **Criterio de gate.** Gate 1 sin bloqueante/mayor; los 2 menores resueltos, 1 sugerencia adoptada y 1 justificada por escrito (protocolo §1.4, precedente F1–F4). Se procede al merge — **última fase**.
+
+
+## Rediseño al estándar de The Algorithm (octubre de 2026)
+
+El panel se rehizo entero sobre la plantilla Reset-The-Algorithm, antes de presentarlo al cliente.
+
+- **Cuatro capas** del estándar en lugar de los cuatro módulos (Radar, Demanda, Contexto, MAIA): captura de señales, inteligencia de mercado, activación estratégica y rendimiento. La competencia va en la capa 1.
+- **Quincha** reemplaza a Tailwind y al sistema anterior: tokens con la paleta de Verisure, Sofia Sans por defecto, gráficos SVG del estándar (Verisure en tinta, Prosegur en gris; el rojo es identidad). Logo oficial en la barra y símbolo en el favicon.
+- **Solo lo que tenemos:** salen MAIA, el chat, el índice de oportunidad y las capas de Trends, SIDPOL y BCRP, que se servían de fixtures. Quedan listadas como «por conectar».
+- **Abanico** para las piezas ATL, digitales y los paneles de vía pública, con su video, audio o foto. El mapa OOH pasa a una tabla por distrito: la localidad de Integrametrics es un distrito y el mapa anterior estaba centrado fuera de Lima.
+- **Capa 3 sin otra llamada a la API:** `medios.json` sale del `export.csv` commiteado (canales, programas, horas y días por mes y marca).
+- **Períodos:** mes cerrado contra el mes anterior entero; mes en curso contra los mismos días.
+- **Pipeline:** falla en rojo sin token (antes quedaba verde sin hacer nada y la data quedó en el 13 de julio), arma `medios.json` al final y deja de escribir fixtures.
+- **Pruebas:** 47, incluida la vista con la data real de todos los meses, los textos (sin undefined, sin rayas largas, dos frases como máximo) y la marca solo en `src/cliente.js`.
+- **Dependencias:** de 134 a 67 paquetes.

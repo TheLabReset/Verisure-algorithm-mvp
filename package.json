@@ -1,29 +1,29 @@
 {
-  "name": "the-algorithm-by-reset",
-  "version": "2.0.0",
+  "name": "the-algorithm-verisure",
+  "version": "3.0.0",
   "type": "module",
-  "description": "The Algorithm by Reset (Verisure Perú) — sistema de inteligencia competitiva de inversión publicitaria outside-in.",
+  "description": "The Algorithm by The Lab para Verisure Perú: inteligencia competitiva de inversión publicitaria, outside-in.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test",
-    "gen:fixtures": "node src/data/fixtures/generate.mjs",
-    "validate:fixtures": "node scripts/validate-fixtures.mjs",
-    "pipeline": "node scripts/run-pipeline.mjs"
+    "prueba": "node --test pruebas/*.test.mjs",
+    "test": "node --test pruebas/*.test.mjs",
+    "sistema": "node herramientas/revisar-sistema.mjs",
+    "artefacto": "node herramientas/armar-artefacto.mjs",
+    "pipeline": "node scripts/run-pipeline.mjs",
+    "medios": "node scripts/armar-medios.mjs"
   },
   "dependencies": {
-    "leaflet": "^1.9.4",
-    "lucide-react": "^0.294.0",
+    "@fontsource-variable/sofia-sans": "5.3.0",
+    "@fontsource-variable/sofia-sans-condensed": "5.3.0",
+    "@fontsource-variable/sofia-sans-semi-condensed": "5.3.0",
+    "lucide-react": "1.49.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-leaflet": "^4.2.1"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32",
-    "tailwindcss": "^3.3.6",
     "vite": "^5.0.8"
   }
 }
