@@ -13,5 +13,5 @@ export function armarMedios(dir = OUT) {
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const m = armarMedios();
-  console.log(`medios.json · ${Object.keys(m.meses).length} meses`);
+  console.log(`medios.json · ${Object.values(m.emisiones).reduce((s, x) => s + x.length, 0)} emisiones`);
 }

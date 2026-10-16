@@ -1,11 +1,10 @@
 // Piezas comunes de las pantallas: marco de capa (índice al costado), cabecera con fuentes y capítulos.
 import { useState } from 'react';
-import { IndiceCapa, Seccion, FuentesCapa, AvisosCapitulo, VentanaContexto, PanelLateral, Monitoreo, BotonMonitoreo } from '../sistema/Componentes.jsx';
+import { IndiceCapa, Seccion, FuentesCapa, VentanaContexto, PanelLateral, Monitoreo, BotonMonitoreo } from '../sistema/Componentes.jsx';
 import { Histograma, Barras } from '../sistema/graficos/Graficos.jsx';
 import { diaSemanaLargo, fechaCorta, numero } from '../sistema/formato.js';
 import { ventanaTexto } from '../textos/comun.js';
 import { alerta } from '../textos/lecturas.js';
-import { seccionPorNumero } from '../capas/estructura.js';
 import { CLIENTE } from '../cliente.js';
 
 // Chips de fuentes: estado y fecha de corte; si la fuente está atrasada, cuántos días lleva sin datos nuevos
@@ -13,24 +12,16 @@ export function fuentesDe(ids, vista) {
   return ids.map((id) => vista.fuentes.find((f) => f.id === id)).filter(Boolean).map((f) => ({
     nombre: f.nombre,
     estado: f.estado,
-    detalle: f.estado === 'no-cargo' ? 'no cargó'
+    detalle: f.estado === 'ejemplo' ? 'data de ejemplo, por conectar'
+      : f.estado === 'no-cargo' ? 'no cargó'
       : f.estado === 'parcial' ? `al ${fechaCorta(f.corte)}, hace ${numero(f.atraso)} días`
       : f.sinDato.length ? `${numero(f.sinDato.length)} ${f.sinDato.length === 1 ? 'día' : 'días'} sin dato` : `al ${fechaCorta(f.corte)}`,
   }));
 }
 
-// Alertas ya escritas, con su ancla («a-…» o «b-…») y el capítulo que las sostiene
-const slug = (t) => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-// Las alertas cuyo dato vive en el detalle del capítulo (no en su vista general) llevan directo a ese panel
-const EN_DETALLE = new Set(['pico-competencia', 'dias-sin-dato']);
-const destino = (numero, id) => {
-  const s = seccionPorNumero(numero);
-  if (!s) return {};
-  return EN_DETALLE.has(id) ? { ir: s.id, irTexto: `el detalle de ${s.titulo}`, irA: `detalle-${s.id}` } : { ir: s.id, irTexto: s.titulo, irA: s.id };
-};
-const escrita = (pref) => (a) => { const t = alerta(a); return t && { ...t, id: `${pref}-${a.id}-${slug(a.marca || a.fuente)}`, ...destino(a.sostiene, a.id) }; };
-export const alertasDe = (vista) => (vista.sugiere.queMirar || []).map(escrita('a')).filter(Boolean);
-export const buenasDe = (vista) => (vista.sugiere.queVaBien || []).map(escrita('b')).filter(Boolean);
+// Los avisos de una tarjeta, ya escritos: cada regla dice en qué tarjeta está su dato
+const escrita = (a) => { const t = alerta(a); return t && { ...t, id: `aviso-${a.id}-${a.tarjeta}` }; };
+export const avisosDe = (vista, tarjeta) => [...(vista.sugiere.queMirar || []), ...(vista.sugiere.queVaBien || [])].filter((a) => a.tarjeta === tarjeta).map(escrita).filter(Boolean);
 
 // Estado de una tarjeta cuando su fuente no trae el dato
 export const sinDato = (estado) => ({ tipo: estado === 'no-cargo' ? 'no-cargo' : 'sin-datos', reemplaza: true });
@@ -64,11 +55,10 @@ export function MarcoCapa({ capa, vista, bajada, conResumen = true, children }) 
   );
 }
 
-// Capítulo con sus avisos ya resueltos desde la estructura de capas
-export function SeccionDe({ def, vista, conAvisos = true, children }) {
+// Capítulo con sus fuentes ya resueltas desde la estructura de capas
+export function SeccionDe({ def, vista, children }) {
   return (
-    <Seccion id={def.id} numero={def.numero} titulo={def.titulo} pregunta={def.pregunta} fuentes={fuentesDe(def.fuentes, vista)}
-      avisos={conAvisos ? <AvisosCapitulo avisos={[...alertasDe(vista), ...buenasDe(vista)].filter((a) => a.ir === def.id)} /> : null}>
+    <Seccion id={def.id} numero={def.numero} titulo={def.titulo} pregunta={def.pregunta} fuentes={fuentesDe(def.fuentes, vista)}>
       {children}
     </Seccion>
   );

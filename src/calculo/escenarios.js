@@ -134,12 +134,14 @@ export const ESCENARIOS = [
   },
   {
     id: 'pico-trends', titulo: 'Pico en las búsquedas',
-    que: 'Las últimas cuatro semanas, las cámaras se buscan el doble y la primera marca de cámaras, cinco veces más.',
+    que: 'Las cuatro semanas que terminan en el período, las cámaras se buscan el doble y la primera marca de cámaras, cinco veces más.',
     aplicar(d) {
       if (!d.busquedas) return;
       const pico = (g, id, k) => {
         const s = g.series.find((x) => x.id === id) ?? g.series[0];
-        const completas = g.semanas.map((_, i) => i).filter((i) => !g.parcial[i]).slice(-4);
+        // las cuatro semanas que terminan en el mes que se mueve: el panel lee Trends hasta el último día del período
+        const tope = d.contrato.meta.lastDay.slice(0, 7) === ultimoMes(d) ? d.contrato.meta.lastDay : `${ultimoMes(d)}-31`;
+        const completas = g.semanas.map((_, i) => i).filter((i) => !g.parcial[i] && g.semanas[i] <= tope).slice(-4);
         // sin tope de 100: la serie de cámaras suma dos términos y ya pasa de 100; con tope, el «pico» la bajaría
         for (const i of completas) s.valores[i] = Math.round(s.valores[i] * k) || s.valores[i];
       };

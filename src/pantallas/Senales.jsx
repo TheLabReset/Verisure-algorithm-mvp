@@ -1,154 +1,102 @@
-// Capa 1 · Captura de señales: qué hizo la competencia. Tres vistas generales: sus versiones del año con lo que
-// estrenó en el período, lo que tiene al aire (ATL o digital, la marca propia al final para comparar) y el mapa de
-// paneles. Los paneles por distrito y la pieza de cada panel van en el detalle de OOH.
+// Capa 1 · Captura de señales: lo nuevo de la competencia en el período elegido (con el atajo inicial, los últimos
+// siete días). Digital primero: sus piezas nuevas por mensaje. Después TV y cable, y radio, emisión por emisión con
+// su digitalizado; OOH en el mapa; y al final, lo que se busca en Google y se comenta en TikTok y Facebook.
+// La marca propia no va en lo nuevo de la competencia: su equipo ya sabe qué tiene al aire.
 // No calcula: pinta la vista y las lecturas de src/textos.
 import { useState } from 'react';
-import { Play, AudioLines, Image as ImagenIcono } from 'lucide-react';
-import { Bloque, Tabla, Resumen, Abanico, VentanaAnuncios, Detalle, Grupo, Ventana, vigente } from '../sistema/Componentes.jsx';
-import { Cronograma } from '../sistema/graficos/Graficos.jsx';
-import { numero, solesCompacto, soles } from '../sistema/formato.js';
-import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
+import { Bloque, Tabla, Resumen, Abanico, Detalle } from '../sistema/Componentes.jsx';
+import { Lineas, Pendiente } from '../sistema/graficos/Graficos.jsx';
+import { numero, compacto, fechaCorta, porcentaje, variacion } from '../sistema/formato.js';
+import { MarcoCapa, SeccionDe, sinDato, avisosDe } from './comun.jsx';
 import Ooh from './Ooh.jsx';
-import { periodoTexto, version, tramoMeses, ventanaTexto, plataformasTexto, capital } from '../textos/comun.js';
-import { estrenosLectura, estrenoTitulo, estrenoDato, abanicoAtlLectura, abanicoDigitalLectura, oohLectura, distritosLectura, cronogramaLectura, textosDelAbanico, textosMarca } from '../textos/lecturas.js';
+import Emisiones from './Emisiones.jsx';
+import { periodoTexto, version, ventanaTexto, resumenTitulo, plataformasTexto, plataformaEnFrase, capital } from '../textos/comun.js';
+import { digitalSemanaLectura, atlSemanaLectura, oohLectura, distritosLectura, textosDelAbanico, textosMarca, trendsMarcasLectura, tiktokLectura, facebookLectura } from '../textos/lecturas.js';
 import { CLIENTE } from '../cliente.js';
 
-const ICONO = { video: Play, audio: AudioLines, image: ImagenIcono };
 const COMPETENCIA = CLIENTE.competencia[0];
 const MARCAS = [...CLIENTE.competencia.map((c) => c.marcaFuente), CLIENTE.marcaFuente];
-const MAX_ESTRENOS = 3; // estrenos de la competencia a la vista; el resto, en el detalle
+const signo = (n) => variacion(n);
 
-// Una pieza suelta en la ventana de anuncios: para un estreno o una fila del cronograma
-const unaPieza = (nombre, x) => ({ nombre, anuncios: [{ id: x.id, titulo: x.titulo, texto: '', pie: '', plataformas: x.plataformas, desde: x.desde, hasta: x.hasta, activo: true, enlace: null, imagen: x.asset?.kind === 'image' ? x.asset.url : null, medio: x.asset && x.asset.kind !== 'image' ? x.asset : null, formato: null, arte: null }] });
+// La ventana de una tarjeta que cae a lo más reciente: dice el tramo que muestra, no el elegido arriba
+const ventanaDe = (x) => (x?.reciente ? ventanaTexto(x.semana.desde, x.semana.hasta) : undefined);
 
-// Las piezas que se estrenaron: una fila por estreno, la competencia primero; «Ver la pieza» la abre
-function Estrenos({ lista, t }) {
+// Digital: un mazo por mensaje con sus piezas nuevas, y la lista de mensajes con sus plataformas
+function DigitalSemana({ d, anio, avisos }) {
   const [abierta, setAbierta] = useState(null);
-  const e = lista.find((x) => x.id === abierta);
-  const grupo = e ? unaPieza(e.nombre, { id: e.id, titulo: e.version, plataformas: [e.canal, e.franja && `franja ${e.franja.toLowerCase()}`].filter(Boolean), desde: e.fecha.slice(0, 10), asset: e.asset }) : null;
-  const orden = [...lista].sort((a, b) => Number(a.propia) - Number(b.propia));
+  const t = textosDelAbanico(anio, { uno: 'pieza', varios: 'piezas' });
+  const lista = { ...d.abanico, grupos: d.abanico.grupos.map((g) => ({ ...g, nombre: version(g.nombre) })) };
   return (
-    <>
-      <ol className="q-estrenos">
-        {orden.map((x) => {
-          const I = ICONO[x.asset?.kind];
-          return (
-            <li key={x.id} className={x.propia ? 'q-estreno-propio' : 'q-estreno-foco'}>
-              <span className="q-estreno-marca">{x.nombre}</span>
-              <span className="q-estreno-cuerpo"><b>{estrenoTitulo(x)}</b><span>{estrenoDato(x)}</span></span>
-              {x.asset && <button type="button" className="q-boton q-boton-quieto" data-ver-estreno={x.id} aria-haspopup="dialog" onClick={() => setAbierta(x.id)}>{I && <I size={14} aria-hidden="true" />}Ver la pieza</button>}
-            </li>
-          );
-        })}
-      </ol>
-      <VentanaAnuncios grupo={grupo} onCerrar={() => setAbierta(null)} t={{ ...t, bajada: () => 'Estreno del período' }}
-        volver={() => document.querySelector(`[data-ver-estreno="${window.CSS.escape(abierta ?? '')}"]`)?.focus()} />
-    </>
+    <Bloque universo="digital" {...digitalSemanaLectura(d)} ventana={ventanaDe(d)} avisos={avisos}
+      ayuda={<p>Una pieza es nueva el día en que Integrametrics la ve por primera vez. Las piezas van agrupadas por su mensaje, que es el nombre de la versión; un mensaje es nuevo si no se había visto antes.</p>}
+      pie={<span>{capital(plataformasTexto(d.plataformas || []) || 'Plataformas digitales')} · Integrametrics digital.</span>}>
+      {d.piezas ? <>
+        <Abanico lista={lista} abierta={abierta} onAbrir={setAbierta} t={t} nota={`vistas por primera vez ${ventanaTexto(d.semana.desde, d.semana.hasta)}`} />
+        <Tabla etiqueta={`Mensajes digitales de ${COMPETENCIA.nombre}`} numericas={[1]}
+          columnas={['Mensaje', 'Piezas', 'Plataformas', 'Visto por primera vez']}
+          filas={d.mensajes.map((m) => [version(m.mensaje), numero(m.piezas), m.plataformas.map(plataformaEnFrase).join(', ') || 'sin dato', m.nuevo ? `${fechaCorta(m.primeraVez)}, nuevo` : fechaCorta(m.primeraVez)])} />
+      </> : <p className="q-nota-bloque">Sin piezas digitales de {COMPETENCIA.nombre} registradas.</p>}
+    </Bloque>
   );
 }
 
-// Lo que tiene al aire: un solo abanico con ATL o digital. ATL cuenta las versiones con emisiones en el período;
-// digital, las vistas por primera vez en el período (Integrametrics registra cada variante el día que la ve)
-function AlAire({ L, P, tVersiones, tDigital }) {
-  const [elegido, setU] = useState('atl');
-  const opcionesU = [{ valor: 'atl', texto: 'ATL', desactivada: !L.abanicoAtl }, { valor: 'digital', texto: 'Digital', desactivada: !L.abanicoDigital }];
-  const u = vigente(elegido, opcionesU);
-  const [abierta, setAbierta] = useState(null);
-  if (!L.abanicoAtl && !L.abanicoDigital) return <Bloque titulo="Lo que tiene al aire" universo={['atl', 'digital']} estado={sinDato('no-cargo')} />;
-  const atl = u === 'atl';
-  const lista = atl ? L.abanicoAtl : L.abanicoDigital;
-  const vacia = !lista.propio && !lista.grupos.length;
-  const cambiar = (x) => { setU(x); setAbierta(null); };
+function AtlSemana({ a, medio, universo, avisos, titulo }) {
+  if (!a) return <Bloque titulo={titulo} universo={universo} estado={sinDato('no-cargo')} />;
   return (
-    <Bloque universo={u} {...(atl ? abanicoAtlLectura(L.abanicoAtl, P) : abanicoDigitalLectura(L.abanicoDigital, P))}
-      ayuda={atl
-        ? <p>Una versión cuenta en el período si su primera y su última emisión registradas se cruzan con él.</p>
-        : <p>Una carta por versión vista por primera vez en el período; las variantes de imagen o formato de una versión van juntas.</p>}
-      pie={<span>{atl ? 'TV, radio, cable, OTT y vía pública.' : `${capital(plataformasTexto(L.digital?.plataformas || []) || 'Plataformas digitales')}.`}</span>}>
-      <div className="q-control q-control-tarjeta"><span>Universo</span>
-        <Grupo etiqueta="Universo" valor={u} onCambiar={cambiar} opciones={opcionesU} />
-      </div>
-      {vacia ? <p className="q-nota-bloque">{atl ? 'Ninguna versión ATL en el período.' : 'Ninguna versión digital nueva en el período.'}</p>
-        : <Abanico key={u} lista={lista} abierta={abierta} onAbrir={setAbierta} t={atl ? tVersiones : tDigital} nota={atl ? `al aire en ${periodoTexto(P)}` : `aparecieron en ${periodoTexto(P)}`} propioAlFinal />}
+    <Bloque universo={universo} {...atlSemanaLectura(a, medio)} ventana={ventanaDe(a)} avisos={avisos}
+      ayuda={<p>Cada fila es una emisión. Una emisión de cadena nacional repetida en sus señales regionales cuenta una sola vez. El digitalizado es el de la versión que Integrametrics guardó.</p>}
+      pie={<span>Integrametrics, emisión por emisión.</span>}>
+      {a.emisiones.length ? <Emisiones a={a} etiqueta={`Emisiones de ${COMPETENCIA.nombre} en ${medio}`} /> : <p className="q-nota-bloque">Sin emisiones registradas.</p>}
     </Bloque>
   );
 }
 
 export default function Senales({ capa, vista: v }) {
-  const [s11, s12] = capa.secciones;
-  const P = v.periodo, L = v.lee;
+  const [s11, s12, s13, s14, s15] = capa.secciones;
+  const P = v.periodo, L = v.lee, E = v.ejemplo;
   const anio = P.desde.slice(0, 4);
   const [panelDe, setPanelDe] = useState(null);
-  const [version_, setVersion] = useState(null);
-  const tVersiones = textosDelAbanico(anio);
-  const tDigital = textosDelAbanico(anio, { uno: 'pieza', varios: 'piezas' });
   const tPaneles = textosDelAbanico(anio, { uno: 'panel', varios: 'paneles' });
-  const estrenosComp = (L.estrenos || []).filter((e) => !e.propia).length;
-  const c = L.cronograma;
-  const filaCrono = c?.filas.find((f) => f.id === version_);
-  const grupoCrono = filaCrono ? unaPieza(COMPETENCIA.nombre, { id: filaCrono.id, titulo: filaCrono.version, plataformas: filaCrono.canales, desde: filaCrono.desde, hasta: filaCrono.hasta, asset: filaCrono.asset }) : null;
-  const digComp = L.abanicoDigital?.grupos.reduce((s, g) => s + g.anuncios.length, 0) ?? null;
-  // las versiones de la competencia que se estrenaron en el período se marcan en el cronograma
-  const nuevas = new Set((L.estrenos || []).filter((e) => !e.propia).map((e) => e.version));
-  const estrenos = L.estrenos ? estrenosLectura(v) : null;
-  const inicio = v.analiza.pauta[0]?.serie[0]?.fecha ?? P.desde;
+  const d = L.digitalSemana, tv = L.tvSemana, radio = L.radioSemana, b = v.analiza.busquedas;
+  const enPeriodo = (x) => x && !x.reciente;
+  const desdeUnAnio = (serie) => serie.filter((p) => p.fecha >= `${Number(P.hasta.slice(0, 4)) - 1}${P.hasta.slice(4)}` && p.fecha <= P.hasta);
   return (
     <MarcoCapa capa={capa} vista={v}>
-      <Resumen titulo={`Resumen de ${periodoTexto(P)}`}
-        pie={<span>Integrametrics, que marca qué piezas son estrenos. Un panel cuenta desde el día que se detecta.</span>}
+      <Resumen titulo={resumenTitulo(P)}
+        pie={<span>Integrametrics. Lo de {CLIENTE.nombre} va en la capa de inteligencia de mercado, para comparar.</span>}
         items={[
-          { rotulo: `Versiones de ${COMPETENCIA.nombre} en el año`, universo: 'atl', ir: s11.id, irTexto: s11.titulo, valor: c ? numero(c.distintas) : null, nota: c ? `${numero(c.atl)} en ATL y ${numero(c.digital)} en digital${c.atl + c.digital > c.distintas ? `; ${numero(c.atl + c.digital - c.distintas)} en los dos` : ''}` : null },
-          { rotulo: `Estrenos de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s11.id, irTexto: s11.titulo, valor: L.estrenos ? numero(estrenosComp) : null, nota: L.estrenos ? `${numero(L.estrenos.length - estrenosComp)} de ${CLIENTE.nombre}` : null },
-          { rotulo: `Versiones digitales ${L.abanicoDigital?.sinHistoria ? 'vistas' : 'nuevas'} de ${COMPETENCIA.nombre}`, universo: 'digital', ir: s11.id, irTexto: s11.titulo, valor: digComp == null ? null : numero(digComp), nota: L.abanicoDigital ? `${numero(L.abanicoDigital.propio?.anuncios.length ?? 0)} de ${CLIENTE.nombre}` : null },
-          { rotulo: `Paneles de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s12.id, irTexto: s12.titulo, valor: L.ooh ? numero(L.ooh.porMarca[COMPETENCIA.marcaFuente]) : null, nota: L.ooh ? `${numero(L.ooh.porMarca[CLIENTE.marcaFuente])} de ${CLIENTE.nombre}` : null },
+          { rotulo: `Piezas digitales nuevas de ${COMPETENCIA.nombre}`, universo: 'digital', ir: s11.id, irTexto: s11.titulo, valor: d ? numero(enPeriodo(d) ? d.piezas : 0) : null, nota: d && enPeriodo(d) ? `${numero(d.mensajes.length)} ${d.mensajes.length === 1 ? 'mensaje' : 'mensajes'}` : d?.piezas ? `las últimas, del ${fechaCorta(d.semana.hasta)}` : null },
+          { rotulo: `Emisiones en TV y cable de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s12.id, irTexto: s12.titulo, valor: tv ? numero(enPeriodo(tv) ? tv.emisiones.length : 0) : null, nota: tv && !enPeriodo(tv) && tv.emisiones.length ? `las últimas, del ${fechaCorta(tv.semana.hasta)}` : tv && enPeriodo(tv) ? `${numero(tv.canales)} ${tv.canales === 1 ? 'canal' : 'canales'}` : null },
+          { rotulo: `Emisiones en radio de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s13.id, irTexto: s13.titulo, valor: radio ? numero(enPeriodo(radio) ? radio.emisiones.length : 0) : null, nota: radio && !enPeriodo(radio) && radio.emisiones.length ? `las últimas, del ${fechaCorta(radio.semana.hasta)}` : radio && enPeriodo(radio) ? `${numero(radio.canales)} ${radio.canales === 1 ? 'emisora' : 'emisoras'}` : null },
+          { rotulo: `Paneles de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s14.id, irTexto: s14.titulo, valor: L.ooh ? numero(L.ooh.porMarca[COMPETENCIA.marcaFuente]) : null, nota: L.ooh ? `${numero(L.ooh.porMarca[CLIENTE.marcaFuente])} de ${CLIENTE.nombre}` : null },
         ]} />
 
       <SeccionDe def={s11} vista={v}>
-        {!c ? <Bloque titulo={`Las versiones de ${COMPETENCIA.nombre} en el año`} universo="atl" estado={sinDato('no-cargo')} /> : (
-          <Bloque universo={['atl', 'digital']} {...cronogramaLectura(c, COMPETENCIA.nombre, inicio, v.fuentes[0].corte)} alcance={tramoMeses(inicio, v.fuentes[0].corte, 'de')}
-            ayuda={<p>ATL va llena, de su primera a su última emisión registrada. Digital va en contorno, de la primera a la última variante vista. Detrás, el período elegido.</p>}
-            pie={<span>Las {numero(c.filas.length)} versiones con más inversión estimada en el año{c.resto ? `; ${numero(c.resto)} ${c.resto === 1 ? 'versión' : 'versiones'} más con menos inversión no entran` : ''}. Los estrenos son de TV, radio, cable, OTT y vía pública.</span>}>
-            <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true"><li><span className="q-muestra q-muestra-tramo" />ATL</li><li><span className="q-muestra q-muestra-contorno" />Digital</li></ul>
-            <Cronograma etiqueta={`Versiones de ${COMPETENCIA.nombre} en el año`} inicio={inicio} fin={v.fuentes[0].corte} periodo={P} formato={solesCompacto}
-              onElegir={setVersion} filas={c.filas.map((f) => ({ id: f.id, nombre: version(f.version), universo: f.universo, desde: f.desde, hasta: f.hasta, valor: f.inversion, nota: [nuevas.has(f.version) && 'nueva en el período', ...f.canales.slice(0, 2)].filter(Boolean).join(', ') }))} />
-            <VentanaAnuncios grupo={grupoCrono} onCerrar={() => setVersion(null)} t={{ ...tVersiones, bajada: () => `Versión de ${COMPETENCIA.nombre}` }} nota={filaCrono ? soles(filaCrono.inversion) : null} />
-            {estrenos && (
-              <div className="q-subbloque">
-                {/* la tarjeta es del año (alfiler); los estrenos son del período elegido y lo dicen con su calendario */}
-                <h4>{estrenos.titulo}<Ventana texto={ventanaTexto(P.desde, P.hasta)} /></h4>
-                <p>{estrenos.lectura}</p>
-                {/* a la vista, solo los de la competencia (hasta tres); la lista completa va en el detalle */}
-                {estrenosComp > 0 && <Estrenos lista={L.estrenos.filter((e) => !e.propia).slice(0, MAX_ESTRENOS)} t={tVersiones} />}
-              </div>
-            )}
-          </Bloque>
-        )}
-        <AlAire L={L} P={P} tVersiones={tVersiones} tDigital={tDigital} />
-        {L.estrenos?.length > Math.min(estrenosComp, MAX_ESTRENOS) && (
-          <Detalle id={`detalle-${s11.id}`} titulo="Estrenos del período" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['todos los estrenos, de las dos marcas']}>
-            <Bloque universo="atl" {...estrenos}
-              ayuda={<p>Una pieza es nueva el día en que su versión se emite por primera vez.</p>}
-              pie={<span>TV, radio, cable, OTT y vía pública.</span>}>
-              <Estrenos lista={L.estrenos} t={tVersiones} />
-            </Bloque>
-          </Detalle>
-        )}
+        {!d ? <Bloque titulo="Lo nuevo en digital" universo="digital" estado={sinDato('no-cargo')} /> : <DigitalSemana d={d} anio={anio} avisos={avisosDe(v, 'digital')} />}
       </SeccionDe>
 
       <SeccionDe def={s12} vista={v}>
+        <AtlSemana a={tv} medio="TV y cable" universo="atl" titulo="TV y cable" avisos={avisosDe(v, 'tv')} />
+      </SeccionDe>
+
+      <SeccionDe def={s13} vista={v}>
+        <AtlSemana a={radio} medio="radio" universo="atl" titulo="Radio" avisos={avisosDe(v, 'radio')} />
+      </SeccionDe>
+
+      <SeccionDe def={s14} vista={v}>
         {!L.ooh ? <Bloque titulo="Dónde están los paneles" universo="atl" estado={sinDato('no-cargo')} /> : <>
-          <Bloque universo="atl" {...oohLectura(L.ooh, P)}
+          <Bloque universo="atl" {...oohLectura(L.ooh, P)} avisos={avisosDe(v, 'ooh')}
             ayuda={<p>Cada círculo es una ubicación: las caras de una misma torre van juntas. El distrito sale de las coordenadas de Integrametrics y los límites de OpenStreetMap.</p>}
             pie={<span>Paneles detectados en el período · mapa base © colaboradores de OpenStreetMap.</span>}>
             {L.ooh.paneles.length > 0 ? <Ooh o={L.ooh} t={tPaneles} nota={`detectados en ${periodoTexto(P)}`} /> : <p className="q-nota-bloque">Sin paneles detectados en el período.</p>}
           </Bloque>
           {L.ooh.paneles.length > 0 && (
-            <Detalle id={`detalle-${s12.id}`} titulo="Detalle de OOH" bajada={`Paneles detectados en ${periodoTexto(P)}.`} vistas={['paneles por distrito', 'la pieza de cada panel']}>
+            <Detalle id={`detalle-${s14.id}`} titulo="Detalle de OOH" bajada={`Paneles detectados en ${periodoTexto(P)}.`} vistas={['paneles por distrito', 'la pieza de cada panel']}>
               <Bloque universo="atl" {...distritosLectura(L.ooh)}
                 pie={<span>Lima y el Callao por distrito; fuera de Lima, por ciudad.</span>}>
-                <Tabla etiqueta="Paneles por distrito y marca" numericas={[1, 2, 3]} barra={{ columna: 3, valores: [...L.ooh.porDistrito, ...L.ooh.fueraDeLima].map((d) => d.total) }}
+                <Tabla etiqueta="Paneles por distrito y marca" numericas={[1, 2, 3]} barra={{ columna: 3, valores: [...L.ooh.porDistrito, ...L.ooh.fueraDeLima].map((x) => x.total) }}
                   columnas={['Distrito o ciudad', ...MARCAS.map(textosMarca.nombreMarca), 'Total']}
-                  filas={[...L.ooh.porDistrito, ...L.ooh.fueraDeLima].map((d) => [d.nombre, ...MARCAS.map((m) => numero(d[m])), numero(d.total)])} />
+                  filas={[...L.ooh.porDistrito, ...L.ooh.fueraDeLima].map((x) => [x.nombre, ...MARCAS.map((m) => numero(x[m])), numero(x.total)])} />
               </Bloque>
               <Bloque universo="atl" titulo="La pieza de cada panel">
                 <Abanico lista={L.ooh.abanico} abierta={panelDe} onAbrir={setPanelDe} t={{ ...tPaneles, titulo: (x) => x.titulo }} nota={`detectados en ${periodoTexto(P)}`} propioAlFinal />
@@ -156,6 +104,43 @@ export default function Senales({ capa, vista: v }) {
             </Detalle>
           )}
         </>}
+      </SeccionDe>
+
+      <SeccionDe def={s15} vista={v}>
+        {!b ? <Bloque titulo="Las marcas de cámaras en Google" universo="busquedas" estado={sinDato('no-cargo')} /> : (
+          <Bloque universo="busquedas" {...trendsMarcasLectura(b)} alcance={`semanas al ${fechaCorta(b.hasta)}`}
+            ayuda={<p>Google Trends da un índice en Perú, no la cantidad de búsquedas: 100 es la semana con más búsquedas de la consulta. Las cinco marcas van en la misma consulta, así que se comparan entre sí. El porcentaje de cada marca compara el promedio de las últimas {numero(b.semanas)} semanas completas frente a las mismas semanas de un año antes.</p>}
+            pie={<span>Google Trends, Perú · consultado el {fechaCorta(b.consultado)}.</span>}>
+            <Lineas etiqueta="Búsquedas semanales de marcas de cámaras en Google Trends, un año hasta el período" formato={(n) => numero(n)} alto={280} elegible
+              series={b.marcas.map((m) => ({ nombre: m.nombre, leyenda: m.crecimiento == null ? m.nombre : `${m.nombre} ${signo(m.crecimiento)}`, serie: desdeUnAnio(b.serieMarcas.find((x) => x.id === m.id)?.serie || []) }))} />
+          </Bloque>
+        )}
+        <Bloque universo="conversacion" {...tiktokLectura(E.tiktok)} ejemplo
+          ayuda={<p>Vistas, interacción (me gusta, comentarios y compartidos) y publicaciones de cada hashtag en las últimas semanas. Se conectará con Apify.</p>}
+          pie={<span>{E.tiktok.fuente}.</span>}>
+          <Tabla etiqueta="Hashtags en TikTok" numericas={[1, 2, 3, 4]} barra={{ columna: 2, valores: E.tiktok.hashtags.map((h) => h.interaccion) }}
+            columnas={['Hashtag', 'Vistas', 'Interacción', 'Publicaciones', 'Frente a las semanas previas']}
+            filas={E.tiktok.hashtags.map((h) => [h.hashtag, compacto(h.vistas), compacto(h.interaccion), numero(h.publicaciones), signo(h.crecimiento)])} />
+        </Bloque>
+        <Bloque universo="conversacion" {...facebookLectura(E.facebook)} ejemplo
+          ayuda={<p>Los temas de los comentarios en las páginas de las marcas y del rubro, con su tono. Se conectará con Apify.</p>}
+          pie={<span>{E.facebook.fuente}, del {fechaCorta(E.facebook.desde)} al {fechaCorta(E.facebook.hasta)}.</span>}>
+          <Tabla etiqueta="Temas de la conversación en Facebook" numericas={[1, 2, 3, 4]} barra={{ columna: 1, valores: E.facebook.temas.map((t) => t.menciones) }}
+            columnas={['Tema', 'Menciones', 'Positivo', 'Neutro', 'Negativo']}
+            filas={E.facebook.temas.map((t) => [t.tema, numero(t.menciones), porcentaje(t.positivo), porcentaje(t.neutro), porcentaje(t.negativo)])} />
+          <Tabla etiqueta="Páginas de Facebook de cada marca" numericas={[1, 2, 3]}
+            columnas={['Página', 'Publicaciones', 'Interacción', 'Comentarios']}
+            filas={E.facebook.paginas.map((x) => [x.nombre, numero(x.publicaciones), numero(x.interaccion), numero(x.comentarios)])} />
+        </Bloque>
+        {b?.marcas.some((m) => m.antes != null) && (
+          <Detalle id={`detalle-${s15.id}`} titulo="Detalle de las marcas de cámaras" bajada="Google Trends, Perú, por semana." vistas={['un año antes y ahora, marca por marca']}>
+            <Bloque universo="busquedas" titulo="Las marcas de cámaras, un año antes y ahora" alcance={`semanas al ${fechaCorta(b.hasta)}`}
+              pie={<span>Índice promedio de 0 a 100 · {fechaCorta(b.desde)} a {fechaCorta(b.hasta)} de {b.hasta.slice(0, 4)}{b.antesDesde ? ` frente a ${fechaCorta(b.antesDesde)} a ${fechaCorta(b.antesHasta)} de ${b.antesHasta.slice(0, 4)}` : ''}.</span>}>
+              <Pendiente etiqueta="Búsquedas de marcas de cámaras, un año antes y ahora" formato={(n) => numero(Math.round(n))} rotuloA="Un año antes" rotuloB="Ahora"
+                resaltar={b.marcas.slice(0, 1).map((m) => m.nombre)} filas={b.marcas.filter((m) => m.antes != null).map((m) => ({ nombre: m.nombre, a: m.antes, b: m.ahora }))} />
+            </Bloque>
+          </Detalle>
+        )}
       </SeccionDe>
     </MarcoCapa>
   );

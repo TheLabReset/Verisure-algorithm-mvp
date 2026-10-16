@@ -1,111 +1,125 @@
-// Capa 3 · Activación estratégica: dónde y cuándo está la inversión de la competencia, con la marca propia para
-// comparar. A la vista: el reparto por medio (partes de un todo por marca) y la semana día × hora (mapa de calor).
-// En el detalle: la inversión por medio en soles, las franjas (mancuernas), los canales y los programas.
-// No calcula: pinta la vista.
+// Capa 3 · Activación estratégica: las plataformas de la marca propia (Meta Ads, Google Ads y TikTok Ads) cruzadas
+// con los leads y bookings de su CRM, que llega por un Google Sheets. El mismo detalle que su tablero: inversión,
+// leads, bookings, L2B (de lead a booking), costo por lead y por booking; por día, por semana, Push y Pull, y cada
+// plataforma con sus campañas frente a su objetivo. Hoy con data de ejemplo, rotulada. No calcula: pinta la vista.
 import { useState } from 'react';
-import { Bloque, Tabla, Resumen, Grupo, Detalle, vigente } from '../sistema/Componentes.jsx';
-import { Franja, Pesas, Barras, MapaCalor } from '../sistema/graficos/Graficos.jsx';
-import { numero, porcentaje, parte, soles, solesCompacto } from '../sistema/formato.js';
+import { Bloque, Tabla, Resumen, Grupo, Detalle, Semaforo, Flujo, vigente } from '../sistema/Componentes.jsx';
+import { Lineas } from '../sistema/graficos/Graficos.jsx';
+import { numero, porcentaje, dolares, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
-import { periodoTexto, version, horasTexto, enLetras } from '../textos/comun.js';
-import { mediosLectura, franjasLectura, canalesLectura, horarioLectura, programasLectura, textosMarca } from '../textos/lecturas.js';
-import { MEDIOS, FRANJAS } from '../calculo/vista.js';
-import { CLIENTE } from '../cliente.js';
+import { resumenTitulo, comparacionTexto } from '../textos/comun.js';
+import { plataformasLectura, pushPullLectura, plataformasObjetivoLectura } from '../textos/lecturas.js';
+import { MARGEN_OBJETIVO } from '../calculo/plataformas.js';
 
-const COMPETENCIA = CLIENTE.competencia[0];
-const MARCAS = [...CLIENTE.competencia.map((c) => c.marcaFuente), CLIENTE.marcaFuente];
-const ORDEN_MEDIOS = ['TV ABIERTA', 'RADIO', 'OOH', 'CABLE', 'OTT'];
-// Color fijo por medio en todas las franjas (el color sigue al medio, no al orden). Radio va en tinta y no en el
-// naranja de categoría, que se confunde con el amarillo de la competencia; el resto en gris
-const CLASE_MEDIO = { 'TV ABIERTA': 'q-p0', RADIO: 'q-p-tinta', OOH: 'q-p2', CABLE: 'q-p5', OTT: 'q-p5' };
-
-function MezclaMedios({ m }) {
-  // la parte sale del monto, sin redondear: Cable y OTT con inversión no se escribe «0 %»
-  const pct = (valor) => (m.inversion ? (valor / m.inversion) * 100 : 0);
-  const principales = ['TV ABIERTA', 'RADIO', 'OOH'].map((k) => ({ nombre: MEDIOS[k], valor: m.medios[k] || 0, pct: pct(m.medios[k] || 0), clase: CLASE_MEDIO[k] }));
-  const resto = ['CABLE', 'OTT'].reduce((s, k) => s + (m.medios[k] || 0), 0);
-  const restoPct = pct(resto);
-  const partes = [...principales, { nombre: 'Cable y OTT', valor: resto, pct: restoPct, clase: 'q-p5' }].filter((p) => p.valor > 0);
-  return (
-    <div className="q-mezcla">
-      <h4>{m.nombre}<span>{solesCompacto(m.inversion)} en ATL</span></h4>
-      {partes.length ? <Franja etiqueta={`Reparto de la inversión ATL de ${m.nombre} por medio`} partes={partes} formato={parte} verTabla={false} /> : <p className="q-nota-bloque">Sin inversión ATL en el período.</p>}
-    </div>
-  );
-}
+const SEMANAS_A_LA_VISTA = 12; // como el tablero del cliente: el trimestre que termina en el período
+const TONO = { bien: 'mejora', cerca: null, lejos: 'empeora' };
+const ESTADO = { bien: 'en objetivo', cerca: 'cerca', lejos: 'lejos' };
+const costo = (n) => dolares(n);
+const pct = (n) => (n == null ? 'sin dato' : porcentaje(n));
+const conTono = (texto, estado) => ({ texto, tono: TONO[estado] ?? null, sub: estado ? ESTADO[estado] : null });
+const cambio = (a, b) => (a == null || !b ? null : ((a - b) / b) * 100);
 
 export default function Activacion({ capa, vista: v }) {
-  const [s31, s32] = capa.secciones;
-  const P = v.periodo, atl = v.lee.atl, med = v.lee.medios;
-  const [elegida, setMarca] = useState(COMPETENCIA.marcaFuente);
-  const ok = atl.estado === 'ok';
-  const orden = ok ? [...atl.marcas].sort((a, b) => Number(a.propia) - Number(b.propia)) : [];
-  const [r, p] = orden;
-  const opcionesMarca = MARCAS.map((m) => ({ valor: m, texto: textosMarca.nombreMarca(m), desactivada: !med?.[m] }));
-  const marca = vigente(elegida, opcionesMarca);
-  const deMarca = med?.[marca];
-  const compMed = med?.[COMPETENCIA.marcaFuente];
-  // la parte sale del monto, con el mismo redondeo que la franja de la mezcla y su lectura
-  const principal = (m) => Object.entries(m.medios).map(([k, x]) => [k, m.inversion ? (x / m.inversion) * 100 : 0]).sort((a, b) => b[1] - a[1])[0];
-  const control = <div className="q-control q-control-tarjeta"><span>Marca</span><Grupo etiqueta="Marca" valor={marca} onCambiar={setMarca} opciones={opcionesMarca} /></div>;
+  const [s31, s32, s33] = capa.secciones;
+  const P = v.periodo, x = v.ejemplo.plataformas;
+  const [elegida, setPlataforma] = useState('meta');
+  if (!x) return <MarcoCapa capa={capa} vista={v}><SeccionDe def={s31} vista={v}><Bloque titulo="Plataformas y CRM" universo="plataformas" estado={sinDato('sin-datos')} /></SeccionDe></MarcoCapa>;
+  const opciones = x.plataformas.map((p) => ({ valor: p.id, texto: p.nombre }));
+  const plat = x.plataformas.find((p) => p.id === vigente(elegida, opciones));
+  const t = x.total, a = x.totalPrevio;
+  const frente = comparacionTexto(P);
+  const delta = (k, mejorSi) => (a ? { cambio: cambio(t[k], a[k]), mejorSi, referencia: `frente a ${frente}` } : null);
+  const ultimas = (semanas) => semanas.slice(-SEMANAS_A_LA_VISTA).reverse();
   return (
     <MarcoCapa capa={capa} vista={v}>
-      <Resumen titulo={`Resumen de ${periodoTexto(P)}`}
-        pie={<span>Inversión estimada por Integrametrics a precio de tarifa; emisiones registradas en TV, radio, cable, OTT y vía pública.</span>}
+      <Resumen titulo={resumenTitulo(P)} ejemplo
+        pie={<span>{x.fuente}. Inversión en dólares, como la reportan las plataformas.</span>}
         items={[
-          { rotulo: `Medio principal de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s31.id, irTexto: s31.titulo, valor: ok && r.inversion ? MEDIOS[principal(r)[0]] ?? null : null, nota: ok && r.inversion ? `${porcentaje(principal(r)[1])} de su inversión ATL` : null },
-          { rotulo: `Emisiones de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s32.id, irTexto: s32.titulo, valor: compMed ? numero(compMed.emisiones) : null, nota: med?.[CLIENTE.marcaFuente] ? `${numero(med[CLIENTE.marcaFuente].emisiones)} de ${CLIENTE.nombre}` : null },
-          { rotulo: `Canales de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s31.id, irTexto: s31.titulo, valor: compMed ? numero(compMed.totalCanales) : null, nota: compMed?.canales[0] ? `${compMed.canales[0].nombre} es el principal` : null },
-          { rotulo: `Hora con más emisiones de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s32.id, irTexto: s32.titulo, valor: compMed?.horasAltas.length ? `${compMed.horasAltas[0]} h` : null, nota: compMed?.horasAltas.length > 1 ? `las ${enLetras(compMed.horasAltas.length, true)} más altas van ${horasTexto(compMed.horasAltas)}` : null },
+          { rotulo: 'Inversión', universo: 'plataformas', ir: s31.id, irTexto: s31.titulo, valor: dolares(t.inversion), nota: a ? `${dolares(a.inversion)} en ${frente}` : null },
+          { rotulo: 'Leads', universo: 'plataformas', ir: s31.id, irTexto: s31.titulo, valor: numero(t.leads), delta: delta('leads', 'sube') },
+          { rotulo: 'Bookings', universo: 'plataformas', ir: s31.id, irTexto: s31.titulo, valor: numero(t.bookings), delta: delta('bookings', 'sube') },
+          { rotulo: 'L2B', universo: 'plataformas', ir: s32.id, irTexto: s32.titulo, valor: pct(t.l2b), nota: a ? `${pct(a.l2b)} en ${frente}` : null },
+          { rotulo: 'Costo por lead', universo: 'plataformas', ir: s33.id, irTexto: s33.titulo, valor: costo(t.cpl), delta: delta('cpl', 'baja') },
+          { rotulo: 'Costo por booking', universo: 'plataformas', ir: s33.id, irTexto: s33.titulo, valor: costo(t.cpb), delta: delta('cpb', 'baja') },
         ]} />
 
       <SeccionDe def={s31} vista={v}>
-        {!ok ? <Bloque titulo="Cómo reparte cada marca su inversión ATL" universo="atl" estado={sinDato(atl.estado)} /> : <>
-          <Bloque universo="atl" {...mediosLectura(v, MEDIOS)}
-            ayuda={<p>Cada franja es el total ATL de una marca repartido por medio. Para comparar montos entre marcas está el share, en Rendimiento.</p>}
-            pie={<span>Inversión ATL estimada por Integrametrics. OTT llega sin inversión estimada.</span>}>
-            <div className="q-mezclas">{orden.map((m) => <MezclaMedios key={m.id} m={m} />)}</div>
+        <Bloque universo="plataformas" {...plataformasLectura(x)} ejemplo
+          ayuda={<p>L2B: de cada 100 leads, cuántos llegan a booking, una venta en el CRM. El costo por booking es la inversión dividida entre los bookings.</p>}
+          pie={<span>{x.fuente}.</span>}>
+          <Flujo etiqueta="De la inversión al booking, por plataforma" columnas={['Inversión', 'Leads', 'Bookings']}
+            filas={[...x.plataformas.map((p) => ({ nombre: p.nombre, clase: null, pasos: [{ valor: dolares(p.inversion) }, { valor: numero(p.leads), nota: `${costo(p.cpl)} por lead` }, { valor: numero(p.bookings), nota: `${costo(p.cpb)} por booking · ${pct(p.l2b)} de los leads` }] })),
+              { nombre: 'Las tres', clase: null, pasos: [{ valor: dolares(t.inversion) }, { valor: numero(t.leads), nota: `${costo(t.cpl)} por lead` }, { valor: numero(t.bookings), nota: `${costo(t.cpb)} por booking · ${pct(t.l2b)} de los leads` }] }]} />
+        </Bloque>
+        <Bloque universo="plataformas" titulo="Leads y bookings, día por día" ejemplo
+          pie={<span>Las tres plataformas juntas. El costo de cada día va en el detalle.</span>}>
+          <Lineas etiqueta="Leads y bookings por día" formato={(n) => numero(n)} alto={220}
+            series={[{ nombre: 'Leads', tono: 'tinta', serie: x.diaria.map((d) => ({ fecha: d.fecha, valor: d.leads })) }, { nombre: 'Bookings', tono: 'propia', serie: x.diaria.map((d) => ({ fecha: d.fecha, valor: d.bookings })) }]} />
+        </Bloque>
+        <Detalle id={`detalle-${s31.id}`} titulo="Detalle de las plataformas, día por día" bajada="Data de ejemplo, por conectar." vistas={['inversión, leads, bookings y costos de cada día']}>
+          <Bloque universo="plataformas" titulo="Cada día del período" ejemplo pie={<span>{x.fuente}.</span>}>
+            <Tabla etiqueta="Inversión, leads, bookings y costos por día" numericas={[1, 2, 3, 4, 5, 6]}
+              columnas={['Día', 'Inversión', 'Leads', 'Bookings', 'L2B', 'Costo por lead', 'Costo por booking']}
+              filas={[...x.diaria].reverse().map((d) => [fechaCorta(d.fecha), dolares(d.inversion), numero(d.leads), numero(d.bookings), pct(d.l2b), costo(d.cpl), costo(d.cpb)])} />
           </Bloque>
-          <Detalle id={`detalle-${s31.id}`} titulo="Detalle de dónde está la inversión" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['la inversión por medio en soles', 'las franjas horarias', 'los canales de cada marca']}>
-            <Bloque universo="atl" titulo="Inversión ATL por medio, en soles"
-              pie={<span>Inversión ATL estimada por Integrametrics a precio de tarifa.</span>}>
-              <Tabla etiqueta="Inversión ATL por medio y marca, en soles y en parte de cada marca" numericas={[1, 2, 3, 4]}
-                columnas={['Medio', r.nombre, 'De su total', p?.nombre, 'De su total']}
-                filas={ORDEN_MEDIOS.map((k) => [MEDIOS[k], soles(r.medios[k] || 0), r.inversion ? parte(((r.medios[k] || 0) / r.inversion) * 100) : 'sin inversión', p ? soles(p.medios[k] || 0) : 'sin dato', p ? (p.inversion ? parte(((p.medios[k] || 0) / p.inversion) * 100) : 'sin inversión') : 'sin dato'])} />
-            </Bloque>
-            <Bloque universo="atl" {...franjasLectura(v, FRANJAS)}
-              pie={<span>Emisiones de TV y radio por franja horaria.</span>}>
-              <Pesas etiqueta="Parte de las emisiones de cada marca por franja" formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} max={100} rotuloA={p?.nombre} rotuloB={r.nombre} tonoA="propia"
-                filas={v.analiza.franjas.map((k) => ({ nombre: FRANJAS[k], a: p?.mezclaFranjas[k] ?? 0, b: r.mezclaFranjas[k] ?? 0 }))} />
-            </Bloque>
-            <Bloque universo="atl" {...canalesLectura(deMarca, marca)}
-              pie={<span>Los ocho canales con más inversión estimada.</span>}>
-              {control}
-              {deMarca?.canales.length ? <Barras etiqueta={`Inversión de ${textosMarca.nombreMarca(marca)} por canal`} tono={marca === CLIENTE.marcaFuente ? 'propia' : undefined} formato={solesCompacto} filas={deMarca.canales.map((c) => ({ nombre: c.nombre, valor: c.valor }))} />
-                : <p className="q-nota-bloque">Sin emisiones en el período.</p>}
-            </Bloque>
-          </Detalle>
-        </>}
+        </Detalle>
       </SeccionDe>
 
       <SeccionDe def={s32} vista={v}>
-        {!med ? <Bloque titulo="Cuándo sale al aire" universo="atl" estado={sinDato(ok ? 'sin-datos' : atl.estado)} /> : <>
-          <Bloque universo="atl" {...horarioLectura(deMarca, marca)}
-            ayuda={<p>Cada celda es el promedio de emisiones en esa hora y ese día de la semana, en el período.</p>}
-            pie={<span>Emisiones de TV, radio, cable y OTT con hora registrada.</span>}>
-            {control}
-            {deMarca?.matriz?.length ? <MapaCalor etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por día de la semana y hora`} tono={marca === CLIENTE.marcaFuente ? 'propia' : 'foco'} matriz={deMarca.matriz} formato={(n) => (n == null ? 'sin dato' : numero(n, n > 0 && n < 10 ? 1 : 0))} />
-              : <p className="q-nota-bloque">Sin emisiones con hora en el período.</p>}
+        <Bloque universo="plataformas" {...pushPullLectura(x)} alcance={`${SEMANAS_A_LA_VISTA} semanas al ${fechaCorta(P.hasta)}`} ejemplo
+          ayuda={<p>Push son las redes, donde el anuncio busca a la persona (Meta y TikTok). Pull es la búsqueda, donde la persona busca la marca o el servicio (Google Ads). Semanas de lunes a domingo; la última puede estar incompleta.</p>}
+          pie={<span>{x.fuente}.</span>}>
+          <Lineas etiqueta="L2B semanal de Push y Pull" formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} alto={220}
+            series={x.tipos.map((g) => ({ nombre: g.tipo === 'push' ? 'Push' : 'Pull', tono: g.tipo === 'push' ? 'tinta' : 'propia', discontinua: g.tipo === 'push', serie: g.semanas.slice(-SEMANAS_A_LA_VISTA).map((s) => ({ fecha: s.desde, valor: s.l2b })) }))} />
+        </Bloque>
+        <Detalle id={`detalle-${s32.id}`} titulo="Detalle de Push y Pull" bajada="Data de ejemplo, por conectar." vistas={['Push y Pull en cifras']}>
+          <Bloque universo="plataformas" titulo="Push y Pull en el período" ejemplo pie={<span>{x.fuente}.</span>}>
+            <Tabla etiqueta="Push y Pull en el período" numericas={[1, 2, 3, 4, 5, 6]}
+              columnas={['Tipo', 'Inversión', 'Leads', 'Bookings', 'L2B', 'Costo por lead', 'Costo por booking']}
+              filas={x.tipos.map((g) => [g.tipo === 'push' ? 'Push (Meta y TikTok)' : 'Pull (Google Ads)', dolares(g.inversion), numero(g.leads), numero(g.bookings), pct(g.l2b), costo(g.cpl), costo(g.cpb)])} />
           </Bloque>
-          <Detalle id={`detalle-${s32.id}`} titulo="Detalle de cuándo sale al aire" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['los programas de cada marca']}>
-            <Bloque universo="atl" {...programasLectura(deMarca, marca)}
-              pie={<span>Los ocho programas con más emisiones.</span>}>
-              {control}
-              {deMarca?.programas.length ? <Barras etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por programa`} tono={marca === CLIENTE.marcaFuente ? 'propia' : undefined} formato={(n) => numero(n)} filas={deMarca.programas.map((x) => ({ nombre: version(x.nombre), valor: x.valor }))} />
-                : <p className="q-nota-bloque">Sin programas registrados en el período.</p>}
-            </Bloque>
-          </Detalle>
-        </>}
+        </Detalle>
+      </SeccionDe>
+
+      <SeccionDe def={s33} vista={v}>
+        <Bloque universo="plataformas" {...plataformasObjetivoLectura(x)} ejemplo
+          ayuda={<p>Cada costo se compara con el objetivo de su plataforma: en objetivo si queda en él o por debajo, cerca hasta {porcentaje(MARGEN_OBJETIVO)} arriba, y lejos si pasa de ahí.</p>}
+          pie={<span>{x.fuente}.</span>}>
+          <ul className="q-plataformas">
+            {x.plataformas.map((p) => (
+              <li key={p.id} className="q-plataforma">
+                <h4>{p.nombre}<span>{p.tipo === 'push' ? 'Push' : 'Pull'}</span></h4>
+                <div className="q-plataforma-cifra"><span>Costo por booking</span><b>{costo(p.cpb)}</b><Semaforo estado={p.estadoCpb} /><small>Objetivo: {costo(p.objetivo.cpb)}</small></div>
+                <dl className="q-ficha-datos">
+                  <div><dt>Costo por lead</dt><dd>{costo(p.cpl)} <Semaforo estado={p.estadoCpl} /></dd></div>
+                  <div><dt>Bookings</dt><dd>{numero(p.bookings)} de {numero(p.leads)} leads</dd></div>
+                  <div><dt>L2B</dt><dd>{pct(p.l2b)}</dd></div>
+                  <div><dt>Inversión</dt><dd>{dolares(p.inversion)}</dd></div>
+                </dl>
+              </li>
+            ))}
+          </ul>
+        </Bloque>
+        <Bloque universo="plataformas" titulo="Costo por booking, semana a semana" alcance={`${SEMANAS_A_LA_VISTA} semanas al ${fechaCorta(P.hasta)}`} ejemplo
+          pie={<span>Semanas de lunes a domingo; la última puede estar incompleta.</span>}>
+          <Lineas etiqueta="Costo por booking semanal de cada plataforma" formato={(n) => (n == null ? 'sin dato' : costo(n))} alto={240} elegible
+            elegidaInicial={Math.max(0, x.plataformas.findIndex((p) => p.estadoCpb === 'lejos'))}
+            series={x.plataformas.map((p) => ({ nombre: p.nombre, leyenda: `${p.nombre} (objetivo ${costo(p.objetivo.cpb)})`, serie: p.semanas.slice(-SEMANAS_A_LA_VISTA).map((s) => ({ fecha: s.desde, valor: s.cpb == null ? null : Math.round(s.cpb) })) }))} />
+        </Bloque>
+        <Detalle id={`detalle-${s33.id}`} titulo="Detalle de cada plataforma" bajada="Data de ejemplo, por conectar." vistas={['cada plataforma semana a semana', 'sus campañas']}>
+          <Bloque universo="plataformas" titulo={`${plat.nombre}, semana a semana`} ejemplo pie={<span>{x.fuente}.</span>}>
+            <div className="q-control q-control-tarjeta"><span>Plataforma</span><Grupo etiqueta="Plataforma" valor={plat.id} onCambiar={setPlataforma} opciones={opciones} /></div>
+            <Tabla etiqueta={`${plat.nombre} por semana`} numericas={[1, 2, 3, 4, 5, 6]}
+              columnas={['Semana', 'Inversión', 'Leads', 'Bookings', 'L2B', 'Costo por lead', 'Costo por booking']}
+              filas={ultimas(plat.semanas).map((s) => [`${fechaCorta(s.desde)}${s.dias < 7 ? ' (incompleta)' : ''}`, dolares(s.inversion), numero(s.leads), numero(s.bookings), pct(s.l2b), conTono(costo(s.cpl), s.estadoCpl), conTono(costo(s.cpb), s.estadoCpb)])} />
+          </Bloque>
+          <Bloque universo="plataformas" titulo={`Las campañas de ${plat.nombre}`} ejemplo pie={<span>Campañas del período, de más a menos inversión.</span>}>
+            <div className="q-control q-control-tarjeta"><span>Plataforma</span><Grupo etiqueta="Plataforma" valor={plat.id} onCambiar={setPlataforma} opciones={opciones} /></div>
+            <Tabla etiqueta={`Campañas de ${plat.nombre}`} numericas={[1, 2, 3, 4, 5, 6]}
+              columnas={['Campaña', 'Inversión', 'Leads', 'Bookings', 'L2B', 'Costo por lead', 'Costo por booking']}
+              filas={plat.campanas.map((c) => [c.nombre, dolares(c.inversion), numero(Math.round(c.leads)), numero(Math.round(c.bookings)), pct(c.l2b), costo(c.cpl), costo(c.cpb)])} />
+          </Bloque>
+        </Detalle>
       </SeccionDe>
     </MarcoCapa>
   );

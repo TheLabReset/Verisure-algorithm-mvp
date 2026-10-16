@@ -110,7 +110,8 @@ export function Linea({ serie, previa, eventos = [], formato = numero, alto: alt
 }
 
 // ─────────────── Pequeños múltiplos con eje común ───────────────
-export function Multiplos({ paneles, formato = numero, etiqueta }) {
+// tono 'tinta': series que no son de ninguna marca del panel (las marcas de cámaras), en tinta y no en el color del foco
+export function Multiplos({ paneles, formato = numero, etiqueta, tono }) {
   const max = Math.max(1, ...paneles.flatMap((p) => p.serie.map((s) => s.valor ?? 0)));
   return (
     <div className="q-multiplos" role="group" aria-label={etiqueta}>
@@ -126,8 +127,8 @@ export function Multiplos({ paneles, formato = numero, etiqueta }) {
                 <figcaption className="q-multiplo-cab"><span>{p.nombre}</span><span className="q-nota">{p.nota}</span></figcaption>
                 <Svg ancho={ancho} alto={alto} etiqueta={p.nombre}>
                   <line className="q-rejilla" x1={m.l} x2={ancho - m.r} y1={y(0)} y2={y(0)} />
-                  <path className="q-linea" d={camino(p.serie, x, y)} />
-                  {iu >= 0 && <><circle className="q-punto-final" cx={x(iu)} cy={y(p.serie[iu].valor)} r="3" data-valor={p.serie[iu].valor} /><text className="q-rotulo-final" x={x(iu) + 6} y={y(p.serie[iu].valor) + 4}>{formato(p.serie[iu].valor)}</text></>}
+                  <path className={tono === 'tinta' ? 'q-linea-tinta' : 'q-linea'} d={camino(p.serie, x, y)} />
+                  {iu >= 0 && <><circle className={tono === 'tinta' ? 'q-punto-final-tinta' : 'q-punto-final'} cx={x(iu)} cy={y(p.serie[iu].valor)} r="3" data-valor={p.serie[iu].valor} /><text className="q-rotulo-final" x={x(iu) + 6} y={y(p.serie[iu].valor) + 4}>{formato(p.serie[iu].valor)}</text></>}
                 </Svg>
               </>
             );
@@ -689,9 +690,11 @@ export function Dispersion({ puntos, elegido, onElegir, rotuloX, rotuloY, format
 // empiezan cualquier día incluidas), sin pisarse: cada rótulo deja al menos 48 px con el anterior
 function rotulosX(base, x) {
   if (base.length <= 45) {
-    // cada siete puntos, pero nunca más cerca de lo que ocupa un rótulo («31 may»): en un celular se saltan
+    // un tramo corto lleva cada día; uno de tres semanas, cada tres; uno más largo, cada siete. Nunca más cerca de lo
+    // que ocupa un rótulo («31 may»): en un celular se saltan
+    const paso = base.length <= 10 ? 1 : base.length <= 21 ? 3 : 7;
     const out = [];
-    base.forEach((p, i) => { if (i % 7 === 0 && (!out.length || x(i) - x(out.at(-1).i) >= 56)) out.push({ i, texto: fechaCorta(p.fecha) }); });
+    base.forEach((p, i) => { if (i % paso === 0 && (!out.length || x(i) - x(out.at(-1).i) >= 56)) out.push({ i, texto: fechaCorta(p.fecha) }); });
     return out;
   }
   const out = [];
@@ -704,11 +707,23 @@ function rotulosX(base, x) {
   return out;
 }
 
+// El color de cada línea: la de foco en el color de la competencia, la propia en el suyo; las que no son de ninguna
+// marca (las marcas de cámaras), en tinta, azul y menta (pares validados para daltonismo), y el resto en gris
+const TONOS_LINEA = ['propia', 'tinta', 'azul', 'menta'];
+const claseLinea = (s) => (s.resaltada ? 'q-linea' : TONOS_LINEA.includes(s.tono) ? `q-linea-${s.tono}` : 'q-linea-resto');
+const clasePunto = (s) => (s.resaltada ? 'q-punto-final' : TONOS_LINEA.includes(s.tono) ? `q-punto-final-${s.tono}` : 'q-punto-final-resto');
+
 // ─────────────── Varias series en la misma escala: la de foco resaltada, la propia en su color, el resto en gris ───────────────
 // tono 'tinta': la serie principal cuando no es de ninguna marca (búsquedas de un rubro). discontinua: la misma marca en otro universo.
 // Un día sin dato es un hueco en todas las series. Los nombres van en una leyenda arriba, a cualquier ancho, y el trazo
 // usa todo el ancho: un rótulo al final de cada línea deja un margen muerto a la derecha y se apiña cuando las líneas terminan juntas.
-export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta }) {
+// elegible: una sola línea resaltada (en tonoElegida) y las demás en gris; se elige otra tocando su línea o su nombre
+// en la leyenda. Para muchas series que no son de ninguna marca: un solo color se lee mejor que cinco.
+// leyenda: el texto de cada serie en la leyenda, si no es su nombre («Ezviz +22 %»)
+export function Lineas({ series: dadas, formato = numero, alto: altoPedido, etiqueta, elegible = false, elegidaInicial = 0, tonoElegida = 'tinta' }) {
+  const [elegida, setElegida] = useState(elegidaInicial);
+  const activa = Math.min(elegida, dadas.length - 1);
+  const series = elegible ? dadas.map((s, k) => ({ ...s, resaltada: false, discontinua: false, tono: k === activa ? tonoElegida : 'resto' })) : dadas;
   const base = series[0]?.serie || [];
   const tabla = { columnas: ['Fecha', ...series.map((s) => s.nombre)], filas: base.map((p, i) => [fechaCorta(p.fecha), ...series.map((s) => formato(s.serie[i]?.valor))]) };
   return (
@@ -722,7 +737,7 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
         const leyenda = [];
         let x0 = 0, fila = 0;
         for (const s of series) {
-          const largo = 30 + Math.ceil(s.nombre.length * 7.8) + 20;
+          const largo = 30 + Math.ceil((s.leyenda ?? s.nombre).length * 7.8) + 20;
           if (x0 > 0 && x0 + largo > ancho - 4) { fila += 1; x0 = 0; }
           leyenda.push({ ...s, x: x0, fila });
           x0 += largo;
@@ -730,7 +745,9 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
         const filasLeyenda = leyenda.length ? leyenda.at(-1).fila + 1 : 0;
         const m = { t: 18 + 20 * filasLeyenda, r: 12, b: 26, l: Math.max(52, 14 + Math.ceil(Math.max(...ys.map((v) => formato(v).length)) * 7.8)) };
         const x = lineal(0, base.length - 1, m.l, ancho - m.r), y = lineal(0, ys.at(-1), alto - m.b, m.t);
-        const orden = [...series].sort((a, b) => Number(a.resaltada) - Number(b.resaltada)); // la resaltada se dibuja encima
+        // la resaltada (o la elegida) se dibuja encima
+        const orden = [...series].sort((a, b) => (elegible ? Number(a === series[activa]) - Number(b === series[activa]) : Number(a.resaltada) - Number(b.resaltada)));
+        const elegir = (k) => (e) => { if (!e.key || e.key === 'Enter' || e.key === ' ') { e.preventDefault?.(); setElegida(k); } };
         return (
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
             {ys.map((v) => <g key={v}><line className="q-rejilla" x1={m.l} x2={ancho - m.r} y1={y(v)} y2={y(v)} /><text className="q-eje" x={m.l - 8} y={y(v) + 4} textAnchor="end">{formato(v)}</text></g>)}
@@ -738,16 +755,19 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
             {rotulosX(base, x).map(({ i, texto }) => { const medio = (texto.length * 7.8) / 2, cx = x(i); const anc = cx + medio > ancho - 2 ? 'end' : cx - medio < 2 ? 'start' : 'middle'; return <text key={base[i].fecha} className="q-eje" x={anc === 'end' ? ancho - 2 : anc === 'start' ? 2 : cx} y={alto - 8} textAnchor={anc}>{texto}</text>; })}
             {base.map((p, i) => (series.every((s) => s.serie[i]?.valor == null) && i > 0 && i < base.length - 1 ? <rect key={'h' + p.fecha} className="q-hueco" x={x(i) - 3} y={m.t} width={6} height={alto - m.b - m.t} /> : null))}
             {base.map((p, i) => <Zona key={'z' + p.fecha} x={x(i) - (x(1) - x(0)) / 2} y={m.t} w={x(1) - x(0)} h={alto - m.b - m.t} pista={`${fecha(p.fecha)}\n${series.map((s) => `${s.nombre}: ${formato(s.serie[i]?.valor)}`).join('\n')}`} />)}
-            {orden.map((s) => <path key={s.nombre} className={`${s.resaltada ? 'q-linea' : s.tono === 'propia' ? 'q-linea-propia' : s.tono === 'tinta' ? 'q-linea-tinta' : 'q-linea-resto'}${s.discontinua ? ' q-discontinua' : ''}`} d={camino(s.serie, x, y)} />)}
-            {leyenda.map((s) => (
-              <g key={'l' + s.nombre} transform={`translate(${4 + s.x}, ${12 + s.fila * 20})`}>
-                <line className={`${s.resaltada ? 'q-linea' : s.tono === 'propia' ? 'q-linea-propia' : s.tono === 'tinta' ? 'q-linea-tinta' : 'q-linea-resto'}${s.discontinua ? ' q-discontinua' : ''}`} x1={0} x2={24} y1={-4} y2={-4} />
-                <text className={`q-rotulo-final${s.resaltada || s.tono === 'propia' || s.tono === 'tinta' ? '' : ' q-rotulo-resto'}`} x={30} y={0}>{s.nombre}</text>
+            {orden.map((s) => <path key={s.nombre} className={`${claseLinea(s)}${s.discontinua ? ' q-discontinua' : ''}`} d={camino(s.serie, x, y)} />)}
+            {/* un área de toque ancha sobre cada línea, para elegirla */}
+            {elegible && series.map((s, k) => <path key={'t' + s.nombre} className="q-linea-toque" d={camino(s.serie, x, y)} onClick={elegir(k)} aria-hidden="true" />)}
+            {leyenda.map((s, k) => (
+              <g key={'l' + s.nombre} transform={`translate(${4 + s.x}, ${12 + s.fila * 20})`} {...(elegible ? { role: 'button', tabIndex: 0, 'aria-pressed': k === activa, 'aria-label': `Resaltar ${s.nombre}`, className: 'q-leyenda-elegible', onClick: elegir(k), onKeyDown: elegir(k) } : {})}>
+                {elegible && <rect className="q-leyenda-toque" x={-4} y={-14} width={34 + Math.ceil((s.leyenda ?? s.nombre).length * 7.8)} height={20} />}
+                <line className={`${claseLinea(s)}${s.discontinua ? ' q-discontinua' : ''}`} x1={0} x2={24} y1={-4} y2={-4} />
+                <text className={`q-rotulo-final${s.resaltada || (s.tono && s.tono !== 'resto') ? '' : ' q-rotulo-resto'}`} x={30} y={0}>{s.leyenda ?? s.nombre}</text>
               </g>
             ))}
             {series.map((s) => {
               const i = ultimoConValor(s.serie);
-              return i < 0 ? null : <circle key={'f' + s.nombre} className={s.resaltada ? 'q-punto-final' : s.tono === 'propia' ? 'q-punto-final-propia' : s.tono === 'tinta' ? 'q-punto-final-tinta' : 'q-punto-final-resto'} cx={x(i)} cy={y(s.serie[i].valor)} r="4" data-valor={s.serie[i].valor} />;
+              return i < 0 ? null : <circle key={'f' + s.nombre} className={clasePunto(s)} cx={x(i)} cy={y(s.serie[i].valor)} r="4" data-valor={s.serie[i].valor} />;
             })}
             {series.flatMap((s) => s.serie.map((p, i) => (p.valor != null ? <circle key={s.nombre + p.fecha} className="q-punto-oculto" cx={x(i)} cy={y(p.valor)} r="3" data-serie={s.nombre} data-fecha={p.fecha} data-valor={p.valor} /> : null)))}
           </Svg>

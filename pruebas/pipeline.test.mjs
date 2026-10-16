@@ -1,5 +1,6 @@
 // El pipeline de punta a punta, con la API de Integrametrics simulada: un día nuevo entra al contrato, al CSV, a
 // medios.json y al contexto de MAIA, la vista se arma con eso y correrlo dos veces no duplica nada.
+import { emisionesDe } from '../src/fuentes/medios.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, copyFileSync, readFileSync, rmSync } from 'node:fs';
@@ -53,7 +54,7 @@ test('pipeline: un día nuevo llega al contrato, al CSV, a medios y a MAIA, sin 
     const csv = readFileSync(join(dir, 'export.csv'), 'utf8');
     assert.equal(csv.split('\n').filter((l) => l.startsWith(DIA)).length, 2);
     const medios = leer(dir, 'medios.json');
-    assert.ok(medios.meses[MES][RIVAL.marcaFuente].programas['PROGRAMA DE PRUEBA'] === 1);
+    assert.equal(emisionesDe(medios, RIVAL.marcaFuente, `${MES}-01`, `${MES}-31`).filter((e) => e.programa === 'PROGRAMA DE PRUEBA').length, 1);
 
     // idempotente: la misma ventana otra vez no suma de nuevo
     await correr();

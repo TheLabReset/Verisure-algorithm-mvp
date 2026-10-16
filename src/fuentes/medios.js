@@ -22,32 +22,40 @@ export function leerCsv(texto) {
   return resto.map((f) => Object.fromEntries(cab.map((k, j) => [k, f[j] ?? ''])));
 }
 
-const diaSemana = (iso) => (new Date(`${iso}T00:00:00Z`).getUTCDay() + 6) % 7; // lunes = 0
-const sumar = (obj, clave, n) => { if (clave) obj[clave] = (obj[clave] || 0) + n; };
+// Cada emisión de cada marca, para que cualquier tramo de fechas (un día, una semana, seis meses) se arme en el
+// panel: horas, días, canales, programas, la compra de medios y las fichas de TV, cable y radio. Los textos que se
+// repiten (canal, programa, versión) van una sola vez en un diccionario y cada emisión guarda su posición.
+// Una emisión: [fecha, hora, grupo, canal, programa, versión, tipo, franja, zona, inversión en soles].
+export const CAMPOS_EMISION = ['fecha', 'hora', 'grupo', 'canal', 'programa', 'version', 'tipo', 'franja', 'zona', 'inversion'];
+const DICCIONARIOS = ['fecha', 'grupo', 'canal', 'programa', 'version', 'tipo', 'franja', 'zona'];
 
 export function mediosDesdeCsv(texto) {
-  const meses = {};
   const filas = leerCsv(texto);
   const repetida = repeticiones(filas, CAMPOS_CSV);
+  const dic = Object.fromEntries(DICCIONARIOS.map((k) => [k, []]));
+  const pos = Object.fromEntries(DICCIONARIOS.map((k) => [k, new Map()]));
+  const codigo = (k, v) => { const t = v || ''; if (!pos[k].has(t)) { pos[k].set(t, dic[k].length); dic[k].push(t); } return pos[k].get(t); };
+  const emisiones = {};
   for (const r of filas) {
     const fecha = r.fecha?.slice(0, 10);
     if (!fecha || !r.marca) continue;
-    const mes = fecha.slice(0, 7);
-    const m = (meses[mes] ??= {});
-    const b = (m[r.marca] ??= { emisiones: 0, horas: Array(24).fill(0), dias: Array(7).fill(0), horaDia: Array.from({ length: 7 }, () => Array(24).fill(0)), canales: {}, programas: {}, zonas: {}, grupos: {} });
     // una repetición regional de una compra nacional no es otra emisión
     if (repetida.has(r)) continue;
-    const inv = Number(r.inversion_soles) || 0;
-    b.emisiones += 1;
-    const h = Number((r.hora || '').slice(0, 2));
-    const d = diaSemana(fecha);
-    if (r.hora && h >= 0 && h < 24) { b.horas[h] += 1; b.horaDia[d][h] += 1; }
-    b.dias[d] += 1;
-    sumar(b.canales, r.medio, inv);
-    sumar(b.programas, r.programa, 1);
-    sumar(b.zonas, r.zona, inv);
-    sumar(b.grupos, r.grupo_medio, inv);
+    (emisiones[r.marca] ??= []).push([codigo('fecha', fecha), r.hora || '', codigo('grupo', r.grupo_medio), codigo('canal', r.medio), codigo('programa', r.programa),
+      codigo('version', r.version), codigo('tipo', r.tipo), codigo('franja', r.franja), codigo('zona', r.zona), Math.round(Number(r.inversion_soles) || 0)]);
   }
-  for (const m of Object.values(meses)) for (const b of Object.values(m)) for (const k of ['canales', 'zonas', 'grupos']) for (const c of Object.keys(b[k])) b[k][c] = Math.round(b[k][c]);
-  return { meses };
+  return { campos: CAMPOS_EMISION, dic, emisiones };
+}
+
+/** Las emisiones de una marca entre dos fechas (incluidas), ya decodificadas. */
+export function emisionesDe(medios, marca, desde, hasta) {
+  const d = medios?.dic, lista = medios?.emisiones?.[marca];
+  if (!d || !lista) return [];
+  const out = [];
+  for (const e of lista) {
+    const fecha = d.fecha[e[0]];
+    if (fecha < desde || fecha > hasta) continue;
+    out.push({ fecha, hora: e[1], grupo: d.grupo[e[2]], canal: d.canal[e[3]], programa: d.programa[e[4]], version: d.version[e[5]], tipo: d.tipo[e[6]], franja: d.franja[e[7]], zona: d.zona[e[8]], inversion: e[9] });
+  }
+  return out;
 }
