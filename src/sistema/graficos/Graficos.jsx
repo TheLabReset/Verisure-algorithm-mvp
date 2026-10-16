@@ -645,7 +645,9 @@ export function Apiladas({ columnas, partes, formato = (p) => porcentaje(p), eti
                 const vacia = partes.every((p) => c.valores[p.clave] == null);
                 let y0 = alto - m.b;
                 return (
-                  <g key={c.clave} className={c.apagada ? 'q-columna-apagada' : undefined}>
+                  <g key={c.clave} className={`q-columna${c.apagada ? ' q-columna-apagada' : ''}`}>
+                    {/* al pasar el mouse, el gris va detrás de la columna: la columna se sigue viendo */}
+                    <rect className="q-columna-fondo" x={i * paso + 2} y={m.t - 4} width={paso - 4} height={h + 8} rx="4" />
                     {vacia ? <rect className="q-hueco" x={x} y={m.t} width={w} height={h} rx="2" />
                       : partes.map((p, k) => {
                         const v = c.valores[p.clave] || 0, hp = (v / 100) * h, gap = k && hp > 0 ? 2 : 0;
@@ -660,7 +662,7 @@ export function Apiladas({ columnas, partes, formato = (p) => porcentaje(p), eti
                         );
                       })}
                     <text className={`q-eje${c.apagada ? '' : ''}`} x={x + w / 2} y={alto - 8} textAnchor="middle">{c.corto}</text>
-                    <Zona x={i * paso} y={m.t} w={paso} h={h} pista={c.pista} />
+                    <rect className="q-zona q-zona-quieta" x={i * paso} y={m.t} width={paso} height={h} data-pista={c.pista} />
                   </g>
                 );
               })}

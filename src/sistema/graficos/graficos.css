@@ -128,6 +128,9 @@
 /* Zonas de lectura: invisibles hasta que el puntero las toca */
 .q-svg .q-zona { fill: transparent; }
 .q-svg .q-zona:hover { fill: var(--superficie-capitulo); }
+.q-svg .q-zona-quieta:hover { fill: transparent; }
+.q-svg .q-columna-fondo { fill: transparent; }
+.q-svg .q-columna:hover .q-columna-fondo { fill: var(--superficie-capitulo); }
 
 /* Leyendas y escalas en HTML */
 .q-leyenda { list-style: none; margin: var(--e-3) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--e-1) var(--e-4); font-size: var(--t-14); color: var(--texto-2); }

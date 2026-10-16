@@ -149,5 +149,9 @@ export function compraDeMedios(medios, P) {
       tipos: [...tipos.entries()].map(([tipo, emisiones]) => ({ tipo, emisiones })).sort((a, b) => b.emisiones - a.emisiones),
     }];
   }));
-  return { canales, totales, enComun, grupos, detalle: filas, porMarca, competencia: comp, propia: PROPIA };
+  // el detalle se lee en diez filas: los programas con más emisiones de cada marca. Cuántos hay en total va al pie,
+  // para que el recorte se diga
+  const programasTop = Object.fromEntries(MARCAS.map((m) => [m, [...filas[m]].sort((a, b) => b.emisiones - a.emisiones).slice(0, TOPE_DETALLE)]));
+  return { canales, totales, enComun, grupos, detalle: filas, porMarca, programasTop, competencia: comp, propia: PROPIA };
 }
+export const TOPE_DETALLE = 10;

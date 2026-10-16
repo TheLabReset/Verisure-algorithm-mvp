@@ -100,6 +100,11 @@ export function presionLectura(v, universo = 'atl') {
   const pico = mayor && mayor.valores[r.id] > 0 && dr > 1 ? ` El día de más inversión de ${r.nombre} fue el ${fechaCorta(mayor.fecha)}, con ${monto(mayor.valores[r.id])}.` : '';
   return { titulo, lectura: `${r.nombre} ${deR}; ${p.nombre}, ${deP}.${pico}` };
 }
+// El detalle de la compra de medios: el recorte se dice, y una marca sin compra se nombra en una línea, no en una columna de ceros
+export const recorteTexto = (n, total, que) => (total > n ? `Los ${numero(n)} ${que} con más emisiones, de ${numero(total)}.` : `${capital(enLetras(total, que))}, de más a menos emisiones.`);
+export const sinCompraTexto = (marca, ventana) => `${marca} no compró ATL ${ventana}.`;
+export const todosTipoTexto = (tipo) => `Todos son ${tipoAvisoPlural(tipo)}.`;
+
 // La mezcla de la competencia mes a mes: el año en el título; el mes más volcado a ATL y el último mes cerrado en la lectura
 export function mezclaLectura(x) {
   const conMezcla = x.meses.filter((m) => m.digital != null);
