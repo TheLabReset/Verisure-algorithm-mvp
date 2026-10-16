@@ -1,8 +1,8 @@
 // OOH: el mapa de paneles (Leaflet, cargado aparte) y la ficha de la ubicación elegida, con su foto o video.
 // Lo de la competencia se elige primero. La ficha abre la ventana con todos los paneles de esa marca.
 import { lazy, Suspense, useMemo, useState } from 'react';
-import { MapPin } from 'lucide-react';
-import { Grupo, VentanaAnuncios } from '../sistema/Componentes.jsx';
+import { MapPin, Maximize2 } from 'lucide-react';
+import { Grupo, VentanaAnuncios, VisorFoto } from '../sistema/Componentes.jsx';
 import { numero, soles, fechaCorta } from '../sistema/formato.js';
 import { segun, version } from '../textos/comun.js';
 import { panelTitulo } from '../textos/lecturas.js';
@@ -12,14 +12,20 @@ const MapaPaneles = lazy(() => import('../sistema/graficos/MapaPaneles.jsx'));
 function Ficha({ ubicacion, paneles, onVerTodos }) {
   const [i, setI] = useState(0);
   const [fallo, setFallo] = useState(null); // la cara cuya foto o video no cargó
+  const [ampliada, setAmpliada] = useState(false);
   const p = paneles[Math.min(i, paneles.length - 1)];
   if (!p) return <p className="q-nota-bloque">Elige un punto del mapa para ver su panel.</p>;
   const a = p.asset;
+  const alt = `Foto del panel de ${p.nombre}${p.version ? `, versión ${version(p.version)}` : ''}`;
   return (
     <div className="q-ficha-panel" aria-live="polite">
+      {a?.kind === 'image' && <VisorFoto abierto={ampliada} onCerrar={() => setAmpliada(false)} src={a.url} alt={alt} titulo={panelTitulo(p)} bajada={p.nombre} />}
       <div className="q-ficha-arte">
         {fallo === p.id ? <span className="q-ficha-sin-arte">{a.kind === 'video' ? 'El video' : 'La foto'} de este panel no cargó</span>
-          : a?.kind === 'image' ? <img src={a.url} alt={`Foto del panel de ${p.nombre}${p.version ? `, versión ${version(p.version)}` : ''}`} loading="lazy" referrerPolicy="no-referrer" onError={() => setFallo(p.id)} />
+          : a?.kind === 'image' ? <>
+            <img src={a.url} alt={alt} loading="lazy" referrerPolicy="no-referrer" onError={() => setFallo(p.id)} />
+            <button type="button" className="q-ficha-ampliar" onClick={() => setAmpliada(true)} aria-label="Ampliar la foto del panel"><span className="q-ficha-ampliar-icono" aria-hidden="true"><Maximize2 size={16} /></span></button>
+          </>
           : a?.kind === 'video' ? <video src={a.url} controls preload="metadata" aria-label={`Video del panel de ${p.nombre}`} onError={() => setFallo(p.id)} />
           : <span className="q-ficha-sin-arte">Integrametrics no captó la foto de este panel</span>}
       </div>

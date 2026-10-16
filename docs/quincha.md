@@ -81,6 +81,7 @@ Están en `src/sistema/Componentes.jsx`. No calculan: reciben cifras ya armadas 
 | `Bloque`, `Ventana`, `Ayuda`, `Estado` | La tarjeta: título, ventana, ayuda, lectura, cuerpo y pie; y lo que muestra cuando falta el dato o está cargando |
 | `Tabla` | Números a la derecha, barra junto a la cifra, subtítulo, tono contra el objetivo y fila destacada |
 | `Flujo` | Una fila por plataforma, un paso por columna (de la inversión a la inscripción) |
+| `VisorFoto` | Una foto entera en una ventana, con zoom (botones, rueda, doble clic o dos dedos) y arrastre: para las fotos de panel, que llegan verticales |
 | `ListaAlertas` | Qué mirar: lista numerada por nivel, cada fila se abre con el detalle |
 | `SugerenciaModelo` | La propuesta del modelo, con robot y una columna por plataforma |
 | `PanelLateral`, `Monitoreo` | Qué se monitorea |

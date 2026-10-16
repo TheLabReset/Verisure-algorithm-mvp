@@ -4,7 +4,7 @@ import {
   ArrowDownRight, ArrowUpRight, ArrowRight, CircleHelp, Megaphone, Contact, Search, MessagesSquare, Globe,
   Sigma, CircleCheck, TriangleAlert, CloudOff, Inbox, CalendarX2, CircleDashed, Hourglass, FlaskConical,
   Eye, TrendingUp, Bot, Calendar, Pin, ChevronDown, CornerDownRight, ListChecks, X, Layers, ArrowUpRight as Ir,
-  ExternalLink, Play, Tv, MonitorSmartphone, AudioLines, Image as ImagenIcono, PanelRightOpen,
+  ExternalLink, Play, Tv, MonitorSmartphone, AudioLines, Image as ImagenIcono, PanelRightOpen, ZoomIn, ZoomOut, Maximize2,
 } from 'lucide-react';
 import { NO_MEDIDO, variacion } from './formato.js';
 
@@ -674,6 +674,59 @@ export function Dialogo({ abierto, titulo, bajada, onCerrar, volver, children })
         <div className="q-dialogo-cuerpo">{abierto ? children : null}</div>
       </div>
     </dialog>
+  );
+}
+
+// ── Visor de una foto: la foto entera, con zoom (botones, rueda, doble clic o dos dedos) y arrastre cuando está
+// ampliada. Para las fotos de panel, que llegan verticales y en la ficha se ven chicas.
+const ZOOM_MAX = 5;
+export function VisorFoto({ abierto, onCerrar, src, alt, titulo, bajada, volver }) {
+  const [z, setZ] = useState({ s: 1, x: 0, y: 0 });
+  const caja = useRef(null), punteros = useRef(new Map()), inicio = useRef(null);
+  useEffect(() => { if (abierto) setZ({ s: 1, x: 0, y: 0 }); }, [abierto, src]);
+  const acotar = ({ s, x, y }) => {
+    const r = caja.current?.getBoundingClientRect(), n = Math.min(ZOOM_MAX, Math.max(1, s));
+    if (!r || n === 1) return { s: n, x: 0, y: 0 };
+    const mx = (r.width * (n - 1)) / 2, my = (r.height * (n - 1)) / 2;
+    return { s: n, x: Math.min(mx, Math.max(-mx, x)), y: Math.min(my, Math.max(-my, y)) };
+  };
+  const zoom = (f) => setZ((v) => acotar({ ...v, s: v.s * f }));
+  // la rueda acerca y aleja sin mover la página: el listener no puede ser pasivo
+  useEffect(() => {
+    const el = caja.current;
+    if (!abierto || !el) return undefined;
+    const rueda = (e) => { e.preventDefault(); setZ((v) => acotar({ ...v, s: v.s * (e.deltaY < 0 ? 1.15 : 1 / 1.15) })); };
+    el.addEventListener('wheel', rueda, { passive: false });
+    return () => el.removeEventListener('wheel', rueda);
+  }, [abierto]); // eslint-disable-line react-hooks/exhaustive-deps
+  const bajar = (e) => { caja.current?.setPointerCapture(e.pointerId); punteros.current.set(e.pointerId, { x: e.clientX, y: e.clientY }); inicio.current = null; };
+  const mover = (e) => {
+    const ps = punteros.current;
+    if (!ps.has(e.pointerId)) return;
+    const antes = ps.get(e.pointerId);
+    ps.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ps.size === 2) {
+      // dos dedos: la distancia entre ellos marca el zoom
+      const [a, b] = [...ps.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (inicio.current) setZ((v) => acotar({ ...v, s: v.s * (d / inicio.current) }));
+      inicio.current = d;
+    } else setZ((v) => (v.s > 1 ? acotar({ ...v, x: v.x + e.clientX - antes.x, y: v.y + e.clientY - antes.y }) : v));
+  };
+  const soltar = (e) => { punteros.current.delete(e.pointerId); inicio.current = null; };
+  return (
+    <Dialogo abierto={abierto} onCerrar={onCerrar} titulo={titulo} bajada={bajada} volver={volver}>
+      <div className="q-visor">
+        <div className="q-visor-controles" role="group" aria-label="Zoom de la foto">
+          <button type="button" className="q-boton q-boton-chico" onClick={() => zoom(1.5)} disabled={z.s >= ZOOM_MAX} aria-label="Acercar"><ZoomIn size={16} aria-hidden="true" /></button>
+          <button type="button" className="q-boton q-boton-chico" onClick={() => zoom(1 / 1.5)} disabled={z.s <= 1} aria-label="Alejar"><ZoomOut size={16} aria-hidden="true" /></button>
+          <button type="button" className="q-boton q-boton-chico" onClick={() => setZ({ s: 1, x: 0, y: 0 })} disabled={z.s === 1}>Ver entera</button>
+        </div>
+        <div ref={caja} className={`q-visor-lienzo${z.s > 1 ? ' q-visor-ampliado' : ''}`} onPointerDown={bajar} onPointerMove={mover} onPointerUp={soltar} onPointerCancel={soltar}
+          onDoubleClick={() => setZ((v) => (v.s > 1 ? { s: 1, x: 0, y: 0 } : acotar({ ...v, s: 2.5 })))}>
+          <img src={src} alt={alt} draggable={false} referrerPolicy="no-referrer" style={{ transform: `translate(${z.x}px, ${z.y}px) scale(${z.s})` }} />
+        </div>
+      </div>
+    </Dialogo>
   );
 }
 

@@ -496,11 +496,9 @@
 
 /* Barra: el nombre del cliente en texto mientras no esté su logo oficial; sello de la fecha de la data; export */
 .q-sello-datos { font-size: var(--t-13); color: var(--sobre-barra-2); white-space: nowrap; }
-.q-barra .q-boton-export { color: var(--sobre-barra-2); text-decoration: none; }
-.q-barra .q-boton-export:hover { color: var(--sobre-barra); }
 .q-control-nota { font-size: var(--t-13); color: var(--texto-3); align-self: center; }
 .q-capa-vacia { padding-block: var(--e-8); }
-@media (max-width: 640px) { .q-sello-datos, .q-boton-export span { display: none; } }
+@media (max-width: 640px) { .q-sello-datos { display: none; } }
 
 /* Estrenos: una fila por pieza nueva, la marca a la izquierda y el botón para verla */
 .q-estrenos { list-style: none; margin: 0; padding: 0; display: grid; }
@@ -533,7 +531,20 @@
 .q-mapa-cargando { display: grid; place-items: center; color: var(--texto-3); font-size: var(--t-14); }
 .q-ficha-panel { display: grid; gap: var(--e-4); }
 .q-ficha-arte { aspect-ratio: 4 / 3; max-width: 100%; border-radius: var(--r-control); overflow: hidden; background: var(--superficie-capitulo); display: grid; place-items: center; }
-.q-ficha-arte img, .q-ficha-arte video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.q-ficha-arte { position: relative; }
+/* la foto entera: las de panel llegan verticales y recortadas mostraban una franja distinta cada vez */
+/* fijada al recuadro: en la grilla, height: 100% no se resolvía y la foto se pasaba del alto */
+.q-ficha-arte img, .q-ficha-arte video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+.q-ficha-ampliar { position: absolute; inset: 0; display: block; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
+.q-ficha-ampliar-icono { position: absolute; right: var(--e-2); bottom: var(--e-2); display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--elevada); color: var(--texto-1); box-shadow: var(--sombra-flota); }
+.q-ficha-ampliar:focus-visible { outline: 2px solid var(--foco); outline-offset: -2px; }
+/* Visor de foto: la foto entera en el lienzo, y con zoom se arrastra */
+.q-visor { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: var(--e-3); height: 100%; }
+.q-visor-controles { display: flex; gap: var(--e-2); flex-wrap: wrap; }
+.q-visor-lienzo { position: relative; overflow: hidden; min-height: 60vh; border-radius: var(--r-control); background: var(--superficie-capitulo); display: grid; place-items: center; touch-action: none; cursor: zoom-in; }
+.q-visor-lienzo.q-visor-ampliado { cursor: grab; }
+.q-visor-lienzo.q-visor-ampliado:active { cursor: grabbing; }
+.q-visor-lienzo img { max-width: 100%; max-height: 70vh; object-fit: contain; user-select: none; transform-origin: center; transition: transform var(--d-110) var(--curva-productiva); }
 .q-ficha-sin-arte { padding: var(--e-4); font-size: var(--t-14); color: var(--texto-3); text-align: center; }
 .q-ficha-cuerpo { display: grid; gap: var(--e-2); min-width: 0; }
 .q-ficha-cuerpo h4 { font-family: var(--f-titulo); font-size: var(--t-19); font-weight: var(--peso-titulo); color: var(--texto-1); line-height: 1.2; }

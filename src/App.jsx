@@ -1,7 +1,7 @@
 // The Algorithm para el cliente de src/cliente.js. Lee el contrato publicado por el pipeline (public/data), arma la
 // vista una sola vez por filtro y la reparte a las capas. Si la data no carga, lo dice: nunca dibuja ceros.
 import { useEffect, useMemo, useState } from 'react';
-import { Moon, Sun, Presentation, Download } from 'lucide-react';
+import { Moon, Sun, Presentation } from 'lucide-react';
 import { armarVista, mesesDisponibles } from './calculo/vista.js';
 import { ESCENARIOS, aplicarEscenario } from './calculo/escenarios.js';
 import { CAPAS } from './capas/estructura.js';
@@ -128,9 +128,6 @@ export default function App() {
           <div className="q-barra-controles">
             {data.contrato && <span className="q-sello-datos">Datos al {fecha(data.contrato.meta.lastDay)}</span>}
             {vista && <BotonMaia onClick={() => setMaiaAbierta(true)} />}
-            <a className="q-boton q-boton-quieto q-boton-export" href={`${import.meta.env.BASE_URL}data/export.csv`} download>
-              <Download size={16} aria-hidden="true" /><span>Export para su BI</span>
-            </a>
             <button type="button" className="q-boton q-boton-quieto q-boton-presentar" aria-pressed={presentar} onClick={() => setPresentar((x) => !x)}>
               <Presentation size={16} aria-hidden="true" /><span>Presentar</span>
             </button>
