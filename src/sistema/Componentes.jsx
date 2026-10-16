@@ -4,7 +4,7 @@ import {
   ArrowDownRight, ArrowUpRight, ArrowRight, CircleHelp, Megaphone, Contact, Search, MessagesSquare, Globe,
   Sigma, CircleCheck, TriangleAlert, CloudOff, Inbox, CalendarX2, CircleDashed, Hourglass, FlaskConical,
   Eye, TrendingUp, Bot, Calendar, Pin, ChevronDown, CornerDownRight, ListChecks, X, Layers, ArrowUpRight as Ir,
-  ExternalLink, Check, Play, Pause, RotateCcw, RotateCw, Tv, MonitorSmartphone, AudioLines, Image as ImagenIcono, PanelRightOpen, ZoomIn, ZoomOut, Maximize2, Minimize2,
+  ExternalLink, Check, Play, Pause, RotateCcw, RotateCw, Tv, MonitorSmartphone, AudioLines, Image as ImagenIcono, PanelRightOpen, ZoomIn, ZoomOut, Maximize2, Minimize2, ThumbsUp, ThumbsDown, Minus,
 } from 'lucide-react';
 import { NO_MEDIDO, variacion } from './formato.js';
 
@@ -406,6 +406,13 @@ export function ListaAlertas({ grupos }) {
 // Frente al objetivo: icono y palabra (el color nunca va solo), con los colores de los niveles de alerta
 // el texto llega escrito desde src/textos (dice el margen del objetivo)
 const SEMAFORO = { bien: { nivel: 'bien', icono: CircleCheck }, cerca: { nivel: 'revisar', icono: Eye }, lejos: { nivel: 'atencion', icono: TriangleAlert } };
+// El tono de un tema de la conversación: icono y palabra sobre un fondo suave (verde, rojo o sin color si es neutro)
+const TONO_ICONO = { 'muy-positivo': ThumbsUp, positivo: ThumbsUp, neutro: Minus, negativo: ThumbsDown, 'muy-negativo': ThumbsDown };
+export function Tono({ tono, texto }) {
+  const Icono = TONO_ICONO[tono];
+  if (!Icono) return null;
+  return <span className={`q-tono q-tono-${tono}`}><Icono size={14} aria-hidden="true" />{texto}</span>;
+}
 export function Semaforo({ estado, texto }) {
   const x = SEMAFORO[estado];
   if (!x) return null;

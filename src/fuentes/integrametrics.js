@@ -53,40 +53,50 @@ export function dayWindows(startDate, endDate) {
   return windows
 }
 
-async function getJSON(url, token, fetchImpl) {
+// Un corte de red o un error del servidor (5xx, 429) se reintenta dos veces, a los 3 y a los 10 segundos: la corrida
+// baja un día por llamada y hace su commit al final, así que una sola falla pasajera dejaba al panel un día sin data.
+// Un 4xx (token vencido, pedido mal armado) no se reintenta: no se arregla esperando. `esperar` se inyecta en las pruebas
+export const ESPERAS_REINTENTO = [3000, 10000]
+const pausa = (ms) => new Promise((r) => setTimeout(r, ms))
+async function getJSON(url, token, fetchImpl, esperar = pausa) {
   if (!token) {
     throw new IntegrametricsError('Falta INTEGRAMETRICS_TOKEN (sin credencial no se puede consultar live)')
   }
-  let res
-  try {
-    res = await fetchImpl(url, { headers: { Authorization: `Bearer ${token}` } })
-  } catch (e) {
-    throw new IntegrametricsError('Red no disponible al consultar Integrametrics', e)
+  for (let intento = 0; ; intento += 1) {
+    let res, error
+    try {
+      res = await fetchImpl(url, { headers: { Authorization: `Bearer ${token}` } })
+    } catch (e) {
+      error = new IntegrametricsError('Red no disponible al consultar Integrametrics', e)
+    }
+    const pasajero = error || res.status >= 500 || res.status === 429
+    if (!pasajero) {
+      if (!res.ok) throw new IntegrametricsError(`Integrametrics respondió ${res.status}`)
+      return res.json()
+    }
+    if (intento >= ESPERAS_REINTENTO.length) throw error || new IntegrametricsError(`Integrametrics respondió ${res.status}`)
+    await esperar(ESPERAS_REINTENTO[intento])
   }
-  if (!res.ok) {
-    throw new IntegrametricsError(`Integrametrics respondió ${res.status}`)
-  }
-  return res.json()
 }
 
 // GET /registros paginado por día. filters se envía como JSON (objeto).
-export async function fetchRegistros({ base = INTEGRAMETRICS_BASE, token, startDate, endDate, filters, fetchImpl }) {
+export async function fetchRegistros({ base = INTEGRAMETRICS_BASE, token, startDate, endDate, filters, fetchImpl, esperar }) {
   const f = fetchImpl || (typeof fetch !== 'undefined' ? fetch : null)
   if (!f) throw new IntegrametricsError('No hay implementación de fetch disponible')
   const out = []
   for (const w of dayWindows(startDate, endDate)) {
     const url = buildUrl(base, '/registros', { startDate: w.start, endDate: w.end, filters })
-    const batch = await getJSON(url, token, f)
+    const batch = await getJSON(url, token, f, esperar)
     if (Array.isArray(batch)) out.push(...batch)
   }
   return out
 }
 
-export async function fetchRegistrosDigital({ base = INTEGRAMETRICS_BASE, token, startDate, endDate, fetchImpl }) {
+export async function fetchRegistrosDigital({ base = INTEGRAMETRICS_BASE, token, startDate, endDate, fetchImpl, esperar }) {
   const f = fetchImpl || (typeof fetch !== 'undefined' ? fetch : null)
   if (!f) throw new IntegrametricsError('No hay implementación de fetch disponible')
   const url = buildUrl(base, '/registros-digital', { startDate, endDate })
-  return getJSON(url, token, f)
+  return getJSON(url, token, f, esperar)
 }
 
 export async function fetchCatalogo({ base = INTEGRAMETRICS_BASE, token, name, params, fetchImpl }) {

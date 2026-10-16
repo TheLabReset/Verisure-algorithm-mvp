@@ -19,6 +19,7 @@ import { hechosDeLaSemana } from './semana.js';
 import { digitalDeLaSemana, atlDeLaSemana, compraDeMedios } from './senales.js';
 import { emisionesDe } from '../fuentes/medios.js';
 import { tiktokDeEjemplo, facebookDeEjemplo, plataformasDeEjemplo } from '../muestra/ejemplo.js';
+import { leerTiktok, leerFacebook } from './conversacion.js';
 import { leerPlataformas } from './plataformas.js';
 
 export { mesesDisponibles };
@@ -451,8 +452,8 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
     },
     // Data de ejemplo (src/muestra/ejemplo.js): fuentes por conectar. Va rotulada y no entra a los avisos ni a MAIA
     ejemplo: {
-      tiktok: tiktokDeEjemplo(P.hasta),
-      facebook: facebookDeEjemplo(P.hasta),
+      tiktok: leerTiktok(tiktokDeEjemplo(P.hasta)),
+      facebook: leerFacebook(facebookDeEjemplo(P.hasta)),
       plataformas: leerPlataformas(plataformasDeEjemplo(meta.firstDay, meta.lastDay), P),
     },
     analiza: {

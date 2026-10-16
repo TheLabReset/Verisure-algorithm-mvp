@@ -435,9 +435,15 @@ export function trendsMarcasLectura(b) {
 }
 export function tiktokLectura(t) {
   const [h] = t.hashtags;
-  const marcas = t.hashtags.filter((x) => x.deMarca);
-  return { titulo: `${h.hashtag} es el hashtag con más interacción`, lectura: `Los hashtags de marca quedan detrás de los del rubro: el más alto es ${marcas[0]?.hashtag ?? 'ninguno'}.` };
+  const marca = t.hashtags.find((x) => x.deMarca);
+  const delante = marca ? t.hashtags.indexOf(marca) : -1;
+  return {
+    titulo: `${h.hashtag} es el hashtag con más interacción`,
+    lectura: !marca ? 'Ningún hashtag de marca entra en la lista.' : delante === 0 ? `Un hashtag de marca, ${marca.hashtag}, encabeza la lista.` : `El primer hashtag de marca es ${marca.hashtag}, con ${numero(delante)} del rubro por delante.`,
+  };
 }
+// El tono de cada tema de Facebook, como se lee en su chip
+export const TONOS = { 'muy-positivo': 'Muy positivo', positivo: 'Positivo', neutro: 'Neutro', negativo: 'Negativo', 'muy-negativo': 'Muy negativo' };
 export function facebookLectura(f) {
   const [t] = f.temas;
   const negativo = [...f.temas].sort((a, b) => b.negativo - a.negativo)[0];

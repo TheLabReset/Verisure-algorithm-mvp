@@ -44,8 +44,9 @@
 [[headers]]
   for = "/data/*"
   [headers.values]
-    # Cache de 1 hora para archivos de data
-    Cache-Control = "public, max-age=3600"
+    # La data cambia cada día con el pipeline: el navegador pregunta siempre si hay una versión nueva (si no la hay,
+    # Netlify responde 304 sin volver a mandar el archivo). Con max-age=3600 se quedaba una hora con la data vieja
+    Cache-Control = "public, max-age=0, must-revalidate"
     
 [[headers]]
   for = "/*.js"
