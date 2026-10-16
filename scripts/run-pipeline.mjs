@@ -1,7 +1,7 @@
 // Pipeline de datos de The Algorithm: baja lo nuevo de Integrametrics y publica en public/data/ lo que lee el panel.
 //   algorithm.json → contrato agregado { meta, daily, pieces, ooh, events, digital }
 //   export.csv     → grilla emisión por emisión, con las dimensiones que comparte con el BI del cliente
-//   medios.json    → canales, programas, horas y días por mes y marca, armado desde export.csv
+//   medios.json    → cada emisión de cada marca (canal, programa, versión, tipo, hora), armado desde export.csv
 //   meta.json      → { generated, source, firstDay, lastDay, days, registros, mode }
 //
 // Dos modos:
@@ -131,7 +131,7 @@ export async function correrPipeline({ token, fetchImpl = fetch, out = OUT, hoy,
 
   log(`✅ pipeline (${source} · ${meta.mode}) · ${algorithm.meta.firstDay}→${algorithm.meta.lastDay}`)
   log(`   ${algorithm.meta.days.length} días · ${algorithm.pieces.length} piezas · ${algorithm.ooh.length} OOH · ${algorithm.events.length} estrenos`)
-  log(`   medios.json · ${Object.keys(medios.meses).length} meses`)
+  log(`   medios.json · ${Object.values(medios.emisiones).reduce((s, x) => s + x.length, 0)} emisiones`)
   return { algorithm, medios, meta }
 }
 

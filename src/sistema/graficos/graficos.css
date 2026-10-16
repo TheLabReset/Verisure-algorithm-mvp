@@ -173,6 +173,11 @@
 /* La serie principal que no es de ninguna marca va en tinta: el amarillo y el rojo quedan para las marcas */
 .q-svg .q-linea-tinta { fill: none; stroke: var(--texto-1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .q-svg .q-punto-final-tinta, .q-svg .q-punto-tinta { fill: var(--texto-1); stroke: var(--superficie); stroke-width: 2; }
+/* series que no son de ninguna marca del panel: azul y menta de categoría (sin el naranja, que se confunde con el amarillo de la competencia) */
+.q-svg .q-linea-azul { fill: none; stroke: var(--s4); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.q-svg .q-punto-final-azul { fill: var(--s4); stroke: var(--superficie); stroke-width: 2; }
+.q-svg .q-linea-menta { fill: none; stroke: var(--s2); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.q-svg .q-punto-final-menta { fill: var(--s2); stroke: var(--superficie); stroke-width: 2; }
 .q-svg .q-pendiente-tinta { stroke: var(--texto-1); stroke-width: 3; }
 /* La misma marca en otro universo: su color, en trazo discontinuo */
 .q-svg .q-discontinua { stroke-dasharray: 6 4; }
@@ -216,3 +221,11 @@
 .q-muestra-mapa-propia, .q-muestra-propia { border-radius: 50%; background: var(--propia); }
 .q-muestra-propia-cuadro { background: var(--propia); margin-left: calc(-1 * var(--e-1)); }
 .q-muestra-resto { background: var(--serie-resto); }
+
+/* Línea elegible: el área de toque es ancha e invisible; el nombre en la leyenda también la elige */
+.q-svg .q-linea-toque { fill: none; stroke: transparent; stroke-width: 14; pointer-events: stroke; cursor: pointer; }
+.q-svg .q-leyenda-elegible { cursor: pointer; pointer-events: all; }
+.q-svg .q-leyenda-toque { fill: transparent; pointer-events: all; }
+.q-svg .q-leyenda-elegible:hover text, .q-svg .q-leyenda-elegible:focus-visible text { text-decoration: underline; }
+.q-svg .q-leyenda-elegible:focus { outline: none; }
+.q-svg .q-leyenda-elegible:focus-visible .q-leyenda-toque { stroke: var(--foco); stroke-width: 2; }

@@ -1,5 +1,5 @@
 // Piezas de texto comunes. Puras: reciben datos ya calculados y devuelven frases en español peruano.
-import { mesLargo, numero } from '../sistema/formato.js';
+import { mesLargo, mesCorto, numero } from '../sistema/formato.js';
 import { CLIENTE } from '../cliente.js';
 import { diasEntre, DIAS_MINIMOS } from '../calculo/periodo.js';
 
@@ -16,6 +16,8 @@ export function tramoFechas(desde, hasta) {
 }
 // El chip de una tarjeta: «1 al 30 de junio», o «1 de julio» si el período es de un solo día
 export const ventanaTexto = (desde, hasta) => tramoFechas(desde, hasta).replace(/^(del|el) /, '');
+// El aviso del selector cuando una fecha a mano no sirve
+export const avisoFechas = (min, max) => `Hay data ${tramoFechas(min, max)}, y «Desde» va antes de «Hasta».`;
 // El período: el mes entero, o el tramo cuando el mes todavía corre («del 1 al 13 de julio»)
 // El mes en curso se dice «lo que va de julio»: se lee bien después de «de», «en» o «para», y el tramo exacto va en el chip de cada tarjeta
 // Un tramo de meses que se escribe con lo que tiene la data: «entre enero y julio», «en julio»,
@@ -29,11 +31,19 @@ export function tramoMeses(desde, hasta, a = 'entre') {
 }
 // Si la fuente está atrasada, el mes no «va»: se dice hasta dónde tiene data («julio hasta el 13»), que también se lee
 // bien después de «de», «en» o «para»
-export const periodoTexto = (P) => (!P.parcial ? mesTexto(P.mes) : P.enCurso === false ? `${mesLargo(+P.mes.slice(5, 7))} hasta el ${Number(P.hasta.slice(8, 10))}` : `lo que va de ${mesLargo(+P.mes.slice(5, 7))}`);
-export const comparacionTexto = (P) => (!P.compararDesde ? null : P.parcial ? `el mismo tramo de ${mesLargo(+P.compararDesde.slice(5, 7))}` : mesTexto(P.compararDesde.slice(0, 7)));
-// El mes de cada barra, para rotularla en una palabra: «Julio» y «Junio»
-export const mesPeriodo = (P) => capital(mesLargo(+P.mes.slice(5, 7)));
-export const mesComparacion = (P) => (P.compararDesde ? capital(mesLargo(+P.compararDesde.slice(5, 7))) : null);
+// Un tramo de días («Últimos 7 días» o dos fechas) se dice «los días del 7 al 13 de julio», o «el día 5 de marzo» si es
+// uno solo: se lee bien después de «en» o «para»
+export const periodoTexto = (P) => (P.tramo ? (P.desde === P.hasta ? `el día ${tramoFechas(P.desde, P.hasta).replace(/^el /, '')}` : `los días ${tramoFechas(P.desde, P.hasta)}`)
+  : !P.parcial ? mesTexto(P.mes) : P.enCurso === false ? `${mesLargo(+P.mes.slice(5, 7))} hasta el ${Number(P.hasta.slice(8, 10))}` : `lo que va de ${mesLargo(+P.mes.slice(5, 7))}`);
+// La comparación: el mes anterior, el mismo tramo del mes anterior o los mismos días justo antes
+export const comparacionTexto = (P) => (!P.compararDesde ? null : P.tramo ? (P.dias === 1 ? 'el día anterior' : `los ${numero(P.dias)} días anteriores`)
+  : P.parcial ? `el mismo tramo de ${mesLargo(+P.compararDesde.slice(5, 7))}` : mesTexto(P.compararDesde.slice(0, 7)));
+// El título del resumen de cada capa: «Resumen de julio de 2026», «Resumen del 7 al 13 de julio»
+export const resumenTitulo = (P) => (P.tramo ? `Resumen ${tramoFechas(P.desde, P.hasta).replace(/^el /, 'del ')}` : `Resumen de ${periodoTexto(P)}`);
+// El rótulo de cada barra, corto: «Julio» y «Junio» si es un mes; si es un tramo, sus fechas («7 al 13 jul»)
+const fechasCortas = (a, b) => (a === b ? `${Number(a.slice(8))} ${mesCorto(+a.slice(5, 7))}` : a.slice(0, 7) === b.slice(0, 7) ? `${Number(a.slice(8))} al ${Number(b.slice(8))} ${mesCorto(+b.slice(5, 7))}` : `${Number(a.slice(8))} ${mesCorto(+a.slice(5, 7))} al ${Number(b.slice(8))} ${mesCorto(+b.slice(5, 7))}`);
+export const mesPeriodo = (P) => (P.tramo ? fechasCortas(P.desde, P.hasta) : capital(mesLargo(+P.mes.slice(5, 7))));
+export const mesComparacion = (P) => (!P.compararDesde ? null : P.tramo ? fechasCortas(P.compararDesde, P.compararHasta) : capital(mesLargo(+P.compararDesde.slice(5, 7))));
 
 // Cantidades chicas en letras (al inicio de una frase o en un sujeto): «dos piezas», «tres paneles»
 const LETRAS_M = ['cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez'];
@@ -82,3 +92,17 @@ export function plataformasTexto(ks, max = 4) {
   const resto = n.length - max;
   return `${n.slice(0, max).join(', ')} y ${numero(resto)} ${resto === 1 ? 'sitio o red más' : 'sitios y redes más'}`;
 }
+
+// Tipos de aviso de Integrametrics en palabras: un spot, una mención, la presentación o la despedida de un programa
+const TIPOS_AVISO = { SPOT: 'Spot', 'SPOT RADIO': 'Spot', 'MENCION TV': 'Mención', 'MENCION RADIO': 'Mención', 'PRESENTA TV': 'Presentación del programa', 'DESPIDE TV': 'Despedida del programa', 'PROMOCION CON AUSPICIO': 'Auspicio', SOBREIMPOSICION: 'Sobreimposición', 'PRODUCT PLACEMENT': 'Product placement', PNT: 'Product placement' };
+export const tipoAviso = (t) => TIPOS_AVISO[t] ?? (t ? capital(t.toLowerCase()) : 'Sin tipo');
+const TIPOS_PLURAL = { Spot: 'spots', Mención: 'menciones', Auspicio: 'auspicios', Sobreimposición: 'sobreimposiciones', 'Product placement': 'product placements' };
+export const tipoAvisoPlural = (t, n) => (n === 1 ? tipoAviso(t).toLowerCase() : (TIPOS_PLURAL[tipoAviso(t)] ?? `${tipoAviso(t).toLowerCase()}s`));
+// Plataformas digitales en cuatro grupos (tres colores y el resto en gris): las tres redes con más avisos del rubro
+// por su nombre y lo demás junto (TikTok, sitios de noticias, radios en línea)
+export const GRUPOS_DIGITALES = ['FACEBOOK', 'INSTAGRAM', 'YOUTUBE', 'OTROS'];
+export const grupoDigital = (k) => (GRUPOS_DIGITALES.includes(k) ? k : 'OTROS');
+export const nombreGrupoDigital = (k) => ({ FACEBOOK: 'Facebook', INSTAGRAM: 'Instagram', YOUTUBE: 'YouTube', OTROS: 'TikTok, sitios y otros' }[k]);
+
+// La ventana de un patrón (horario, compra): «en cuatro semanas», o los días que hay si la data empieza antes
+export const ventanaPatron = (mv) => (mv.dias >= 28 ? 'en cuatro semanas' : `en ${numero(mv.dias)} ${mv.dias === 1 ? 'día' : 'días'}`);

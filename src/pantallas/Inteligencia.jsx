@@ -1,116 +1,194 @@
-// Capa 2 · Inteligencia de mercado: qué mirar (alertas con umbral fijo, la competencia primero), la amenaza de las
-// cámaras DIY (Google Trends) y cómo viene la pauta de cada marca en el año. Las marcas de cámaras y la inversión
-// mes a mes van en el detalle de su capítulo. No calcula: pinta la vista.
+// Capa 2 · Inteligencia de mercado: cómo se mueve la competencia, con la marca propia para comparar. Dónde pone su
+// inversión (digital primero, por plataforma; después ATL, por medio), qué medios compra canal por canal frente a la
+// marca propia, y cuándo sale al aire (la semana día × hora y sus programas). No calcula: pinta la vista.
 import { useState } from 'react';
-import { Bloque, ListaAlertas, Tabla, Grupo, Detalle, vigente } from '../sistema/Componentes.jsx';
-import { Lineas, Pendiente, Histograma } from '../sistema/graficos/Graficos.jsx';
-import { soles, solesCompacto, mesCorto, numero, fechaCorta } from '../sistema/formato.js';
-import { MarcoCapa, SeccionDe, alertasDe, buenasDe, sinDato } from './comun.jsx';
-import { mesTexto, tramoFechas } from '../textos/comun.js';
-import { temporadaLectura, textosMarca, busquedasLectura, marcasDiyLectura, pautaSemanalLectura, queMirarLectura } from '../textos/lecturas.js';
+import { Bloque, Tabla, Resumen, Grupo, Detalle, vigente } from '../sistema/Componentes.jsx';
+import { Franja, Pesas, Barras, MapaCalor } from '../sistema/graficos/Graficos.jsx';
+import { numero, porcentaje, parte, soles, solesCompacto, fechaCorta } from '../sistema/formato.js';
+import { MarcoCapa, SeccionDe, sinDato, avisosDe } from './comun.jsx';
+import { periodoTexto, version, horasTexto, enLetras, resumenTitulo, tipoAviso, GRUPOS_DIGITALES, nombreGrupoDigital, ventanaTexto, lista, ventanaPatron } from '../textos/comun.js';
+import { mediosLectura, franjasLectura, canalesLectura, horarioLectura, programasLectura, textosMarca, digitalPlataformasLectura, compraLectura } from '../textos/lecturas.js';
+import { MEDIOS, FRANJAS } from '../calculo/vista.js';
 import { CLIENTE } from '../cliente.js';
 
-const GRUPOS = [
-  { nivel: 'atencion', titulo: 'Piden atención' },
-  { nivel: 'revisar', titulo: 'Para revisar' },
-  { nivel: 'oportunidad', titulo: 'Oportunidades' },
-  { nivel: 'bien', titulo: 'Lo que va bien' },
-];
+const COMPETENCIA = CLIENTE.competencia[0];
 const MARCAS = [...CLIENTE.competencia.map((c) => c.marcaFuente), CLIENTE.marcaFuente];
+const ORDEN_MEDIOS = ['TV ABIERTA', 'RADIO', 'OOH', 'CABLE', 'OTT'];
+// Color fijo por medio y por plataforma (el color sigue a la categoría, no al orden). Radio y Facebook van en tinta y
+// no en el naranja de categoría, que se confunde con el amarillo de la competencia; el resto en gris
+const CLASE_MEDIO = { 'TV ABIERTA': 'q-p0', RADIO: 'q-p-tinta', OOH: 'q-p2', CABLE: 'q-p5', OTT: 'q-p5' };
+const CLASE_DIGITAL = { FACEBOOK: 'q-p-tinta', INSTAGRAM: 'q-p0', YOUTUBE: 'q-p2', OTROS: 'q-p5' };
+const GRUPO_MEDIO = { 'TV ABIERTA': 'TV abierta', CABLE: 'Cable', RADIO: 'Radio', 'OTT STREAMING/LIVE': 'OTT y streaming' };
 
-const UNIVERSOS_PAUTA = [{ valor: 'atl', texto: 'ATL' }, { valor: 'digital', texto: 'Digital' }, { valor: 'todo', texto: 'Todo' }];
-
-// La pauta semana a semana: un panel por marca (la competencia primero), las dos en la misma escala (una barra más
-// alta es más inversión, sin importar de quién). El año va completo; las semanas que caen en el período elegido van
-// en el color de cada marca y el resto en gris: si todo va resaltado, nada lo está. La cifra marca la más alta de
-// las resaltadas. «Todo» suma ATL y digital solo para ver cuándo se prende la pauta
-function PautaSemanal({ pauta, P }) {
-  // arranca en ATL: «Todo» suma dos estimaciones distintas y es una vista de apoyo, no la primera
-  const [elegido, setUniverso] = useState('atl');
-  const opciones = UNIVERSOS_PAUTA.map((o) => ({ ...o, desactivada: !pauta[o.valor] }));
-  const universo = vigente(elegido, opciones);
-  const filas = pauta[universo] || [];
-  const tope = Math.max(1, ...filas.flatMap((f) => f.semanas.map((s) => s.valor ?? 0)));
-  const etiquetaSemana = (s, i, todas) => (i === 0 || s.fecha.slice(5, 7) !== todas[i - 1].fecha.slice(5, 7) ? mesCorto(+s.fecha.slice(5, 7)) : '');
+function MezclaMedios({ m }) {
+  // la parte sale del monto, sin redondear: Cable y OTT con inversión no se escribe «0 %»
+  const pct = (valor) => (m.inversion ? (valor / m.inversion) * 100 : 0);
+  const principales = ['TV ABIERTA', 'RADIO', 'OOH'].map((k) => ({ nombre: MEDIOS[k], valor: m.medios[k] || 0, pct: pct(m.medios[k] || 0), clase: CLASE_MEDIO[k] }));
+  const resto = ['CABLE', 'OTT'].reduce((s, k) => s + (m.medios[k] || 0), 0);
+  const partes = [...principales, { nombre: 'Cable y OTT', valor: resto, pct: pct(resto), clase: 'q-p5' }].filter((p) => p.valor > 0);
   return (
-    <Bloque universo={universo === 'todo' ? ['atl', 'digital'] : universo} {...pautaSemanalLectura(filas, universo)} alcance="semanas del año"
-      ayuda={<p>Semanas de lunes a domingo; la primera y la última pueden estar incompletas. La altura sigue a la raíz cuadrada de la inversión, con un mismo tope para las dos marcas: las semanas chicas se ven y la barra más alta siempre es la de más inversión.</p>}
-      pie={<span>{universo === 'todo' ? 'Todo suma ATL y digital, que Integrametrics estima con métodos distintos: sirve para ver cuándo se prende la pauta, no para comparar montos.' : 'Inversión semanal estimada por Integrametrics.'}</span>}>
-      <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={universo} onCambiar={setUniverso} opciones={opciones} /></div>
-      <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true">
-        <li><span className="q-muestra q-muestra-tramo" /><span className="q-muestra q-muestra-propia-cuadro" />{P.desde === P.hasta ? 'La semana' : 'Semanas'} con días {tramoFechas(P.desde, P.hasta)}</li>
-        <li><span className="q-muestra q-muestra-resto" />El resto del año</li>
-      </ul>
-      <div className="q-pauta-semanal">
-        {filas.map((f) => (
-          <div key={f.id} className="q-pauta-marca">
-            <h4>{f.marca}<span>{solesCompacto(f.total)} en el año</span></h4>
-            <Histograma etiqueta={`Inversión semanal de ${f.marca}`} tono={f.foco ? undefined : f.propia ? 'propia' : 'resto'} formato={(n) => (n == null ? 'sin registros' : soles(n))} alto={150} max={tope} escala="raiz"
-              resaltar={f.semanas.map((s, i) => (s.hasta >= P.desde && s.fecha <= P.hasta ? i : -1)).filter((i) => i >= 0)}
-              barras={f.semanas.map((s, i, todas) => ({ nombre: `Semana del ${fechaCorta(s.fecha)}${s.parcial ? ' (incompleta)' : ''}`, corto: etiquetaSemana(s, i, todas), valor: s.valor }))} />
-          </div>
-        ))}
-      </div>
-    </Bloque>
+    <div className="q-mezcla">
+      <h4>{m.nombre}<span>{solesCompacto(m.inversion)} en ATL</span></h4>
+      {partes.length ? <Franja etiqueta={`Reparto de la inversión ATL de ${m.nombre} por medio`} partes={partes} formato={parte} verTabla={false} /> : <p className="q-nota-bloque">Sin inversión ATL en el período.</p>}
+    </div>
+  );
+}
+
+function MezclaDigital({ m }) {
+  const total = GRUPOS_DIGITALES.reduce((s, g) => s + (m.grupos?.[g] || 0), 0);
+  const partes = GRUPOS_DIGITALES.map((g) => ({ nombre: nombreGrupoDigital(g), valor: m.grupos?.[g] || 0, pct: total ? ((m.grupos?.[g] || 0) / total) * 100 : 0, clase: CLASE_DIGITAL[g] })).filter((p) => p.valor > 0);
+  return (
+    <div className="q-mezcla">
+      <h4>{m.nombre}<span>{numero(total)} avisos registrados</span></h4>
+      {partes.length ? <Franja etiqueta={`Reparto de los avisos digitales de ${m.nombre} por plataforma`} partes={partes} formato={parte} verTabla={false} /> : <p className="q-nota-bloque">Sin avisos digitales en el período.</p>}
+    </div>
+  );
+}
+
+// Tipos de aviso de una marca: los tres que más pesan en color, los demás juntos en gris
+const CLASE_TIPO = ['q-p-tinta', 'q-p0', 'q-p2'];
+function MezclaTipos({ nombre, tipos }) {
+  const total = tipos.reduce((s, t) => s + t.emisiones, 0);
+  const principales = tipos.slice(0, 3), resto = tipos.slice(3).reduce((s, t) => s + t.emisiones, 0);
+  const partes = [...principales.map((t, i) => ({ nombre: tipoAviso(t.tipo), valor: t.emisiones, pct: total ? (t.emisiones / total) * 100 : 0, clase: CLASE_TIPO[i] })),
+    ...(resto ? [{ nombre: 'Otros tipos', valor: resto, pct: (resto / total) * 100, clase: 'q-p5' }] : [])];
+  return (
+    <div className="q-mezcla">
+      <h4>{nombre}<span>{numero(total)} {total === 1 ? 'emisión' : 'emisiones'}</span></h4>
+      {total ? <Franja etiqueta={`Emisiones de ${nombre} por tipo de aviso`} partes={partes} formato={parte} verTabla={false} /> : <p className="q-nota-bloque">Sin compra de medios ATL en el período.</p>}
+    </div>
   );
 }
 
 export default function Inteligencia({ capa, vista: v }) {
   const [s21, s22, s23] = capa.secciones;
-  const P = v.periodo;
-  const todas = [...alertasDe(v), ...buenasDe(v)];
-  const t = v.analiza.temporada;
-  const b = v.analiza.busquedas;
-  const etiquetaMes = (m) => `${mesCorto(+m.mes.slice(5, 7))}${m.parcial ? ' (parcial)' : ''}`;
-  const desdeAnioPasado = (serie) => serie.filter((p) => p.fecha >= `${Number(b.hasta.slice(0, 4)) - 1}-01-01`);
+  const P = v.periodo, atl = v.lee.atl, dig = v.lee.digital, med = v.lee.medios, compra = v.lee.compra;
+  const [elegida, setMarca] = useState(COMPETENCIA.marcaFuente);
+  const ok = atl.estado === 'ok';
+  const orden = ok ? [...atl.marcas].sort((a, b) => Number(a.propia) - Number(b.propia)) : [];
+  const ordenDig = dig.estado === 'ok' ? [...dig.marcas].sort((a, b) => Number(a.propia) - Number(b.propia)) : [];
+  const [r, p] = orden;
+  const opcionesMarca = MARCAS.map((m) => ({ valor: m, texto: textosMarca.nombreMarca(m), desactivada: !med?.[m] }));
+  const marca = vigente(elegida, opcionesMarca);
+  const deMarca = med?.[marca];
+  const compMed = med?.[COMPETENCIA.marcaFuente];
+  const principal = (m) => Object.entries(m.medios).map(([k, x]) => [k, m.inversion ? (x / m.inversion) * 100 : 0]).sort((a, b) => b[1] - a[1])[0];
+  const control = <div className="q-control q-control-tarjeta"><span>Marca</span><Grupo etiqueta="Marca" valor={marca} onCambiar={setMarca} opciones={opcionesMarca} /></div>;
+  const [C, Pr] = [COMPETENCIA.marcaFuente, CLIENTE.marcaFuente];
+  const mv = v.lee.mediosVentana;
+  // los canales de las dos marcas en la misma escala: una barra más larga siempre es más emisiones
+  const maxCanal = compra ? Math.max(1, ...[C, Pr].flatMap((m) => compra.porMarca[m].canales.map((c) => c.emisiones))) : 1;
+  const nC = COMPETENCIA.nombre, nP = CLIENTE.nombre;
   return (
-    <MarcoCapa capa={capa} vista={v} conResumen={false}>
-      <SeccionDe def={s21} vista={v} conAvisos={false}>
-        <Bloque universo="modelo" {...queMirarLectura(v)}
-          ayuda={<><p>Cada alerta sale de una regla con un umbral fijo:</p><ul>
-            <li>Una pieza nueva o una versión digital nueva de la competencia.</li>
-            <li>La competencia sube {v.umbrales.subidaCompetencia} % o más su inversión frente al mes anterior (o al mismo tramo, si el mes está en curso), baja {v.umbrales.bajadaCompetencia} % o más, o se queda sin inversión.</li>
-            <li>Un día de la competencia que triplica su mediana de días con inversión.</li>
-            <li>Un medio con {v.umbrales.medioNuevo} % o más de la inversión ATL de la competencia, o una zona con sus paneles, que no tenía el mes anterior.</li>
-            <li>Las búsquedas de cámaras suben {v.umbrales.subidaDiy} % o más frente a las mismas semanas de un año antes.</li>
-            <li>Un cambio de {v.umbrales.caidaShareDigital} puntos o más en el share digital de {CLIENTE.nombre}, o {v.umbrales.dominioAtl} % o más de la inversión ATL.</li>
-            <li>Días sin registros de Integrametrics.</li>
-          </ul><p>Con menos de {v.umbrales.diasMinimos} días con data en el período no se lee ninguna subida, bajada ni cambio de share: un solo día raro las movería.</p></>}>
-          {todas.length ? <ListaAlertas grupos={GRUPOS.map((g) => ({ ...g, items: todas.filter((a) => a.nivel === g.nivel) }))} />
-            : <p className="q-nota-bloque">Sin alertas en el período.</p>}
-        </Bloque>
+    <MarcoCapa capa={capa} vista={v}>
+      <Resumen titulo={resumenTitulo(P)}
+        pie={<span>Inversión estimada por Integrametrics a precio de tarifa. Emisiones de TV, cable, radio y OTT; la vía pública va en OOH.</span>}
+        items={[
+          { rotulo: `Medio principal de ${nC}`, universo: 'atl', ir: s21.id, irTexto: s21.titulo, valor: ok && r.inversion ? MEDIOS[principal(r)[0]] ?? null : null, nota: ok && r.inversion ? `${porcentaje(principal(r)[1])} de su inversión ATL` : null },
+          { rotulo: `Emisiones de ${nC}${mv.ampliada ? ` ${ventanaPatron(mv)}` : ''}`, universo: 'atl', ir: s22.id, irTexto: s22.titulo, valor: compra ? numero(compra.totales[C].emisiones) : null, nota: compra ? `${numero(compra.totales[Pr].emisiones)} de ${nP}` : null },
+          { rotulo: `Canales de ${nC}${mv.ampliada ? ` ${ventanaPatron(mv)}` : ''}`, universo: 'atl', ir: s22.id, irTexto: s22.titulo, valor: compra ? numero(compra.totales[C].canales) : null, nota: compra ? (compra.enComun ? `${compra.enComun === 1 ? 'uno' : enLetras(compra.enComun)} en común con ${nP}` : `ninguno en común con ${nP}`) : null },
+          { rotulo: `Hora con más emisiones de ${nC}${mv.ampliada ? ` ${ventanaPatron(mv)}` : ''}`, universo: 'atl', ir: s23.id, irTexto: s23.titulo, valor: compMed?.horasAltas.length ? `${compMed.horasAltas[0]} h` : null, nota: compMed?.horasAltas.length > 1 ? `las ${enLetras(compMed.horasAltas.length, true)} más altas van ${horasTexto(compMed.horasAltas)}` : null },
+        ]} />
+
+      <SeccionDe def={s21} vista={v}>
+        {dig.estado !== 'ok' ? <Bloque titulo="Dónde aparece cada marca en digital" universo="digital" estado={sinDato(dig.estado)} /> : (
+          <Bloque universo="digital" {...digitalPlataformasLectura({ ...dig, periodo: P, nombreGrupo: nombreGrupoDigital })}
+            ayuda={<p>Cada franja es el total de avisos digitales que Integrametrics registró de una marca, repartido por plataforma. Integrametrics no estima la inversión por plataforma: cuenta avisos.</p>}
+            pie={<span>Avisos digitales registrados por Integrametrics.</span>}>
+            <div className="q-mezclas">{ordenDig.map((m) => <MezclaDigital key={m.id} m={m} />)}</div>
+          </Bloque>
+        )}
+        {!ok ? <Bloque titulo="Cómo reparte cada marca su inversión ATL" universo="atl" estado={sinDato(atl.estado)} /> : <>
+          <Bloque universo="atl" {...mediosLectura(v, MEDIOS)} avisos={avisosDe(v, 'medios')}
+            ayuda={<p>Cada franja es el total ATL de una marca repartido por medio.</p>}
+            pie={<span>Inversión ATL estimada por Integrametrics. OTT llega sin inversión estimada.</span>}>
+            <div className="q-mezclas">{orden.map((m) => <MezclaMedios key={m.id} m={m} />)}</div>
+          </Bloque>
+          <Detalle id={`detalle-${s21.id}`} titulo="Detalle de dónde está la inversión" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['la inversión por medio en soles', 'las franjas horarias', 'los canales de cada marca']}>
+            <Bloque universo="atl" titulo="Inversión ATL por medio, en soles"
+              pie={<span>Inversión ATL estimada por Integrametrics a precio de tarifa.</span>}>
+              <Tabla etiqueta="Inversión ATL por medio y marca, en soles y en parte de cada marca" numericas={[1, 2, 3, 4]}
+                columnas={['Medio', r.nombre, 'De su total', p?.nombre, 'De su total']}
+                filas={ORDEN_MEDIOS.map((k) => [MEDIOS[k], soles(r.medios[k] || 0), r.inversion ? parte(((r.medios[k] || 0) / r.inversion) * 100) : 'sin inversión', p ? soles(p.medios[k] || 0) : 'sin dato', p ? (p.inversion ? parte(((p.medios[k] || 0) / p.inversion) * 100) : 'sin inversión') : 'sin dato'])} />
+            </Bloque>
+            <Bloque universo="atl" {...franjasLectura(v, FRANJAS)}
+              pie={<span>Emisiones de TV y radio por franja horaria.</span>}>
+              <Pesas etiqueta="Parte de las emisiones de cada marca por franja" formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} max={100} rotuloA={p?.nombre} rotuloB={r.nombre} tonoA="propia"
+                filas={v.analiza.franjas.map((k) => ({ nombre: FRANJAS[k], a: p?.mezclaFranjas[k] ?? 0, b: r.mezclaFranjas[k] ?? 0 }))} />
+            </Bloque>
+            <Bloque universo="atl" {...canalesLectura(deMarca, marca)}
+              pie={<span>Los canales con más inversión estimada, hasta ocho.</span>}>
+              {control}
+              {deMarca?.canales.length ? <Barras etiqueta={`Inversión de ${textosMarca.nombreMarca(marca)} por canal`} tono={marca === Pr ? 'propia' : undefined} formato={solesCompacto} filas={deMarca.canales.map((c) => ({ nombre: c.nombre, valor: c.valor }))} />
+                : <p className="q-nota-bloque">Sin emisiones en el período.</p>}
+            </Bloque>
+          </Detalle>
+        </>}
       </SeccionDe>
 
       <SeccionDe def={s22} vista={v}>
-        {!b ? <Bloque titulo="Cámaras de seguridad frente a la marca" universo="busquedas" estado={sinDato('no-cargo')} /> : <>
-          <Bloque universo="busquedas" {...busquedasLectura(b)} alcance={`semanas al ${fechaCorta(b.hasta)}`}
-            ayuda={<p>Google Trends da un índice en Perú, no la cantidad de búsquedas: 100 es la semana con más búsquedas de toda la consulta. Los términos van en una misma consulta, así que se comparan entre sí. «Cámaras de seguridad» suma las dos formas de escribirlo, por eso puede pasar de 100. La comparación es el promedio de las últimas {numero(b.semanas)} semanas completas frente a las mismas semanas de un año antes.</p>}
-            pie={<span>Google Trends, Perú · consultado el {fechaCorta(b.consultado)}.</span>}>
-            <Lineas etiqueta="Búsquedas semanales de cámaras y de la marca en Google Trends" formato={(n) => numero(n)} alto={260}
-              series={b.series.map((s) => ({ nombre: s.nombre, resaltada: false, tono: s.propia ? 'propia' : s.id === 'camaras' ? 'tinta' : undefined, serie: desdeAnioPasado(s.serie) }))} />
+        {!compra ? <Bloque titulo="Compra de medios" universo="atl" estado={sinDato(ok ? 'sin-datos' : atl.estado)} /> : <>
+          <Bloque universo="atl" {...compraLectura(compra, mv, mv.ampliada ? ventanaPatron(mv) : null)} ventana={mv.ampliada ? ventanaTexto(mv.desde, mv.hasta) : undefined}
+            ayuda={<p>Los canales y emisoras de TV abierta, cable, radio y OTT donde salió cada marca, de más a menos emisiones. Con un período de menos de cuatro semanas se leen las cuatro que terminan en su último día. La vía pública va en OOH.</p>}
+            pie={<span>Integrametrics, emisión por emisión. Una emisión de cadena nacional repetida en sus señales regionales cuenta una sola vez.</span>}>
+            <div className="q-mezclas">
+              {[C, Pr].map((m) => {
+                const x = compra.porMarca[m], t = compra.totales[m];
+                return (
+                  <div key={m} className="q-mezcla">
+                    <h4>{textosMarca.nombreMarca(m)}<span>{numero(t.emisiones)} {t.emisiones === 1 ? 'emisión' : 'emisiones'} en {numero(t.canales)} {t.canales === 1 ? 'canal' : 'canales'}</span></h4>
+                    {x.canales.length ? <Barras etiqueta={`Emisiones de ${textosMarca.nombreMarca(m)} por canal`} tono={m === Pr ? 'propia' : undefined} max={maxCanal} formato={(n) => numero(n)}
+                      filas={x.canales.map((c) => ({ nombre: c.canal === 'DESCONOCIDO' ? 'Canal sin registrar' : version(c.canal), valor: c.emisiones }))} />
+                      : <p className="q-nota-bloque">Sin compra de medios ATL en el período.</p>}
+                    {x.canales.some((c) => c.enComun) && <p className="q-nota-bloque">También los compra {textosMarca.nombreMarca(m === Pr ? C : Pr)}: {lista(x.canales.filter((c) => c.enComun).map((c) => version(c.canal)))}.</p>}
+                    {x.restoCanales > 0 && <p className="q-nota-bloque">Y {numero(x.restoCanales)} {x.restoCanales === 1 ? 'canal más' : 'canales más'} con menos emisiones.</p>}
+                  </div>
+                );
+              })}
+            </div>
           </Bloque>
-          <Detalle id={`detalle-${s22.id}`} titulo="Detalle de cámaras DIY" bajada="Google Trends, Perú, por semana." vistas={['las marcas de cámaras que más se buscan']}>
-            <Bloque universo="busquedas" {...marcasDiyLectura(b)} alcance={`semanas al ${fechaCorta(b.hasta)}`}
-              ayuda={<p>Las cinco marcas van en otra consulta de Google Trends, con su propia escala: no se comparan con la tarjeta de cámaras y marca. Cada línea va del promedio de las mismas semanas de un año antes al de las últimas {numero(b.semanas)}.</p>}
-              pie={<span>Índice promedio de 0 a 100 · {fechaCorta(b.desde)} a {fechaCorta(b.hasta)} de {b.hasta.slice(0, 4)}{b.antesDesde ? ` frente a ${fechaCorta(b.antesDesde)} a ${fechaCorta(b.antesHasta)} de ${b.antesHasta.slice(0, 4)}` : ''}.</span>}>
-              {!b.marcas.some((m) => m.antes != null) ? <p className="q-nota-bloque">Google Trends todavía no tiene un año de historia para comparar estas semanas.</p> : <Pendiente etiqueta="Búsquedas de marcas de cámaras, un año antes y ahora" formato={(n) => numero(Math.round(n))} rotuloA="Un año antes" rotuloB="Ahora"
-                resaltar={b.marcas.slice(0, 1).map((m) => m.nombre)} filas={b.marcas.filter((m) => m.antes != null).map((m) => ({ nombre: m.nombre, a: m.antes, b: m.ahora }))} />}
+          {[C, Pr].some((m) => compra.porMarca[m].tipos.length > 1) && <Bloque universo="atl" titulo="Qué tipo de aviso compra cada marca" ventana={mv.ampliada ? ventanaTexto(mv.desde, mv.hasta) : undefined}
+            ayuda={<p>Cada franja reparte las emisiones de una marca por tipo de aviso: spot, mención, auspicio, presentación o despedida de un programa, sobreimposición. Los tipos que pesan menos van juntos en gris.</p>}
+            pie={<span>Integrametrics, emisión por emisión.</span>}>
+            <div className="q-mezclas">{[C, Pr].map((m) => <MezclaTipos key={m} nombre={textosMarca.nombreMarca(m)} tipos={compra.porMarca[m].tipos} />)}</div>
+          </Bloque>}
+          <Detalle id={`detalle-${s22.id}`} titulo="Detalle de la compra de medios" bajada={`Integrametrics, ${mv.ampliada ? `del ${ventanaTexto(mv.desde, mv.hasta)}` : periodoTexto(P)}.`} vistas={['canal por canal, las dos marcas', 'canal, programa y tipo de aviso de cada marca']}>
+            <Bloque universo="atl" titulo={`Canal por canal, ${nC} frente a ${nP}`}
+              pie={<span>Inversión estimada a precio de tarifa.</span>}>
+              <Tabla etiqueta={`Compra de medios por medio, ${nC} frente a ${nP}`} numericas={[1, 2, 3, 4]}
+                columnas={['Medio', `Emisiones ${nC}`, `Inversión ${nC}`, `Emisiones ${nP}`, `Inversión ${nP}`]}
+                filas={compra.grupos.map((g) => [GRUPO_MEDIO[g.grupo] ?? version(g.grupo), numero(g.marcas[C].emisiones), soles(g.marcas[C].inversion), numero(g.marcas[Pr].emisiones), soles(g.marcas[Pr].inversion)])} />
+              <Tabla etiqueta={`Compra de medios por canal, ${nC} frente a ${nP}`} numericas={[2, 3, 4, 5, 6]}
+                columnas={['Canal', 'Medio', `Emisiones ${nC}`, `Inversión ${nC}`, `Programas ${nC}`, `Emisiones ${nP}`, `Inversión ${nP}`]}
+                filas={compra.canales.map((c) => [c.canal === 'DESCONOCIDO' ? 'Canal sin registrar' : version(c.canal), GRUPO_MEDIO[c.grupo] ?? version(c.grupo), numero(c.marcas[C].emisiones), c.marcas[C].emisiones ? soles(c.marcas[C].inversion) : 'no compró', numero(c.marcas[C].programas), numero(c.marcas[Pr].emisiones), c.marcas[Pr].emisiones ? soles(c.marcas[Pr].inversion) : 'no compró'])} />
+            </Bloque>
+            <Bloque universo="atl" titulo={`La compra de ${textosMarca.nombreMarca(marca)}, programa por programa`}
+              pie={<span>Cada fila es un canal, un programa y un tipo de aviso, con su franja más frecuente.</span>}>
+              {control}
+              {compra.detalle[marca]?.length ? <Tabla etiqueta={`Compra de medios de ${textosMarca.nombreMarca(marca)} por canal, programa y tipo de aviso`} numericas={[4, 5]}
+                columnas={['Canal', 'Programa', 'Tipo de aviso', 'Franja', 'Emisiones', 'Inversión']}
+                filas={compra.detalle[marca].map((x) => [x.canal === 'DESCONOCIDO' ? 'Canal sin registrar' : version(x.canal), x.programa ? version(x.programa) : 'sin programa', tipoAviso(x.tipo), FRANJAS[x.franja] ?? 'sin dato', numero(x.emisiones), soles(x.inversion)])} />
+                : <p className="q-nota-bloque">Sin compra de medios ATL en el período.</p>}
             </Bloque>
           </Detalle>
         </>}
       </SeccionDe>
 
       <SeccionDe def={s23} vista={v}>
-        {!Object.keys(v.analiza.pautaSemanal).length ? <Bloque titulo="La pauta del año, semana a semana" universo="atl" estado={sinDato('no-cargo')} /> : <PautaSemanal pauta={v.analiza.pautaSemanal} P={P} />}
-        <Detalle id={`detalle-${s23.id}`} titulo="Detalle de la pauta del año" bajada="Inversión estimada por Integrametrics, mes a mes." vistas={['la inversión de cada mes, por marca y universo']}>
-          <Bloque universo={['atl', 'digital']} {...temporadaLectura(t)} alcance="todos los meses con data"
-            ayuda={<p>El mes en curso va con los días que tienen data.</p>}
-            pie={<span>Integrametrics tiene data desde {t.length ? mesTexto(t[0].mes) : 'este mes'}.</span>}>
-            <Tabla etiqueta="Inversión por mes, marca y universo" numericas={[1, 2, 3, 4]} destacada={t.findIndex((m) => m.mes === P.mes)}
-              columnas={['Mes', ...MARCAS.map((m) => `ATL ${textosMarca.nombreMarca(m)}`), ...MARCAS.map((m) => `Digital ${textosMarca.nombreMarca(m)}`)]}
-              filas={t.map((m) => [etiquetaMes(m), ...MARCAS.map((x) => soles(m.atl[x])), ...MARCAS.map((x) => soles(m.digital[x]))])} />
+        {!med ? <Bloque titulo="Cuándo sale al aire" universo="atl" estado={sinDato(ok ? 'sin-datos' : atl.estado)} /> : <>
+          <Bloque universo="atl" {...horarioLectura(deMarca, marca)} ventana={mv.ampliada ? ventanaTexto(mv.desde, mv.hasta) : undefined}
+            ayuda={<p>Cada celda es el promedio de emisiones en esa hora y ese día de la semana. Un horario es un patrón: con un período de menos de cuatro semanas, se leen las cuatro que terminan en su último día.</p>}
+            pie={<span>Emisiones de TV, radio, cable y OTT con hora registrada.</span>}>
+            {control}
+            {deMarca?.matriz?.length && deMarca.emisiones ? <MapaCalor etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por día de la semana y hora`} tono={marca === Pr ? 'propia' : 'foco'} matriz={deMarca.matriz} formato={(n) => (n == null ? 'sin dato' : numero(n, n > 0 && n < 10 ? 1 : 0))} />
+              : <p className="q-nota-bloque">Sin emisiones con hora en el período.</p>}
           </Bloque>
-        </Detalle>
+          <Bloque universo="atl" {...programasLectura(deMarca, marca)} ventana={mv.ampliada ? ventanaTexto(mv.desde, mv.hasta) : undefined}
+            pie={<span>Los programas con más emisiones, hasta ocho{mv.ampliada ? `, ${ventanaPatron(mv)} al ${fechaCorta(mv.hasta)}` : ''}.</span>}>
+            {control}
+            {deMarca?.programas.length > 0 && <Barras etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por programa`} tono={marca === Pr ? 'propia' : undefined} formato={(n) => numero(n)} filas={deMarca.programas.map((x) => ({ nombre: version(x.nombre), valor: x.valor }))} />}
+          </Bloque>
+        </>}
       </SeccionDe>
     </MarcoCapa>
   );

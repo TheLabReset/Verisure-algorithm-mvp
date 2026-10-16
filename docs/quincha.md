@@ -77,8 +77,12 @@ Están en `src/sistema/Componentes.jsx`. No calculan: reciben cifras ya armadas 
 | `IndiceCapa` | «En esta capa», al costado, marca el capítulo que se está leyendo |
 | `FuentesCapa`, `ChipFuente` | Cada fuente con su fecha de corte y su estado (punto y texto) |
 | `Resumen`, `Frase` | Las cifras de la capa y, debajo, una frase por plataforma contra su objetivo |
-| `Seccion`, `AvisosCapitulo` | El capítulo y las alertas que sostiene, una línea cada una |
-| `Bloque`, `Ventana`, `Ayuda`, `Estado` | La tarjeta: título, ventana, ayuda, lectura, cuerpo y pie; y lo que muestra cuando falta el dato o está cargando |
+| `Seccion` | El capítulo: número, título, pregunta y las fuentes con problema |
+| `AvisosTarjeta` | Los avisos de una tarjeta, debajo de su lectura: nivel (ícono y palabra) y frase, sin enlace |
+| `Bloque`, `Ventana`, `Ayuda`, `Estado` | La tarjeta: título, ventana, ayuda, lectura, avisos, cuerpo y pie; y lo que muestra cuando falta el dato o está cargando. Con `ejemplo`, el sello «Data de ejemplo» arriba |
+| `SelectorPeriodo` | El período: atajos y dos fechas, en un panel alineado con su botón que nunca sale de la pantalla. Una fecha fuera de la data o un «Desde» después del «Hasta» se marca y se dice por qué |
+| `Reproductor` | Audio y video con botón grande, barra de avance de 44 px de toque, tiempo a la vista y saltos de 10 segundos. Suena uno a la vez: el play de uno pausa a los demás |
+| `Semaforo` | Un costo frente a su objetivo: en objetivo, cerca o por encima, con ícono y palabra |
 | `Tabla` | Números a la derecha, barra junto a la cifra, subtítulo, tono contra el objetivo y fila destacada |
 | `Flujo` | Una fila por plataforma, un paso por columna (de la inversión a la inscripción) |
 | `VisorFoto` | Una foto entera en una ventana, con zoom (botones, rueda, doble clic o dos dedos) y arrastre: para las fotos de panel, que llegan verticales |

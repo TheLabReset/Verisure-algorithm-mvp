@@ -4,7 +4,7 @@ import {
   ArrowDownRight, ArrowUpRight, ArrowRight, CircleHelp, Megaphone, Contact, Search, MessagesSquare, Globe,
   Sigma, CircleCheck, TriangleAlert, CloudOff, Inbox, CalendarX2, CircleDashed, Hourglass, FlaskConical,
   Eye, TrendingUp, Bot, Calendar, Pin, ChevronDown, CornerDownRight, ListChecks, X, Layers, ArrowUpRight as Ir,
-  ExternalLink, Play, Tv, MonitorSmartphone, AudioLines, Image as ImagenIcono, PanelRightOpen, ZoomIn, ZoomOut, Maximize2,
+  ExternalLink, Check, Play, Pause, RotateCcw, RotateCw, Tv, MonitorSmartphone, AudioLines, Image as ImagenIcono, PanelRightOpen, ZoomIn, ZoomOut, Maximize2,
 } from 'lucide-react';
 import { NO_MEDIDO, variacion } from './formato.js';
 
@@ -18,6 +18,7 @@ export const UNIVERSOS = {
   modelo: { icono: Sigma, nombre: 'Reglas' },
   atl: { icono: Tv, nombre: 'ATL' },
   digital: { icono: MonitorSmartphone, nombre: 'Digital' },
+  plataformas: { icono: Layers, nombre: 'Plataformas y CRM' },
 };
 
 export function Chip({ tipo = 'neutro', icono: Icono, children, titulo }) {
@@ -34,9 +35,9 @@ export const ChipUniverso = ({ universo, children }) => {
   return <Chip tipo="universo" icono={u.icono}>{children || u.nombre}</Chip>;
 };
 
-const ICONO_FUENTE = { ok: CircleCheck, parcial: TriangleAlert, 'no-cargo': CloudOff };
+const ICONO_FUENTE = { ok: CircleCheck, parcial: TriangleAlert, 'no-cargo': CloudOff, ejemplo: FlaskConical };
 export function ChipFuente({ nombre, estado, detalle }) {
-  return <Chip tipo={estado === 'ok' ? 'fuente' : 'atencion'} icono={ICONO_FUENTE[estado]} titulo={detalle}>{nombre}{detalle ? ` · ${detalle}` : ''}</Chip>;
+  return <Chip tipo={estado === 'ok' ? 'fuente' : estado === 'ejemplo' ? 'ejemplo' : 'atencion'} icono={ICONO_FUENTE[estado]} titulo={detalle}>{nombre}{detalle ? ` · ${detalle}` : ''}</Chip>;
 }
 
 export const SelloMuestra = ({ children }) => (
@@ -110,6 +111,66 @@ export function Ayuda({ titulo = 'Cómo se calcula', children }) {
   );
 }
 
+// ── Selector de período: atajos y, aparte, dos fechas para cualquier tramo ──
+// El panel nunca sale de la pantalla: se mide y se corre hacia adentro, como la ayuda
+export function SelectorPeriodo({ texto, atajo, atajos, desde, hasta, min, max, comparacion, aviso, onAtajo, onRango }) {
+  const [abierto, setAbierto] = useState(false);
+  const [borrador, setBorrador] = useState({ desde, hasta });
+  const id = useId();
+  const ref = useRef(null), panel = useRef(null);
+  useEffect(() => { setBorrador({ desde, hasta }); }, [desde, hasta]);
+  useLayoutEffect(() => {
+    const g = panel.current;
+    if (!abierto || !g) return undefined;
+    const ubicar = () => {
+      g.style.transform = '';
+      const r = g.getBoundingClientRect(), m = 16, ancho = document.documentElement.clientWidth;
+      const dx = r.left < m ? m - r.left : r.right > ancho - m ? ancho - m - r.right : 0;
+      if (dx) g.style.transform = `translateX(${Math.round(dx)}px)`;
+    };
+    ubicar();
+    window.addEventListener('resize', ubicar);
+    return () => window.removeEventListener('resize', ubicar);
+  }, [abierto]);
+  useEffect(() => {
+    if (!abierto) return undefined;
+    const fuera = (e) => { if (!ref.current?.contains(e.target)) setAbierto(false); };
+    const tecla = (e) => { if (e.key === 'Escape') setAbierto(false); };
+    document.addEventListener('pointerdown', fuera);
+    document.addEventListener('keydown', tecla);
+    return () => { document.removeEventListener('pointerdown', fuera); document.removeEventListener('keydown', tecla); };
+  }, [abierto]);
+  const valida = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d || '') && d >= min && d <= max;
+  const aplicar = (b) => { if (valida(b.desde) && valida(b.hasta) && b.desde <= b.hasta) onRango(b.desde, b.hasta); };
+  // una fecha fuera de la data o un «desde» después del «hasta» no cambia el período: se marca el campo y se dice por qué
+  const malDesde = !valida(borrador.desde) || (valida(borrador.hasta) && borrador.desde > borrador.hasta), malHasta = !valida(borrador.hasta);
+  const nombre = atajos.find((a) => a.id === atajo)?.nombre;
+  return (
+    <div className="q-periodo" ref={ref}>
+      <button type="button" className="q-periodo-boton" aria-haspopup="dialog" aria-expanded={abierto} aria-controls={id} onClick={() => setAbierto((a) => !a)}>
+        <Calendar size={16} aria-hidden="true" /><span>{texto}</span>{nombre && <small>{nombre}</small>}<ChevronDown size={16} aria-hidden="true" />
+      </button>
+      <div id={id} ref={panel} className="q-periodo-panel" role="dialog" aria-label="Elegir período" hidden={!abierto}>
+        <p className="q-periodo-titulo">Atajos</p>
+        <div className="q-periodo-atajos">
+          {atajos.map((a) => (
+            <button key={a.id} type="button" aria-pressed={a.id === atajo} onClick={() => { onAtajo(a.id); setAbierto(false); }}>
+              <span>{a.nombre}</span>{a.id === atajo && <Check size={16} aria-hidden="true" />}
+            </button>
+          ))}
+        </div>
+        <p className="q-periodo-titulo">Fechas</p>
+        <div className="q-periodo-rango">
+          <label>Desde<input type="date" value={borrador.desde} min={min} max={valida(borrador.hasta) ? borrador.hasta : max} aria-invalid={malDesde} onChange={(e) => { const b = { ...borrador, desde: e.target.value }; setBorrador(b); aplicar(b); }} /></label>
+          <label>Hasta<input type="date" value={borrador.hasta} min={valida(borrador.desde) ? borrador.desde : min} max={max} aria-invalid={malHasta} onChange={(e) => { const b = { ...borrador, hasta: e.target.value }; setBorrador(b); aplicar(b); }} /></label>
+        </div>
+        {(malDesde || malHasta) && aviso && <p className="q-periodo-error" role="alert">{aviso}</p>}
+        {comparacion && <p className="q-periodo-nota">{comparacion}</p>}
+      </div>
+    </div>
+  );
+}
+
 // ── Estados: lo que no hay se dice, nunca se dibuja como cero ──
 const ESTADOS = {
   'no-cargo': { icono: CloudOff, titulo: 'La fuente no cargó', atencion: true },
@@ -158,23 +219,27 @@ export function Ventana({ texto, fija }) {
   return <span className={`q-ventana${fija ? ' q-ventana-fija' : ''}`} title={fija ? 'No sigue el período elegido' : 'Sigue el período elegido'}><Icono size={12} aria-hidden="true" />{texto}</span>;
 }
 
-export function Bloque({ titulo, lectura, universo, ancho = 'completo', alcance, ventana, estado, ayuda, pie, children, id }) {
+// avisos: lo que la regla encontró en el dato de esta tarjeta, en una línea cada uno (nivel y frase), debajo de la
+// lectura. ejemplo: la tarjeta pinta data de ejemplo (fuente por conectar) y lo dice arriba, a la vista
+export function Bloque({ titulo, lectura, universo, ancho = 'completo', alcance, ventana, estado, ayuda, pie, children, id, avisos = [], ejemplo = false }) {
   const us = [].concat(universo ?? []).map((k) => UNIVERSOS[k]).filter(Boolean);
   const periodo = useContext(VentanaContexto);
   const cargando = useContext(CargandoContexto);
   const texto = alcance || (ventana === false ? null : ventana || periodo);
   if (cargando) estado = { tipo: 'cargando', reemplaza: true };
   return (
-    <article className={`q-bloque q-${ancho}`} id={id} data-estado={estado?.tipo || 'ok'}>
+    <article className={`q-bloque q-${ancho}`} id={id} data-estado={estado?.tipo || 'ok'} data-ejemplo={ejemplo || undefined}>
       <header className="q-bloque-cab">
         <div className="q-bloque-titulo">
           <h3>{titulo}</h3>
           <div className="q-bloque-marcas">
+            {ejemplo && <span className="q-ejemplo"><FlaskConical size={13} aria-hidden="true" />Data de ejemplo</span>}
             {texto && <Ventana texto={texto} fija={!!alcance} />}
             {ayuda && <Ayuda>{ayuda}</Ayuda>}
           </div>
         </div>
         {lectura && !estado?.reemplaza && <p className="q-bloque-lectura">{lectura}</p>}
+        {avisos.length > 0 && !estado?.reemplaza && <AvisosTarjeta avisos={avisos} />}
       </header>
       <div className="q-bloque-cuerpo">
         {estado && <Estado tipo={estado.tipo} titulo={estado.titulo}>{estado.texto && <p>{estado.texto}</p>}</Estado>}
@@ -192,14 +257,14 @@ export function Bloque({ titulo, lectura, universo, ancho = 'completo', alcance,
 // Cada paso dice su cifra y debajo su costo o su razón; la flecha marca que un paso sale del anterior ──
 export function Flujo({ etiqueta, columnas, filas, nota }) {
   return (
-    <div className="q-flujo" role="table" aria-label={etiqueta}>
+    <div className="q-flujo" role="table" aria-label={etiqueta} style={{ '--pasos': columnas.length }}>
       <div className="q-flujo-fila q-flujo-cab" role="row">
         <span role="columnheader" />
         {columnas.map((c) => <span key={c} role="columnheader">{c}</span>)}
       </div>
       {filas.map((f, i) => (
         <div key={f.nombre} className="q-flujo-fila" role="row">
-          <span className="q-flujo-nombre" role="rowheader"><span className={`q-muestra q-p${i}`} aria-hidden="true" />{f.nombre}</span>
+          <span className="q-flujo-nombre" role="rowheader">{f.clase !== null && <span className={`q-muestra ${f.clase ?? `q-p${i}`}`} aria-hidden="true" />}{f.nombre}</span>
           {f.pasos.map((p, j) => (
             <span key={j} className="q-flujo-paso" role="cell">
               {j > 0 && <ArrowRight className="q-flujo-flecha" size={14} aria-hidden="true" />}
@@ -338,17 +403,22 @@ export function ListaAlertas({ grupos }) {
 }
 
 // Avisos de un capítulo: una línea por alerta, que lleva a su fila en Qué mirar
-export function AvisosCapitulo({ avisos }) {
-  if (!avisos.length) return null;
+// Frente al objetivo: icono y palabra (el color nunca va solo), con los colores de los niveles de alerta
+// el texto llega escrito desde src/textos (dice el margen del objetivo)
+const SEMAFORO = { bien: { nivel: 'bien', icono: CircleCheck }, cerca: { nivel: 'revisar', icono: Eye }, lejos: { nivel: 'atencion', icono: TriangleAlert } };
+export function Semaforo({ estado, texto }) {
+  const x = SEMAFORO[estado];
+  if (!x) return null;
+  return <span className={`q-nivel q-alerta-${x.nivel}`}><x.icono size={14} aria-hidden="true" strokeWidth={2.4} />{texto}</span>;
+}
+
+// Los avisos de una tarjeta: el nivel (icono y palabra, el color nunca va solo) y la frase, sin enlace a otro lado
+export function AvisosTarjeta({ avisos }) {
   return (
-    <ul className="q-avisos" aria-label="Alertas de este capítulo">
+    <ul className="q-avisos-tarjeta" aria-label="Avisos de esta tarjeta">
       {avisos.map((a) => {
         const n = NIVELES[a.nivel];
-        return (
-          <li key={a.id} className={`q-aviso q-alerta-${a.nivel}`}>
-            <a href={'#' + a.id}><span className="q-nivel"><n.icono size={14} aria-hidden="true" strokeWidth={2.4} />{n.nombre}</span><span className="q-aviso-texto">{a.titulo}</span><Ir size={14} aria-hidden="true" /></a>
-          </li>
-        );
+        return <li key={a.id} className={`q-alerta-${a.nivel}`}><span className="q-nivel"><n.icono size={14} aria-hidden="true" strokeWidth={2.4} />{n.nombre}</span><span>{a.titulo}</span></li>;
       })}
     </ul>
   );
@@ -363,12 +433,12 @@ export function Frase({ segmentos }) {
 // ── Resumen de la capa: pocas cifras, cada una lleva a su capítulo ──
 // frases: una línea por plataforma debajo de las cifras (cuánto pagó y qué tan lejos quedó de su objetivo).
 // Se eligió la frase y no una barra: se lee sin aprender a leer nada y no compite con las cifras de arriba.
-export function Resumen({ titulo, items, pie, frases = [] }) {
+export function Resumen({ titulo, items, pie, frases = [], ejemplo = false }) {
   const cargando = useContext(CargandoContexto);
   if (cargando) return <section className="q-resumen" id="resumen"><h2 className="q-resumen-titulo">{titulo}</h2><Estado tipo="cargando" /></section>;
   return (
-    <section className="q-resumen" aria-labelledby="resumen-t" id="resumen">
-      <h2 id="resumen-t" className="q-resumen-titulo">{titulo}</h2>
+    <section className="q-resumen" aria-labelledby="resumen-t" id="resumen" data-ejemplo={ejemplo || undefined}>
+      <div className="q-resumen-cab"><h2 id="resumen-t" className="q-resumen-titulo">{titulo}</h2>{ejemplo && <span className="q-ejemplo"><FlaskConical size={13} aria-hidden="true" />Data de ejemplo</span>}</div>
       <ul className="q-resumen-cifras">
         {items.map((i) => {
           const u = UNIVERSOS[i.universo];
@@ -743,6 +813,43 @@ export function ArteMuestra({ a, grande = false }) {
   );
 }
 
+// ── Reproductor de audio y video: botón grande, barra de avance que se agarra con el dedo, el tiempo a la vista y
+// saltos de 10 segundos. Los controles del navegador quedan chicos en una tarjeta angosta ──
+const reloj = (s) => (Number.isFinite(s) ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}` : '0:00');
+// Suena un solo medio a la vez: el play de uno pausa a los demás, también a los que quedaron detrás de una ventana
+let excluyente = false;
+export function unSoloMedio() {
+  if (excluyente || typeof document === 'undefined') return;
+  excluyente = true;
+  document.addEventListener('play', (e) => {
+    for (const m of document.querySelectorAll('audio, video')) if (m !== e.target && !m.paused && !m.muted) m.pause();
+  }, true);
+}
+export function Reproductor({ src, tipo, etiqueta, onError }) {
+  const ref = useRef(null);
+  useEffect(() => { unSoloMedio(); const m = ref.current; return () => m?.pause(); }, []);
+  const [sonando, setSonando] = useState(false), [t, setT] = useState(0), [total, setTotal] = useState(0);
+  const el = () => ref.current;
+  const alternar = () => { const m = el(); if (!m) return; if (m.paused) m.play().catch(() => {}); else m.pause(); };
+  const saltar = (n) => { const m = el(); if (m) m.currentTime = Math.max(0, Math.min(m.duration || 0, m.currentTime + n)); };
+  const eventos = { ref, src, preload: 'metadata', onPlay: () => setSonando(true), onPause: () => setSonando(false), onEnded: () => setSonando(false),
+    onTimeUpdate: (e) => setT(e.currentTarget.currentTime), onLoadedMetadata: (e) => setTotal(e.currentTarget.duration), onDurationChange: (e) => setTotal(e.currentTarget.duration), onError };
+  return (
+    <div className={`q-reproductor q-reproductor-${tipo}`}>
+      {tipo === 'video' ? <video {...eventos} playsInline aria-label={etiqueta} onClick={alternar} /> : <><audio {...eventos} aria-label={etiqueta} /><span className="q-reproductor-onda" aria-hidden="true"><AudioLines size={28} /></span></>}
+      <div className="q-reproductor-barra">
+        <button type="button" className="q-reproductor-boton q-reproductor-play" onClick={alternar} aria-label={sonando ? 'Pausar' : 'Reproducir'}>{sonando ? <Pause size={20} aria-hidden="true" /> : <Play size={20} aria-hidden="true" />}</button>
+        <button type="button" className="q-reproductor-boton" onClick={() => saltar(-10)} aria-label="Retroceder 10 segundos"><RotateCcw size={18} aria-hidden="true" /></button>
+        <input type="range" className="q-reproductor-avance" min={0} max={total || 0} step={0.1} value={Math.min(t, total || 0)} aria-label={`Avance de ${etiqueta}`}
+          aria-valuetext={`${reloj(t)} de ${reloj(total)}`} onChange={(e) => { const m = el(); if (m) { m.currentTime = Number(e.target.value); setT(m.currentTime); } }}
+          style={{ '--avance': total ? `${(Math.min(t, total) / total) * 100}%` : '0%' }} />
+        <button type="button" className="q-reproductor-boton" onClick={() => saltar(10)} aria-label="Adelantar 10 segundos"><RotateCw size={18} aria-hidden="true" /></button>
+        <span className="q-reproductor-tiempo">{reloj(t)} / {reloj(total)}</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Un anuncio entero, en la ventana. Una imagen que no carga sale; la tarjeta sigue sin ella ──
 function TarjetaAnuncio({ a, anunciante, t }) {
   const [rota, setRota] = useState(false), [videoRoto, setVideoRoto] = useState(false); // el video o el audio
@@ -753,9 +860,9 @@ function TarjetaAnuncio({ a, anunciante, t }) {
       {a.imagen && !rota && <div className="q-anuncio-pieza"><img src={a.imagen} alt={`Imagen del anuncio de ${anunciante}`} loading="lazy" referrerPolicy="no-referrer" onError={() => setRota(true)} /></div>}
       {!a.imagen && a.arte != null && <div className="q-anuncio-pieza"><ArteMuestra a={a} grande /></div>}
       {a.medio?.kind === 'video' && (videoRoto ? <p className="q-nota-bloque">El video de esta pieza no cargó.</p>
-        : <div className="q-anuncio-pieza q-anuncio-video"><video controls preload="none" src={a.medio.url} aria-label={`Video de ${a.titulo || anunciante}`} onError={() => setVideoRoto(true)} /></div>)}
+        : <div className="q-anuncio-reproductor"><Reproductor tipo="video" src={a.medio.url} etiqueta={`Video de ${a.titulo || anunciante}`} onError={() => setVideoRoto(true)} /></div>)}
       {a.medio?.kind === 'audio' && (videoRoto ? <p className="q-nota-bloque">El audio de esta pieza no cargó.</p>
-        : <div className="q-anuncio-audio"><AudioLines size={18} aria-hidden="true" /><audio controls preload="none" src={a.medio.url} aria-label={`Audio de ${a.titulo || anunciante}`} onError={() => setVideoRoto(true)} /></div>)}
+        : <div className="q-anuncio-reproductor"><Reproductor tipo="audio" src={a.medio.url} etiqueta={`Audio de ${a.titulo || anunciante}`} onError={() => setVideoRoto(true)} /></div>)}
       <div className="q-anuncio-cuerpo">
         {a.titulo && <h3>{t.titulo ? t.titulo(a) : a.titulo}</h3>}
         {texto && <p className="q-anuncio-texto">{texto}</p>}
@@ -794,7 +901,9 @@ function MarcaFormato({ formato }) {
 // ── El mazo: las tres piezas más recientes apiladas; con el mouse o el foco se abren en abanico ──
 function Mazo({ g, onAbrir, propio, t }) {
   const [rotas, setRotas] = useState(() => new Set());
-  const conImagen = g.anuncios.filter((a) => a.imagen && !rotas.has(a.id)).slice(0, 3);
+  // una pieza en video se ve por su primer cuadro (el navegador lo pinta con preload="metadata"); sin imagen ni video, el texto
+  const verse = (a) => (a.imagen || a.medio?.kind === 'video') && !rotas.has(a.id);
+  const conImagen = g.anuncios.filter(verse).slice(0, 3);
   const cartas = conImagen.length ? conImagen : g.anuncios.slice(0, 3);
   const pila = [...cartas].reverse(); // la más reciente se dibuja última: queda encima
   const n = g.anuncios.length;
@@ -802,10 +911,12 @@ function Mazo({ g, onAbrir, propio, t }) {
     <button type="button" className="q-mazo" onClick={() => onAbrir(g.nombre)} data-anunciante={g.nombre} aria-haspopup="dialog">
       <span className="q-mazo-pila" aria-hidden="true">
         {pila.map((a, i) => {
-          const conImg = a.imagen && conImagen.length;
+          const conImg = verse(a) && conImagen.length;
+          const rota = () => setRotas((r) => new Set(r).add(a.id));
           return (
             <span key={a.id} className={`q-carta${!conImg && a.arte == null ? ' q-carta-texto' : ''}`} style={{ '--d': i - (pila.length - 1) / 2 }} data-previa={a.id}>
-              {conImg ? <img src={a.imagen} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setRotas((r) => new Set(r).add(a.id))} />
+              {conImg && a.imagen ? <img src={a.imagen} alt="" loading="lazy" referrerPolicy="no-referrer" onError={rota} />
+                : conImg ? <><video src={`${a.medio.url}#t=0.5`} muted playsInline preload="metadata" tabIndex={-1} onError={rota} /><span className="q-carta-play"><Play size={16} aria-hidden="true" /></span></>
                 : a.arte != null ? <ArteMuestra a={a} /> : <><span>{t.titulo ? t.titulo(a) : a.titulo || a.texto}</span><MarcaFormato formato={a.formato} /></>}
             </span>
           );

@@ -38,7 +38,8 @@ function apagar(d, marca, cuando) {
       }
     }
   }
-  for (const [mes, m] of Object.entries(d.medios?.meses || {})) if (cuando(`${mes}-15`)) delete m[marca];
+  // medios.json guarda cada emisión: las de la marca en esos días salen
+  if (d.medios?.emisiones?.[marca]) d.medios.emisiones[marca] = d.medios.emisiones[marca].filter((e) => !cuando(d.medios.dic.fecha[e[0]]));
 }
 const largo = (t, n = 3) => `${t} ${'EDICIÓN ESPECIAL DE TEMPORADA CON PROMOCIÓN NACIONAL '.repeat(n)}`.trim();
 
@@ -68,7 +69,7 @@ export const ESCENARIOS = [
     aplicar(d) {
       for (const m of [PROPIA, RIVAL]) { escalar(d.contrato.daily, m, 1000); escalar(d.contrato.digital?.daily || [], m, 1000); }
       for (const p of [...d.contrato.ooh, ...d.contrato.pieces, ...(d.contrato.digital?.pieces || [])]) if (p.spend != null) p.spend *= 1000;
-      for (const m of Object.values(d.medios?.meses || {})) for (const x of Object.values(m)) for (const g of ['canales', 'zonas', 'grupos']) if (x[g]) for (const k of Object.keys(x[g])) x[g][k] *= 1000;
+      for (const lista of Object.values(d.medios?.emisiones || {})) for (const e of lista) e[9] *= 1000; // la inversión de cada emisión
     },
   },
   {
@@ -81,15 +82,8 @@ export const ESCENARIOS = [
       c.daily = c.daily.filter((x) => hasta(x.fecha));
       if (c.digital) { c.digital.daily = c.digital.daily.filter((x) => hasta(x.fecha)); c.digital.pieces = c.digital.pieces.filter((p) => hasta(p.firstEmission)); }
       c.events = c.events.filter((e) => hasta(e.fecha)); c.ooh = c.ooh.filter((p) => hasta(p.firstFecha)); c.pieces = c.pieces.filter((p) => hasta(p.firstEmission));
-      // medios.json del mes, como lo dejaría el pipeline con un día: lo de un día promedio
-      const dias = Number(new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 0)).getUTCDate());
-      for (const x of Object.values(d.medios?.meses?.[m] || {})) {
-        x.emisiones = Math.round(x.emisiones / dias);
-        for (const g of ['canales', 'programas', 'zonas', 'grupos']) if (x[g]) for (const k of Object.keys(x[g])) x[g][k] = Math.round(x[g][k] / dias);
-        if (x.horas) x.horas = x.horas.map((v) => Math.round(v / dias));
-        if (x.dias) x.dias = x.dias.map((v, i) => (i === (new Date(dia).getUTCDay() + 6) % 7 ? Math.round(x.emisiones) : 0));
-        if (x.horaDia) x.horaDia = x.horaDia.map((f, i) => f.map((v) => (i === (new Date(dia).getUTCDay() + 6) % 7 ? Math.round(v / 4) : 0)));
-      }
+      // medios.json como lo dejaría el pipeline con un día: las emisiones hasta ese día
+      for (const [marca, lista] of Object.entries(d.medios?.emisiones || {})) d.medios.emisiones[marca] = lista.filter((e) => hasta(d.medios.dic.fecha[e[0]]));
     },
   },
   {
@@ -129,17 +123,19 @@ export const ESCENARIOS = [
       const c = d.contrato;
       for (const x of [...c.events, ...c.pieces, ...c.ooh, ...(c.digital?.pieces || [])]) if (x.vname) x.vname = largo(x.vname);
       for (const e of c.events) if (e.mname) e.mname = largo(e.mname, 1);
-      for (const m of Object.values(d.medios?.meses || {})) for (const x of Object.values(m)) for (const g of ['canales', 'programas']) if (x[g]) x[g] = Object.fromEntries(Object.entries(x[g]).map(([k, v]) => [largo(k, 1), v]));
+      if (d.medios?.dic) for (const g of ['canal', 'programa', 'version']) d.medios.dic[g] = d.medios.dic[g].map((k) => (k ? largo(k, 1) : k));
     },
   },
   {
     id: 'pico-trends', titulo: 'Pico en las búsquedas',
-    que: 'Las últimas cuatro semanas, las cámaras se buscan el doble y la primera marca de cámaras, cinco veces más.',
+    que: 'Las cuatro semanas que terminan en el período, las cámaras se buscan el doble y la primera marca de cámaras, cinco veces más.',
     aplicar(d) {
       if (!d.busquedas) return;
       const pico = (g, id, k) => {
         const s = g.series.find((x) => x.id === id) ?? g.series[0];
-        const completas = g.semanas.map((_, i) => i).filter((i) => !g.parcial[i]).slice(-4);
+        // las cuatro semanas que terminan en el mes que se mueve: el panel lee Trends hasta el último día del período
+        const tope = d.contrato.meta.lastDay.slice(0, 7) === ultimoMes(d) ? d.contrato.meta.lastDay : `${ultimoMes(d)}-31`;
+        const completas = g.semanas.map((_, i) => i).filter((i) => !g.parcial[i] && g.semanas[i] <= tope).slice(-4);
         // sin tope de 100: la serie de cámaras suma dos términos y ya pasa de 100; con tope, el «pico» la bajaría
         for (const i of completas) s.valores[i] = Math.round(s.valores[i] * k) || s.valores[i];
       };

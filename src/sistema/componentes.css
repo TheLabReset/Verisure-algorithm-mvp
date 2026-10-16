@@ -159,6 +159,7 @@
 .q-chip-universo { color: var(--texto-1); background: var(--superficie); }
 .q-chip-fuente { border-color: var(--borde); }
 .q-chip-atencion { color: var(--atencion); border-color: currentColor; background: var(--superficie); }
+.q-chip-ejemplo { color: var(--texto-2); border-style: dashed; border-color: var(--borde-control); }
 .q-chip svg { flex: none; }
 
 /* ── Estados de un bloque ── */
@@ -240,14 +241,13 @@
 .q-alerta-ir { display: inline-flex; align-items: center; gap: var(--e-1); width: fit-content; margin-top: var(--e-1); font-size: var(--t-14); color: var(--texto-1); }
 
 /* Avisos dentro de un capítulo: una lista corta, sin raya de color, que lleva a Sugiere */
-.q-avisos { list-style: none; margin: 0; padding: 0; display: grid; border-radius: var(--r-bloque); background: var(--superficie); border: 1px solid var(--borde); }
-.q-aviso + .q-aviso { border-top: 1px solid var(--borde); }
-.q-aviso a { display: flex; align-items: center; gap: var(--e-3); padding: var(--e-3) var(--e-4); color: var(--texto-1); text-decoration: none; font-size: var(--t-14); }
-.q-aviso a:hover .q-aviso-texto { text-decoration: underline; }
-.q-aviso .q-nivel { flex: none; min-width: 9.5em; }
-.q-aviso-texto { flex: 1; min-width: 0; }
-.q-aviso svg:last-child { flex: none; color: var(--texto-3); }
-@media (max-width: 640px) { .q-aviso a { flex-wrap: wrap; gap: var(--e-1) var(--e-3); } .q-aviso .q-nivel { min-width: 0; } }
+/* Avisos dentro de la tarjeta: una línea por aviso, debajo de la lectura */
+.q-avisos-tarjeta { list-style: none; margin: var(--e-3) 0 0; padding: 0; display: grid; gap: var(--e-2); }
+.q-avisos-tarjeta li { display: flex; align-items: baseline; gap: var(--e-3); font-size: var(--t-14); color: var(--texto-1); max-width: 72ch; }
+.q-avisos-tarjeta .q-nivel { flex: none; min-width: 8.5em; }
+@media (max-width: 640px) { .q-avisos-tarjeta li { flex-direction: column; gap: 0; } .q-avisos-tarjeta .q-nivel { min-width: 0; } }
+/* Data de ejemplo: la tarjeta lo dice arriba, junto a su ventana */
+.q-ejemplo { display: inline-flex; align-items: center; gap: var(--e-1); padding: 2px var(--e-2); border: 1px dashed var(--borde-control); border-radius: var(--r-control); font-size: var(--t-13); color: var(--texto-2); white-space: nowrap; }
 
 /* Línea de alertas en el resumen */
 
@@ -345,7 +345,7 @@
 
 /* ── Flujo de la pauta al CRM: una fila por plataforma, un paso por columna ── */
 .q-flujo { display: grid; gap: 0; }
-.q-flujo-fila { display: grid; grid-template-columns: minmax(120px, 1fr) repeat(4, minmax(0, 1.2fr)); gap: var(--e-4); align-items: start; padding: var(--e-3) 0; border-bottom: 1px solid var(--borde); }
+.q-flujo-fila { display: grid; grid-template-columns: minmax(120px, 1fr) repeat(var(--pasos, 4), minmax(0, 1.2fr)); gap: var(--e-4); align-items: start; padding: var(--e-3) 0; border-bottom: 1px solid var(--borde); }
 .q-flujo-fila:last-of-type { border-bottom: 0; }
 .q-flujo-cab { padding-top: 0; font-size: var(--t-13); color: var(--texto-3); border-bottom-color: var(--borde-control); }
 .q-flujo-nombre { display: inline-flex; align-items: center; font-size: var(--t-16); color: var(--texto-1); padding-top: var(--e-1); }
@@ -430,7 +430,8 @@
 @media (prefers-reduced-motion: reduce) {
   .q-mazo:hover .q-carta, .q-mazo:focus-visible .q-carta { transform: translateX(calc(-50% + var(--d) * 0.9rem)) rotate(calc(var(--d) * 4deg)); }
 }
-.q-carta img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.q-carta img, .q-carta video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; background: var(--barra); pointer-events: none; }
+.q-carta-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--elevada); color: var(--texto-1); box-shadow: var(--sombra-flota); }
 .q-carta-texto { display: flex; align-items: center; padding: var(--e-3); }
 .q-carta-texto span { font-size: var(--t-13); color: var(--texto-2); overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 7; line-clamp: 7; overflow: hidden; }
 .q-mazo-nombre { font-family: var(--f-titulo); font-size: var(--t-19); font-weight: var(--peso-titulo); }
@@ -627,3 +628,82 @@
 @media (max-width: 900px) { .q-share-universos { grid-template-columns: minmax(0, 1fr); } }
 /* Aviso de escenario o estado de la demo: siempre visible, también al presentar, para que nada se lea como data real */
 .q-aviso-demo { background: var(--texto-1); color: var(--superficie); font-size: var(--t-14); font-weight: var(--peso-rotulo); padding-block: var(--e-2); }
+
+/* Reproductor: el botón y la barra de avance con un área de toque de 44 px; la barra se ve fina pero se agarra entera */
+.q-reproductor { display: grid; background: var(--superficie-capitulo); border-radius: var(--r-control); overflow: hidden; }
+.q-reproductor video { display: block; width: 100%; aspect-ratio: 16 / 9; background: var(--barra); cursor: pointer; }
+.q-reproductor-onda { display: grid; place-items: center; min-height: 72px; color: var(--texto-3); }
+.q-reproductor-barra { display: flex; align-items: center; gap: var(--e-1); padding: var(--e-2) var(--e-3); }
+.q-reproductor-boton { flex: none; display: inline-grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: var(--texto-1); cursor: pointer; }
+.q-reproductor-boton:hover { background: var(--superficie); }
+.q-reproductor-boton:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+.q-reproductor-play { background: var(--texto-1); color: var(--superficie); }
+.q-reproductor-play:hover { background: var(--texto-2); }
+.q-reproductor-avance { flex: 1; min-width: 4rem; height: 44px; margin: 0; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; }
+.q-reproductor-avance::-webkit-slider-runnable-track { height: 6px; border-radius: var(--r-marca); background: linear-gradient(to right, var(--texto-1) var(--avance), var(--borde-control) var(--avance)); }
+.q-reproductor-avance::-moz-range-track { height: 6px; border-radius: var(--r-marca); background: var(--borde-control); }
+.q-reproductor-avance::-moz-range-progress { height: 6px; border-radius: var(--r-marca); background: var(--texto-1); }
+.q-reproductor-avance::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: calc(-1.5 * var(--e-1)); border-radius: 50%; background: var(--texto-1); }
+.q-reproductor-avance::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: var(--texto-1); }
+.q-reproductor-avance:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+.q-reproductor-tiempo { flex: none; min-width: 6.5em; text-align: right; font-size: var(--t-13); color: var(--texto-2); font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) { .q-reproductor-tiempo { min-width: 0; } .q-reproductor-barra { flex-wrap: wrap; } .q-reproductor-avance { order: 5; flex-basis: 100%; } }
+.q-anuncio-reproductor { border-bottom: 1px solid var(--borde); }
+.q-anuncio-reproductor .q-reproductor { border-radius: 0; }
+
+/* Emisiones de TV y radio: la lista a la izquierda y la ficha a la derecha, como OOH */
+.q-emisiones { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(16rem, 1fr); gap: var(--e-6); align-items: start; }
+.q-emisiones-tipos { grid-column: 1 / -1; flex-wrap: wrap; }
+.q-emisiones-lista { list-style: none; margin: 0; padding: 0; max-height: 30rem; overflow-y: auto; border: 1px solid var(--borde); border-radius: var(--r-control); }
+.q-emisiones-lista li + li { border-top: 1px solid var(--borde); }
+.q-emisiones-lista button { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); gap: var(--e-3); width: 100%; padding: var(--e-3) var(--e-4); border: 0; background: transparent; text-align: left; color: var(--texto-1); font: inherit; font-size: var(--t-14); cursor: pointer; }
+.q-emisiones-lista button:hover { background: var(--superficie-capitulo); }
+.q-emisiones-lista button[aria-pressed="true"] { background: var(--superficie-capitulo); }
+.q-emisiones-lista button[aria-pressed="true"] b { text-decoration: underline; text-underline-offset: 3px; }
+.q-emisiones-lista button:focus-visible { outline: 2px solid var(--foco); outline-offset: -2px; }
+.q-emision-cuando { display: grid; font-variant-numeric: tabular-nums; }
+.q-emision-cuando small, .q-emision-que small { font-size: var(--t-13); color: var(--texto-3); }
+.q-emision-que { display: grid; min-width: 0; }
+.q-emision-que b { font-weight: var(--peso-rotulo); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.q-emisiones-ficha { position: sticky; top: var(--e-4); min-width: 0; }
+.q-ficha-arte-corta { aspect-ratio: auto; min-height: 7rem; }
+@media (max-width: 900px) { .q-emisiones { grid-template-columns: minmax(0, 1fr); } .q-emisiones-ficha { position: static; order: -1; } .q-emisiones-tipos { order: -2; } .q-emisiones-lista { max-height: 22rem; } }
+
+.q-resumen-cab { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--e-2) var(--e-4); }
+
+/* Selector de período: el botón dice el tramo y el atajo; el panel lleva los atajos y dos fechas */
+.q-periodo { position: relative; }
+.q-periodo-boton { display: inline-flex; align-items: center; gap: var(--e-2); min-height: 40px; padding: var(--e-1) var(--e-3); border: 1px solid var(--borde-control); border-radius: var(--r-control); background: var(--superficie); color: var(--texto-1); font: inherit; font-size: var(--t-14); cursor: pointer; }
+.q-periodo-boton small { font-size: var(--t-13); color: var(--texto-3); }
+.q-periodo-boton:hover, .q-periodo-boton[aria-expanded="true"] { border-color: var(--texto-3); }
+.q-periodo-boton:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+.q-periodo-panel {
+  position: absolute; left: 0; right: auto; top: calc(100% + var(--e-2)); z-index: 20; width: min(340px, calc(100vw - 2 * var(--e-4)));
+  display: grid; gap: var(--e-2); padding: var(--e-4); border-radius: var(--r-bloque);
+  background: var(--elevada); border: 1px solid var(--borde); box-shadow: var(--sombra-flota);
+}
+.q-periodo-titulo { font-size: var(--t-13); font-weight: var(--peso-rotulo); color: var(--texto-3); }
+.q-periodo-atajos { display: grid; gap: 2px; }
+.q-periodo-atajos button { display: flex; align-items: center; justify-content: space-between; min-height: 40px; padding: var(--e-2) var(--e-3); border: 0; border-radius: var(--r-control); background: transparent; color: var(--texto-1); font: inherit; font-size: var(--t-14); text-align: left; cursor: pointer; }
+.q-periodo-atajos button:hover, .q-periodo-atajos button[aria-pressed="true"] { background: var(--superficie-capitulo); }
+.q-periodo-atajos button:focus-visible { outline: 2px solid var(--foco); outline-offset: -2px; }
+.q-periodo-rango { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
+.q-periodo-rango label { display: grid; gap: var(--e-1); font-size: var(--t-13); color: var(--texto-2); }
+.q-periodo-rango input { min-height: 40px; padding: var(--e-1) var(--e-2); border: 1px solid var(--borde-control); border-radius: var(--r-control); background: var(--superficie); color: var(--texto-1); font: inherit; font-size: var(--t-14); min-width: 0; }
+.q-periodo-nota { font-size: var(--t-13); color: var(--texto-3); }
+.q-periodo-error { font-size: var(--t-13); font-weight: var(--peso-rotulo); color: var(--texto-1); }
+.q-periodo-rango input[aria-invalid="true"] { border-color: var(--texto-1); }
+@media (max-width: 640px) { .q-periodo-boton small { display: none; } }
+
+
+/* Cada plataforma frente a su objetivo: una ficha por plataforma, el costo por booking grande y su semáforo */
+.q-plataformas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--e-4); }
+.q-plataforma { display: grid; gap: var(--e-3); align-content: start; padding: var(--e-4); border: 1px solid var(--borde); border-radius: var(--r-bloque); background: var(--superficie); }
+.q-plataforma h4 { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--f-titulo); font-size: var(--t-19); font-weight: var(--peso-titulo); color: var(--texto-1); }
+.q-plataforma h4 span { font-family: var(--f-texto); font-size: var(--t-13); font-weight: var(--peso-rotulo); color: var(--texto-3); }
+.q-plataforma-cifra { display: grid; gap: var(--e-1); justify-items: start; }
+.q-plataforma-cifra > span:first-child { font-size: var(--t-13); color: var(--texto-3); }
+.q-plataforma-cifra b { font-family: var(--f-titulo); font-size: var(--c-32); font-weight: var(--peso-cifra); color: var(--texto-1); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.q-plataforma-cifra small { font-size: var(--t-13); color: var(--texto-3); }
+.q-plataforma .q-ficha-datos dt { flex: none; white-space: nowrap; }
+.q-plataforma .q-ficha-datos dd { display: inline-flex; align-items: center; gap: var(--e-2); flex-wrap: wrap; justify-content: flex-end; }

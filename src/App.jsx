@@ -2,12 +2,13 @@
 // vista una sola vez por filtro y la reparte a las capas. Si la data no carga, lo dice: nunca dibuja ceros.
 import { useEffect, useMemo, useState } from 'react';
 import { Moon, Sun, Presentation } from 'lucide-react';
-import { armarVista, mesesDisponibles } from './calculo/vista.js';
+import { armarVista } from './calculo/vista.js';
+import { ATAJOS, ATAJO_INICIAL } from './calculo/periodo.js';
 import { ESCENARIOS, aplicarEscenario } from './calculo/escenarios.js';
 import { CAPAS } from './capas/estructura.js';
-import { fecha, fechaCorta } from './sistema/formato.js';
-import { mesTexto } from './textos/comun.js';
-import { NavegacionCapas, Selector, BarraDemo, CargandoContexto, Estado, Resguardo } from './sistema/Componentes.jsx';
+import { fecha } from './sistema/formato.js';
+import { ventanaTexto, comparacionTexto, avisoFechas } from './textos/comun.js';
+import { NavegacionCapas, SelectorPeriodo, BarraDemo, CargandoContexto, Estado, Resguardo, unSoloMedio } from './sistema/Componentes.jsx';
 import Senales from './pantallas/Senales.jsx';
 import Inteligencia from './pantallas/Inteligencia.jsx';
 import Activacion from './pantallas/Activacion.jsx';
@@ -64,14 +65,15 @@ export default function App() {
   const cargada = useData();
   const [escenario, setEscenario] = useState(escenarioDeLaUrl);
   const data = useMemo(() => (cargada.estado === 'ok' && escenario ? aplicarEscenario(escenario, cargada) : cargada), [cargada, escenario]);
-  const meses = useMemo(() => (data.contrato ? mesesDisponibles(data.contrato.meta) : []), [data.contrato]);
-  const [mes, setMes] = useState(null);
-  const mesActivo = mes || meses.at(-1);
+  // el período: un atajo («Últimos 7 días», el inicial) o dos fechas elegidas a mano
+  const [filtros, setFiltros] = useState({ atajo: ATAJO_INICIAL });
+  const clavePeriodo = filtros.atajo || `${filtros.desde}_${filtros.hasta}`;
   const [capa, setCapa] = useState(capaDeLaUrl);
   const [tema, setTema] = useState(() => leerPref('tema-elegido', 'light'));
   const [demo, setDemo] = useState('datos');
   const [presentar, setPresentar] = useState(false);
   const [maiaAbierta, setMaiaAbierta] = useState(false);
+  useEffect(() => { unSoloMedio(); }, []);
   useEffect(() => { document.documentElement.dataset.theme = tema; }, [tema]);
   useEffect(() => { if (presentar) document.documentElement.dataset.presentar = ''; else delete document.documentElement.dataset.presentar; }, [presentar]);
   const cambiarTema = () => { const t = tema === 'dark' ? 'light' : 'dark'; setTema(t); guardarPref('tema-elegido', t); };
@@ -103,15 +105,15 @@ export default function App() {
   // armarVista corre fuera del Resguardo de cada capa: si la data trae algo que el cálculo no esperaba, se dice que
   // no se pudo armar, en vez de dejar la pantalla en blanco
   const armada = useMemo(() => {
-    if (data.estado !== 'ok' || !mesActivo) return null;
+    if (data.estado !== 'ok') return null;
     const caidas = ['atl', 'digital', 'trends'].includes(demo) ? [demo] : [];
     try {
-      return { vista: armarVista(data.contrato, data.medios, { mes: mesActivo }, { fuentesCaidas: caidas, hoy: hoyIso() }, { mapa: data.mapa, busquedas: data.busquedas }) };
+      return { vista: armarVista(data.contrato, data.medios, filtros, { fuentesCaidas: caidas, hoy: hoyIso() }, { mapa: data.mapa, busquedas: data.busquedas }) };
     } catch (e) {
       console.error('armarVista', e);
       return { fallo: true };
     }
-  }, [data, mesActivo, demo]);
+  }, [data, filtros, demo]);
   const vista = armada?.vista ?? null;
   const actual = CAPAS.find((c) => c.id === capa);
   const Pantalla = PANTALLAS[capa];
@@ -151,11 +153,13 @@ export default function App() {
         <div className="q-envoltura q-filtros-fila">
           <NavegacionCapas capas={CAPAS} activa={capa} onCambiar={irACapa} />
           <div className="q-filtros-controles">
-            {meses.length > 0 && (
-              <Selector etiqueta="Mes" valor={mesActivo} onCambiar={setMes}
-                opciones={[...meses].reverse().map((m) => ({ valor: m, texto: vista && m === vista.periodo.mes && vista.periodo.parcial ? `${mesTexto(m)} (${vista.periodo.enCurso === false ? `hasta el ${fechaCorta(vista.periodo.hasta)}` : 'en curso'})` : mesTexto(m) }))} />
+            {vista && data.contrato && (
+              <SelectorPeriodo texto={ventanaTexto(vista.periodo.desde, vista.periodo.hasta)} atajo={vista.periodo.atajo} atajos={ATAJOS}
+                desde={vista.periodo.desde} hasta={vista.periodo.hasta} min={data.contrato.meta.firstDay} max={data.contrato.meta.lastDay}
+                comparacion={vista.periodo.compararDesde ? `Se compara con ${comparacionTexto(vista.periodo)}, ${ventanaTexto(vista.periodo.compararDesde, vista.periodo.compararHasta)}.` : 'Sin días antes con qué comparar.'}
+                aviso={avisoFechas(data.contrato.meta.firstDay, data.contrato.meta.lastDay)}
+                onAtajo={(atajo) => setFiltros({ atajo })} onRango={(desde, hasta) => setFiltros({ desde, hasta })} />
             )}
-            {vista && <span className="q-control-nota">{vista.periodo.compararDesde ? 'Comparado con el mes anterior' + (vista.periodo.parcial ? ', mismo tramo de días' : '') : 'Sin mes anterior para comparar'}</span>}
           </div>
         </div>
       </div>
@@ -167,7 +171,7 @@ export default function App() {
           </div>
         ) : (
           <CargandoContexto.Provider value={cargando}>
-            {vista ? <Resguardo key={`${capa}-${escenario}-${mesActivo}-${demo}`} donde="Esta capa" envoltura><Pantalla capa={actual} vista={vista} irACapa={irACapa} /></Resguardo> : <div className="q-envoltura q-capa-vacia"><Estado tipo="cargando" titulo="Cargando la data" /></div>}
+            {vista ? <Resguardo key={`${capa}-${escenario}-${clavePeriodo}-${demo}`} donde="Esta capa" envoltura><Pantalla capa={actual} vista={vista} irACapa={irACapa} /></Resguardo> : <div className="q-envoltura q-capa-vacia"><Estado tipo="cargando" titulo="Cargando la data" /></div>}
           </CargandoContexto.Provider>
         )}
       </main>
@@ -178,7 +182,7 @@ export default function App() {
       {vista && <Maia abierta={maiaAbierta} onCerrar={() => setMaiaAbierta(false)} vista={vista} reporte={data.maia} />}
 
       <footer className="q-envoltura q-pie">
-        <p>Las cifras salen de Integrametrics (inversión estimada a precio de tarifa) y de Google Trends. El panel no usa data de ventas ni de clientes de {CLIENTE.nombre}.</p>
+        <p>Las cifras salen de Integrametrics (inversión estimada a precio de tarifa) y de Google Trends. TikTok, Facebook y las plataformas de {CLIENTE.nombre} con su CRM van con data de ejemplo, rotulada, hasta que se conecten.</p>
         <p>The Algorithm · By The Lab</p>
       </footer>
     </div>

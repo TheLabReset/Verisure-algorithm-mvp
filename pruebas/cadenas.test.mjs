@@ -26,7 +26,7 @@ test('cadenas: Lima con inversión y sus repetidoras a la misma hora (o hasta do
   assert.deepEqual([...r.keys()].map((x) => x.medio).sort(), ['OXIGENO (AQP)', 'OXIGENO (CIX)', 'OXIGENO (PIU)']);
   // a 6 minutos, con inversión propia, de otra cadena o de otra versión: cuenta aparte
   const m = mediosDesdeCsv(['fecha,hora,zona,grupo_medio,medio,programa,marca,version,franja,tipo,inversion_soles', ...filas.map((f) => [f.fecha, f.hora, f.zona, f.grupo_medio, f.medio, '', f.marca, f.version, 'DIA', 'SPOT', f.inversion_soles].join(','))].join('\n'));
-  assert.equal(m.meses['2026-07'].X.emisiones, 5);
+  assert.equal(m.emisiones.X.length, 5);
 });
 
 test('cadenas: el contrato cuenta un spot por compra nacional y la inversión no cambia', () => {
