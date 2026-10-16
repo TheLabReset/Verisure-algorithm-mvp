@@ -4,7 +4,7 @@ import {
   ArrowDownRight, ArrowUpRight, ArrowRight, CircleHelp, Megaphone, Contact, Search, MessagesSquare, Globe,
   Sigma, CircleCheck, TriangleAlert, CloudOff, Inbox, CalendarX2, CircleDashed, Hourglass, FlaskConical,
   Eye, TrendingUp, Bot, Calendar, Pin, ChevronDown, CornerDownRight, ListChecks, X, Layers, ArrowUpRight as Ir,
-  ExternalLink, Play, Tv, MonitorSmartphone, AudioLines, Image as ImagenIcono,
+  ExternalLink, Play, Tv, MonitorSmartphone, AudioLines, Image as ImagenIcono, PanelRightOpen,
 } from 'lucide-react';
 import { NO_MEDIDO, variacion } from './formato.js';
 
@@ -306,7 +306,7 @@ export function ListaAlertas({ grupos }) {
                     </summary>
                     <div className="q-fila-detalle">
                       <p>{a.dato}</p>
-                      {a.ir && <a className="q-alerta-ir" href={'#' + a.ir}>Ver el dato en {a.irTexto}<Ir size={14} aria-hidden="true" /></a>}
+                      {a.ir && <a className="q-alerta-ir" href={'#' + (a.irA || a.ir)}>Ver el dato en {a.irTexto}<Ir size={14} aria-hidden="true" /></a>}
                     </div>
                   </details>
                 </li>
@@ -535,6 +535,35 @@ export function PanelLateral({ titulo, bajada, abierto, onCerrar, children, clas
         {children}
       </div>
     </dialog>
+  );
+}
+
+// ── Detalle de un capítulo: la vista general queda siempre a la vista y lo minucioso se abre aparte, en el panel
+// de la derecha. El botón nombra lo que hay adentro, para que nada quede escondido sin aviso. Un ancla #detalle-…
+// (la que usan las alertas cuyo dato vive en el detalle) lo abre. El contenido se arma solo con el panel abierto.
+export function Detalle({ id, titulo, bajada, vistas, children }) {
+  const [abierto, setAbierto] = useState(false);
+  useEffect(() => {
+    const mirar = () => { if (location.hash === '#' + id) setAbierto(true); };
+    mirar();
+    window.addEventListener('hashchange', mirar);
+    return () => window.removeEventListener('hashchange', mirar);
+  }, [id]);
+  const cerrar = () => {
+    setAbierto(false);
+    // el ancla que lo abrió se suelta, para que volver a pedirla lo abra otra vez
+    if (location.hash === '#' + id) history.replaceState(null, '', location.pathname + location.search);
+  };
+  return (
+    <div className="q-detalle" id={id}>
+      <button type="button" className="q-boton q-detalle-boton" aria-haspopup="dialog" aria-expanded={abierto} onClick={() => setAbierto(true)}>
+        <PanelRightOpen size={16} aria-hidden="true" />
+        <span>Ver el detalle<span className="q-detalle-vistas">: {vistas.join(', ').replace(/, ([^,]*)$/, ' y $1')}</span></span>
+      </button>
+      <PanelLateral titulo={titulo} bajada={bajada} abierto={abierto} onCerrar={cerrar} className="q-panel-detalle">
+        {abierto && <div className="q-detalle-cuerpo">{children}</div>}
+      </PanelLateral>
+    </div>
   );
 }
 

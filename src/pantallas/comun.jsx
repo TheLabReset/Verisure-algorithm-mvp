@@ -21,8 +21,14 @@ export function fuentesDe(ids, vista) {
 
 // Alertas ya escritas, con su ancla («a-…» o «b-…») y el capítulo que las sostiene
 const slug = (t) => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-const destino = (numero) => { const s = seccionPorNumero(numero); return s ? { ir: s.id, irTexto: s.titulo } : {}; };
-const escrita = (pref) => (a) => { const t = alerta(a); return t && { ...t, id: `${pref}-${a.id}-${slug(a.marca || a.fuente)}`, ...destino(a.sostiene) }; };
+// Las alertas cuyo dato vive en el detalle del capítulo (no en su vista general) llevan directo a ese panel
+const EN_DETALLE = new Set(['pico-competencia', 'dias-sin-dato']);
+const destino = (numero, id) => {
+  const s = seccionPorNumero(numero);
+  if (!s) return {};
+  return EN_DETALLE.has(id) ? { ir: s.id, irTexto: `el detalle de ${s.titulo}`, irA: `detalle-${s.id}` } : { ir: s.id, irTexto: s.titulo, irA: s.id };
+};
+const escrita = (pref) => (a) => { const t = alerta(a); return t && { ...t, id: `${pref}-${a.id}-${slug(a.marca || a.fuente)}`, ...destino(a.sostiene, a.id) }; };
 export const alertasDe = (vista) => (vista.sugiere.queMirar || []).map(escrita('a')).filter(Boolean);
 export const buenasDe = (vista) => (vista.sugiere.queVaBien || []).map(escrita('b')).filter(Boolean);
 

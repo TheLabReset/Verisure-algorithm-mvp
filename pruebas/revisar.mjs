@@ -16,8 +16,8 @@ export function lecturasDe(v) {
   const P = v.periodo;
   return [
     L.estrenosLectura(v), L.abanicoAtlLectura(v.lee.abanicoAtl, P), L.abanicoDigitalLectura(v.lee.abanicoDigital, P),
-    L.oohLectura(v.lee.ooh, P), L.distritosLectura(v.lee.ooh), L.cronogramaLectura(v.lee.cronograma, 'la competencia'),
-    L.atlLectura(v), L.digitalLectura(v), L.presionLectura(v, 'atl'), L.presionLectura(v, 'digital'), L.shareSemanalLectura(v.analiza.shareSemanal),
+    L.oohLectura(v.lee.ooh, P), L.distritosLectura(v.lee.ooh), L.cronogramaLectura(v.lee.cronograma, 'La competencia', v.analiza.pauta[0]?.serie[0]?.fecha, v.fuentes[0].corte),
+    L.atlLectura(v), L.digitalLectura(v), L.shareLectura(v), L.presionLectura(v, 'atl'), L.presionLectura(v, 'digital'), L.shareSemanalLectura(v.analiza.shareSemanal),
     L.mediosLectura(v, MEDIOS), L.franjasLectura(v, FRANJAS), L.temporadaLectura(v.analiza.temporada), L.pautaLectura(v.analiza.pauta), ...Object.entries(v.analiza.pautaSemanal).map(([u, f]) => L.pautaSemanalLectura(f, u)),
     L.busquedasLectura(v.analiza.busquedas), L.marcasDiyLectura(v.analiza.busquedas),
     ...Object.entries(v.lee.medios || {}).flatMap(([m, d]) => [L.canalesLectura(d, m), L.horarioLectura(d, m), L.programasLectura(d, m)]),

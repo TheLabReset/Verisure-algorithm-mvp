@@ -58,6 +58,12 @@
   /* rampa secuencial de tinta: del gris del fondo a la tinta de la marca; en oscuro, del gris oscuro a la cal */
   --p-r-1: #efefec; --p-r-2: #d9d9d5; --p-r-3: #bcbcb7; --p-r-4: #96968f; --p-r-5: #6e6e69; --p-r-6: #464644; --p-r-7: #1d1d1f;
   --p-ro-1: #34363d; --p-ro-2: #4a4c54; --p-ro-3: #666870; --p-ro-4: #8b8d94; --p-ro-5: #b1b2b7; --p-ro-6: #d5d6d8; --p-ro-7: #f5f5f3;
+  /* rampas de magnitud en el color de cada marca (el mapa de calor de una marca): de menos a más, un solo tono.
+     Calculadas en OKLCH, con cada escalón separado del vecino (lo mide el chequeo) */
+  --p-am-1: #fffcf1; --p-am-2: #fbe6a1; --p-am-3: #facb39; --p-am-4: #eab532; --p-am-5: #c59128; --p-am-6: #9d6c1d; --p-am-7: #724c1e;
+  --p-amo-1: #3e311a; --p-amo-2: #5a4414; --p-amo-3: #785b18; --p-amo-4: #97751a; --p-amo-5: #ba9320; --p-amo-6: #ddb227; --p-amo-7: #ffd338;
+  --p-rj-1: #feeff0; --p-rj-2: #ffd1d3; --p-rj-3: #ffa4a8; --p-rj-4: #f96f74; --p-rj-5: #ea2f3b; --p-rj-6: #ba1d2a; --p-rj-7: #8a1522;
+  --p-rjo-1: #492828; --p-rjo-2: #6d2e30; --p-rjo-3: #96353a; --p-rjo-4: #c13b42; --p-rjo-5: #e54b52; --p-rjo-6: #f5727b; --p-rjo-7: #fca0a7;
 
   /* ── Primitivos: estado (reservados, nunca serie) ── */
   --p-prosegur: #ffc800;    /* el amarillo de Prosegur, medido en sus piezas digitales: los rellenos de la competencia en foco */
@@ -114,6 +120,21 @@
   --q4: var(--p-r-5);
   --q5: var(--p-r-6);
   --q6: var(--p-r-7);
+  /* el mapa de calor de una marca va en su color: la competencia en amarillo, la propia en rojo */
+  --qf0: var(--p-am-1);
+  --qf1: var(--p-am-2);
+  --qf2: var(--p-am-3);
+  --qf3: var(--p-am-4);
+  --qf4: var(--p-am-5);
+  --qf5: var(--p-am-6);
+  --qf6: var(--p-am-7);
+  --qp0: var(--p-rj-1);
+  --qp1: var(--p-rj-2);
+  --qp2: var(--p-rj-3);
+  --qp3: var(--p-rj-4);
+  --qp4: var(--p-rj-5);
+  --qp5: var(--p-rj-6);
+  --qp6: var(--p-rj-7);
   --banda-0: var(--p-n-100);             /* la zona hasta el objetivo en una bala: un solo gris, nunca escalones */
   --sombra-flota: 0 10px 28px rgb(18 19 24 / 0.14);
   color-scheme: light;
@@ -193,6 +214,20 @@
     --q4: var(--p-ro-5);
     --q5: var(--p-ro-6);
     --q6: var(--p-ro-7);
+    --qf0: var(--p-amo-1);
+    --qf1: var(--p-amo-2);
+    --qf2: var(--p-amo-3);
+    --qf3: var(--p-amo-4);
+    --qf4: var(--p-amo-5);
+    --qf5: var(--p-amo-6);
+    --qf6: var(--p-amo-7);
+    --qp0: var(--p-rjo-1);
+    --qp1: var(--p-rjo-2);
+    --qp2: var(--p-rjo-3);
+    --qp3: var(--p-rjo-4);
+    --qp4: var(--p-rjo-5);
+    --qp5: var(--p-rjo-6);
+    --qp6: var(--p-rjo-7);
     --banda-0: var(--p-o-700);
     --sombra-flota: 0 12px 32px rgb(0 0 0 / 0.45);
     color-scheme: dark;
@@ -242,6 +277,20 @@
   --q4: var(--p-ro-5);
   --q5: var(--p-ro-6);
   --q6: var(--p-ro-7);
+  --qf0: var(--p-amo-1);
+  --qf1: var(--p-amo-2);
+  --qf2: var(--p-amo-3);
+  --qf3: var(--p-amo-4);
+  --qf4: var(--p-amo-5);
+  --qf5: var(--p-amo-6);
+  --qf6: var(--p-amo-7);
+  --qp0: var(--p-rjo-1);
+  --qp1: var(--p-rjo-2);
+  --qp2: var(--p-rjo-3);
+  --qp3: var(--p-rjo-4);
+  --qp4: var(--p-rjo-5);
+  --qp5: var(--p-rjo-6);
+  --qp6: var(--p-rjo-7);
   --banda-0: var(--p-o-700);
   --sombra-flota: 0 12px 32px rgb(0 0 0 / 0.45);
   color-scheme: dark;

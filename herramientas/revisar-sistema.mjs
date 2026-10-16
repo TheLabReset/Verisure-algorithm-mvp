@@ -35,6 +35,8 @@ const CONVIVEN = [
   // la marca propia frente a la competencia y frente al gris de la comparación (por luminosidad, no solo por tono)
   ['propia', 'serie-resto', 2], ['propia', 'resalte', 1.4], ['propia-linea', 'serie-resto', 2], ['propia-linea', 'serie-1', 1.4],
   ['q0', 'q1', 1.2], ['q1', 'q2', 1.2], ['q2', 'q3', 1.2], ['q3', 'q4', 1.2], ['q4', 'q5', 1.2], ['q5', 'q6', 1.2],
+  // las rampas de marca: cada escalón separado del vecino, igual que la de tinta
+  ...['qf', 'qp'].flatMap((r) => [0, 1, 2, 3, 4, 5].map((i) => [`${r}${i}`, `${r}${i + 1}`, 1.2])),
 ];
 // pares fijos: texto sobre un relleno
 const PARES = [['sobre-seleccion', 'seleccion', 4.5], ['sobre-barra', 'barra', 4.5], ['sobre-barra-2', 'barra', 4.5]];

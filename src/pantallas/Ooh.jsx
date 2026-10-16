@@ -62,12 +62,13 @@ export default function Ooh({ o, t, nota }) {
   const elegirZona = (z) => { setZona(z); setElegida(null); };
   return (
     <div className="q-ooh">
+      {/* la zona va en su propia fila, sobre las dos columnas: así el mapa y la foto del panel empiezan a la misma altura */}
+      {o.zonas.length > 1 && (
+        <div className="q-control q-ooh-zonas"><MapPin size={14} aria-hidden="true" /><span>Zona</span>
+          <Grupo etiqueta="Zona del mapa" valor={actual.nombre} onCambiar={elegirZona} opciones={o.zonas.map((z) => ({ valor: z.nombre, texto: `${z.nombre} · ${numero(z.paneles)}` }))} />
+        </div>
+      )}
       <div className="q-ooh-mapa">
-        {o.zonas.length > 1 && (
-          <div className="q-control q-ooh-zonas"><MapPin size={14} aria-hidden="true" /><span>Zona</span>
-            <Grupo etiqueta="Zona del mapa" valor={actual.nombre} onCambiar={elegirZona} opciones={o.zonas.map((z) => ({ valor: z.nombre, texto: `${z.nombre} · ${numero(z.paneles)}` }))} />
-          </div>
-        )}
         <Suspense fallback={<div className="q-mapa q-mapa-cargando">Cargando el mapa…</div>}>
           <MapaPaneles key={o.zonas.map((z) => z.nombre).join()} ubicaciones={ubicaciones} elegida={id} onElegir={setElegida} encuadre={encuadre}
             etiqueta={`Mapa de paneles OOH en ${actual?.nombre ?? 'Lima'}`} />

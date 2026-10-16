@@ -15,6 +15,15 @@ export function tramoFechas(desde, hasta) {
 }
 // El período: el mes entero, o el tramo cuando el mes todavía corre («del 1 al 13 de julio»)
 // El mes en curso se dice «lo que va de julio»: se lee bien después de «de», «en» o «para», y el tramo exacto va en el chip de cada tarjeta
+// Un tramo de meses que se escribe con lo que tiene la data: «entre enero y julio», «en julio»,
+// «entre diciembre de 2026 y enero de 2027». a: 'entre' | 'de' (para «de enero a julio»)
+export function tramoMeses(desde, hasta, a = 'entre') {
+  if (!desde || !hasta) return 'en el año';
+  const [ad, md] = [desde.slice(0, 4), +desde.slice(5, 7)], [ah, mh] = [hasta.slice(0, 4), +hasta.slice(5, 7)];
+  if (ad === ah && md === mh) return `en ${mesLargo(md)}`;
+  const [x, y] = ad === ah ? [mesLargo(md), mesLargo(mh)] : [`${mesLargo(md)} de ${ad}`, `${mesLargo(mh)} de ${ah}`];
+  return a === 'de' ? `${x} a ${y}` : `entre ${x} y ${y}`;
+}
 export const periodoTexto = (P) => (P.parcial ? `lo que va de ${mesLargo(+P.mes.slice(5, 7))}` : mesTexto(P.mes));
 export const comparacionTexto = (P) => (!P.compararDesde ? null : P.parcial ? `el mismo tramo de ${mesLargo(+P.compararDesde.slice(5, 7))}` : mesTexto(P.compararDesde.slice(0, 7)));
 

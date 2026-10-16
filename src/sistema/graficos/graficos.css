@@ -96,6 +96,21 @@
 .q-q4 { fill: var(--q4); background: var(--q4); }
 .q-q5 { fill: var(--q5); background: var(--q5); }
 .q-q6 { fill: var(--q6); background: var(--q6); }
+/* el mapa de calor de una marca, en su color */
+.q-calor-foco .q-q0 { fill: var(--qf0); background: var(--qf0); }
+.q-calor-foco .q-q1 { fill: var(--qf1); background: var(--qf1); }
+.q-calor-foco .q-q2 { fill: var(--qf2); background: var(--qf2); }
+.q-calor-foco .q-q3 { fill: var(--qf3); background: var(--qf3); }
+.q-calor-foco .q-q4 { fill: var(--qf4); background: var(--qf4); }
+.q-calor-foco .q-q5 { fill: var(--qf5); background: var(--qf5); }
+.q-calor-foco .q-q6 { fill: var(--qf6); background: var(--qf6); }
+.q-calor-propia .q-q0 { fill: var(--qp0); background: var(--qp0); }
+.q-calor-propia .q-q1 { fill: var(--qp1); background: var(--qp1); }
+.q-calor-propia .q-q2 { fill: var(--qp2); background: var(--qp2); }
+.q-calor-propia .q-q3 { fill: var(--qp3); background: var(--qp3); }
+.q-calor-propia .q-q4 { fill: var(--qp4); background: var(--qp4); }
+.q-calor-propia .q-q5 { fill: var(--qp5); background: var(--qp5); }
+.q-calor-propia .q-q6 { fill: var(--qp6); background: var(--qp6); }
 .q-svg .q-sin-dato { fill: var(--superficie); stroke: var(--borde-control); stroke-dasharray: 2 2; }
 .q-svg .q-celda:hover { stroke: var(--texto-1); stroke-width: 1.5; }
 
@@ -184,3 +199,5 @@
 .q-muestra-mapa-foco { border-radius: 50%; background: var(--resalte); border: 1px solid var(--resalte-anillo); }
 .q-muestra-mapa-resto { border-radius: 50%; background: var(--borde-control); }
 .q-muestra-mapa-propia, .q-muestra-propia { border-radius: 50%; background: var(--propia); }
+.q-muestra-propia-cuadro { background: var(--propia); margin-left: calc(-1 * var(--e-1)); }
+.q-muestra-resto { background: var(--serie-resto); }

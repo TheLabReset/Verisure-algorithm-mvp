@@ -19,7 +19,7 @@ No hay guía de marca pública: el sitio de Verisure y Brandfetch bloquean la de
 
 - **Barra:** el logo completo en negativo (`public/marca/logo-barra.svg`), en blanco sobre la barra oscura en los dos temas. Se pinta con `currentColor`, así que toma `--sobre-barra`. No se recompone ni se recorta: va tal como vino.
 - **Favicon:** el símbolo en rojo (`public/favicon.svg`).
-- **Rojo:** identidad. Marca la capa activa, el número del capítulo, el acento y a Verisure en los gráficos. Nunca va en un texto de dato ni en una rampa de magnitud.
+- **Rojo:** identidad. Marca la capa activa, el número del capítulo, el acento y a Verisure en los gráficos. Nunca va en un texto de dato. El mapa de calor de Verisure va en una rampa de su rojo; el de Prosegur, en una de su amarillo.
 - **Gráficos y mapa, con foco en la competencia:** Prosegur va en su amarillo y Verisure en su rojo (`--propia`). El gris queda para la comparación (el mes anterior, las semanas fuera del período, los términos de búsqueda que no son de nadie). Lo principal sigue siendo saber qué hace Prosegur: va primero, en el color de foco, con borde y anillo; Verisure va liso, sin borde.
   - En claro, el amarillo sobre blanco no se ve (1,55 : 1), así que los rellenos (barras, tramos, puntos, círculos del mapa) llevan un borde de tinta: es la regla de relleno con borde de Quincha. Las líneas finas van en ocre (#A67C00), porque una línea no lleva borde.
   - En oscuro, el amarillo puro, sin borde (9,3 : 1 sobre el fondo).

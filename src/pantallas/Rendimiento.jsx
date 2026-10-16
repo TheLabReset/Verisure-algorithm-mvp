@@ -1,13 +1,14 @@
 // Capa 4 · Rendimiento y optimización: cómo viene el share de la competencia en el período frente al anterior.
-// Share of investment en ATL y en digital (universos distintos: lado a lado, nunca sumados), el share semana a semana
-// en el año y la inversión día por día. No calcula: pinta la vista.
+// A la vista: el share of investment en digital y en ATL en una tarjeta (universos distintos: lado a lado, nunca
+// sumados) y el share semana a semana en el año. En el detalle: las cifras en soles y la inversión día por día.
+// No calcula: pinta la vista.
 import { useState } from 'react';
-import { Bloque, Tabla, Resumen, Grupo } from '../sistema/Componentes.jsx';
+import { Bloque, Tabla, Resumen, Grupo, Detalle } from '../sistema/Componentes.jsx';
 import { Pesas, Lineas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, soles, solesCompacto, compacto } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import { periodoTexto, comparacionTexto, puntosFrente, capital } from '../textos/comun.js';
-import { fraseShare, atlLectura, digitalLectura, presionLectura, shareSemanalLectura } from '../textos/lecturas.js';
+import { fraseShare, atlLectura, digitalLectura, shareLectura, presionLectura, shareSemanalLectura } from '../textos/lecturas.js';
 
 const pts = (n) => (n == null ? 'sin comparación' : n === 0 ? 'igual' : `${n > 0 ? '+' : '−'}${numero(Math.abs(n))} pts`);
 
@@ -31,7 +32,7 @@ function ShareMarcas({ u, etiqueta, rotuloA }) {
 export default function Rendimiento({ capa, vista: v }) {
   const [s41] = capa.secciones;
   const P = v.periodo, atl = v.lee.atl, dig = v.lee.digital;
-  const [diario, setDiario] = useState('digital');
+  const [diario, setDiario] = useState(dig.estado === 'ok' ? 'digital' : 'atl');
   const ok = (x) => x.estado === 'ok';
   const rival = (u) => u.marcas.find((m) => m.foco);
   const comparacion = comparacionTexto(P);
@@ -51,20 +52,19 @@ export default function Rendimiento({ capa, vista: v }) {
         ]} />
 
       <SeccionDe def={s41} vista={v}>
-        {!ok(dig) ? <Bloque titulo="Share of investment digital" universo="digital" estado={sinDato(dig.estado)} /> : (
-          <Bloque universo="digital" {...digitalLectura(v)}
-            ayuda={<p>Inversión digital estimada por Integrametrics en Facebook, Instagram, Google Search y YouTube. Cada fila une el share de la comparación (gris) con el del período.</p>}
-            pie={<span>Facebook, Instagram, Google Search y YouTube.</span>}>
-            <ShareMarcas u={dig} etiqueta="Share de la inversión digital por marca, antes y ahora" rotuloA={rotuloA} />
-            <TablaShare u={dig} etiqueta="Inversión, impresiones y share digital por marca" conImpresiones />
-          </Bloque>
-        )}
-        {!ok(atl) ? <Bloque titulo="Share of investment ATL" universo="atl" estado={sinDato(atl.estado)} /> : (
-          <Bloque universo="atl" {...atlLectura(v)}
-            ayuda={<p>Share of investment: la parte de la inversión de la categoría que pone cada marca. Integrametrics estima la inversión con la tarifa de cada medio (inversión bruta), no con lo que se pagó.</p>}
-            pie={<span>TV abierta, cable, radio, OTT y vía pública.</span>}>
-            <ShareMarcas u={atl} etiqueta="Share de la inversión ATL por marca, antes y ahora" rotuloA={rotuloA} />
-            <TablaShare u={atl} etiqueta="Inversión y share ATL por marca" />
+        {!ok(dig) && !ok(atl) ? <Bloque titulo="Share of investment" universo={['digital', 'atl']} estado={sinDato(dig.estado)} /> : (
+          <Bloque universo={[...(ok(dig) ? ['digital'] : []), ...(ok(atl) ? ['atl'] : [])]} {...shareLectura(v)}
+            ayuda={<p>Share of investment: la parte de la inversión de la categoría que pone cada marca, en digital (Facebook, Instagram, Google Search y YouTube) y en ATL (TV abierta, cable, radio, OTT y vía pública). Integrametrics estima cada universo con un método distinto: se leen lado a lado y nunca se suman. Cada fila une el share de la comparación (gris) con el del período.</p>}
+            pie={<span>Inversión estimada por Integrametrics a precio de tarifa. Las cifras en soles y las impresiones están en el detalle.</span>}>
+            <div className="q-share-universos">
+              {[['Digital', dig], ['ATL', atl]].map(([n, x]) => (
+                <div key={n} className="q-pauta-marca">
+                  <h4>{n}<span>{ok(x) ? `${solesCompacto(x.total)} entre las dos marcas` : 'no cargó'}</span></h4>
+                  {ok(x) ? <ShareMarcas u={x} etiqueta={`Share de la inversión ${n === 'ATL' ? 'ATL' : 'digital'} por marca, antes y ahora`} rotuloA={rotuloA} />
+                    : <p className="q-nota-bloque">Integrametrics {n === 'ATL' ? 'ATL' : 'digital'} no cargó: este universo no se muestra.</p>}
+                </div>
+              ))}
+            </div>
           </Bloque>
         )}
         {(s.atl || s.digital) && (
@@ -75,13 +75,27 @@ export default function Rendimiento({ capa, vista: v }) {
               series={[...(s.digital ? [{ nombre: 'Digital', resaltada: true, serie: s.digital }] : []), ...(s.atl ? [{ nombre: 'ATL', resaltada: false, serie: s.atl }] : [])]} />
           </Bloque>
         )}
-        {ok(u) && (
-          <Bloque universo={diario} {...presionLectura(v, diario)}
-            pie={<span>Inversión estimada de cada día, en soles, en la misma escala para las dos marcas. Un día sin registros es un hueco, no un cero.</span>}>
-            <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={diario} onCambiar={setDiario} opciones={[{ valor: 'digital', texto: 'Digital' }, { valor: 'atl', texto: 'ATL', desactivada: !ok(atl) }]} /></div>
-            <Lineas etiqueta={`Inversión ${diario === 'atl' ? 'ATL' : 'digital'} por día y por marca`} formato={solesCompacto}
-              series={[...u.marcas].sort((a, b) => Number(a.foco) - Number(b.foco)).map((m) => ({ nombre: m.nombre, resaltada: m.foco, tono: m.propia ? 'propia' : undefined, serie: u.diaria.map((d) => ({ fecha: d.fecha, valor: d.valores[m.id] })) }))} />
-          </Bloque>
+        {(ok(dig) || ok(atl)) && (
+          <Detalle id={`detalle-${s41.id}`} titulo="Detalle de cómo viene el período" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['la inversión y el share en soles', 'la inversión día por día']}>
+            {ok(dig) && (
+              <Bloque universo="digital" {...digitalLectura(v)} pie={<span>Facebook, Instagram, Google Search y YouTube.</span>}>
+                <TablaShare u={dig} etiqueta="Inversión, impresiones y share digital por marca" conImpresiones />
+              </Bloque>
+            )}
+            {ok(atl) && (
+              <Bloque universo="atl" {...atlLectura(v)} pie={<span>TV abierta, cable, radio, OTT y vía pública.</span>}>
+                <TablaShare u={atl} etiqueta="Inversión y share ATL por marca" />
+              </Bloque>
+            )}
+          {ok(u) && (
+            <Bloque universo={diario} {...presionLectura(v, diario)}
+              pie={<span>Inversión estimada de cada día, en soles, en la misma escala para las dos marcas. Un día sin registros es un hueco, no un cero.</span>}>
+              <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={diario} onCambiar={setDiario} opciones={[{ valor: 'digital', texto: 'Digital', desactivada: !ok(dig) }, { valor: 'atl', texto: 'ATL', desactivada: !ok(atl) }]} /></div>
+              <Lineas etiqueta={`Inversión ${diario === 'atl' ? 'ATL' : 'digital'} por día y por marca`} formato={solesCompacto}
+                series={[...u.marcas].sort((a, b) => Number(a.foco) - Number(b.foco)).map((m) => ({ nombre: m.nombre, resaltada: m.foco, tono: m.propia ? 'propia' : undefined, serie: u.diaria.map((d) => ({ fecha: d.fecha, valor: d.valores[m.id] })) }))} />
+            </Bloque>
+          )}
+          </Detalle>
         )}
       </SeccionDe>
     </MarcoCapa>

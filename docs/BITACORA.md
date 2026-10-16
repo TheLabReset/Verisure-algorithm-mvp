@@ -210,3 +210,14 @@ Ajustes pedidos por The Lab después de ver el rediseño.
 - **Corrección:** los selectores dentro de una tarjeta abrían columnas implícitas y dejaban los gráficos angostos, con un hueco a la derecha. Ahora cada gráfico mide lo mismo que su tarjeta.
 
 - **Prosegur en su amarillo** (#FFC800, medido en sus piezas): relleno con borde de tinta en claro, amarillo puro en oscuro, líneas en ocre. «Atención» pasa a tinta y Radio a tinta en las franjas de medios, para no chocar con el amarillo. El chequeo de Quincha mide el borde de un relleno que lo tiene.
+
+## Vista general y detalle, Verisure en su rojo y data en movimiento (octubre de 2026)
+
+The Lab pidió menos scroll y no cargar las vistas pensando en la data que va a llegar (Google, Meta, TikTok, un Google Sheets).
+
+- **De 22 tarjetas a la vista a 10.** Cada capítulo muestra lo que cambia la decisión de la semana; lo minucioso va en su detalle, un panel a la derecha con un botón que nombra lo que hay adentro. Tope de tres tarjetas por capítulo y diez en el panel, escrito en la guía.
+- **Fusiones:** los estrenos del período van bajo el cronograma de versiones (solo los de la competencia a la vista); ATL y digital al aire son un solo abanico con selector; el share digital y el ATL, una tarjeta lado a lado.
+- **Al detalle:** todos los estrenos, paneles por distrito, la pieza de cada panel, las marcas de cámaras, la inversión de cada mes, la inversión por medio en soles, franjas, canales, programas, las cifras de share en soles y la inversión día por día. «Lo que falta conectar» queda en «Qué se monitorea».
+- **Verisure en su rojo** en los gráficos y el mapa; el gris queda para la comparación. El mapa de calor va en la rampa de la marca elegida (amarillo o rojo). La pauta del año pone las dos marcas en la misma escala: con escalas propias, Prosegur se veía más alto que Verisure invirtiendo menos.
+- **Data en movimiento:** once escenarios sobre la data real, en las pruebas y en la barra de demo. Salieron una caída real (Trends sin un año de historia dejaba el panel en blanco), alertas que faltaban (la competencia que baja a la mitad o se apaga) y variaciones leídas con un solo día de data. Cada gráfico y cada capa van en un resguardo.
+- **Textos sin fechas fijas:** el cronograma decía «entre enero y julio» escrito a mano; ahora sale de la data.

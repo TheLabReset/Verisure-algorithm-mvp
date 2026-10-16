@@ -9,7 +9,7 @@ import { periodoDelMes } from '../src/calculo/periodo.js';
 import { mediosDesdeCsv, leerCsv } from '../src/fuentes/medios.js';
 import { CLIENTE } from '../src/cliente.js';
 import * as L from '../src/textos/lecturas.js';
-import { version, medioEnFrase } from '../src/textos/comun.js';
+import { version, medioEnFrase, tramoMeses } from '../src/textos/comun.js';
 import { hechoTexto } from '../src/textos/maia.js';
 import { distritoDe, proyectar } from '../src/calculo/ooh.js';
 import { semanaDe } from '../src/calculo/semana.js';
@@ -161,6 +161,21 @@ test('medios.json es lo que sale del CSV commiteado', () => {
 
 test('leerCsv respeta comillas, comas y comillas dobles dentro de un campo', () => {
   assert.deepEqual(leerCsv('a,b\n"x, y","di ""hola"""\n'), [{ a: 'x, y', b: 'di "hola"' }]);
+});
+
+test('el tramo de meses sale de la data, no de un texto fijo', () => {
+  assert.equal(tramoMeses('2026-01-01', '2026-07-13'), 'entre enero y julio');
+  assert.equal(tramoMeses('2026-01-01', '2026-07-13', 'de'), 'enero a julio');
+  assert.equal(tramoMeses('2026-07-01', '2026-07-01'), 'en julio');
+  assert.equal(tramoMeses('2026-12-01', '2027-02-10'), 'entre diciembre de 2026 y febrero de 2027');
+  assert.equal(tramoMeses(null, '2026-07-01'), 'en el año');
+});
+
+test('las lecturas de la vista no traen meses escritos a mano', () => {
+  // si la data empieza en marzo, el cronograma no puede decir «entre enero y julio»
+  const v = vistaDe(MESES.at(-1));
+  const x = L.cronogramaLectura(v.lee.cronograma, 'La competencia', '2026-03-01', v.fuentes[0].corte);
+  assert.match(x.lectura, /entre marzo y julio/);
 });
 
 test('nombres de versión y medios dentro de una frase', () => {

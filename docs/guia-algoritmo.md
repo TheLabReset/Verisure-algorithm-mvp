@@ -46,6 +46,13 @@ Antes de cualquier decisión, la pregunta es la misma: **¿esto lo vamos a poder
 2. **Resumen:** de cuatro a cinco cifras. Cada una lleva su variación o su nota y un enlace al capítulo que la explica. Las cifras de una plataforma llevan el punto de su color en el rótulo («● CPL Google Ads»).
    - **El objetivo se dice en una frase, no en una barra.** Va en una caja gris debajo de las cifras, con una línea por plataforma: «Google Ads pagó **$7,14** por lead: $0,37 por debajo de su objetivo de **$7,51**». Solo la distancia lleva color (rojo si pasa el objetivo, verde si queda debajo) y las cifras van en negrita. Se eligió así porque no hay nada que aprender a leer, ocupa pocas líneas y no compite con las cifras de arriba. [`Resumen`, `frases`; `objetivoFrase` en `src/textos/capas.js`]
 3. **Capítulos:** un panel gris con número, título y pregunta. Arriba van los avisos de las alertas que ese capítulo sostiene, en una línea cada uno, y debajo las tarjetas blancas.
+4. **Vista general y detalle.** Cada capítulo muestra a la vista solo lo que cambia la decisión de la semana; lo minucioso va en su **detalle**, un panel que se abre a la derecha con el botón «Ver el detalle» al pie del capítulo. [`Detalle`]
+   - **Tope:** tres tarjetas a la vista por capítulo y diez en todo el panel. Si una tarjeta nueva no entra, otra pasa al detalle o se fusiona.
+   - **El botón nombra lo que hay adentro** («Ver el detalle: paneles por distrito y la pieza de cada panel»). Nada se esconde sin aviso.
+   - **Las alertas siguen leyendo todo.** Una alerta cuyo dato vive en el detalle lleva a ese panel (`#detalle-<capítulo>`), no a la vista general.
+   - **Va al detalle:** las tablas en soles de lo que ya muestra un gráfico, el día por día, las listas largas (programas, canales, distritos, todos los estrenos) y lo que solo usa quien planifica medios.
+   - **Fusionar antes que sumar.** Dos tarjetas que responden la misma pregunta van en una, con un selector (ATL o digital) o con una segunda lectura separada por una línea (los estrenos bajo el cronograma).
+   - **Una fuente nueva** (Google Ads, Meta, TikTok, un Google Sheets) entra primero a una tarjeta que ya existe: una fila, un mazo del abanico, una marca en un gráfico, una frase de objetivo. Abre tarjeta propia solo si responde una pregunta que ninguna otra responde, y entonces respeta el tope.
 
 ## 5. La tarjeta
 
@@ -82,7 +89,8 @@ Antes de cualquier decisión, la pregunta es la misma: **¿esto lo vamos a poder
   - cuánto dura cada versión o campaña: cronograma [`Cronograma`];
   - dónde está: mapa con puntos clicables y una ficha al lado [`MapaPaneles`].
   Las barras quedan para rankings (canales, programas).
-- **Rampas de magnitud:** un solo tono, el del foco (tinta en claro, cal en oscuro). Nunca un color que no es de ninguna marca del panel. [`--q0` a `--q6`]
+- **Rampas de magnitud:** un solo tono, de claro a oscuro. Si el gráfico es de una sola marca (el mapa de calor de cuándo emite), la rampa va en el color de esa marca, para que se sepa de quién es el dato sin leer el título; si no, en tinta. Nunca un color que no es de ninguna marca del panel. [`--q0` a `--q6`, `--qf0` a `--qf6` del foco, `--qp0` a `--qp6` de la propia]
+- **Una escala para todas las marcas.** Si dos marcas van una debajo de otra, comparten la escala: una barra más alta siempre es más inversión. Escalas distintas se leen como la misma aunque la ayuda diga que no. [`Histograma` con `max`]
 - **Controles dentro de una tarjeta** (marca, universo): van en `q-control-tarjeta`, que no abre columnas en el cuerpo de la tarjeta. Un control que abre columnas deja el gráfico angosto con un hueco a la derecha. Antes de entregar, cada gráfico mide lo mismo que su tarjeta.
 - **Mapas:** Leaflet con un mapa base de verdad (calles y nombres), calmado con el filtro `--mapa-filtro` para que se lean los puntos. Cada punto se puede elegir y abre una ficha con la pieza; un punto que no se puede abrir no sirve. Fuera de la ciudad principal, botones de zona que encuadran el mapa. El distrito sale de las coordenadas, nunca del texto que trae la fuente.
 - El contraste se mide con `npm run sistema`. Los pares de colores que conviven en un gráfico tienen mínimos propios.

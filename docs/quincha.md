@@ -35,7 +35,8 @@ Los semánticos se agrupan por función:
   - `--serie-resto`: el resto, cuando hay un resalte;
   - `--previa`: el período de comparación, siempre en gris;
   - `--s2`, `--s3` y `--s4` (menta, naranja y azul): partes de un todo, que en un gráfico van en orden azul, naranja y menta;
-  - `--q0` a `--q6`: la rampa para magnitud.
+  - `--q0` a `--q6`: la rampa para magnitud, en tinta;
+  - `--qf0` a `--qf6` y `--qp0` a `--qp6`: la misma rampa en el color del foco y de la marca propia, para un gráfico de una sola marca. Calculadas en OKLCH; el chequeo mide cada escalón contra el vecino.
 
 **Claro por defecto.** Se proyecta en reuniones y se lee de día. El oscuro no invierte el claro: tiene sus propios niveles, y lo más claro es lo más cercano al lector.
 

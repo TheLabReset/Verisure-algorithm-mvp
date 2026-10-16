@@ -3,7 +3,7 @@
 // la tarjeta es sobre la marca propia. Toda cifra llega calculada desde src/calculo; acá solo se escribe.
 import { numero, porcentaje, soles, solesCompacto, fechaCorta } from '../sistema/formato.js';
 import { CLIENTE } from '../cliente.js';
-import { periodoTexto, comparacionTexto, puntosFrente, enLetras, segun, lista, capital, horasTexto, DIAS_SEMANA, version, mesTexto, medioEnFrase } from './comun.js';
+import { tramoMeses, periodoTexto, comparacionTexto, puntosFrente, enLetras, segun, lista, capital, horasTexto, DIAS_SEMANA, version, mesTexto, medioEnFrase } from './comun.js';
 
 const propiaDe = (u) => u.marcas.find((m) => m.propia);
 const rivalDe = (u) => u.marcas.find((m) => !m.propia);
@@ -57,6 +57,31 @@ export function digitalLectura(v) {
   const titulo = parejo ? 'En digital la inversión está pareja' : `${r.share > p.share ? r.nombre : p.nombre} lidera la inversión digital`;
   return { titulo, lectura: `En Facebook, Instagram, Google y YouTube, ${r.nombre} tiene ${pct(r.share)} y ${p.nombre} ${pct(p.share)}.${cola}` };
 }
+// El share del período en una sola tarjeta: digital y ATL lado a lado (universos distintos, nunca sumados).
+// La competencia en el título; la marca propia y el cambio frente a la comparación en la lectura
+export function shareLectura(v) {
+  const P = v.periodo;
+  const us = [['digital', v.lee.digital], ['ATL', v.lee.atl]].filter(([, u]) => u.estado === 'ok' && rivalDe(u)?.share != null);
+  if (!us.length) return { titulo: 'Sin inversión registrada en el período', lectura: `Integrametrics no tiene inversión de ninguna marca en ${periodoTexto(P)}.` };
+  const r = rivalDe(us[0][1]), p = propiaDe(us[0][1]);
+  // cuánto tiene cada marca en cada universo; un 0 se dice «no tiene inversión», nunca «0 %»
+  const tiene = (m, largo) => {
+    const con = us.filter(([, u]) => m(u).share), sin = us.filter(([, u]) => !m(u).share);
+    const partes = con.map(([n, u]) => (largo ? `${pct(m(u).share)} de la inversión ${n}` : `${pct(m(u).share)} en ${n}`));
+    const no = sin.length ? `no tiene inversión ${sin.map(([n]) => (largo ? n : `en ${n}`)).join(' ni ')}` : null;
+    return partes.length ? `tiene ${lista(partes)}${no ? ` y ${no}` : ''}` : no;
+  };
+  const titulo = `${r.nombre} ${tiene(rivalDe, true)}`;
+  const propia = `${p.nombre} ${tiene(propiaDe, false)}.`;
+  // el cambio solo si hay con qué comparar (y días suficientes: puntosFrente lo decide)
+  const cambios = us.map(([n, u]) => [n, rivalDe(u).cambioPts]).filter(([, x]) => x != null && puntosFrente(x, P));
+  const cambio = (x) => (x === 0 ? 'igual' : `${numero(Math.abs(x))} ${segun(Math.abs(x), 'punto', 'puntos')} ${x > 0 ? 'más' : 'menos'}`);
+  const comp = comparacionTexto(P) || '';
+  const frenteA = comp.startsWith('el ') ? `al ${comp.slice(3)}` : `a ${comp}`;
+  const frente = cambios.length ? ` Frente ${frenteA}, ${r.nombre} queda ${lista(cambios.map(([n, x]) => `${cambio(x)} en ${n}`))}.` : '';
+  return { titulo, lectura: `${propia}${frente}` };
+}
+
 export function presionLectura(v, universo = 'atl') {
   const u = v.lee[universo];
   const conData = u.diaria.filter((d) => Object.values(d.valores).some((x) => x != null));
@@ -91,12 +116,12 @@ export function shareSemanalLectura(s) {
 }
 
 // ── 1.1 ──
-export function cronogramaLectura(c, marca) {
+export function cronogramaLectura(c, marca, desde, hasta) {
   const titulo = `Las versiones de ${marca} en el año`;
   if (!c?.total) return { titulo, lectura: `Integrametrics no registró versiones de ${marca} en el año.` };
   const atl = c.filas.filter((f) => f.universo === 'atl').length, dig = c.filas.filter((f) => f.universo === 'digital').length;
   const top = [...c.filas].sort((a, b) => b.inversion - a.inversion)[0];
-  return { titulo, lectura: `${marca} tuvo ${numero(c.total)} versiones entre enero y julio; acá van las ${numero(c.filas.length)} con más inversión, ${numero(atl)} ATL y ${numero(dig)} digitales. La de más inversión es ${cita(top.version)}, del ${fechaCorta(top.desde)} al ${fechaCorta(top.hasta)}.` };
+  return { titulo, lectura: `${marca} tuvo ${numero(c.total)} versiones ${tramoMeses(desde, hasta)}; acá van las ${numero(c.filas.length)} con más inversión, ${numero(atl)} ATL y ${numero(dig)} digitales. La de más inversión es ${cita(top.version)}, del ${fechaCorta(top.desde)} al ${fechaCorta(top.hasta)}.` };
 }
 export function estrenosLectura(v) {
   const e = v.lee.estrenos, P = v.periodo;

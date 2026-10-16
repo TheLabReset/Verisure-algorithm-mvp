@@ -6,10 +6,12 @@ Sigue el estándar de The Algorithm: cuatro capas, el sistema de diseño Quincha
 
 ## Las cuatro capas
 
-1. **Captura de señales:** qué hizo Prosegur. Sus versiones del año en un cronograma, lo que estrenó, lo que tiene al aire en ATL y digital (en abanico, con su video, audio o imagen) y el OOH en un mapa: cada panel se puede elegir y abre su foto o video.
-2. **Inteligencia de mercado:** qué mirar (alertas con umbral fijo, la competencia primero), las cámaras DIY (cuánto se buscan frente a la marca y qué marcas de cámaras crecen, con Google Trends) y la pauta del año semana a semana.
-3. **Activación estratégica:** cómo reparte cada marca su inversión por medio, sus franjas, canales, la semana día × hora y los programas.
-4. **Rendimiento y optimización:** share of investment en ATL y en digital frente al período anterior, el share de Prosegur semana a semana y la inversión día por día.
+Cada capítulo tiene una vista general y un detalle que se abre a la derecha («Ver el detalle»), para que el panel no crezca hacia abajo cuando llegue más data.
+
+1. **Captura de señales:** qué hizo Prosegur. Sus versiones del año en un cronograma con los estrenos del período, lo que tiene al aire en ATL o digital (en abanico, con su video, audio o imagen) y el OOH en un mapa: cada panel se puede elegir y abre su foto o video. En el detalle: todos los estrenos, los paneles por distrito y la pieza de cada panel.
+2. **Inteligencia de mercado:** qué mirar (alertas con umbral fijo, la competencia primero), las cámaras DIY frente a la marca (Google Trends) y la pauta del año semana a semana, con las dos marcas en la misma escala. En el detalle: las marcas de cámaras que más se buscan y la inversión de cada mes.
+3. **Activación estratégica:** cómo reparte cada marca su inversión por medio y cuándo emite (día × hora, en el color de la marca). En el detalle: la inversión por medio en soles, las franjas, los canales y los programas.
+4. **Rendimiento y optimización:** el share of investment en digital y en ATL frente al período anterior, y el share de Prosegur semana a semana. En el detalle: las cifras en soles y la inversión día por día.
 
 **MAIA** (Media Analyst IA), en el botón de la barra: el reporte de cada semana (los hechos, calculados con reglas, y su lectura, escrita por el modelo cada lunes) y consultas sobre la data del panel.
 
@@ -88,7 +90,7 @@ El pipeline corre en GitHub Actions ([`.github/workflows/pipeline.yml`](.github/
 
 ## Lo que falta conectar
 
-Se muestra solo lo que tenemos. En «Qué se monitorea» y en el capítulo de cámaras DIY quedan a la vista las fuentes por conectar: precios de cámaras en marketplaces (Mercado Libre pide credenciales), anuncios de marcas de cámaras (Meta Ad Library pide un token), denuncias SIDPOL y el Power BI de Verisure, que sería lo último en activarse.
+Se muestra solo lo que tenemos. En «Qué se monitorea» quedan a la vista las fuentes por conectar: precios de cámaras en marketplaces (Mercado Libre pide credenciales), anuncios de marcas de cámaras (Meta Ad Library pide un token), denuncias SIDPOL y el Power BI de Verisure, que sería lo último en activarse.
 
 ## Documentación
 

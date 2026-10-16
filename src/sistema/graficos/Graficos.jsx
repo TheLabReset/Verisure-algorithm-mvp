@@ -367,11 +367,12 @@ export function Reticula({ partes, cuadros, etiqueta }) {
 }
 
 // ─────────────── Mapa de calor hora × día, con escala visible ───────────────
-export function MapaCalor({ matriz, formato = numero, etiqueta }) {
+// tono: 'foco' o 'propia' pinta la rampa en el color de la marca; sin tono, en tinta
+export function MapaCalor({ matriz, formato = numero, etiqueta, tono }) {
   const max = Math.max(...matriz.flat().filter((v) => v != null));
   const tabla = { columnas: ['Día', ...Array.from({ length: 24 }, (_, h) => `${h} h`)], filas: matriz.map((f, i) => [DIAS[i], ...f.map((v) => formato(v))]) };
   return (
-    <Grafico etiqueta={etiqueta} tabla={tabla}>
+    <Grafico etiqueta={etiqueta} tabla={tabla} className={tono ? `q-calor-${tono}` : ''}>
       {(ancho) => {
         const m = { t: 22, r: 4, b: 4, l: 78 }, ch = 26;
         const cw = (ancho - m.l - m.r) / 24, alto = m.t + 7 * ch + m.b;
@@ -529,13 +530,14 @@ function Rotulo({ texto, cx, y, ancho }) {
   return <text className="q-rotulo-valor" x={x} y={y} textAnchor={ancla}>{texto}</text>;
 }
 
-export function Histograma({ barras, formato = numero, rotulo, resaltar = [], etiqueta, alto: altoPedido = 180, tono }) {
+// max: un tope común cuando varios histogramas se comparan uno debajo de otro (la misma escala para todas las marcas)
+export function Histograma({ barras, formato = numero, rotulo, resaltar = [], etiqueta, alto: altoPedido = 180, tono, max: maxComun }) {
   const tabla = { columnas: ['', 'Valor'], filas: barras.map((b) => [b.nombre, formato(b.valor)]) };
   return (
     <Grafico etiqueta={etiqueta} tabla={tabla}>
       {(ancho) => {
         const alto = altoPedido, m = { t: 22, r: 4, b: 24, l: 4 };
-        const max = Math.max(1, ...barras.map((b) => b.valor ?? 0));
+        const max = Math.max(1, maxComun ?? 0, ...barras.map((b) => b.valor ?? 0));
         const paso = (ancho - m.l - m.r) / barras.length, w = Math.max(2, paso - Math.min(8, paso * 0.28));
         const y = lineal(0, max, alto - m.b, m.t);
         const cada = Math.ceil(30 / paso);
