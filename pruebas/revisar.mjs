@@ -49,7 +49,7 @@ export function textoRoto(texto, nombres = []) {
   const t = sinNombres(texto, nombres);
   const out = [];
   const contexto = (i, largo) => t.slice(Math.max(0, i - 40), i + largo + 40).replace(/\s+/g, ' ').trim();
-  for (const [re, por] of [[/undefined|NaN|\bnull\b|Infinity|\[object/g, 'cálculo roto'], [/—/g, 'raya larga'], ...RELLENO.map(([r, por]) => [new RegExp(r.source, 'gi'), por])]) {
+  for (const [re, por] of [[/undefined|NaN|\bnull\b|Infinity|\[object/g, 'cálculo roto'], [/—/g, 'raya larga'], [/\d %/g, 'espacio que corta la cifra de su «%»'], ...RELLENO.map(([r, por]) => [new RegExp(r.source, 'gi'), por])]) {
     for (const m of t.matchAll(re)) if (por === 'cálculo roto' || !enUnNombre(t, m.index, m[0].length, nombres)) out.push(`${por}: «${contexto(m.index, m[0].length)}»`);
   }
   return out;

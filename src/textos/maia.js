@@ -5,13 +5,13 @@ import { numero, soles, fechaCorta } from '../sistema/formato.js';
 import { CLIENTE } from '../cliente.js';
 import { lista, segun, enLetras, capital, version } from './comun.js';
 
-const cambioTexto = (c) => (c == null ? 'sin semana anterior para comparar' : c === 0 ? 'igual que la semana anterior' : `${c > 0 ? '+' : '−'}${numero(Math.abs(c))} % frente a la semana anterior`);
+const cambioTexto = (c) => (c == null ? 'sin semana anterior para comparar' : c === 0 ? 'igual que la semana anterior' : `${c > 0 ? '+' : '−'}${numero(Math.abs(c))} % frente a la semana anterior`);
 const universo = (u) => (u === 'atl' ? 'ATL' : 'digital');
 
 const HECHOS = {
   inversion: (h) => ({
     titulo: `${h.marca} invirtió ${soles(h.ahora)} en ${universo(h.universo)}`,
-    dato: `${capital(cambioTexto(h.cambio))}${h.share != null ? `; ${numero(h.share)} % de la inversión ${universo(h.universo)} de la semana` : ''}.`,
+    dato: `${capital(cambioTexto(h.cambio))}${h.share != null ? `; ${numero(h.share)} % de la inversión ${universo(h.universo)} de la semana` : ''}.`,
   }),
   'versiones-atl': (h) => ({
     titulo: `${h.marca} sacó ${enLetras(h.cuantas, true)} ${segun(h.cuantas, 'versión ATL', 'versiones ATL')}`,
@@ -26,7 +26,7 @@ const HECHOS = {
     dato: h.distritos.length ? `En ${lista(h.distritos.slice(0, 4))}${h.distritos.length > 4 ? ` y ${numero(h.distritos.length - 4)} zonas más` : ''}.` : 'Sin distrito registrado.',
   }),
   diy: (h) => ({
-    titulo: `Las búsquedas de cámaras de seguridad ${h.crecimiento >= 0 ? 'suben' : 'bajan'} ${numero(Math.abs(h.crecimiento))} %`,
+    titulo: `Las búsquedas de cámaras de seguridad ${h.crecimiento >= 0 ? 'suben' : 'bajan'} ${numero(Math.abs(h.crecimiento))} %`,
     dato: `Últimas 12 semanas de Google Trends frente a las mismas de un año antes${h.razon ? `; unas ${numero(h.razon, 1)} búsquedas de cámaras por cada búsqueda de «${CLIENTE.nombre.toLowerCase()}»` : ''}.`,
   }),
 };

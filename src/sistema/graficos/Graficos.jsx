@@ -170,13 +170,12 @@ export function Pesas({ filas, formato = numero, max, min = 0, rotuloA, rotuloB,
                   {f.b != null && <circle className={f.tono === 'propia' ? 'q-punto-propia' : f.tono === 'resto' ? 'q-punto-actual-resto' : 'q-punto-actual'} cx={x(f.b)} cy={cy} r="6" data-valor={f.b} />}
                   {/* la cifra va junto a su punto (el del período): a la derecha si queda adelante de la comparación, si no a la izquierda */}
                   {/* a la izquierda solo si cabe sin pisar el nombre de la fila; si no, a la derecha del punto más alejado */}
-                  {/* B a la izquierda de su punto si va detrás de A y cabe; si no cabe, entre los dos puntos si hay lugar, y si
-                      tampoco, encima de su punto: nunca al lado del punto A, donde se leería como la cifra de A */}
+                  {/* B a la izquierda de su punto si va detrás de A y cabe; si no, encima de su punto: entre los dos puntos
+                      quedaría sobre la línea, y al lado del punto A se leería como la cifra de A */}
                   {f.b != null && !(tonoA === 'propia' && f.a != null && f.a > f.b && x(f.b) - m.l < 44 && x(f.a) - x(f.b) >= 12) && (() => {
                     const t = formato(f.b), ancho = t.length * 7.8;
                     if (f.a == null || f.b >= f.a) return <text className="q-rotulo-valor" x={x(Math.max(f.b, f.a ?? f.b)) + 12} y={cy + 4}>{t}</text>;
                     if (x(f.b) - m.l >= ancho + 16) return <text className="q-rotulo-valor" x={x(f.b) - 12} y={cy + 4} textAnchor="end">{t}</text>;
-                    if (x(f.a) - x(f.b) >= ancho + 24) return <text className="q-rotulo-valor" x={x(f.b) + 10} y={cy + 4}>{t}</text>;
                     return <text className="q-rotulo-valor" x={x(f.b)} y={cy - 9} textAnchor="middle">{t}</text>;
                   })()}
                   {/* si A es la marca propia también lleva su cifra, del lado contrario a B; la que no cabe sin pisar algo queda en la tabla; si los puntos se tapan, solo va la de B */}
@@ -537,7 +536,9 @@ function Rotulo({ texto, cx, y, ancho }) {
 }
 
 // max: un tope común cuando varios histogramas se comparan uno debajo de otro (la misma escala para todas las marcas)
-export function Histograma({ barras, formato = numero, rotulo, resaltar = [], etiqueta, alto: altoPedido = 180, tono, max: maxComun }) {
+// escala 'raiz': la altura sigue a la raíz cuadrada del valor. Sirve cuando dos marcas comparten escala y una invierte
+// treinta veces menos: sus barras se ven y la que invierte más sigue siendo la más alta. La ayuda de la tarjeta lo dice.
+export function Histograma({ barras, formato = numero, rotulo, resaltar = [], etiqueta, alto: altoPedido = 180, tono, max: maxComun, escala = 'lineal' }) {
   const tabla = { columnas: ['', 'Valor'], filas: barras.map((b) => [b.nombre, formato(b.valor)]) };
   return (
     <Grafico etiqueta={etiqueta} tabla={tabla}>
@@ -545,7 +546,9 @@ export function Histograma({ barras, formato = numero, rotulo, resaltar = [], et
         const alto = altoPedido, m = { t: 22, r: 4, b: 24, l: 4 };
         const max = Math.max(1, maxComun ?? 0, ...barras.map((b) => b.valor ?? 0));
         const paso = (ancho - m.l - m.r) / barras.length, w = Math.max(2, paso - Math.min(8, paso * 0.28));
-        const y = lineal(0, max, alto - m.b, m.t);
+        const lin = lineal(0, escala === 'raiz' ? Math.sqrt(max) : max, alto - m.b, m.t);
+        // una barra con valor nunca queda más baja que 2 px: lo que existe se ve
+        const y = (v) => (v > 0 ? Math.min(lin(escala === 'raiz' ? Math.sqrt(v) : v), alto - m.b - 2) : lin(0));
         const cada = Math.ceil(30 / paso);
         // la cifra va sobre la barra más alta: de las resaltadas si las hay, si no de todas
         const candidatas = resaltar.length ? resaltar : barras.map((_, i) => i).filter((i) => barras[i].valor > 0);
@@ -674,7 +677,21 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
         const vals = series.flatMap((s) => s.serie.map((p) => p.valor)).filter((v) => v != null);
         const ys = marcas(Math.max(...vals, 1));
         // los márgenes a la medida de los rótulos: el del eje (S/ 1,0 M es más largo que S/ 50 mil) y el final más largo
-        const m = { t: 18, r: Math.max(92, 20 + Math.ceil(Math.max(...series.map((x) => x.nombre.length)) * 7.8)), b: 26, l: Math.max(52, 14 + Math.ceil(Math.max(...ys.map((v) => formato(v).length)) * 7.8)) };
+        // angosto (teléfono): los nombres van en una leyenda arriba y el trazo usa todo el ancho; ancho: al final de cada línea
+        const angosto = ancho < 560;
+        // la leyenda se acomoda por el largo de cada nombre: una fila nueva cuando el siguiente no cabe
+        const leyenda = [];
+        if (angosto) {
+          let x0 = 0, fila = 0;
+          for (const s of series) {
+            const largo = 24 + Math.ceil(s.nombre.length * 7.8) + 16;
+            if (x0 > 0 && x0 + largo > ancho - 4) { fila += 1; x0 = 0; }
+            leyenda.push({ ...s, x: x0, fila });
+            x0 += largo;
+          }
+        }
+        const filasLeyenda = leyenda.length ? leyenda.at(-1).fila + 1 : 0;
+        const m = { t: angosto ? 18 + 20 * filasLeyenda : 18, r: angosto ? 12 : Math.max(92, 20 + Math.ceil(Math.max(...series.map((x) => x.nombre.length)) * 7.8)), b: 26, l: Math.max(52, 14 + Math.ceil(Math.max(...ys.map((v) => formato(v).length)) * 7.8)) };
         const x = lineal(0, base.length - 1, m.l, ancho - m.r), y = lineal(0, ys.at(-1), alto - m.b, m.t);
         const finales = series.map((s) => { const i = ultimoConValor(s.serie); return i >= 0 ? y(s.serie[i].valor) + 4 : null; });
         // los rótulos finales se separan y no bajan al eje de fechas
@@ -688,13 +705,19 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
             {base.map((p, i) => (series.every((s) => s.serie[i]?.valor == null) && i > 0 && i < base.length - 1 ? <rect key={'h' + p.fecha} className="q-hueco" x={x(i) - 3} y={m.t} width={6} height={alto - m.b - m.t} /> : null))}
             {base.map((p, i) => <Zona key={'z' + p.fecha} x={x(i) - (x(1) - x(0)) / 2} y={m.t} w={x(1) - x(0)} h={alto - m.b - m.t} pista={`${fecha(p.fecha)}\n${series.map((s) => `${s.nombre}: ${formato(s.serie[i]?.valor)}`).join('\n')}`} />)}
             {orden.map((s) => <path key={s.nombre} className={`${s.resaltada ? 'q-linea' : s.tono === 'propia' ? 'q-linea-propia' : s.tono === 'tinta' ? 'q-linea-tinta' : 'q-linea-resto'}${s.discontinua ? ' q-discontinua' : ''}`} d={camino(s.serie, x, y)} />)}
+            {leyenda.map((s) => (
+              <g key={'l' + s.nombre} transform={`translate(${4 + s.x}, ${12 + s.fila * 20})`}>
+                <line className={`${s.resaltada ? 'q-linea' : s.tono === 'propia' ? 'q-linea-propia' : s.tono === 'tinta' ? 'q-linea-tinta' : 'q-linea-resto'}${s.discontinua ? ' q-discontinua' : ''}`} x1={0} x2={18} y1={-4} y2={-4} />
+                <text className={`q-rotulo-final${s.resaltada || s.tono === 'propia' || s.tono === 'tinta' ? '' : ' q-rotulo-resto'}`} x={24} y={0}>{s.nombre}</text>
+              </g>
+            ))}
             {series.map((s, k) => {
               const i = ultimoConValor(s.serie);
               if (i < 0) return null;
               return (
                 <g key={'f' + s.nombre}>
                   <circle className={s.resaltada ? 'q-punto-final' : s.tono === 'propia' ? 'q-punto-final-propia' : s.tono === 'tinta' ? 'q-punto-final-tinta' : 'q-punto-final-resto'} cx={x(i)} cy={y(s.serie[i].valor)} r="4" data-valor={s.serie[i].valor} />
-                  <text className={`q-rotulo-final${s.resaltada || s.tono === 'propia' || s.tono === 'tinta' ? '' : ' q-rotulo-resto'}`} x={x(i) + 8} y={separados[k]}>{s.nombre}</text>
+                  {!angosto && <text className={`q-rotulo-final${s.resaltada || s.tono === 'propia' || s.tono === 'tinta' ? '' : ' q-rotulo-resto'}`} x={x(i) + 8} y={separados[k]}>{s.nombre}</text>}
                 </g>
               );
             })}

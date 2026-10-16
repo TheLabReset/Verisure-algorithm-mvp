@@ -15,7 +15,7 @@ const corto = (t, n = 60) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…`
 const cita = (v) => `«${corto(version(v))}»`;
 // los montos de siete cifras o más se leen en millones
 const monto = (n) => (Math.abs(n) >= 1e6 ? solesCompacto(n) : soles(n));
-const signo = (n) => (n > 0 ? `+${numero(n)} %` : `${n < 0 ? '−' : ''}${numero(Math.abs(n))} %`);
+const signo = (n) => (n > 0 ? `+${numero(n)} %` : `${n < 0 ? '−' : ''}${numero(Math.abs(n))} %`);
 
 // Nombres de marca para textos que reciben ids de la fuente
 export const textosMarca = {
@@ -168,7 +168,7 @@ export function busquedasLectura(b) {
   const titulo = 'Cámaras de seguridad frente a la marca';
   if (!b) return { titulo, lectura: 'Google Trends no cargó.' };
   const wifi = b.series.find((s) => s.id === 'wifi');
-  const crece = (s, nombre) => (s?.crecimiento == null ? null : `las de ${nombre} ${s.crecimiento >= 0 ? 'suben' : 'bajan'} ${numero(Math.abs(s.crecimiento))} %`);
+  const crece = (s, nombre) => (s?.crecimiento == null ? null : `las de ${nombre} ${s.crecimiento >= 0 ? 'suben' : 'bajan'} ${numero(Math.abs(s.crecimiento))} %`);
   const cambios = [crece(b.camaras, 'cámaras'), crece(wifi, 'cámara wifi')].filter(Boolean);
   const razon = b.razon == null ? '' : `En las últimas ${numero(b.semanas)} semanas hubo unas ${numero(b.razon, 1)} búsquedas de cámaras de seguridad por cada búsqueda de «${b.marca.nombre}».`;
   return { titulo, lectura: `${razon}${cambios.length ? ` Frente a las mismas semanas de un año antes, ${lista(cambios)}.` : ''}`.trim() };
@@ -276,13 +276,13 @@ const ALERTAS = {
     mirar: `El mensaje y el medio de la pieza, y si se cruza con lo que tiene al aire ${CLIENTE.nombre}.`,
   }),
   'sube-competencia': (a) => ({
-    titulo: `${a.marca} sube ${numero(a.sube)} % su inversión ${a.universo}`,
+    titulo: `${a.marca} sube ${numero(a.sube)} % su inversión ${a.universo}`,
     dato: `${monto(a.monto)} en ${per(a)}, frente a ${monto(a.antes)} en ${comp(a)}.`,
     mirar: 'Qué versiones y qué medios explican la subida.',
   }),
   'baja-competencia': (a) => ({
     // con algo de inversión, una baja que redondea a 100 % se dice «más de 99 %»
-    titulo: `${a.marca} baja ${a.monto > 0 && Math.round(a.baja) >= 100 ? 'más de 99' : numero(a.baja)} % su inversión ${a.universo}`,
+    titulo: `${a.marca} baja ${a.monto > 0 && Math.round(a.baja) >= 100 ? 'más de 99' : numero(a.baja)} % su inversión ${a.universo}`,
     dato: `${monto(a.monto)} en ${per(a)}, frente a ${monto(a.antes)} en ${comp(a)}.`,
     mirar: 'Qué versiones dejó de pautar y si su pauta del año muestra pausas parecidas.',
   }),
@@ -303,7 +303,7 @@ const ALERTAS = {
   }),
   'medio-nuevo': (a) => ({
     titulo: `${a.marca} invierte en ${lista(a.medios.map((m) => medioEnFrase(m.nombre)))}, que no tenía en ${comp(a)}`,
-    dato: `${capital(lista(a.medios.map((m) => `${medioEnFrase(m.nombre)} con ${monto(m.monto)} (${m.pct < 1 ? 'menos del 1 %' : `el ${porcentaje(m.pct)}`} de su inversión ATL)`)))}.`,
+    dato: `${capital(lista(a.medios.map((m) => `${medioEnFrase(m.nombre)} con ${monto(m.monto)} (${m.pct < 1 ? 'menos del 1 %' : `el ${porcentaje(m.pct)}`} de su inversión ATL)`)))}.`,
     mirar: 'Si es una prueba puntual o el inicio de una presencia sostenida.',
   }),
   'paneles-competencia': (a) => ({
@@ -317,7 +317,7 @@ const ALERTAS = {
     mirar: 'El mensaje de cada versión y en qué plataformas sale.',
   }),
   'diy-sube': (a) => ({
-    titulo: `Las búsquedas de cámaras de seguridad suben ${numero(a.crecimiento)} %`,
+    titulo: `Las búsquedas de cámaras de seguridad suben ${numero(a.crecimiento)} %`,
     dato: `Del ${fechaCorta(a.desde)} al ${fechaCorta(a.hasta)} de ${a.hasta.slice(0, 4)}, frente a las mismas semanas de ${Number(a.hasta.slice(0, 4)) - 1}.`,
     mirar: 'Qué marcas de cámaras explican la subida.',
   }),
@@ -333,7 +333,7 @@ const ALERTAS = {
   }),
   'dominio-atl': (a) => ({
     titulo: `${CLIENTE.nombre} concentra ${porcentaje(a.share)} de la inversión ATL`,
-    dato: !a.marca ? 'En TV, radio, cable, OTT y vía pública.' : a.inversionCompetencia > 0 ? `${a.marca} tiene ${a.shareCompetencia < 1 ? 'menos del 1 %' : porcentaje(a.shareCompetencia)} en ${per(a)}.` : `${a.marca} no tiene inversión ATL en ${per(a)}.`,
+    dato: !a.marca ? 'En TV, radio, cable, OTT y vía pública.' : a.inversionCompetencia > 0 ? `${a.marca} tiene ${a.shareCompetencia < 1 ? 'menos del 1 %' : porcentaje(a.shareCompetencia)} en ${per(a)}.` : `${a.marca} no tiene inversión ATL en ${per(a)}.`,
     mirar: 'Cuántas veces sale al aire cada pieza.',
   }),
   'share-digital-sube': (a) => ({

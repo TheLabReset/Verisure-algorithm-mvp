@@ -34,7 +34,7 @@ function PautaSemanal({ pauta, P }) {
   const etiquetaSemana = (s, i, todas) => (i === 0 || s.fecha.slice(5, 7) !== todas[i - 1].fecha.slice(5, 7) ? mesCorto(+s.fecha.slice(5, 7)) : '');
   return (
     <Bloque universo={universo === 'todo' ? ['atl', 'digital'] : universo} {...pautaSemanalLectura(filas, universo)} alcance="semanas del año"
-      ayuda={<p>Semanas de lunes a domingo. La primera y la última pueden estar incompletas.</p>}
+      ayuda={<p>Semanas de lunes a domingo; la primera y la última pueden estar incompletas. La altura sigue a la raíz cuadrada de la inversión, con un mismo tope para las dos marcas: las semanas chicas se ven y la barra más alta siempre es la de más inversión.</p>}
       pie={<span>{universo === 'todo' ? 'Todo suma ATL y digital, que Integrametrics estima con métodos distintos: sirve para ver cuándo se prende la pauta, no para comparar montos.' : 'Inversión semanal estimada por Integrametrics.'}</span>}>
       <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={universo} onCambiar={setUniverso} opciones={opciones} /></div>
       <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true">
@@ -45,7 +45,7 @@ function PautaSemanal({ pauta, P }) {
         {filas.map((f) => (
           <div key={f.id} className="q-pauta-marca">
             <h4>{f.marca}<span>{solesCompacto(f.total)} en el año</span></h4>
-            <Histograma etiqueta={`Inversión semanal de ${f.marca}`} tono={f.foco ? undefined : f.propia ? 'propia' : 'resto'} formato={(n) => (n == null ? 'sin registros' : soles(n))} alto={150} max={tope}
+            <Histograma etiqueta={`Inversión semanal de ${f.marca}`} tono={f.foco ? undefined : f.propia ? 'propia' : 'resto'} formato={(n) => (n == null ? 'sin registros' : soles(n))} alto={150} max={tope} escala="raiz"
               resaltar={f.semanas.map((s, i) => (s.hasta >= P.desde && s.fecha <= P.hasta ? i : -1)).filter((i) => i >= 0)}
               barras={f.semanas.map((s, i, todas) => ({ nombre: `Semana del ${fechaCorta(s.fecha)}${s.parcial ? ' (incompleta)' : ''}`, corto: etiquetaSemana(s, i, todas), valor: s.valor }))} />
           </div>
@@ -69,11 +69,11 @@ export default function Inteligencia({ capa, vista: v }) {
         <Bloque universo="modelo" {...queMirarLectura(v)}
           ayuda={<><p>Cada alerta sale de una regla con un umbral fijo:</p><ul>
             <li>Una pieza nueva o una versión digital nueva de la competencia.</li>
-            <li>La competencia sube {v.umbrales.subidaCompetencia} % o más su inversión frente al mes anterior (o al mismo tramo, si el mes está en curso), baja {v.umbrales.bajadaCompetencia} % o más, o se queda sin inversión.</li>
+            <li>La competencia sube {v.umbrales.subidaCompetencia} % o más su inversión frente al mes anterior (o al mismo tramo, si el mes está en curso), baja {v.umbrales.bajadaCompetencia} % o más, o se queda sin inversión.</li>
             <li>Un día de la competencia que triplica su mediana de días con inversión.</li>
-            <li>Un medio con {v.umbrales.medioNuevo} % o más de la inversión ATL de la competencia, o una zona con sus paneles, que no tenía el mes anterior.</li>
-            <li>Las búsquedas de cámaras suben {v.umbrales.subidaDiy} % o más frente a las mismas semanas de un año antes.</li>
-            <li>Un cambio de {v.umbrales.caidaShareDigital} puntos o más en el share digital de {CLIENTE.nombre}, o {v.umbrales.dominioAtl} % o más de la inversión ATL.</li>
+            <li>Un medio con {v.umbrales.medioNuevo} % o más de la inversión ATL de la competencia, o una zona con sus paneles, que no tenía el mes anterior.</li>
+            <li>Las búsquedas de cámaras suben {v.umbrales.subidaDiy} % o más frente a las mismas semanas de un año antes.</li>
+            <li>Un cambio de {v.umbrales.caidaShareDigital} puntos o más en el share digital de {CLIENTE.nombre}, o {v.umbrales.dominioAtl} % o más de la inversión ATL.</li>
             <li>Días sin registros de Integrametrics.</li>
           </ul><p>Con menos de {v.umbrales.diasMinimos} días con data en el período no se lee ninguna subida, bajada ni cambio de share: un solo día raro las movería.</p></>}>
           {todas.length ? <ListaAlertas grupos={GRUPOS.map((g) => ({ ...g, items: todas.filter((a) => a.nivel === g.nivel) }))} />

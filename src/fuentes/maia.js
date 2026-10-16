@@ -16,7 +16,7 @@ Reglas de la data:
 - Google Trends es un índice, no un volumen: 100 es la semana con más búsquedas de cada grupo de términos (cámaras de seguridad suma dos términos y puede pasar de 100); solo se comparan términos del mismo grupo.
 - Toda comparación dice frente a qué (el mes anterior, la semana anterior, las mismas semanas de un año antes).
 - Di siempre hasta qué fecha llega la data (corte), porque puede estar atrasada.
-Cómo escribes: español peruano, frases cortas, sin rayas largas. Observas y explicas lo que muestra la data; no das órdenes. Si te piden una recomendación, dices qué conviene mirar y por qué, sin prometer resultados. Cifras en soles como «S/ 1 234» y porcentajes como «12 %». Respuestas de 120 palabras como máximo, salvo que pidan detalle.`;
+Cómo escribes: español peruano, frases cortas, sin rayas largas. Observas y explicas lo que muestra la data; no das órdenes. Si te piden una recomendación, dices qué conviene mirar y por qué, sin prometer resultados. Cifras en soles como «S/ 1 234» y porcentajes como «12 %». Respuestas de 120 palabras como máximo, salvo que pidan detalle.`;
 
 // Una llamada a la API de mensajes. El contexto va en un bloque cacheado: se reusa entre preguntas.
 export async function pedirClaude({ clave, modelo = MODELO, contexto, mensajes, maxTokens = 700, fetchImpl = fetch }) {
