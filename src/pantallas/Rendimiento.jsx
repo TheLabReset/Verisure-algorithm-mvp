@@ -3,7 +3,7 @@
 // sumados) y el share semana a semana en el año. En el detalle: las cifras en soles y la inversión día por día.
 // No calcula: pinta la vista.
 import { useState } from 'react';
-import { Bloque, Tabla, Resumen, Grupo, Detalle } from '../sistema/Componentes.jsx';
+import { Bloque, Tabla, Resumen, Grupo, Detalle, vigente } from '../sistema/Componentes.jsx';
 import { Pesas, Lineas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, soles, solesCompacto, compacto } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
@@ -32,7 +32,10 @@ function ShareMarcas({ u, etiqueta, rotuloA }) {
 export default function Rendimiento({ capa, vista: v }) {
   const [s41] = capa.secciones;
   const P = v.periodo, atl = v.lee.atl, dig = v.lee.digital;
-  const [diario, setDiario] = useState(dig.estado === 'ok' ? 'digital' : 'atl');
+  // ATL primero: las alertas que llevan al día por día (un pico, un día sin registros) son de ATL
+  const [elegidoDiario, setDiario] = useState('atl');
+  const opcionesDiario = [{ valor: 'atl', texto: 'ATL', desactivada: atl.estado !== 'ok' }, { valor: 'digital', texto: 'Digital', desactivada: dig.estado !== 'ok' }];
+  const diario = vigente(elegidoDiario, opcionesDiario);
   const ok = (x) => x.estado === 'ok';
   const rival = (u) => u.marcas.find((m) => m.foco);
   const comparacion = comparacionTexto(P);
@@ -89,7 +92,7 @@ export default function Rendimiento({ capa, vista: v }) {
           {ok(u) && (
             <Bloque universo={diario} {...presionLectura(v, diario)}
               pie={<span>Inversión estimada por Integrametrics. Un día sin registros queda como hueco, no como cero.</span>}>
-              <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={diario} onCambiar={setDiario} opciones={[{ valor: 'digital', texto: 'Digital', desactivada: !ok(dig) }, { valor: 'atl', texto: 'ATL', desactivada: !ok(atl) }]} /></div>
+              <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={diario} onCambiar={setDiario} opciones={opcionesDiario} /></div>
               <Lineas etiqueta={`Inversión ${diario === 'atl' ? 'ATL' : 'digital'} por día y por marca`} formato={solesCompacto}
                 series={[...u.marcas].sort((a, b) => Number(a.foco) - Number(b.foco)).map((m) => ({ nombre: m.nombre, resaltada: m.foco, tono: m.propia ? 'propia' : undefined, serie: u.diaria.map((d) => ({ fecha: d.fecha, valor: d.valores[m.id] })) }))} />
             </Bloque>

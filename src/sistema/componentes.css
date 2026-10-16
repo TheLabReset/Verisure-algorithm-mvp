@@ -190,7 +190,7 @@
 .q-datos dd { color: var(--texto-2); }
 
 /* ── Pie de página ── */
-.q-pie { border-top: 1px solid var(--borde); padding-block: var(--e-6) var(--e-10); font-size: var(--t-13); color: var(--texto-3); display: grid; gap: var(--e-2); }
+.q-pie { border-top: 1px solid var(--borde); padding-block: var(--e-6) calc(var(--e-10) + 3rem); /* la barra de la demo, fija abajo, no tapa la última línea */ font-size: var(--t-13); color: var(--texto-3); display: grid; gap: var(--e-2); }
 .q-pie p { max-width: var(--ancho-lectura); }
 
 /* ── Piezas de la app ── */
@@ -610,3 +610,5 @@
 /* El share del período: digital y ATL lado a lado en una tarjeta, uno debajo del otro en pantallas angostas */
 .q-share-universos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-6); }
 @media (max-width: 900px) { .q-share-universos { grid-template-columns: minmax(0, 1fr); } }
+/* Aviso de escenario o estado de la demo: siempre visible, también al presentar, para que nada se lea como data real */
+.q-aviso-demo { background: var(--texto-1); color: var(--superficie); font-size: var(--t-14); font-weight: var(--peso-rotulo); padding-block: var(--e-2); }

@@ -3,7 +3,7 @@
 // En el detalle: la inversión por medio en soles, las franjas (mancuernas), los canales y los programas.
 // No calcula: pinta la vista.
 import { useState } from 'react';
-import { Bloque, Tabla, Resumen, Grupo, Detalle } from '../sistema/Componentes.jsx';
+import { Bloque, Tabla, Resumen, Grupo, Detalle, vigente } from '../sistema/Componentes.jsx';
 import { Franja, Pesas, Barras, MapaCalor } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, soles, solesCompacto } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
@@ -35,13 +35,14 @@ function MezclaMedios({ m }) {
 export default function Activacion({ capa, vista: v }) {
   const [s31, s32] = capa.secciones;
   const P = v.periodo, atl = v.lee.atl, med = v.lee.medios;
-  const [marca, setMarca] = useState(COMPETENCIA.marcaFuente);
+  const [elegida, setMarca] = useState(COMPETENCIA.marcaFuente);
   const ok = atl.estado === 'ok';
   const orden = ok ? [...atl.marcas].sort((a, b) => Number(a.propia) - Number(b.propia)) : [];
   const [r, p] = orden;
+  const opcionesMarca = MARCAS.map((m) => ({ valor: m, texto: textosMarca.nombreMarca(m), desactivada: !med?.[m] }));
+  const marca = vigente(elegida, opcionesMarca);
   const deMarca = med?.[marca];
   const compMed = med?.[COMPETENCIA.marcaFuente];
-  const opcionesMarca = MARCAS.map((m) => ({ valor: m, texto: textosMarca.nombreMarca(m), desactivada: !med?.[m] }));
   const principal = (m) => Object.entries(m.mezclaMedios).sort((a, b) => b[1] - a[1])[0];
   const control = <div className="q-control q-control-tarjeta"><span>Marca</span><Grupo etiqueta="Marca" valor={marca} onCambiar={setMarca} opciones={opcionesMarca} /></div>;
   return (

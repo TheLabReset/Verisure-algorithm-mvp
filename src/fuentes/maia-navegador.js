@@ -10,5 +10,7 @@ export async function preguntarMaia(pregunta, historial, fetchImpl = fetch) {
   if (r.status === 404 || r.status === 405) return { error: 'sin-funcion' }; // vista previa local o un sitio sin la función
   const d = await r.json().catch(() => null);
   if (!r.ok) return { error: d?.error === 'sin-clave' ? 'sin-clave' : 'modelo' };
-  return { respuesta: d?.respuesta || '', corte: d?.corte || null };
+  // una respuesta vacía o que no es JSON (por ejemplo, el HTML del panel) no es una respuesta de MAIA
+  if (typeof d?.respuesta !== 'string' || !d.respuesta.trim()) return { error: 'modelo' };
+  return { respuesta: d.respuesta, corte: d?.corte || null };
 }

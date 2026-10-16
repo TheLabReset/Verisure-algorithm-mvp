@@ -7,7 +7,8 @@ const PROPIA = CLIENTE.marcaFuente;
 const RIVAL = CLIENTE.competencia[0].marcaFuente;
 const copia = (x) => (x == null ? x : structuredClone(x));
 const mesDe = (fecha) => fecha.slice(0, 7);
-const ultimoMes = (d) => mesDe(d.contrato.meta.lastDay);
+// el mes que mueve un escenario: el que se pide, o el último con data
+const ultimoMes = (d) => d.mes || mesDe(d.contrato.meta.lastDay);
 
 // multiplica la inversión (y las emisiones, si las hay) de una marca en los días que cumplen la condición
 function escalar(diarios, marca, k, cuando = () => true) {
@@ -159,11 +160,13 @@ export const ESCENARIOS = [
   },
 ];
 
-// Devuelve una copia de la data con el escenario aplicado; la original no se toca
-export function aplicarEscenario(id, datos) {
+// Devuelve una copia de la data con el escenario aplicado; la original no se toca. mes: el mes que se mueve (por
+// omisión, el último con data)
+export function aplicarEscenario(id, datos, { mes = null } = {}) {
   const e = ESCENARIOS.find((x) => x.id === id);
   if (!e) return datos;
-  const d = { ...datos, contrato: copia(datos.contrato), medios: copia(datos.medios), busquedas: copia(datos.busquedas) };
+  const d = { ...datos, mes, contrato: copia(datos.contrato), medios: copia(datos.medios), busquedas: copia(datos.busquedas) };
   e.aplicar(d);
+  delete d.mes;
   return d;
 }

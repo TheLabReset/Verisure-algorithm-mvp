@@ -77,7 +77,12 @@ export function revisar(archivos) {
       if (prop === 'box-shadow' && !/^(var\(|none)/.test(valor.trim())) err(ruta, `box-shadow literal: ${valor.trim()}`);
       // Sin franjas de resalte: una tarjeta con una barra de color al costado (o arriba) es el resalte de
       // plantilla que el estándar prohíbe. Lo importante se resalta con el orden, el tamaño o el peso del texto.
-      if (/^border(-(top|right|bottom|left|inline|block)(-(start|end))?)?(-width)?$/.test(prop)) for (const n of valor.matchAll(/(\d*\.?\d+)px/g)) if (+n[1] > 2) err(ruta, `${prop} de ${n[0]}: franja de resalte; se resalta con orden, tamaño o peso, no con bordes gruesos`);
+      // Se mide en px, rem, em y pt (1rem = 16px, 1pt ≈ 1,33px), y «medium» o «thick» también cuentan como gruesos.
+      if (/^border(-(top|right|bottom|left|inline|block)(-(start|end))?)?(-width)?$/.test(prop)) {
+        const aPx = { px: 1, rem: 16, em: 16, pt: 4 / 3 };
+        for (const n of valor.matchAll(/(\d*\.?\d+)(px|rem|em|pt)\b/g)) if (+n[1] * aPx[n[2]] > 2) err(ruta, `${prop} de ${n[0]}: franja de resalte; se resalta con orden, tamaño o peso, no con bordes gruesos`);
+        if (/\b(medium|thick)\b/.test(valor)) err(ruta, `${prop} con ${valor.match(/\b(medium|thick)\b/)[0]}: franja de resalte`);
+      }
       if (/^(transition|animation)(-duration)?$/.test(prop) && /(^|[\s,])\d*\.?\d+m?s\b/.test(valor)) err(ruta, `duración literal en ${prop}: ${valor.trim()}`);
     }
   }

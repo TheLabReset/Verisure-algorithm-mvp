@@ -52,7 +52,7 @@ Siete reglas, en `src/sistema/componentes.css`:
 4. Lo que no sigue el período **dice su propia ventana**, con alfiler en vez de calendario.
 5. Cada tarjeta dice **su universo al pie** (pauta, CRM, sitio, búsquedas, conversación, modelo). Lo de universos distintos no se suma.
 6. **Una sola cifra grande por pantalla de lectura:** la del resumen. Adentro, las cifras acompañan.
-7. **Se resalta sin franjas.** Nada de tarjetas con una barra de color al costado o arriba, ni bordes gruesos: es el resalte de plantilla que delata un diseño armado en automático. Lo importante va primero, más grande o con más peso; la gravedad de algo se dice con una palabra («grave», «para revisar»), no con un color de borde. El chequeo marca cualquier borde de más de 2 px.
+7. **Se resalta sin franjas.** Nada de tarjetas con una barra de color al costado o arriba, ni bordes gruesos: es el resalte de plantilla que delata un diseño armado en automático. Lo importante va primero, más grande o con más peso; la gravedad de algo se dice con una palabra («grave», «para revisar»), no con un color de borde. El chequeo marca en el CSS cualquier borde de más de 2 px (medido en px, rem, em o pt, y `medium` o `thick`). No revisa estilos en línea ni franjas hechas con pseudo-elementos: esas se cuidan en la revisión.
 
 ## 3. Tipografía
 

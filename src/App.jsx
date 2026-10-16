@@ -22,10 +22,11 @@ const INICIO = CAPAS[0].id;
 // Preferencias del visitante: si el navegador no deja guardar, la página funciona igual
 const leerPref = (k, porDefecto) => { try { return localStorage.getItem('algoritmo:' + k) || porDefecto; } catch { return porDefecto; } };
 const guardarPref = (k, v) => { try { localStorage.setItem('algoritmo:' + k, v); } catch { /* sin almacenamiento */ } };
-// El ancla dice la capa: «senales», «s-3-2» (un capítulo), «a-…» o «b-…» (una alerta, en Inteligencia)
+// El ancla dice la capa: «senales», «s-3-2» (un capítulo), «detalle-s-4-1» (el detalle de un capítulo), «a-…» o «b-…»
+// (una alerta, en Inteligencia)
 const capaDeAncla = (h) => {
   if (CAPAS.some((c) => c.id === h)) return h;
-  const capitulo = h.match(/^s-(\d)-/);
+  const capitulo = h.match(/^(?:detalle-)?s-(\d)-/);
   if (capitulo) return CAPAS.find((c) => c.numero === capitulo[1])?.id || null;
   return /^(a|b)-/.test(h) ? 'inteligencia' : null;
 };
@@ -128,6 +129,15 @@ export default function App() {
         </div>
       </header>
 
+      {/* un escenario o un estado de la demo nunca se ve como data real, tampoco al presentar */}
+      {(escenario || demo !== 'datos') && (
+        <div className="q-aviso-demo" role="status">
+          <div className="q-envoltura">
+            {escenario ? `Escenario de prueba: ${ESCENARIOS.find((e) => e.id === escenario)?.titulo ?? escenario}. Las cifras no son reales.`
+              : demo === 'cargando' ? 'Demo: así se ve el panel mientras carga.' : `Demo: así se ve el panel si ${{ atl: 'Integrametrics ATL', digital: 'Integrametrics digital', trends: 'Google Trends' }[demo]} no carga.`}
+          </div>
+        </div>
+      )}
       <div className="q-filtros">
         <div className="q-envoltura q-filtros-fila">
           <NavegacionCapas capas={CAPAS} activa={capa} onCambiar={irACapa} />
@@ -148,7 +158,7 @@ export default function App() {
           </div>
         ) : (
           <CargandoContexto.Provider value={cargando}>
-            {vista ? <Resguardo key={`${capa}-${escenario}-${mesActivo}`} donde="Esta capa"><Pantalla capa={actual} vista={vista} irACapa={irACapa} /></Resguardo> : <div className="q-envoltura q-capa-vacia"><Estado tipo="cargando" titulo="Cargando la data" /></div>}
+            {vista ? <Resguardo key={`${capa}-${escenario}-${mesActivo}-${demo}`} donde="Esta capa" envoltura><Pantalla capa={actual} vista={vista} irACapa={irACapa} /></Resguardo> : <div className="q-envoltura q-capa-vacia"><Estado tipo="cargando" titulo="Cargando la data" /></div>}
           </CargandoContexto.Provider>
         )}
       </main>

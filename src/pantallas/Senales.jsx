@@ -4,7 +4,7 @@
 // No calcula: pinta la vista y las lecturas de src/textos.
 import { useState } from 'react';
 import { Play, AudioLines, Image as ImagenIcono } from 'lucide-react';
-import { Bloque, Tabla, Resumen, Abanico, VentanaAnuncios, Detalle, Grupo, Ventana } from '../sistema/Componentes.jsx';
+import { Bloque, Tabla, Resumen, Abanico, VentanaAnuncios, Detalle, Grupo, Ventana, vigente } from '../sistema/Componentes.jsx';
 import { Cronograma } from '../sistema/graficos/Graficos.jsx';
 import { numero, solesCompacto, soles } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
@@ -50,7 +50,9 @@ function Estrenos({ lista, t }) {
 // Lo que tiene al aire: un solo abanico con ATL o digital. ATL cuenta las versiones con emisiones en el período;
 // digital, las vistas por primera vez en el período (Integrametrics registra cada variante el día que la ve)
 function AlAire({ L, P, tVersiones, tDigital }) {
-  const [u, setU] = useState(L.abanicoAtl ? 'atl' : 'digital');
+  const [elegido, setU] = useState('atl');
+  const opcionesU = [{ valor: 'atl', texto: 'ATL', desactivada: !L.abanicoAtl }, { valor: 'digital', texto: 'Digital', desactivada: !L.abanicoDigital }];
+  const u = vigente(elegido, opcionesU);
   const [abierta, setAbierta] = useState(null);
   if (!L.abanicoAtl && !L.abanicoDigital) return <Bloque titulo="Lo que tiene al aire" universo={['atl', 'digital']} estado={sinDato('no-cargo')} />;
   const atl = u === 'atl';
@@ -64,7 +66,7 @@ function AlAire({ L, P, tVersiones, tDigital }) {
         : <p>Una carta por versión vista por primera vez en el período; las variantes de imagen o formato de una versión van juntas.</p>}
       pie={<span>{atl ? 'TV, radio, cable, OTT y vía pública.' : 'Facebook, Instagram, Google Search y YouTube.'}</span>}>
       <div className="q-control q-control-tarjeta"><span>Universo</span>
-        <Grupo etiqueta="Universo" valor={u} onCambiar={cambiar} opciones={[{ valor: 'atl', texto: 'ATL', desactivada: !L.abanicoAtl }, { valor: 'digital', texto: 'Digital', desactivada: !L.abanicoDigital }]} />
+        <Grupo etiqueta="Universo" valor={u} onCambiar={cambiar} opciones={opcionesU} />
       </div>
       {vacia ? <p className="q-nota-bloque">{atl ? 'Ninguna versión ATL en el período.' : 'Ninguna versión digital nueva en el período.'}</p>
         : <Abanico key={u} lista={lista} abierta={abierta} onAbrir={setAbierta} t={atl ? tVersiones : tDigital} nota={atl ? `al aire en ${periodoTexto(P)}` : `aparecieron en ${periodoTexto(P)}`} propioAlFinal />}

@@ -37,6 +37,7 @@ test('permite bordes finos y valores tokenizados', () => {
 test('atrapa franjas de resalte y deja pasar bordes finos', () => {
   assert.ok(conAdemas({ 'src/a.css': '.a { border-left: 4px solid var(--acento); }' }).errores.some((e) => e.includes('franja de resalte')));
   assert.ok(conAdemas({ 'src/a.css': '.a { border-top-width: 3px; }' }).errores.some((e) => e.includes('franja de resalte')));
+  for (const v of ['0.5rem solid red', '5pt solid red', 'thick solid red', '.25em solid red']) assert.ok(conAdemas({ 'src/a.css': `.a { border-left: ${v}; }` }).errores.some((e) => e.includes('franja de resalte')), v);
   assert.deepEqual(conAdemas({ 'src/a.css': '.a { border-left: 2px solid var(--texto-1); border: 1px solid var(--borde); }' }).errores, []);
 });
 

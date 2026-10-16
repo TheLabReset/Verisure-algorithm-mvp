@@ -22,6 +22,11 @@ Sin la clave, el panel dice que MAIA no está activa y muestra solo los hechos d
 
 En `netlify.toml`, la regla de `/api/maia` va antes de la redirección de la SPA (`/* → /index.html`): Netlify lee las reglas de arriba abajo y gana la primera. No lo probé en un despliegue; se confirma con la primera pregunta desde el panel (si responde con el HTML del panel, la regla no se aplicó).
 
+Dos cosas a mirar al activarla:
+
+- **Tiempo:** Netlify corta una función sincrónica a los 30 segundos (según su documentación de funciones, consultada en octubre de 2026; versiones anteriores decían 10). Si MAIA dice seguido que no pudo responder, se prueba con un modelo más rápido en `MAIA_MODELO`.
+- **Costo:** sin `BASIC_AUTH_*`, cualquiera con el enlace puede preguntarle a MAIA y cada pregunta usa la clave de Anthropic. Con el sitio abierto conviene un límite de gasto en la consola de Anthropic.
+
 ## 3. Google Trends
 
 No pide clave. El paso corre los lunes y reintenta si Google responde 429. Asumo que responde desde los runners de GitHub; si el paso queda en rojo tres lunes seguidos, hay que bajar Trends desde otra máquina o con un proveedor de pago.

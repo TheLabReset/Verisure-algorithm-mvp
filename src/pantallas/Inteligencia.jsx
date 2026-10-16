@@ -2,7 +2,7 @@
 // cámaras DIY (Google Trends) y cómo viene la pauta de cada marca en el año. Las marcas de cámaras y la inversión
 // mes a mes van en el detalle de su capítulo. No calcula: pinta la vista.
 import { useState } from 'react';
-import { Bloque, ListaAlertas, Tabla, Grupo, Detalle } from '../sistema/Componentes.jsx';
+import { Bloque, ListaAlertas, Tabla, Grupo, Detalle, vigente } from '../sistema/Componentes.jsx';
 import { Lineas, Pendiente, Histograma } from '../sistema/graficos/Graficos.jsx';
 import { soles, solesCompacto, mesCorto, numero, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, alertasDe, buenasDe, sinDato } from './comun.jsx';
@@ -25,9 +25,11 @@ const UNIVERSOS_PAUTA = [{ valor: 'atl', texto: 'ATL' }, { valor: 'digital', tex
 // en el color de cada marca y el resto en gris: si todo va resaltado, nada lo está. La cifra marca la más alta de
 // las resaltadas. «Todo» suma ATL y digital solo para ver cuándo se prende la pauta
 function PautaSemanal({ pauta, P }) {
-  const [universo, setUniverso] = useState(pauta.digital ? 'todo' : Object.keys(pauta)[0]);
-  const filas = pauta[universo] || [];
+  // arranca en ATL: «Todo» suma dos estimaciones distintas y es una vista de apoyo, no la primera
+  const [elegido, setUniverso] = useState('atl');
   const opciones = UNIVERSOS_PAUTA.map((o) => ({ ...o, desactivada: !pauta[o.valor] }));
+  const universo = vigente(elegido, opciones);
+  const filas = pauta[universo] || [];
   const tope = Math.max(1, ...filas.flatMap((f) => f.semanas.map((s) => s.valor ?? 0)));
   const etiquetaSemana = (s, i, todas) => (i === 0 || s.fecha.slice(5, 7) !== todas[i - 1].fecha.slice(5, 7) ? mesCorto(+s.fecha.slice(5, 7)) : '');
   return (

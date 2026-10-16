@@ -124,7 +124,8 @@ export class Resguardo extends Component {
   componentDidCatch(error) { console.error('Resguardo', this.props.donde, error); }
   render() {
     if (!this.state.error) return this.props.children;
-    return <Estado tipo="no-cargo" titulo={`${this.props.donde || 'Esta parte'} no se pudo armar con la data de hoy`}><p>El resto del panel sigue al día.</p></Estado>;
+    const aviso = <Estado tipo="no-cargo" titulo={`${this.props.donde || 'Esta parte'} no se pudo armar con la data de hoy`}><p>El resto del panel sigue al día.</p></Estado>;
+    return this.props.envoltura ? <div className="q-envoltura q-capa-vacia">{aviso}</div> : aviso;
   }
 }
 
@@ -449,6 +450,10 @@ export function IndiceCapa({ secciones, etiqueta, conResumen = true, capaId }) {
 }
 
 // ── Opciones excluyentes ──
+// La opción que vale: la elegida si sigue disponible; si no (la fuente se cayó, cambió el mes), la primera que lo esté.
+// Así una elección vieja nunca deja una tarjeta vacía ni un control con una opción desactivada como elegida.
+export const vigente = (valor, opciones) => (opciones.some((o) => o.valor === valor && !o.desactivada) ? valor : opciones.find((o) => !o.desactivada)?.valor ?? valor);
+
 // Con más de MAX_GRUPO opciones (más ciudades, más marcas) los botones ya no caben en un celular: pasa a ser una lista
 const MAX_GRUPO = 4;
 export function Grupo({ etiqueta, opciones, valor, onCambiar }) {
@@ -549,14 +554,17 @@ export function Detalle({ id, titulo, bajada, vistas, children }) {
     window.addEventListener('hashchange', mirar);
     return () => window.removeEventListener('hashchange', mirar);
   }, [id]);
+  const boton = useRef(null);
   const cerrar = () => {
     setAbierto(false);
-    // el ancla que lo abrió se suelta, para que volver a pedirla lo abra otra vez
-    if (location.hash === '#' + id) history.replaceState(null, '', location.pathname + location.search);
+    // el ancla que lo abrió vuelve a ser la del capítulo: la capa sigue en la dirección y pedir el detalle otra vez lo abre
+    if (location.hash === '#' + id) history.replaceState(null, '', `${location.pathname}${location.search}#${id.replace(/^detalle-/, '')}`);
+    // si se abrió desde un enlace no hubo botón que recupere el foco: vuelve al botón del detalle
+    setTimeout(() => { if (!document.activeElement || document.activeElement === document.body) boton.current?.focus(); }, 60);
   };
   return (
     <div className="q-detalle" id={id}>
-      <button type="button" className="q-boton q-detalle-boton" aria-haspopup="dialog" aria-expanded={abierto} onClick={() => setAbierto(true)}>
+      <button ref={boton} type="button" className="q-boton q-detalle-boton" aria-haspopup="dialog" aria-expanded={abierto} onClick={() => setAbierto(true)}>
         <PanelRightOpen size={16} aria-hidden="true" />
         <span>Ver el detalle<span className="q-detalle-vistas">: {vistas.join(', ').replace(/, ([^,]*)$/, ' y $1')}</span></span>
       </button>

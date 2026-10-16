@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { armarVista, mesesDisponibles } from '../src/calculo/vista.js';
 import { ESCENARIOS, aplicarEscenario } from '../src/calculo/escenarios.js';
+import { periodoDelMes, diasEntre, DIAS_MINIMOS } from '../src/calculo/periodo.js';
 import { numerosRotos, revisarTextos } from './revisar.mjs';
 
 const leer = (f) => JSON.parse(readFileSync(new URL(`../public/data/${f}`, import.meta.url), 'utf8'));
@@ -28,15 +29,20 @@ test('los escenarios no tocan la data original', () => {
 });
 
 test('los escenarios mueven lo que dicen mover', () => {
-  const mes = mesesDisponibles(DATOS.contrato.meta).at(-1);
-  const vista = (id) => { const d = aplicarEscenario(id, DATOS); return armarVista(d.contrato, d.medios, { mes }, {}, { mapa: d.mapa, busquedas: d.busquedas }); };
+  // un mes con días suficientes para leer variaciones, fijo frente a la data viva: el pipeline corre estas pruebas
+  // antes de bajar data nueva, y el día 1 de un mes el último mes tiene un solo día
+  const meses = mesesDisponibles(DATOS.contrato.meta);
+  const mes = [...meses].reverse().find((m) => { const P = periodoDelMes(DATOS.contrato.meta, m); return diasEntre(P.desde, P.hasta) + 1 >= DIAS_MINIMOS; });
+  const vista = (id) => { const d = aplicarEscenario(id, DATOS, { mes }); return armarVista(d.contrato, d.medios, { mes }, {}, { mapa: d.mapa, busquedas: d.busquedas }); };
   const base = vista(null);
   const rival = (v) => v.lee.atl.marcas.find((m) => m.foco);
   assert.ok(rival(vista('competencia-fuerte')).share > rival(base).share, 'la competencia fuerte no sube su share');
   assert.ok(vista('competencia-fuerte').sugiere.queMirar.some((a) => a.id === 'sube-competencia'), 'la competencia fuerte no dispara la alerta de subida');
   assert.ok(vista('competencia-apagada').sugiere.queMirar.some((a) => a.id === 'competencia-sin-pauta'), 'la competencia apagada no dispara ninguna alerta');
-  const unDia = vista('un-dia').sugiere.queMirar;
-  assert.ok(unDia.some((a) => a.id === 'pocos-dias') && !unDia.some((a) => ['sube-competencia', 'baja-competencia', 'medio-nuevo', 'pico-competencia'].includes(a.id)), 'con un día de data se leen variaciones');
+  const unDia = aplicarEscenario('un-dia', DATOS);
+  const vu = armarVista(unDia.contrato, unDia.medios, { mes: mesesDisponibles(unDia.contrato.meta).at(-1) }, {}, {});
+  assert.equal(vu.periodo.desde, vu.periodo.hasta);
+  const alertasUnDia = vu.sugiere.queMirar;
+  assert.ok(alertasUnDia.some((a) => a.id === 'pocos-dias') && !alertasUnDia.some((a) => ['sube-competencia', 'baja-competencia', 'medio-nuevo', 'pico-competencia'].includes(a.id)), 'con un día de data se leen variaciones');
   assert.equal(vista('sin-paneles').lee.ooh?.paneles?.length ?? 0, 0);
-  assert.equal(vista('un-dia').periodo.desde, vista('un-dia').periodo.hasta);
 });

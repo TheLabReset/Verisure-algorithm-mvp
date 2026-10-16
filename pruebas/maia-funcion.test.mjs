@@ -59,3 +59,38 @@ test('MAIA: si el modelo o el contexto fallan, dice que no pudo; nunca inventa',
   const r = await leer(await funcion(pedido({ pregunta: 'hola' })));
   assert.deepEqual([r.status, r.cuerpo.error, r.cuerpo.respuesta], [502, 'modelo', undefined]);
 });
+
+test('MAIA: una respuesta vacía del modelo no llega como respuesta, y un historial que no es lista se rechaza', async () => {
+  entorno({ ANTHROPIC_API_KEY: 'k' });
+  globalThis.fetch = async (url) => (String(url).endsWith('.json') ? new Response('{"meses":[]}') : new Response(JSON.stringify({ content: [{ type: 'text', text: '   ' }] })));
+  const r = await leer(await funcion(pedido({ pregunta: 'hola' })));
+  assert.deepEqual([r.status, r.cuerpo.error, r.cuerpo.detalle], [502, 'modelo', undefined]);
+  for (const historial of ['texto', { a: 1 }]) assert.equal((await funcion(pedido({ pregunta: 'hola', historial }))).status, 400);
+  globalThis.fetch = async (url) => (String(url).endsWith('.json') ? new Response('{"meses":[]}') : new Response(JSON.stringify({ content: [{ type: 'text', text: 'Bien.' }] })));
+  assert.equal((await leer(await funcion(pedido({ pregunta: 'hola', historial: [null, { rol: 'usuario', texto: 'antes' }] })))).cuerpo.respuesta, 'Bien.');
+});
+
+test('MAIA: si el contexto llega como HTML (falta el archivo y responde la SPA), dice que no pudo leerlo', async () => {
+  entorno({ ANTHROPIC_API_KEY: 'k' });
+  globalThis.fetch = async (url) => (String(url).endsWith('.json') ? new Response('<!doctype html><html></html>', { headers: { 'content-type': 'text/html' } }) : new Response('{}'));
+  assert.equal((await leer(await funcion(pedido({ pregunta: 'hola' })))).cuerpo.error, 'contexto');
+});
+
+test('MAIA en el navegador: una respuesta vacía o HTML es un error, nunca una burbuja vacía', async () => {
+  const { preguntarMaia } = await import('../src/fuentes/maia-navegador.js');
+  assert.deepEqual(await preguntarMaia('x', [], async () => new Response('<!doctype html>', { status: 200 })), { error: 'modelo' });
+  assert.deepEqual(await preguntarMaia('x', [], async () => new Response(JSON.stringify({ respuesta: '' }))), { error: 'modelo' });
+});
+
+test('Acceso: /api/maia y /data quedan detrás del Basic Auth, y una clave con ñ funciona', async () => {
+  const toml = readFileSync(new URL('../netlify.toml', import.meta.url), 'utf8');
+  assert.match(toml, /\[\[edge_functions\]\]\s*\n\s*path = "\/\*"\s*\n\s*function = "auth"/);
+  const { default: auth } = await import('../netlify/edge-functions/auth.js');
+  entorno({ BASIC_AUTH_USER: 'lab', BASIC_AUTH_PASSWORD: 'contraseña' });
+  const conClave = 'Basic ' + Buffer.from('lab:contraseña', 'utf8').toString('base64');
+  assert.equal((await auth(new Request('https://panel.ejemplo/data/maia-contexto.json'), {}))?.status, 401);
+  assert.equal(await auth(new Request('https://panel.ejemplo/api/maia', { headers: { authorization: conClave } }), {}), undefined, 'con la clave correcta pasa');
+  assert.equal((await auth(new Request('https://panel.ejemplo/', { headers: { authorization: 'Basic eDp5' } }), {}))?.status, 401);
+  entorno({});
+  assert.equal(await auth(new Request('https://panel.ejemplo/'), {}), undefined, 'sin credenciales el sitio queda abierto (modo demo)');
+});

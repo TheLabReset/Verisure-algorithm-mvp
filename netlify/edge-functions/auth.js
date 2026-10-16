@@ -13,7 +13,8 @@ export default async (request, context) => {
   if (!user || !pass) return
 
   const provided = request.headers.get('authorization') || ''
-  const expected = 'Basic ' + btoa(`${user}:${pass}`)
+  // btoa solo acepta Latin-1: una clave con ñ o tildes se pasa a UTF-8 antes de codificarla
+  const expected = 'Basic ' + btoa(String.fromCharCode(...new TextEncoder().encode(`${user}:${pass}`)))
 
   // Comparación de tiempo ~constante (no filtra la contraseña por timing).
   if (provided && timingSafeEqual(provided, expected)) return // autorizado → continúa
