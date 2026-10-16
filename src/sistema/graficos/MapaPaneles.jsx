@@ -3,7 +3,7 @@
 // (--mapa-filtro: gris tenue en claro, invertido en oscuro), así el mapa sigue al tema. Cada círculo es una ubicación
 // (las caras de una misma torre van juntas); su tamaño sigue a la inversión estimada. La competencia va en el color
 // de foco y la marca propia en su rojo, como en todos los gráficos. Un clic elige la ubicación; la ficha la pinta la pantalla.
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -14,15 +14,22 @@ const BASE = {
   atribucion: '© <a href="https://www.openstreetmap.org/copyright">colaboradores de OpenStreetMap</a>',
 };
 
-export default function MapaPaneles({ ubicaciones, elegida, onElegir, encuadre, etiqueta }) {
+// contornos: los límites de los distritos en [lat, lng]; se dibujan solo si el mapa base no carga (sin red, un visor
+// que bloquea OpenStreetMap), para que los puntos sigan teniendo dónde leerse
+export default function MapaPaneles({ ubicaciones, elegida, onElegir, encuadre, etiqueta, contornos = [] }) {
   const caja = useRef(null), mapa = useRef(null), capas = useRef({});
+  const [sinBase, setSinBase] = useState(false);
 
   // El mapa se crea una vez
   useEffect(() => {
     const m = L.map(caja.current, { scrollWheelZoom: false, zoomControl: false, attributionControl: true, preferCanvas: false });
     L.control.zoom({ position: 'topright', zoomInTitle: 'Acercar', zoomOutTitle: 'Alejar' }).addTo(m);
     m.attributionControl.setPrefix(false);
-    L.tileLayer(BASE.url, { attribution: BASE.atribucion, maxZoom: 19 }).addTo(m);
+    let fallas = 0;
+    L.tileLayer(BASE.url, { attribution: BASE.atribucion, maxZoom: 19 }).on('tileerror', () => { fallas += 1; if (fallas >= 3) setSinBase(true); }).addTo(m);
+    // un pane debajo de los puntos y encima del mapa base
+    m.createPane('contornos').style.zIndex = Number(getComputedStyle(m.getPane('overlayPane')).zIndex) - 1;
+    capas.current.contornos = L.layerGroup().addTo(m);
     capas.current.puntos = L.layerGroup().addTo(m);
     mapa.current = m;
     return () => { m.remove(); mapa.current = null; };
@@ -50,6 +57,14 @@ export default function MapaPaneles({ ubicaciones, elegida, onElegir, encuadre, 
     }
   }, [ubicaciones, elegida, onElegir]);
 
+  // Sin mapa base: los límites de los distritos, debajo de los puntos
+  useEffect(() => {
+    const g = capas.current.contornos;
+    if (!g || !sinBase) return;
+    g.clearLayers();
+    for (const anillo of contornos) L.polygon(anillo, { pane: 'contornos', className: 'q-mapa-distrito', interactive: false, weight: 1 }).addTo(g);
+  }, [sinBase, contornos]);
+
   // Encuadre: los paneles de la zona elegida (Lima o una ciudad)
   useEffect(() => {
     const m = mapa.current;
@@ -58,5 +73,11 @@ export default function MapaPaneles({ ubicaciones, elegida, onElegir, encuadre, 
     m.fitBounds(b.pad(0.15), { maxZoom: 15, animate: false });
   }, [encuadre]);
 
-  return <div className="q-mapa" ref={caja} role="region" aria-label={etiqueta} />;
+  return (
+    // el modificador va en el marco: el className del div del mapa no cambia nunca, porque React borraría las clases de Leaflet
+    <div className={`q-mapa-marco${sinBase ? ' q-mapa-sin-base' : ''}`}>
+      <div className="q-mapa" ref={caja} role="region" aria-label={etiqueta} />
+      {sinBase && <p className="q-mapa-aviso" role="status">El mapa de fondo no cargó: se ven los límites de los distritos.</p>}
+    </div>
+  );
 }

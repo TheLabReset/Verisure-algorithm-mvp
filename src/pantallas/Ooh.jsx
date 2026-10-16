@@ -11,14 +11,16 @@ const MapaPaneles = lazy(() => import('../sistema/graficos/MapaPaneles.jsx'));
 
 function Ficha({ ubicacion, paneles, onVerTodos }) {
   const [i, setI] = useState(0);
+  const [fallo, setFallo] = useState(null); // la cara cuya foto o video no cargó
   const p = paneles[Math.min(i, paneles.length - 1)];
   if (!p) return <p className="q-nota-bloque">Elige un punto del mapa para ver su panel.</p>;
   const a = p.asset;
   return (
     <div className="q-ficha-panel" aria-live="polite">
       <div className="q-ficha-arte">
-        {a?.kind === 'image' ? <img src={a.url} alt={`Foto del panel de ${p.nombre}${p.version ? `, versión ${version(p.version)}` : ''}`} loading="lazy" referrerPolicy="no-referrer" />
-          : a?.kind === 'video' ? <video src={a.url} controls preload="metadata" aria-label={`Video del panel de ${p.nombre}`} />
+        {fallo === p.id ? <span className="q-ficha-sin-arte">{a.kind === 'video' ? 'El video' : 'La foto'} de este panel no cargó</span>
+          : a?.kind === 'image' ? <img src={a.url} alt={`Foto del panel de ${p.nombre}${p.version ? `, versión ${version(p.version)}` : ''}`} loading="lazy" referrerPolicy="no-referrer" onError={() => setFallo(p.id)} />
+          : a?.kind === 'video' ? <video src={a.url} controls preload="metadata" aria-label={`Video del panel de ${p.nombre}`} onError={() => setFallo(p.id)} />
           : <span className="q-ficha-sin-arte">Integrametrics no captó la foto de este panel</span>}
       </div>
       <div className="q-ficha-cuerpo">
@@ -70,7 +72,7 @@ export default function Ooh({ o, t, nota }) {
       )}
       <div className="q-ooh-mapa">
         <Suspense fallback={<div className="q-mapa q-mapa-cargando">Cargando el mapa…</div>}>
-          <MapaPaneles key={o.zonas.map((z) => z.nombre).join()} ubicaciones={ubicaciones} elegida={id} onElegir={setElegida} encuadre={encuadre}
+          <MapaPaneles key={o.zonas.map((z) => z.nombre).join()} ubicaciones={ubicaciones} elegida={id} onElegir={setElegida} encuadre={encuadre} contornos={o.contornos}
             etiqueta={`Mapa de paneles OOH en ${actual?.nombre ?? 'Lima'}`} />
         </Suspense>
         <ul className="q-leyenda" aria-hidden="true">

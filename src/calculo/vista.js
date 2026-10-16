@@ -11,7 +11,7 @@
 import { CLIENTE } from '../cliente.js';
 import { rango, diasEntre, diaSemana, periodoDelMes, mesesDisponibles, DIAS_MINIMOS } from './periodo.js';
 import { agruparAnuncios, nombrePlataforma } from './anuncios.js';
-import { leerOoh } from './ooh.js';
+import { leerOoh, contornos } from './ooh.js';
 import { versionesDelAnio, cronograma, pautaDiaria, shareSemanal, pautaSemanal } from './competencia.js';
 import { leerBusquedas } from './busquedas.js';
 import { hechosDeLaSemana } from './semana.js';
@@ -178,6 +178,7 @@ function ooh(contrato, mapa, P) {
     porMarcaAntes: previos ? Object.fromEntries(MARCAS.map((m) => [m, previos.filter((p) => p.maname === m).length])) : null,
     zonasNuevas: leidoAntes ? Object.fromEntries(MARCAS.map((m) => { const antes = zonasDe(leidoAntes, m); return [m, [...zonasDe(mapaLeido, m)].filter((z) => !antes.has(z) && z !== 'Sin coordenadas')]; })) : null,
     porDistrito: mapaLeido.porDistrito, fueraDeLima: mapaLeido.fueraDeLima, enLima: mapaLeido.enLima, fuera: mapaLeido.fuera,
+    contornos: contornos(mapa),
     abanico: abanico(lista.map((p) => ({ marca: p.marca, pieza: p.pieza })), (x) => x.marca),
   };
 }

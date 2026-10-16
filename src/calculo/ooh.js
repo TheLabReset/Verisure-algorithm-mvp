@@ -11,6 +11,13 @@ const CIUDADES = [
 ];
 const km = (a, b) => Math.hypot((a.lat - b.lat) * 111, (a.lng - b.lng) * 111 * Math.cos((a.lat * Math.PI) / 180));
 
+// Los límites de los distritos de Lima de vuelta a latitud y longitud: el respaldo del mapa cuando el mapa base no carga
+export function contornos(mapa) {
+  if (!mapa?.distritos) return [];
+  const { lat0, lng0, k, cos } = mapa.proyeccion;
+  return mapa.distritos.flatMap((d) => d.anillos.map((a) => a.map(([x, y]) => [Math.round((lat0 - y / k) * 1e5) / 1e5, Math.round((x / (cos * k) + lng0) * 1e5) / 1e5])));
+}
+
 export const proyectar = (mapa, lat, lng) => {
   const { lat0, lng0, k, cos } = mapa.proyeccion;
   return [(lng - lng0) * cos * k, (lat0 - lat) * k];

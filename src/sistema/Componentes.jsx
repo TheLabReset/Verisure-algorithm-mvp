@@ -667,14 +667,15 @@ export function ArteMuestra({ a, grande = false }) {
 
 // ── Un anuncio entero, en la ventana. Una imagen que no carga sale; la tarjeta sigue sin ella ──
 function TarjetaAnuncio({ a, anunciante, t }) {
-  const [rota, setRota] = useState(false);
+  const [rota, setRota] = useState(false), [videoRoto, setVideoRoto] = useState(false);
   const meta = t.meta(a);
   const texto = a.texto || t.texto(a);
   return (
     <article className="q-anuncio" data-anuncio={a.id}>
       {a.imagen && !rota && <div className="q-anuncio-pieza"><img src={a.imagen} alt={`Imagen del anuncio de ${anunciante}`} loading="lazy" referrerPolicy="no-referrer" onError={() => setRota(true)} /></div>}
       {!a.imagen && a.arte != null && <div className="q-anuncio-pieza"><ArteMuestra a={a} grande /></div>}
-      {a.medio?.kind === 'video' && <div className="q-anuncio-pieza q-anuncio-video"><video controls preload="none" src={a.medio.url} aria-label={`Video de ${a.titulo || anunciante}`} /></div>}
+      {a.medio?.kind === 'video' && (videoRoto ? <p className="q-nota-bloque">El video de esta pieza no cargó.</p>
+        : <div className="q-anuncio-pieza q-anuncio-video"><video controls preload="none" src={a.medio.url} aria-label={`Video de ${a.titulo || anunciante}`} onError={() => setVideoRoto(true)} /></div>)}
       {a.medio?.kind === 'audio' && <div className="q-anuncio-audio"><AudioLines size={18} aria-hidden="true" /><audio controls preload="none" src={a.medio.url} aria-label={`Audio de ${a.titulo || anunciante}`} /></div>}
       <div className="q-anuncio-cuerpo">
         {a.titulo && <h3>{t.titulo ? t.titulo(a) : a.titulo}</h3>}
