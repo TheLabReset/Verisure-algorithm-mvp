@@ -28,6 +28,7 @@ Los semánticos se agrupan por función:
 - **Superficies:** `--fondo` (la página), `--superficie-capitulo` (el panel que agrupa), `--superficie` (la tarjeta) y `--barra` (la barra superior).
 - **Texto:** `--texto-1` (cifras y títulos), `--texto-2` (lectura) y `--texto-3` (notas y ejes).
 - **Acento:** `--acento` y `--acento-texto`, el rojo de la marca. Es identidad (la capa activa, el número de capítulo), nunca dato.
+- **Marca propia en los gráficos:** `--propia` (rellenos, puntos, el mapa) y `--propia-linea` (líneas). Es identidad: dice cuál es la marca, no cuánto. Va lisa, sin el borde del foco, para que el foco siga siendo lo primero que se ve. El chequeo mide que se separe del foco y del gris.
 - **Estado:** `--mejora`, `--empeora` y `--atencion`. Siempre van con flecha, signo o ícono, para que el color nunca vaya solo.
 - **Datos:**
   - `--serie-1`: barras y líneas, en el color de datos de la marca;

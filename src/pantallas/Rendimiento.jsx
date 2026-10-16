@@ -21,11 +21,11 @@ function TablaShare({ u, etiqueta, conImpresiones }) {
   );
 }
 
-// Share antes y ahora, por marca: la competencia arriba; la comparación en gris, el período en el color de foco
+// Share antes y ahora, por marca: la competencia arriba; la comparación en gris, el período en el color de cada marca
 function ShareMarcas({ u, etiqueta, rotuloA }) {
   const orden = [...u.marcas].sort((a, b) => Number(a.propia) - Number(b.propia));
   return <Pesas etiqueta={etiqueta} formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} max={100} rotuloA={rotuloA} rotuloB="Este período"
-    filas={orden.map((m) => ({ nombre: m.nombre, a: m.sharePrevio, b: m.share, resto: !m.foco }))} />;
+    filas={orden.map((m) => ({ nombre: m.nombre, a: m.sharePrevio, b: m.share, tono: m.foco ? undefined : m.propia ? 'propia' : 'resto' }))} />;
 }
 
 export default function Rendimiento({ capa, vista: v }) {
@@ -80,7 +80,7 @@ export default function Rendimiento({ capa, vista: v }) {
             pie={<span>Inversión estimada de cada día, en soles, en la misma escala para las dos marcas. Un día sin registros es un hueco, no un cero.</span>}>
             <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={diario} onCambiar={setDiario} opciones={[{ valor: 'digital', texto: 'Digital' }, { valor: 'atl', texto: 'ATL', desactivada: !ok(atl) }]} /></div>
             <Lineas etiqueta={`Inversión ${diario === 'atl' ? 'ATL' : 'digital'} por día y por marca`} formato={solesCompacto}
-              series={[...u.marcas].sort((a, b) => Number(a.foco) - Number(b.foco)).map((m) => ({ nombre: m.nombre, resaltada: m.foco, serie: u.diaria.map((d) => ({ fecha: d.fecha, valor: d.valores[m.id] })) }))} />
+              series={[...u.marcas].sort((a, b) => Number(a.foco) - Number(b.foco)).map((m) => ({ nombre: m.nombre, resaltada: m.foco, tono: m.propia ? 'propia' : undefined, serie: u.diaria.map((d) => ({ fecha: d.fecha, valor: d.valores[m.id] })) }))} />
           </Bloque>
         )}
       </SeccionDe>

@@ -2,7 +2,7 @@
 // Mapa base: los mosaicos estándar de OpenStreetMap, sin clave, calmados con un filtro que sale de los tokens
 // (--mapa-filtro: gris tenue en claro, invertido en oscuro), así el mapa sigue al tema. Cada círculo es una ubicación
 // (las caras de una misma torre van juntas); su tamaño sigue a la inversión estimada. La competencia va en el color
-// de foco y la marca propia en gris, como en todos los gráficos. Un clic elige la ubicación; la ficha la pinta la pantalla.
+// de foco y la marca propia en su rojo, como en todos los gráficos. Un clic elige la ubicación; la ficha la pinta la pantalla.
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -39,7 +39,7 @@ export default function MapaPaneles({ ubicaciones, elegida, onElegir, encuadre, 
       const sel = u.id === elegida;
       const c = L.circleMarker([u.lat, u.lng], {
         radius: 7 + Math.sqrt(u.inversion / max) * 13, weight: 2,
-        className: `q-mapa-punto ${u.foco ? 'q-mapa-foco' : 'q-mapa-resto'}${sel ? ' q-mapa-elegido' : ''}`,
+        className: `q-mapa-punto ${u.foco ? 'q-mapa-foco' : u.propia ? 'q-mapa-propia' : 'q-mapa-resto'}${sel ? ' q-mapa-elegido' : ''}`,
         bubblingMouseEvents: false,
       });
       c.bindTooltip(u.pista, { direction: 'top', offset: [0, -8], className: 'q-mapa-pista', opacity: 1 });

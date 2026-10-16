@@ -40,7 +40,7 @@ function PautaSemanal({ pauta, P }) {
         {filas.map((f) => (
           <div key={f.id} className="q-pauta-marca">
             <h4>{f.marca}<span>{solesCompacto(f.total)} en el año</span></h4>
-            <Histograma etiqueta={`Inversión semanal de ${f.marca}`} tono={f.foco ? undefined : 'resto'} formato={(n) => (n == null ? 'sin registros' : soles(n))} alto={150}
+            <Histograma etiqueta={`Inversión semanal de ${f.marca}`} tono={f.foco ? undefined : f.propia ? 'propia' : 'resto'} formato={(n) => (n == null ? 'sin registros' : soles(n))} alto={150}
               resaltar={f.semanas.map((s, i) => (s.hasta >= P.desde && s.fecha <= P.hasta ? i : -1)).filter((i) => i >= 0)}
               barras={f.semanas.map((s, i, todas) => ({ nombre: `Semana del ${fechaCorta(s.fecha)}${s.parcial ? ' (incompleta)' : ''}`, corto: etiquetaSemana(s, i, todas), valor: s.valor }))} />
           </div>
@@ -82,7 +82,7 @@ export default function Inteligencia({ capa, vista: v }) {
             ayuda={<p>Google Trends da un índice de 0 a 100 en Perú, no la cantidad de búsquedas. Los tres términos van en una misma consulta, así que se comparan entre sí. «Cámaras de seguridad» junta las dos formas de escribirlo. La comparación es el promedio de las últimas {numero(b.semanas)} semanas completas frente a las mismas semanas de un año antes.</p>}
             pie={<span>Google Trends, Perú, por semana · consultado el {fechaCorta(b.consultado)}. No sigue el mes elegido: Trends va al día.</span>}>
             <Lineas etiqueta="Búsquedas semanales de cámaras y de la marca en Google Trends" formato={(n) => numero(n)} alto={260}
-              series={b.series.map((s) => ({ nombre: s.nombre, resaltada: s.id === 'camaras', serie: desdeAnioPasado(s.serie) }))} />
+              series={b.series.map((s) => ({ nombre: s.nombre, resaltada: s.id === 'camaras', tono: s.propia ? 'propia' : undefined, serie: desdeAnioPasado(s.serie) }))} />
           </Bloque>
           <Bloque universo="busquedas" ancho="mitad" {...marcasDiyLectura(b)} alcance={`semanas al ${fechaCorta(b.hasta)}`}
             ayuda={<p>Las cinco marcas van en otra consulta de Google Trends, con su propia escala: no se comparan con la tarjeta de al lado. Cada línea une el promedio de las mismas semanas de un año antes con el de las últimas {numero(b.semanas)}.</p>}

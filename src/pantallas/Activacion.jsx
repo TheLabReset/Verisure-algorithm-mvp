@@ -67,13 +67,13 @@ export default function Activacion({ capa, vista: v }) {
           <Bloque universo="atl" ancho="mitad" {...franjasLectura(v, FRANJAS)}
             ayuda={<p>Parte de las emisiones de cada marca en cada franja horaria. Cada fila une a las dos marcas en la misma escala, de 0 a 100 %.</p>}
             pie={<span>Emisiones de TV y radio por franja horaria.</span>}>
-            <Pesas etiqueta="Parte de las emisiones de cada marca por franja" formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} max={100} rotuloA={p?.nombre} rotuloB={r.nombre}
+            <Pesas etiqueta="Parte de las emisiones de cada marca por franja" formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} max={100} rotuloA={p?.nombre} rotuloB={r.nombre} tonoA="propia"
               filas={v.analiza.franjas.map((k) => ({ nombre: FRANJAS[k], a: p?.mezclaFranjas[k] ?? 0, b: r.mezclaFranjas[k] ?? 0 }))} />
           </Bloque>
           <Bloque universo="atl" ancho="mitad" {...canalesLectura(deMarca, marca)}
             pie={<span>Los ocho canales con más inversión estimada de la marca en el mes.</span>}>
             {control}
-            {deMarca?.canales.length ? <Barras etiqueta={`Inversión de ${textosMarca.nombreMarca(marca)} por canal`} tono={marca === CLIENTE.marcaFuente ? 'resto' : undefined} formato={solesCompacto} filas={deMarca.canales.map((c) => ({ nombre: c.nombre, valor: c.valor }))} />
+            {deMarca?.canales.length ? <Barras etiqueta={`Inversión de ${textosMarca.nombreMarca(marca)} por canal`} tono={marca === CLIENTE.marcaFuente ? 'propia' : undefined} formato={solesCompacto} filas={deMarca.canales.map((c) => ({ nombre: c.nombre, valor: c.valor }))} />
               : <p className="q-nota-bloque">Sin emisiones en el período.</p>}
           </Bloque>
         </>}
@@ -90,7 +90,7 @@ export default function Activacion({ capa, vista: v }) {
           </Bloque>
           <Bloque universo="atl" {...programasLectura(deMarca, marca)}
             pie={<span>Los ocho programas con más emisiones de la marca en el mes.</span>}>
-            {deMarca?.programas.length ? <Barras etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por programa`} tono={marca === CLIENTE.marcaFuente ? 'resto' : undefined} formato={(n) => numero(n)} filas={deMarca.programas.map((x) => ({ nombre: version(x.nombre), valor: x.valor }))} />
+            {deMarca?.programas.length ? <Barras etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por programa`} tono={marca === CLIENTE.marcaFuente ? 'propia' : undefined} formato={(n) => numero(n)} filas={deMarca.programas.map((x) => ({ nombre: version(x.nombre), valor: x.valor }))} />
               : <p className="q-nota-bloque">Sin programas registrados en el período.</p>}
           </Bloque>
         </>}

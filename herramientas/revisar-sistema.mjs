@@ -22,7 +22,7 @@ const TEXTO = ['texto-1', 'texto-2', 'texto-3', 'acento-texto', 'mejora', 'empeo
 // marcas de interfaz que hay que ver: 3:1 sobre toda superficie (WCAG 1.4.11)
 const INTERFAZ = ['borde-control', 'acento', 'foco'];
 // marcas de datos: 3:1 sobre las superficies donde hay gráficos
-const GRAFICO = ['s1', 'resalte', 's2', 's3', 's4', 'previa'];
+const GRAFICO = ['s1', 'resalte', 'propia', 'propia-linea', 's2', 's3', 's4', 'previa'];
 // Un relleno con borde: si un color de datos tiene su --X-borde (o lo hereda de un alias), lo que se ve contra el
 // fondo es el borde. Así entra un color de marca claro (un amarillo) sin perder contraste: relleno de marca y borde
 // de tinta. Un borde «transparent» (en el tema donde el relleno ya contrasta solo) vuelve a medir el relleno.
@@ -32,6 +32,8 @@ const GRAFICO = ['s1', 'resalte', 's2', 's3', 's4', 'previa'];
 const CONVIVEN = [
   ['s1', 'previa', 2], ['banda-0', 'superficie', 1.2], ['s1', 'banda-0', 4.5], ['borde-control', 'superficie', 3],
   ['serie-1', 'superficie', 3], ['serie-1', 'serie-resto', 2], ['serie-resto', 'superficie', 1.4],
+  // la marca propia frente a la competencia y frente al gris de la comparación (por luminosidad, no solo por tono)
+  ['propia', 'serie-resto', 2], ['propia', 'resalte', 1.4], ['propia-linea', 'serie-resto', 2], ['propia-linea', 'serie-1', 1.4],
   ['q0', 'q1', 1.2], ['q1', 'q2', 1.2], ['q2', 'q3', 1.2], ['q3', 'q4', 1.2], ['q4', 'q5', 1.2], ['q5', 'q6', 1.2],
 ];
 // pares fijos: texto sobre un relleno

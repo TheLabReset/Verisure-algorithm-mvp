@@ -139,7 +139,9 @@ export function Multiplos({ paneles, formato = numero, etiqueta }) {
 }
 
 // ─────────────── Pesas: dos valores de la misma escala por fila ───────────────
-export function Pesas({ filas, formato = numero, max, min = 0, rotuloA, rotuloB, centro = min < 0 ? 0 : null, etiqueta }) {
+// tonoA='propia': el punto A es la marca propia (en su rojo, lleno) y no una comparación. Cada fila puede llevar
+// tono 'propia' o 'resto' para su punto B; sin tono, B va en el color de foco.
+export function Pesas({ filas, formato = numero, max, min = 0, rotuloA, rotuloB, centro = min < 0 ? 0 : null, etiqueta, tonoA }) {
   const tabla = { columnas: ['', rotuloA, rotuloB], filas: filas.map((f) => [f.nombre, formato(f.a), formato(f.b)]) };
   return (
     <Grafico etiqueta={etiqueta} tabla={tabla}>
@@ -151,7 +153,7 @@ export function Pesas({ filas, formato = numero, max, min = 0, rotuloA, rotuloB,
         return (
           <>
           <ul className="q-leyenda q-leyenda-pesas" aria-hidden="true">
-            <li><span className="q-muestra q-muestra-previa" />{rotuloA}</li>
+            <li><span className={`q-muestra ${tonoA === 'propia' ? 'q-muestra-propia' : 'q-muestra-previa'}`} />{rotuloA}</li>
             <li><span className="q-muestra q-muestra-actual" /><b>{rotuloB}</b></li>
           </ul>
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
@@ -164,13 +166,17 @@ export function Pesas({ filas, formato = numero, max, min = 0, rotuloA, rotuloB,
                   <line className="q-rejilla" x1={m.l} x2={ancho - m.r} y1={cy} y2={cy} />
                   {centro != null && <line className="q-separador" x1={x(centro)} x2={x(centro)} y1={cy - 10} y2={cy + 10} />}
                   {f.a != null && f.b != null && <line className="q-pesa" x1={x(f.a)} x2={x(f.b)} y1={cy} y2={cy} />}
-                  {f.a != null && <circle className="q-punto-previo" cx={x(f.a)} cy={cy} r="5" data-valor={f.a} />}
-                  {f.b != null && <circle className={f.resto ? 'q-punto-actual-resto' : 'q-punto-actual'} cx={x(f.b)} cy={cy} r="6" data-valor={f.b} />}
+                  {f.a != null && <circle className={tonoA === 'propia' ? 'q-punto-propia' : 'q-punto-previo'} cx={x(f.a)} cy={cy} r={tonoA === 'propia' ? 6 : 5} data-valor={f.a} />}
+                  {f.b != null && <circle className={f.tono === 'propia' ? 'q-punto-propia' : f.tono === 'resto' ? 'q-punto-actual-resto' : 'q-punto-actual'} cx={x(f.b)} cy={cy} r="6" data-valor={f.b} />}
                   {/* la cifra va junto a su punto (el del período): a la derecha si queda adelante de la comparación, si no a la izquierda */}
                   {/* a la izquierda solo si cabe sin pisar el nombre de la fila; si no, a la derecha del punto más alejado */}
-                  {f.b != null && (f.a == null || f.b >= f.a || x(f.b) - m.l < 44
+                  {f.b != null && !(tonoA === 'propia' && f.a != null && f.a > f.b && x(f.b) - m.l < 44 && x(f.a) - x(f.b) >= 12) && (f.a == null || f.b >= f.a || x(f.b) - m.l < 44
                     ? <text className="q-rotulo-valor" x={x(Math.max(f.b, f.a ?? f.b)) + 12} y={cy + 4}>{formato(f.b)}</text>
                     : <text className="q-rotulo-valor" x={x(f.b) - 12} y={cy + 4} textAnchor="end">{formato(f.b)}</text>)}
+                  {/* si A es la marca propia también lleva su cifra, del lado contrario a B; la que no cabe sin pisar algo queda en la tabla; si los puntos se tapan, solo va la de B */}
+                  {tonoA === 'propia' && f.a != null && f.b != null && Math.abs(x(f.a) - x(f.b)) >= 12 && (f.a > f.b
+                    ? <text className="q-rotulo-valor" x={x(f.a) + 12} y={cy + 4}>{formato(f.a)}</text>
+                    : x(f.a) - m.l >= 44 && x(f.b) - x(f.a) > 16 && <text className="q-rotulo-valor" x={x(f.a) - 12} y={cy + 4} textAnchor="end">{formato(f.a)}</text>)}
                 </g>
               );
             })}
@@ -274,7 +280,7 @@ export function Barras({ filas, formato = numero, max: maxComun, margen, margenD
                   <Zona x={0} y={cy} w={ancho} h={fila} pista={`${f.nombre}\n${f.valor == null ? f.nota || 'sin dato' : formato(f.valor) + (f.nota ? ` · ${f.nota}` : '')}${f.previo != null ? `\ncomparación: ${formato(f.previo)}` : ''}`} />
                   <text className={`q-rotulo-fila${r ? ' q-fuerte' : ''}`} x={m.l - 10} y={cy + fila / 2 + 4} textAnchor="end">{recortar(f.nombre, m.l)}</text>
                   {f.valor == null ? <text className="q-nota" x={m.l} y={cy + fila / 2 + 4}>{f.nota || 'sin dato'}</text> : <>
-                    {f.valor > 0 && <rect className={tono === 'resto' ? 'q-barra-resto-fuerte' : r ? 'q-barra-acento' : resaltar ? 'q-barra-resto' : 'q-barra'} x={x(0)} y={cy + 7} width={Math.max(1, x(f.valor) - x(0))} height={fila - 14} rx="2" data-valor={f.valor} />}
+                    {f.valor > 0 && <rect className={tono === 'propia' ? 'q-barra-propia' : tono === 'resto' ? 'q-barra-resto-fuerte' : r ? 'q-barra-acento' : resaltar ? 'q-barra-resto' : 'q-barra'} x={x(0)} y={cy + 7} width={Math.max(1, x(f.valor) - x(0))} height={fila - 14} rx="2" data-valor={f.valor} />}
                     {f.previo != null && <line className="q-raya-previa" x1={x(f.previo)} x2={x(f.previo)} y1={cy + 3} y2={cy + fila - 3} data-valor={f.previo} />}
                     <text className="q-rotulo-valor" x={x(Math.max(f.valor, f.previo ?? 0)) + 8} y={cy + fila / 2 + 4}>{formato(f.valor)}{conNota && f.nota && <tspan className="q-nota"> · {f.nota}</tspan>}</text>
                   </>}
@@ -535,7 +541,7 @@ export function Histograma({ barras, formato = numero, rotulo, resaltar = [], et
               return (
                 <g key={b.nombre}>
                   <Zona x={m.l + i * paso} y={m.t} w={paso} h={alto - m.b - m.t} pista={`${b.nombre}\n${formato(b.valor)}`} />
-                  {b.valor > 0 && <rect className={r ? (tono === 'resto' ? 'q-barra-resto-fuerte' : 'q-barra-acento') : resaltar.length || tono === 'resto' ? 'q-barra-resto' : 'q-barra'} x={x} y={y(b.valor)} width={w} height={y(0) - y(b.valor)} rx="2" data-valor={b.valor} />}
+                  {b.valor > 0 && <rect className={r ? (tono === 'propia' ? 'q-barra-propia' : tono === 'resto' ? 'q-barra-resto-fuerte' : 'q-barra-acento') : resaltar.length || tono === 'resto' ? 'q-barra-resto' : tono === 'propia' ? 'q-barra-propia' : 'q-barra'} x={x} y={y(b.valor)} width={w} height={y(0) - y(b.valor)} rx="2" data-valor={b.valor} />}
                   {/* rótulos a intervalo fijo; una barra resaltada fuera del intervalo se rotula solo si cabe */}
                   {(i % cada === 0 || (r && cada === 1)) && <text className={`q-eje${r ? ' q-fuerte' : ''}`} x={x + w / 2} y={alto - 8} textAnchor="middle">{b.corto ?? b.nombre}</text>}
                   {(rotulo || i === tope) && <text className="q-rotulo-valor" x={x + w / 2} y={y(b.valor ?? 0) - 6} textAnchor="middle">{rotulo ? rotulo(b) : formato(b.valor)}</text>}
@@ -552,7 +558,7 @@ export function Histograma({ barras, formato = numero, rotulo, resaltar = [], et
 // ─────────────── Dispersión: dos medidas por marca, una escala por eje ───────────────
 // x en escala logarítmica (cada marca del eje vale 10 veces la anterior): las cifras de interacción van de miles a
 // decenas de miles. y de 0 a 100 con la raya de 50 (neutro). Cada punto se elige con clic o con el teclado; el
-// elegido lleva anillo. La marca propia va en menta, más grande y con su nombre en negrita.
+// elegido lleva anillo. La marca propia va en su color, más grande y con su nombre en negrita.
 export function Dispersion({ puntos, elegido, onElegir, rotuloX, rotuloY, formatoX = numero, formatoY = numero, notas = {}, etiqueta }) {
   const tabla = { columnas: ['Marca', rotuloX, rotuloY], filas: puntos.map((p) => [p.nombre, formatoX(p.x), formatoY(p.y)]) };
   return (
@@ -632,7 +638,7 @@ function rotulosX(base, x) {
   return out;
 }
 
-// ─────────────── Varias series en la misma escala: la propia resaltada, el resto en gris ───────────────
+// ─────────────── Varias series en la misma escala: la de foco resaltada, la propia en su color, el resto en gris ───────────────
 // Un día sin dato es un hueco en todas las series. El rótulo final de cada serie va al lado de su último punto.
 export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta }) {
   const base = series[0]?.serie || [];
@@ -655,14 +661,14 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
             {rotulosX(base, x).map(({ i, texto }) => <text key={base[i].fecha} className="q-eje" x={x(i)} y={alto - 8} textAnchor="middle">{texto}</text>)}
             {base.map((p, i) => (series.every((s) => s.serie[i]?.valor == null) && i > 0 && i < base.length - 1 ? <rect key={'h' + p.fecha} className="q-hueco" x={x(i) - 3} y={m.t} width={6} height={alto - m.b - m.t} /> : null))}
             {base.map((p, i) => <Zona key={'z' + p.fecha} x={x(i) - (x(1) - x(0)) / 2} y={m.t} w={x(1) - x(0)} h={alto - m.b - m.t} pista={`${fecha(p.fecha)}\n${series.map((s) => `${s.nombre}: ${formato(s.serie[i]?.valor)}`).join('\n')}`} />)}
-            {orden.map((s) => <path key={s.nombre} className={s.resaltada ? 'q-linea' : 'q-linea-resto'} d={camino(s.serie, x, y)} />)}
+            {orden.map((s) => <path key={s.nombre} className={s.resaltada ? 'q-linea' : s.tono === 'propia' ? 'q-linea-propia' : 'q-linea-resto'} d={camino(s.serie, x, y)} />)}
             {series.map((s, k) => {
               const i = ultimoConValor(s.serie);
               if (i < 0) return null;
               return (
                 <g key={'f' + s.nombre}>
-                  <circle className={s.resaltada ? 'q-punto-final' : 'q-punto-final-resto'} cx={x(i)} cy={y(s.serie[i].valor)} r="4" data-valor={s.serie[i].valor} />
-                  <text className={`q-rotulo-final${s.resaltada ? '' : ' q-rotulo-resto'}`} x={x(i) + 8} y={separados[k]}>{s.nombre}</text>
+                  <circle className={s.resaltada ? 'q-punto-final' : s.tono === 'propia' ? 'q-punto-final-propia' : 'q-punto-final-resto'} cx={x(i)} cy={y(s.serie[i].valor)} r="4" data-valor={s.serie[i].valor} />
+                  <text className={`q-rotulo-final${s.resaltada || s.tono === 'propia' ? '' : ' q-rotulo-resto'}`} x={x(i) + 8} y={separados[k]}>{s.nombre}</text>
                 </g>
               );
             })}

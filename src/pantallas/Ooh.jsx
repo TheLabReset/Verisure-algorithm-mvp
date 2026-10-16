@@ -73,7 +73,7 @@ export default function Ooh({ o, t, nota }) {
             etiqueta={`Mapa de paneles OOH en ${actual?.nombre ?? 'Lima'}`} />
         </Suspense>
         <ul className="q-leyenda" aria-hidden="true">
-          {[...new Map(o.ubicaciones.map((x) => [x.nombre, x.foco])).entries()].sort((a, b) => Number(b[1]) - Number(a[1])).map(([n, f]) => <li key={n}><span className={`q-muestra ${f ? 'q-muestra-mapa-foco' : 'q-muestra-mapa-resto'}`} />{n}</li>)}
+          {[...new Map(o.ubicaciones.map((x) => [x.nombre, x])).values()].sort((a, b) => Number(b.foco) - Number(a.foco)).map((x) => <li key={x.nombre}><span className={`q-muestra ${x.foco ? 'q-muestra-mapa-foco' : x.propia ? 'q-muestra-mapa-propia' : 'q-muestra-mapa-resto'}`} />{x.nombre}</li>)}
           <li className="q-nota">El tamaño de cada círculo sigue a su inversión estimada. Un clic abre su panel.</li>
         </ul>
       </div>

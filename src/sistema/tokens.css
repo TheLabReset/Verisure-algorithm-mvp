@@ -26,9 +26,10 @@
      botones de sus piezas publicadas (confirmé, octubre de 2026). No hay guía de marca pública: el resto lo asumo. */
   --p-tinta: #1d1d1f;      /* el gris casi negro de sus piezas: texto y la serie de Verisure en los gráficos */
   --p-cal: #f5f5f3;        /* fondo claro neutro */
-  --p-rojo: #ed002f;       /* el rojo oficial de Verisure (su logo, #ED002F): identidad, nunca dato */
+  --p-rojo: #ed002f;       /* el rojo oficial de Verisure (su logo, #ED002F): identidad, y Verisure en los gráficos */
   --p-rojo-texto: #b8002a; /* rojo legible sobre claro */
   --p-rojo-claro: #ff8a9b; /* rojo legible sobre oscuro */
+  --p-rojo-vivo: #ff5c75;  /* Verisure en los gráficos sobre oscuro: más rojo que el de texto, 4,9 : 1 sobre la tarjeta */
   --p-verde: #00b49c;      /* el verde azulado de sus botones, sobre oscuro */
   --p-verde-oscuro: #00705f; /* verde azulado legible sobre claro */
 
@@ -93,11 +94,13 @@
   --empeora: var(--p-rojo-texto);        /* variación desfavorable */
   --atencion: var(--p-tinta);            /* pocos casos, dato parcial: en tinta con su ícono, para no confundirse con el amarillo de la competencia */
   --s1: var(--resalte);                  /* puntos de la serie en foco */
-  --resalte: var(--p-prosegur);          /* rellenos de la serie en foco: la competencia, en su amarillo. El rojo es identidad, nunca dato */
+  --resalte: var(--p-prosegur);          /* rellenos de la serie en foco: la competencia, en su amarillo */
   --resalte-borde: var(--p-tinta);       /* el borde que hace visible el amarillo sobre blanco (relleno con borde, ver quincha.md) */
   --resalte-anillo: var(--p-tinta);      /* el anillo de los puntos y círculos en foco */
   --serie-1: var(--p-prosegur-ocre);     /* líneas de la serie en foco: el amarillo oscurecido, porque una línea no lleva borde */
   --serie-resto: var(--p-n-200);  /* el resto, cuando un gráfico resalta una sola marca */
+  --propia: var(--p-rojo);               /* la marca propia en los gráficos y el mapa: Verisure en su rojo, solo en marcas, nunca en texto */
+  --propia-linea: var(--p-rojo-texto);   /* sus líneas, más oscuras: el rojo puro y el ocre de la competencia se confunden con deuteranopía */
   --resalte-suave: color-mix(in oklab, var(--resalte) 10%, var(--superficie));
   --s2: var(--p-cat-menta);              /* categorías en orden fijo */
   --s3: var(--p-cat-naranja);
@@ -175,6 +178,8 @@
     --resalte-anillo: var(--superficie);
     --serie-1: var(--resalte);
     --serie-resto: var(--p-o-600);
+    --propia: var(--p-rojo-vivo);
+    --propia-linea: var(--propia);
     --resalte-suave: color-mix(in oklab, var(--resalte) 18%, var(--superficie));
     --s2: var(--p-cat-menta-o);
     --s3: var(--p-cat-naranja-o);
@@ -222,6 +227,8 @@
   --resalte-anillo: var(--superficie);
   --serie-1: var(--resalte);
   --serie-resto: var(--p-o-600);
+  --propia: var(--p-rojo-vivo);
+  --propia-linea: var(--propia);
   --resalte-suave: color-mix(in oklab, var(--resalte) 18%, var(--superficie));
   --s2: var(--p-cat-menta-o);
   --s3: var(--p-cat-naranja-o);

@@ -161,7 +161,7 @@ function ooh(contrato, mapa, P) {
   const ubicacion = new Map();
   for (const q of mapaLeido.puntos) for (const x of q.paneles) ubicacion.set(String(x.key), { distrito: q.distrito, ubicacion: q.id });
   return {
-    ubicaciones: mapaLeido.puntos.map((u) => ({ id: u.id, marca: u.marca, nombre: nombreMarca(u.marca), foco: u.marca !== PROPIA, lat: u.lat, lng: u.lng, zona: u.zona, distrito: u.distrito, inversion: u.inversion, paneles: u.paneles.map((x) => String(x.key)) })),
+    ubicaciones: mapaLeido.puntos.map((u) => ({ id: u.id, marca: u.marca, nombre: nombreMarca(u.marca), foco: u.marca !== PROPIA, propia: u.marca === PROPIA, lat: u.lat, lng: u.lng, zona: u.zona, distrito: u.distrito, inversion: u.inversion, paneles: u.paneles.map((x) => String(x.key)) })),
     zonas: mapaLeido.zonas,
     paneles: lista.map((p) => ({ ...p, distrito: ubicacion.get(p.id)?.distrito ?? null, ubicacion: ubicacion.get(p.id)?.ubicacion ?? null })).sort((a, b) => Number(a.propia) - Number(b.propia) || b.inversion - a.inversion),
     porMarca: Object.fromEntries(MARCAS.map((m) => [m, paneles.filter((p) => p.maname === m).length])),
@@ -234,7 +234,7 @@ function pautaPorSemana(contrato, ok) {
   return Object.fromEntries(Object.entries(fuentes).filter(([, f]) => f).map(([u, series]) => [u, [...COMPETENCIA, PROPIA].map((m) => {
     const semanas = pautaSemanal(series, m, dias);
     const activas = semanas.filter((x) => x.valor > 0);
-    return { id: m, marca: nombreMarca(m), foco: m !== PROPIA, semanas, semanasConInversion: activas.length, semanasConData: semanas.filter((x) => x.valor != null).length, primera: activas[0]?.fecha ?? null, total: suma(semanas.map((x) => x.valor)) };
+    return { id: m, marca: nombreMarca(m), foco: m !== PROPIA, propia: m === PROPIA, semanas, semanasConInversion: activas.length, semanasConData: semanas.filter((x) => x.valor != null).length, primera: activas[0]?.fecha ?? null, total: suma(semanas.map((x) => x.valor)) };
   })]));
 }
 

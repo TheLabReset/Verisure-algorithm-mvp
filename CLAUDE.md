@@ -2,9 +2,9 @@
 
 Panel de inteligencia competitiva de The Lab para Verisure Perú, con la data de Integrametrics y Google Trends, y MAIA (Media Analyst IA) para el reporte semanal y las consultas. Sigue el estándar de la plantilla Reset-The-Algorithm.
 
-- **Lo principal es la competencia:** cada capa y cada lectura empiezan por lo que hizo Prosegur; Verisure va para comparar. En los gráficos y el mapa, Prosegur va en su amarillo (`foco` en la vista; en claro con borde de tinta) y Verisure en gris.
+- **Lo principal es la competencia:** cada capa y cada lectura empiezan por lo que hizo Prosegur; Verisure va para comparar. En los gráficos y el mapa, Prosegur va en su amarillo (`foco` en la vista; en claro con borde de tinta) y Verisure en su rojo (`--propia`, liso y sin borde); el gris queda para la comparación y el resto.
 - **Cómo se diseña:** sigue `docs/guia-algoritmo.md` (cuatro capas, tarjeta, gráficos, datos honestos). Si algo nuevo la contradice, se actualiza la guía en el mismo cambio.
-- **Con qué se construye:** Quincha, en `docs/quincha.md`. La paleta de Verisure vive solo en `src/sistema/tokens.css`. El rojo es identidad, nunca dato; las rampas de magnitud van en tinta. Ninguna franja de resalte: el chequeo rechaza bordes de más de 2 px.
+- **Con qué se construye:** Quincha, en `docs/quincha.md`. La paleta de Verisure vive solo en `src/sistema/tokens.css`. El rojo es identidad: la capa activa, el capítulo y las marcas de Verisure en los gráficos, nunca un texto ni una rampa de magnitud (esas van en tinta). Ninguna franja de resalte: el chequeo rechaza bordes de más de 2 px.
 - **La marca:** el nombre de Verisure, de Prosegur y del rubro viven solo en `src/cliente.js`; una prueba falla si aparecen escritos en `src/` o `scripts/`. Logo y colores: `docs/marca-verisure.md`.
 - **Ninguna cifra se escribe en un componente.** La data sale de `public/data` (la publica el pipeline), se calcula en `src/calculo` y los textos se arman en `src/textos`. Las pantallas (`src/pantallas`) solo pintan.
 - **Datos honestos:** se muestra solo lo que tenemos. ATL y digital no se suman, salvo en el selector «Todo» de la pauta semanal, con su nota. Un mes cerrado se compara con el mes anterior entero; el mes en curso, con los mismos días. Un día sin registros es un hueco, no un cero. Las alertas usan umbrales fijos y a la vista.
