@@ -701,7 +701,8 @@ function rotulosX(base, x) {
 
 // ─────────────── Varias series en la misma escala: la de foco resaltada, la propia en su color, el resto en gris ───────────────
 // tono 'tinta': la serie principal cuando no es de ninguna marca (búsquedas de un rubro). discontinua: la misma marca en otro universo.
-// Un día sin dato es un hueco en todas las series. El rótulo final de cada serie va al lado de su último punto.
+// Un día sin dato es un hueco en todas las series. Los nombres van en una leyenda arriba, a cualquier ancho, y el trazo
+// usa todo el ancho: un rótulo al final de cada línea deja un margen muerto a la derecha y se apiña cuando las líneas terminan juntas.
 export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta }) {
   const base = series[0]?.serie || [];
   const tabla = { columnas: ['Fecha', ...series.map((s) => s.nombre)], filas: base.map((p, i) => [fechaCorta(p.fecha), ...series.map((s) => formato(s.serie[i]?.valor))]) };
@@ -709,30 +710,21 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
     <Grafico etiqueta={etiqueta} tabla={tabla}>
       {(ancho) => {
         const alto = altoPedido || Math.round(Math.min(280, Math.max(200, ancho * 0.36)));
-        // el margen derecho a la medida del rótulo final más largo
         const vals = series.flatMap((s) => s.serie.map((p) => p.valor)).filter((v) => v != null);
         const ys = marcas(Math.max(...vals, 1));
-        // los márgenes a la medida de los rótulos: el del eje (S/ 1,0 M es más largo que S/ 50 mil) y el final más largo
-        // angosto (teléfono): los nombres van en una leyenda arriba y el trazo usa todo el ancho; ancho: al final de cada línea
-        const angosto = ancho < 560;
+        // el margen izquierdo a la medida del rótulo del eje (S/ 1,0 M es más largo que S/ 50 mil)
         // la leyenda se acomoda por el largo de cada nombre: una fila nueva cuando el siguiente no cabe
         const leyenda = [];
-        if (angosto) {
-          let x0 = 0, fila = 0;
-          for (const s of series) {
-            const largo = 24 + Math.ceil(s.nombre.length * 7.8) + 16;
-            if (x0 > 0 && x0 + largo > ancho - 4) { fila += 1; x0 = 0; }
-            leyenda.push({ ...s, x: x0, fila });
-            x0 += largo;
-          }
+        let x0 = 0, fila = 0;
+        for (const s of series) {
+          const largo = 30 + Math.ceil(s.nombre.length * 7.8) + 20;
+          if (x0 > 0 && x0 + largo > ancho - 4) { fila += 1; x0 = 0; }
+          leyenda.push({ ...s, x: x0, fila });
+          x0 += largo;
         }
         const filasLeyenda = leyenda.length ? leyenda.at(-1).fila + 1 : 0;
-        const m = { t: angosto ? 18 + 20 * filasLeyenda : 18, r: angosto ? 12 : Math.max(92, 20 + Math.ceil(Math.max(...series.map((x) => x.nombre.length)) * 7.8)), b: 26, l: Math.max(52, 14 + Math.ceil(Math.max(...ys.map((v) => formato(v).length)) * 7.8)) };
+        const m = { t: 18 + 20 * filasLeyenda, r: 12, b: 26, l: Math.max(52, 14 + Math.ceil(Math.max(...ys.map((v) => formato(v).length)) * 7.8)) };
         const x = lineal(0, base.length - 1, m.l, ancho - m.r), y = lineal(0, ys.at(-1), alto - m.b, m.t);
-        const finales = series.map((s) => { const i = ultimoConValor(s.serie); return i >= 0 ? y(s.serie[i].valor) + 4 : null; });
-        // los rótulos finales se separan y no bajan al eje de fechas
-        const sueltos = separar(finales.map((v) => v ?? 0), 14), sobra = Math.max(0, Math.max(...sueltos) - (alto - m.b - 6));
-        const separados = sueltos.map((v) => v - sobra);
         const orden = [...series].sort((a, b) => Number(a.resaltada) - Number(b.resaltada)); // la resaltada se dibuja encima
         return (
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
@@ -744,19 +736,13 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
             {orden.map((s) => <path key={s.nombre} className={`${s.resaltada ? 'q-linea' : s.tono === 'propia' ? 'q-linea-propia' : s.tono === 'tinta' ? 'q-linea-tinta' : 'q-linea-resto'}${s.discontinua ? ' q-discontinua' : ''}`} d={camino(s.serie, x, y)} />)}
             {leyenda.map((s) => (
               <g key={'l' + s.nombre} transform={`translate(${4 + s.x}, ${12 + s.fila * 20})`}>
-                <line className={`${s.resaltada ? 'q-linea' : s.tono === 'propia' ? 'q-linea-propia' : s.tono === 'tinta' ? 'q-linea-tinta' : 'q-linea-resto'}${s.discontinua ? ' q-discontinua' : ''}`} x1={0} x2={18} y1={-4} y2={-4} />
-                <text className={`q-rotulo-final${s.resaltada || s.tono === 'propia' || s.tono === 'tinta' ? '' : ' q-rotulo-resto'}`} x={24} y={0}>{s.nombre}</text>
+                <line className={`${s.resaltada ? 'q-linea' : s.tono === 'propia' ? 'q-linea-propia' : s.tono === 'tinta' ? 'q-linea-tinta' : 'q-linea-resto'}${s.discontinua ? ' q-discontinua' : ''}`} x1={0} x2={24} y1={-4} y2={-4} />
+                <text className={`q-rotulo-final${s.resaltada || s.tono === 'propia' || s.tono === 'tinta' ? '' : ' q-rotulo-resto'}`} x={30} y={0}>{s.nombre}</text>
               </g>
             ))}
-            {series.map((s, k) => {
+            {series.map((s) => {
               const i = ultimoConValor(s.serie);
-              if (i < 0) return null;
-              return (
-                <g key={'f' + s.nombre}>
-                  <circle className={s.resaltada ? 'q-punto-final' : s.tono === 'propia' ? 'q-punto-final-propia' : s.tono === 'tinta' ? 'q-punto-final-tinta' : 'q-punto-final-resto'} cx={x(i)} cy={y(s.serie[i].valor)} r="4" data-valor={s.serie[i].valor} />
-                  {!angosto && <text className={`q-rotulo-final${s.resaltada || s.tono === 'propia' || s.tono === 'tinta' ? '' : ' q-rotulo-resto'}`} x={x(i) + 8} y={separados[k]}>{s.nombre}</text>}
-                </g>
-              );
+              return i < 0 ? null : <circle key={'f' + s.nombre} className={s.resaltada ? 'q-punto-final' : s.tono === 'propia' ? 'q-punto-final-propia' : s.tono === 'tinta' ? 'q-punto-final-tinta' : 'q-punto-final-resto'} cx={x(i)} cy={y(s.serie[i].valor)} r="4" data-valor={s.serie[i].valor} />;
             })}
             {series.flatMap((s) => s.serie.map((p, i) => (p.valor != null ? <circle key={s.nombre + p.fecha} className="q-punto-oculto" cx={x(i)} cy={y(p.valor)} r="3" data-serie={s.nombre} data-fecha={p.fecha} data-valor={p.valor} /> : null)))}
           </Svg>
