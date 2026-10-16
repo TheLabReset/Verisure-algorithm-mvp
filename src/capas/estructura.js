@@ -9,10 +9,10 @@ const competencia = CLIENTE.competencia.map((c) => c.nombre).join(' y ');
 
 export const CAPAS = [
   {
-    id: 'senales', numero: '1', nombre: 'Captura de señales', descripcion: `Lo nuevo de ${competencia} en la semana`,
-    titulo: 'Captura de señales', bajada: `Lo que hizo ${competencia} en la semana: digital primero, después TV y cable, radio y vía pública, y lo que se busca y se comenta.`,
+    id: 'senales', numero: '1', nombre: 'Captura de señales', descripcion: `Lo nuevo de ${competencia} en el período`,
+    titulo: 'Captura de señales', bajada: `Lo que hizo ${competencia} en el período: digital primero, después TV y cable, radio y vía pública, y lo que se busca y se comenta.`,
     secciones: [
-      { id: 's-1-1', numero: '1.1', titulo: 'Digital', pregunta: `¿Qué piezas y mensajes digitales nuevos tuvo ${competencia} en la semana?`, universos: ['digital'], fuentes: ['digital'] },
+      { id: 's-1-1', numero: '1.1', titulo: 'Digital', pregunta: `¿Qué piezas y mensajes digitales nuevos tuvo ${competencia} en el período?`, universos: ['digital'], fuentes: ['digital'] },
       { id: 's-1-2', numero: '1.2', titulo: 'TV y cable', pregunta: `¿Qué emitió ${competencia} en TV y cable, en qué programas y con qué tipo de aviso?`, universos: ['atl'], fuentes: ['atl'] },
       { id: 's-1-3', numero: '1.3', titulo: 'Radio', pregunta: `¿Qué emitió ${competencia} en radio, en qué emisoras y programas?`, universos: ['atl'], fuentes: ['atl'] },
       { id: 's-1-4', numero: '1.4', titulo: 'OOH', pregunta: '¿Dónde están los paneles de cada marca y qué pieza lleva cada uno?', universos: ['atl'], fuentes: ['atl'] },

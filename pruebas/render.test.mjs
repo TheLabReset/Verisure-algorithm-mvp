@@ -59,6 +59,18 @@ for (const e of [{ id: null, titulo: 'Data real' }, ...ESCENARIOS]) {
   });
 }
 
+// El selector de período: cada atajo, un día suelto, el primer día de la data y un tramo que cruza meses
+test('render: cada atajo y tramos libres, sin texto roto', () => {
+  const malos = new Set();
+  const { firstDay } = DATOS.contrato.meta;
+  for (const filtros of [{ atajo: '7d' }, { atajo: '30d' }, { atajo: 'mes' }, { atajo: 'mes-pasado' }, { atajo: '6m' }, { desde: '2026-03-05', hasta: '2026-03-05' }, { desde: firstDay, hasta: firstDay }, { desde: '2026-04-20', hasta: '2026-05-10' }]) {
+    const v = armarVista(DATOS.contrato, DATOS.medios, filtros, {}, { mapa: DATOS.mapa, busquedas: DATOS.busquedas });
+    const nombres = nombresDeLaFuente(v);
+    for (const id of IDS) for (const m of textoRoto(texto(pintar(id, v)), nombres)) malos.add(`${id} ${JSON.stringify(filtros)}: ${m}`);
+  }
+  assert.deepEqual([...malos].slice(0, 12), []);
+});
+
 // Los estados de la barra Demo: cada fuente caída y la carga, en cada mes, con los avisos que trae cada uno
 test('render: fuentes caídas y cargando, sin texto roto', () => {
   const malos = new Set();
@@ -70,4 +82,24 @@ test('render: fuentes caídas y cargando, sin texto roto', () => {
     }
   }
   assert.deepEqual([...malos].slice(0, 12), []);
+});
+
+// La data de ejemplo se dice: cada tarjeta y el resumen de la capa de plataformas llevan el sello, y las tarjetas de
+// TikTok y Facebook también. Y no entra a los avisos: ninguna regla apunta a una tarjeta de ejemplo
+test('la data de ejemplo lleva su sello y no entra a los avisos', () => {
+  for (const filtros of [{ atajo: '7d' }, { atajo: 'mes-pasado' }, { desde: '2026-03-05', hasta: '2026-03-05' }]) {
+    const v = armarVista(DATOS.contrato, DATOS.medios, filtros, {}, { mapa: DATOS.mapa, busquedas: DATOS.busquedas });
+    const act = pintar('activacion', v);
+    const bloques = (act.match(/<article class="q-bloque /g) || []).length;
+    const sellados = (act.match(/<article class="q-bloque [^"]*"[^>]*data-ejemplo="true"/g) || []).length;
+    assert.ok(bloques > 0 && sellados === bloques, `${JSON.stringify(filtros)}: ${bloques - sellados} tarjetas de plataformas sin el sello`);
+    assert.match(act, /<section class="q-resumen"[^>]*data-ejemplo="true"/, 'el resumen de plataformas sin el sello');
+    const sen = pintar('senales', v);
+    for (const red of ['TikTok', 'Facebook']) {
+      const tarjeta = sen.split('<article class="q-bloque ').find((t) => t.includes(`${red} vía Apify`) || t.includes(red === 'Facebook' ? 'social listening' : 'búsqueda por hashtag'));
+      assert.ok(tarjeta && /data-ejemplo="true"/.test(tarjeta.slice(0, 300)), `${red}: la tarjeta de ejemplo sin el sello`);
+    }
+    const avisos = [...v.sugiere.queMirar, ...v.sugiere.queVaBien];
+    assert.ok(avisos.every((a) => ['digital', 'tv', 'radio', 'ooh', 'medios', 'share', 'diaria'].includes(a.tarjeta)), 'un aviso apunta a una tarjeta que no tiene data real');
+  }
 });

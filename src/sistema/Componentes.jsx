@@ -401,7 +401,7 @@ export function ListaAlertas({ grupos }) {
 
 // Avisos de un capítulo: una línea por alerta, que lleva a su fila en Qué mirar
 // Frente al objetivo: icono y palabra (el color nunca va solo), con los colores de los niveles de alerta
-const SEMAFORO = { bien: { nivel: 'bien', icono: CircleCheck, texto: 'En objetivo' }, cerca: { nivel: 'revisar', icono: Eye, texto: 'Cerca del objetivo' }, lejos: { nivel: 'atencion', icono: TriangleAlert, texto: 'Lejos del objetivo' } };
+const SEMAFORO = { bien: { nivel: 'bien', icono: CircleCheck, texto: 'En objetivo' }, cerca: { nivel: 'revisar', icono: Eye, texto: 'Cerca del objetivo' }, lejos: { nivel: 'atencion', icono: TriangleAlert, texto: 'Por encima del objetivo' } };
 export function Semaforo({ estado }) {
   const x = SEMAFORO[estado];
   if (!x) return null;

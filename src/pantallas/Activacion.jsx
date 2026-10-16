@@ -13,7 +13,7 @@ import { MARGEN_OBJETIVO } from '../calculo/plataformas.js';
 
 const SEMANAS_A_LA_VISTA = 12; // como el tablero del cliente: el trimestre que termina en el período
 const TONO = { bien: 'mejora', cerca: null, lejos: 'empeora' };
-const ESTADO = { bien: 'en objetivo', cerca: 'cerca', lejos: 'lejos' };
+const ESTADO = { bien: 'en objetivo', cerca: 'cerca', lejos: 'por encima' };
 const costo = (n) => dolares(n);
 const pct = (n) => (n == null ? 'sin dato' : porcentaje(n));
 const conTono = (texto, estado) => ({ texto, tono: TONO[estado] ?? null, sub: estado ? ESTADO[estado] : null });
@@ -83,7 +83,7 @@ export default function Activacion({ capa, vista: v }) {
 
       <SeccionDe def={s33} vista={v}>
         <Bloque universo="plataformas" {...plataformasObjetivoLectura(x)} ejemplo
-          ayuda={<p>Cada costo se compara con el objetivo de su plataforma: en objetivo si queda en él o por debajo, cerca hasta {porcentaje(MARGEN_OBJETIVO)} arriba, y lejos si pasa de ahí.</p>}
+          ayuda={<p>Cada costo se compara con el objetivo de su plataforma: en objetivo si queda en él o por debajo, cerca hasta {porcentaje(MARGEN_OBJETIVO)} arriba, y por encima si pasa de ahí.</p>}
           pie={<span>{x.fuente}.</span>}>
           <ul className="q-plataformas">
             {x.plataformas.map((p) => (

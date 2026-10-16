@@ -86,7 +86,7 @@ export default function Inteligencia({ capa, vista: v }) {
         items={[
           { rotulo: `Medio principal de ${nC}`, universo: 'atl', ir: s21.id, irTexto: s21.titulo, valor: ok && r.inversion ? MEDIOS[principal(r)[0]] ?? null : null, nota: ok && r.inversion ? `${porcentaje(principal(r)[1])} de su inversión ATL` : null },
           { rotulo: `Emisiones de ${nC}${mv.ampliada ? ' en cuatro semanas' : ''}`, universo: 'atl', ir: s22.id, irTexto: s22.titulo, valor: compra ? numero(compra.totales[C].emisiones) : null, nota: compra ? `${numero(compra.totales[Pr].emisiones)} de ${nP}` : null },
-          { rotulo: `Canales de ${nC}${mv.ampliada ? ' en cuatro semanas' : ''}`, universo: 'atl', ir: s22.id, irTexto: s22.titulo, valor: compra ? numero(compra.totales[C].canales) : null, nota: compra ? (compra.enComun ? `${enLetras(compra.enComun)} en común con ${nP}` : `ninguno en común con ${nP}`) : null },
+          { rotulo: `Canales de ${nC}${mv.ampliada ? ' en cuatro semanas' : ''}`, universo: 'atl', ir: s22.id, irTexto: s22.titulo, valor: compra ? numero(compra.totales[C].canales) : null, nota: compra ? (compra.enComun ? `${compra.enComun === 1 ? 'uno' : enLetras(compra.enComun)} en común con ${nP}` : `ninguno en común con ${nP}`) : null },
           { rotulo: `Hora con más emisiones de ${nC}${mv.ampliada ? ' en cuatro semanas' : ''}`, universo: 'atl', ir: s23.id, irTexto: s23.titulo, valor: compMed?.horasAltas.length ? `${compMed.horasAltas[0]} h` : null, nota: compMed?.horasAltas.length > 1 ? `las ${enLetras(compMed.horasAltas.length, true)} más altas van ${horasTexto(compMed.horasAltas)}` : null },
         ]} />
 

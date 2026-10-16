@@ -65,8 +65,16 @@ export function shareLectura(v) {
   const cambio = (x) => (x === 0 ? 'igual' : `${numero(Math.abs(x))} ${segun(Math.abs(x), 'punto', 'puntos')} ${x > 0 ? 'más' : 'menos'}`);
   const comp = comparacionTexto(P) || '';
   const frenteA = comp.startsWith('el ') ? `al ${comp.slice(3)}` : `a ${comp}`;
-  // con comparación, el título dice cómo se movió la competencia en cada universo: «baja de 60 % a 5 % en digital»
-  const mov = ([n, u]) => { const m = rivalDe(u), x = m.cambioPts; return x === 0 ? `sigue en ${shareDe(m)} en ${n}` : `${x > 0 ? 'sube' : 'baja'} de ${porcentaje(m.sharePrevio)} a ${shareDe(m)} en ${n}`; };
+  // con comparación, el título dice cómo se movió la competencia en cada universo, con un solo verbo:
+  // «pasa de 14 % a 1 % en digital y de 4 % a 1 % en ATL»; lo que no cambia, «sigue en 3 % en ATL»
+  let conVerbo = false;
+  const mov = ([n, u]) => {
+    const m = rivalDe(u);
+    if (m.cambioPts === 0) return `sigue en ${shareDe(m)} en ${n}`;
+    const t = `${conVerbo ? '' : 'pasa '}de ${porcentaje(m.sharePrevio)} a ${shareDe(m)} en ${n}`;
+    conVerbo = true;
+    return t;
+  };
   const titulo = cambios.length === us.length ? `${r.nombre} ${lista(us.map(mov))}, frente ${frenteA}` : `${r.nombre} ${tiene(rivalDe, true)}`;
   // sin lectura: la tarjeta va en porcentajes, y la parte de la marca propia es el resto de la barra; los soles están en el detalle
   return { titulo, lectura: '' };
@@ -276,13 +284,13 @@ const ALERTAS = {
     mirar: `El mensaje y el medio de la pieza, y si se cruza con lo que tiene al aire ${CLIENTE.nombre}.`,
   }),
   'sube-competencia': (a) => ({
-    titulo: `${a.marca} sube ${numero(a.sube)} % su inversión ${a.universo}`,
+    titulo: `${a.marca} aumenta ${numero(a.sube)} % su inversión ${a.universo}`,
     dato: `${monto(a.monto)} en ${per(a)}, frente a ${monto(a.antes)} en ${comp(a)}.`,
-    mirar: 'Qué versiones y qué medios explican la subida.',
+    mirar: 'Qué versiones y qué medios explican el aumento.',
   }),
   'baja-competencia': (a) => ({
     // con algo de inversión, una baja que redondea a 100 % se dice «más de 99 %»
-    titulo: `${a.marca} baja ${a.monto > 0 && Math.round(a.baja) >= 100 ? 'más de 99' : numero(a.baja)} % su inversión ${a.universo}`,
+    titulo: `${a.marca} disminuye ${a.monto > 0 && Math.round(a.baja) >= 100 ? 'más de 99' : numero(a.baja)} % su inversión ${a.universo}`,
     dato: `${monto(a.monto)} en ${per(a)}, frente a ${monto(a.antes)} en ${comp(a)}.`,
     mirar: 'Qué versiones dejó de pautar y si su pauta del año muestra pausas parecidas.',
   }),
@@ -312,12 +320,12 @@ const ALERTAS = {
     mirar: `Qué versión lleva cada panel y si se cruza con las zonas de ${CLIENTE.nombre}.`,
   }),
   'digital-competencia': (a) => ({
-    titulo: `${a.marca} usa ${enLetras(a.cuantas)} ${segun(a.cuantas, 'mensaje digital nuevo', 'mensajes digitales nuevos')} en la semana`,
+    titulo: `${a.marca} usa ${enLetras(a.cuantas)} ${segun(a.cuantas, 'mensaje digital nuevo', 'mensajes digitales nuevos')} en el período`,
     dato: `${a.cuantas > 1 ? 'Uno de ellos: ' : ''}${cita(a.ultima)}, que no había usado antes.`,
     mirar: 'En qué plataformas sale y con cuántas piezas.',
   }),
   'share-digital': (a) => ({
-    titulo: `${CLIENTE.nombre} pierde share en digital`,
+    titulo: `El share digital de ${CLIENTE.nombre} disminuye`,
     dato: `${porcentaje(a.share)} de la inversión digital, frente a ${porcentaje(a.antes)} en ${comp(a)}.`,
     mirar: 'Cuánto cambió la inversión digital de cada marca, la propia incluida.',
   }),
@@ -332,7 +340,7 @@ const ALERTAS = {
     mirar: 'Cuántas veces sale al aire cada pieza.',
   }),
   'share-digital-sube': (a) => ({
-    titulo: `${CLIENTE.nombre} gana share en digital`,
+    titulo: `El share digital de ${CLIENTE.nombre} aumenta`,
     dato: `${porcentaje(a.share)} de la inversión digital, frente a ${porcentaje(a.antes)} en ${comp(a)}.`,
     mirar: 'Cuánto cambió la inversión digital de cada marca, la propia incluida.',
   }),
@@ -375,7 +383,7 @@ export function digitalSemanaLectura(d) {
   const donde = d.plataformas.length ? `, sobre todo en ${plataformasTexto(d.plataformas.slice(0, 2))}` : '';
   const primero = d.reciente ? `Las más recientes son ${cuantas} ${semanaDe(d.semana)}.`
     : nuevos === k ? `${k === 1 ? 'El mensaje es nuevo' : `Los ${enLetras(k)} mensajes son nuevos`}.`
-    : nuevos ? `${capital(enLetras(nuevos))} de los ${enLetras(k)} mensajes ${nuevos === 1 ? 'es nuevo' : 'son nuevos'}.`
+    : nuevos ? `${nuevos === 1 ? 'Uno' : capital(enLetras(nuevos))} de los ${enLetras(k)} mensajes ${nuevos === 1 ? 'es nuevo' : 'son nuevos'}.`
     : `${k === 1 ? 'Es un mensaje que ya venía usando' : `Los ${enLetras(k)} mensajes ya los venía usando`}.`;
   const segundo = k > 1 ? ` El que más piezas tiene es ${cita(m.mensaje)}, con ${numero(m.piezas)}${donde}.` : ` Sale${donde.replace(', sobre todo', ' sobre todo') || ' en digital'}.`;
   return { titulo, lectura: `${primero}${segundo}` };
@@ -388,8 +396,8 @@ export function atlSemanaLectura(a, medio) {
   const tipos = a.porTipo.map((t) => `${numero(t.emisiones)} ${tipoAvisoPlural(t.nombre, t.emisiones)}`);
   const titulo = a.reciente ? `${COMP} no salió en ${medio} en el período` : `${COMP} tuvo ${numero(n)} ${segun(n, 'emisión', 'emisiones')} en ${medio}`;
   const primero = a.reciente
-    ? `Su última semana al aire fue ${semanaDe(a.semana)}, con ${numero(n)} ${segun(n, 'emisión', 'emisiones')} en ${numero(a.canales)} ${segun(a.canales, 'canal', 'canales')}.`
-    : `${a.porTipo.length === 1 ? `${n === 1 ? 'Es' : 'Todas son'} ${tipoAvisoPlural(a.porTipo[0].nombre, n)}` : capital(lista(tipos))}, en ${numero(a.canales)} ${segun(a.canales, 'canal', 'canales')}.`;
+    ? `Su última semana al aire fue ${semanaDe(a.semana)}, con ${numero(n)} ${segun(n, 'emisión', 'emisiones')} en ${enLetras(a.canales)} ${segun(a.canales, 'canal', 'canales')}.`
+    : `${a.porTipo.length === 1 ? `${n === 1 ? 'Es' : 'Todas son'} ${tipoAvisoPlural(a.porTipo[0].nombre, n)}` : capital(lista(tipos))}, en ${enLetras(a.canales)} ${segun(a.canales, 'canal', 'canales')}.`;
   const segundo = a.porMotivo.length > 1 ? ` El motivo que más sale es ${cita(motivo.nombre)}, con ${numero(motivo.emisiones)}.` : ` El motivo es ${cita(motivo.nombre)}.`;
   return { titulo, lectura: `${primero}${segundo}` };
 }
@@ -444,7 +452,7 @@ export function plataformasLectura(x) {
   const mejor = [...x.plataformas].filter((p) => p.cpb != null).sort((a, b) => a.cpb - b.cpb)[0];
   return {
     titulo: `${numero(t.bookings)} bookings de ${numero(t.leads)} leads, a ${usd(t.cpb)} cada booking`,
-    lectura: mejor ? `${mejor.nombre} tiene el booking más barato, a ${usd(mejor.cpb)}.` : '',
+    lectura: mejor ? `${mejor.nombre} tiene el menor costo por booking: ${usd(mejor.cpb)}.` : '',
   };
 }
 export function pushPullLectura(x) {
@@ -454,11 +462,12 @@ export function pushPullLectura(x) {
   const nombre = (t) => (t.tipo === 'push' ? 'Push' : 'Pull');
   return { titulo: `${nombre(mas)} convierte más: ${porcentaje(mas.l2b)} de sus leads llegan a booking`, lectura: `${nombre(menos)}, ${porcentaje(menos.l2b)}.` };
 }
+// las plataformas son de la marca propia y las maneja la agencia: lo que pasa el objetivo se dice sin juicio
 export function plataformasObjetivoLectura(x) {
-  const lejos = x.plataformas.filter((p) => p.estadoCpb === 'lejos'), bien = x.plataformas.filter((p) => p.estadoCpb === 'bien');
-  const titulo = lejos.length ? `${lista(lejos.map((p) => p.nombre))} ${lejos.length === 1 ? 'queda lejos' : 'quedan lejos'} de su objetivo de costo por booking`
+  const encima = x.plataformas.filter((p) => p.estadoCpb === 'lejos'), bien = x.plataformas.filter((p) => p.estadoCpb === 'bien');
+  const titulo = encima.length ? `${lista(encima.map((p) => p.nombre))} ${encima.length === 1 ? 'está' : 'están'} por encima de su objetivo de costo por booking`
     : bien.length === x.plataformas.length ? 'Las tres plataformas están en su objetivo de costo por booking' : `${lista(bien.map((p) => p.nombre))} ${bien.length === 1 ? 'está' : 'están'} en su objetivo de costo por booking`;
-  const peor = lejos[0];
-  return { titulo, lectura: peor ? `${peor.nombre} paga ${usd(peor.cpb)} por booking, con un objetivo de ${usd(peor.objetivo.cpb)}.` : '' };
+  const p = encima[0];
+  return { titulo, lectura: p ? `En ${p.nombre}, cada booking cuesta ${usd(p.cpb)}, con un objetivo de ${usd(p.objetivo.cpb)}.` : '' };
 }
 export { fechaSinAnio };
