@@ -5,7 +5,7 @@
 // muestra su último tramo del mismo largo con algo, y se dice.
 
 import { CLIENTE } from '../cliente.js';
-import { agruparAnuncios } from './anuncios.js';
+import { agruparAnuncios, htmlDe } from './anuncios.js';
 import { plataformaEnFrase } from '../textos/comun.js';
 import { emisionesDe } from '../fuentes/medios.js';
 
@@ -69,7 +69,7 @@ export function digitalDeLaSemana(contrato, S) {
   const carta = (p) => ({
     id: String(p.key), titulo: p.vname || '', texto: '', pie: '', plataformas: p.plataforma ? [plataformaEnFrase(p.plataforma)] : [], desde: dia(p.firstEmission),
     activo: true, enlace: null, imagen: p.asset?.kind === 'image' ? p.asset.url : null,
-    medio: p.asset && p.asset.kind !== 'image' && p.asset.kind !== 'link' ? p.asset : null, formato: { video: 'Video', image: 'Imagen' }[p.asset?.kind] ?? null, arte: null,
+    medio: p.asset && p.asset.kind !== 'image' && p.asset.kind !== 'link' ? p.asset : null, html: htmlDe(p.asset), formato: { video: 'Video', image: 'Imagen' }[p.asset?.kind] ?? null, arte: null,
   });
   const abanico = agruparAnuncios(mensajes.map((m) => ({ nombre: m.mensaje, anuncios: porMensaje.get(m.id).piezas.map(carta) })));
   // las plataformas de la semana, de más a menos piezas (el código de la fuente: el texto lo escribe la pantalla)

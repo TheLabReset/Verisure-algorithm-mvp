@@ -81,9 +81,10 @@ Están en `src/sistema/Componentes.jsx`. No calculan: reciben cifras ya armadas 
 | `AvisosTarjeta` | Los avisos de una tarjeta, debajo de su lectura: nivel (ícono y palabra) y frase, sin enlace |
 | `Bloque`, `Ventana`, `Ayuda`, `Estado` | La tarjeta: título, ventana, ayuda, lectura, avisos, cuerpo y pie; y lo que muestra cuando falta el dato o está cargando. Con `ejemplo`, el sello «Data de ejemplo» arriba |
 | `SelectorPeriodo` | El período: atajos y dos fechas, en un panel alineado con su botón que nunca sale de la pantalla. Una fecha fuera de la data o un «Desde» después del «Hasta» se marca y se dice por qué |
-| `Reproductor` | Audio y video con botón grande, barra de avance de 44 px de toque, tiempo a la vista y saltos de 10 segundos. Suena uno a la vez: el play de uno pausa a los demás |
+| `Reproductor` | Audio y video con botón grande, barra de avance de 44 px de toque y tiempo a la vista. Suena uno a la vez: el play de uno pausa a los demás. El video tiene pantalla completa; en una tarjeta angosta lleva arriba play, el tiempo y la pantalla completa, y abajo la barra, y los saltos de 10 segundos aparecen en pantalla completa. El audio conserva sus saltos |
+| `PiezaHtml` | Un anuncio HTML de portal en un marco aislado, reducido a la tarjeta, con pantalla completa. Solo pasan archivos del almacenamiento de Integrametrics |
 | `Semaforo` | Un costo frente a su objetivo: en objetivo, cerca o por encima, con ícono y palabra |
-| `Tabla` | Números a la derecha, barra junto a la cifra, subtítulo, tono contra el objetivo y fila destacada |
+| `Tabla` | Números a la derecha, barra junto a la cifra, subtítulo, tono contra el objetivo y fila destacada. `mejor` y `peor` marcan dos filas en verde y rojo claro (`--mejora-suave`, `--empeora-suave`), sin texto a la vista (lo pidió el equipo: se sobreentiende); el texto queda para el lector de pantalla y la ayuda de la tarjeta lo explica |
 | `Flujo` | Una fila por plataforma, un paso por columna (de la inversión a la inscripción) |
 | `VisorFoto` | Una foto entera en una ventana, con zoom (botones, rueda, doble clic o dos dedos) y arrastre: para las fotos de panel, que llegan verticales |
 | `ListaAlertas` | Qué mirar: lista numerada por nivel, cada fila se abre con el detalle |

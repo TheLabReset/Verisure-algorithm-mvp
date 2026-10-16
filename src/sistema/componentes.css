@@ -305,6 +305,8 @@
 .q-fila-destacada > * { background: var(--resalte-suave); }
 .q-fila-destacada > th { font-weight: var(--peso-rotulo); }
 .q-fila-apagada > * { color: var(--texto-3); }
+.q-fila-mejor > * { background: var(--mejora-suave); }
+.q-fila-peor > * { background: var(--empeora-suave); }
 .q-fila-apagada .q-celda-barra i { background: var(--serie-resto); }
 
 /* ── Resumen: una frase por plataforma, en una caja gris debajo de las cifras ── */
@@ -480,7 +482,16 @@
 .q-anuncios-grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: var(--e-4); }
 .q-anuncio { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--borde); border-radius: var(--r-bloque); background: var(--superficie); }
 .q-anuncio-pieza { aspect-ratio: 1 / 1; background: var(--superficie-capitulo); border-bottom: 1px solid var(--borde); }
+.q-anuncio-pieza { position: relative; }
 .q-anuncio-pieza img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.q-anuncio-pieza-html { aspect-ratio: auto; }
+/* Anuncio HTML: el marco aislado se reduce al ancho de la tarjeta; en pantalla completa ocupa la pantalla, centrado */
+.q-pieza-html { position: relative; width: 100%; max-height: 70vh; overflow: hidden; background: var(--superficie-capitulo); }
+.q-pieza-html iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; pointer-events: none; background: var(--superficie); }
+.q-pieza-html:fullscreen { max-height: none; aspect-ratio: auto !important; background: var(--barra); }
+.q-pieza-html:fullscreen iframe { pointer-events: auto; }
+.q-pieza-ampliar { position: absolute; right: var(--e-2); bottom: var(--e-2); display: inline-grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--elevada); color: var(--texto-1); box-shadow: var(--sombra-flota); cursor: pointer; }
+.q-pieza-ampliar:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
 .q-anuncio-cuerpo { display: flex; flex-direction: column; gap: var(--e-2); flex: 1 1 auto; padding: var(--e-4); }
 .q-anuncio-cuerpo h3 { font-family: var(--f-titulo); font-size: var(--t-16); font-weight: var(--peso-titulo); line-height: 1.3; }
 .q-anuncio-texto { font-size: var(--t-14); color: var(--texto-2); white-space: pre-line; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; line-clamp: 6; overflow: hidden; }
@@ -630,7 +641,7 @@
 .q-aviso-demo { background: var(--texto-1); color: var(--superficie); font-size: var(--t-14); font-weight: var(--peso-rotulo); padding-block: var(--e-2); }
 
 /* Reproductor: el botón y la barra de avance con un área de toque de 44 px; la barra se ve fina pero se agarra entera */
-.q-reproductor { display: grid; background: var(--superficie-capitulo); border-radius: var(--r-control); overflow: hidden; }
+.q-reproductor { display: grid; background: var(--superficie-capitulo); border-radius: var(--r-control); overflow: hidden; container-type: inline-size; }
 .q-reproductor video { display: block; width: 100%; aspect-ratio: 16 / 9; background: var(--barra); cursor: pointer; }
 .q-reproductor-onda { display: grid; place-items: center; min-height: 72px; color: var(--texto-3); }
 .q-reproductor-barra { display: flex; align-items: center; gap: var(--e-1); padding: var(--e-2) var(--e-3); }
@@ -647,7 +658,20 @@
 .q-reproductor-avance::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: var(--texto-1); }
 .q-reproductor-avance:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
 .q-reproductor-tiempo { flex: none; min-width: 6.5em; text-align: right; font-size: var(--t-13); color: var(--texto-2); font-variant-numeric: tabular-nums; }
-@media (max-width: 480px) { .q-reproductor-tiempo { min-width: 0; } .q-reproductor-barra { flex-wrap: wrap; } .q-reproductor-avance { order: 5; flex-basis: 100%; } }
+/* en una tarjeta angosta (la ventana de anuncios, el celular): arriba play, el tiempo y la pantalla completa; abajo la
+   barra de avance, que ya sirve para moverse. En el video, los saltos de 10 segundos vuelven en pantalla completa; el
+   audio, que no tiene pantalla completa, los conserva (le caben en la fila) */
+@container (max-width: 440px) {
+  .q-reproductor-barra { flex-wrap: wrap; }
+  .q-reproductor-video .q-reproductor-salto { display: none; }
+  .q-reproductor-tiempo { min-width: 0; margin-left: auto; }
+  .q-reproductor-avance { order: 5; flex-basis: 100%; }
+}
+/* pantalla completa: el video ocupa todo lo que deja la barra */
+.q-reproductor:fullscreen { grid-template-rows: minmax(0, 1fr) auto; width: 100vw; height: 100vh; border-radius: 0; background: var(--barra); }
+.q-reproductor:fullscreen video { height: 100%; aspect-ratio: auto; object-fit: contain; }
+.q-reproductor:fullscreen .q-reproductor-salto { display: inline-grid; }
+.q-reproductor:fullscreen .q-reproductor-barra { background: var(--superficie-capitulo); }
 .q-anuncio-reproductor { border-bottom: 1px solid var(--borde); }
 .q-anuncio-reproductor .q-reproductor { border-radius: 0; }
 

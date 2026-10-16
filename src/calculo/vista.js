@@ -10,7 +10,7 @@
 
 import { CLIENTE } from '../cliente.js';
 import { rango, diasEntre, diaSemana, sumarDias, periodoDelMes, periodoDe, mesesDisponibles, DIAS_MINIMOS } from './periodo.js';
-import { agruparAnuncios, nombrePlataforma } from './anuncios.js';
+import { agruparAnuncios, nombrePlataforma, htmlDe } from './anuncios.js';
 import { leerOoh, contornos, distritoDe, proyectar } from './ooh.js';
 import { plataformaEnFrase, grupoDigital, GRUPOS_DIGITALES } from '../textos/comun.js';
 import { versionesDelAnio, cronograma, pautaDiaria, shareSemanal, pautaSemanal } from './competencia.js';
@@ -130,7 +130,7 @@ const formatoDe = (asset) => ({ video: 'Video', audio: 'Audio', image: 'Imagen' 
 const pieza = (p, extra = {}) => ({
   id: String(p.key), titulo: p.vname || '', texto: '', pie: '', plataformas: [], desde: dia(p.firstEmission || p.firstFecha || p.fecha),
   activo: true, enlace: null, imagen: p.asset?.kind === 'image' ? p.asset.url : null,
-  medio: p.asset && p.asset.kind !== 'image' && p.asset.kind !== 'link' ? p.asset : null, formato: formatoDe(p.asset), arte: null, ...extra,
+  medio: p.asset && p.asset.kind !== 'image' && p.asset.kind !== 'link' ? p.asset : null, html: htmlDe(p.asset), formato: formatoDe(p.asset), arte: null, ...extra,
 });
 function abanico(items, marcaDe) {
   const porMarca = new Map(MARCAS.map((m) => [m, []]));
