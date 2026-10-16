@@ -77,6 +77,11 @@
 /* «el resto»: el único gris de un gráfico de partes */
 .q-p5 { fill: var(--borde-control); background: var(--borde-control); }
 /* una categoría en tinta: cuando el naranja de categoría choca con el color de una marca (el amarillo de la competencia) */
+/* Reparto: el color de cada marca y su tono claro para la barra de la comparación */
+.q-svg .q-parte-foco { fill: var(--resalte); stroke: var(--resalte-borde); stroke-width: 1.25; }
+.q-svg .q-parte-propia { fill: var(--propia); }
+.q-svg .q-parte-foco-antes { fill: var(--qf2); }
+.q-svg .q-parte-propia-antes { fill: var(--qp2); }
 .q-p-tinta { fill: var(--texto-1); background: var(--texto-1); }
 /* partes de una retícula: la resaltada en menta, dos en color de categoría (azul y naranja, validados para
    daltonismo en ese orden), el resto en un solo gris y lo perdido hueco. Nunca dos grises vecinos. */

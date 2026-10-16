@@ -300,6 +300,42 @@ export function Barras({ filas, formato = numero, max: maxComun, margen, margenD
 }
 
 // ─────────────── Franja: partes de un todo, rótulo y leyenda con el mismo reparto ───────────────
+// ─────────────── Reparto entre dos marcas: una barra de 100 % y, debajo, la misma barra de la comparación ───────────────
+// Con dos marcas el share de una es el resto de la otra: una barra dice todo. La de antes va fina y en el tono claro
+// de cada marca, para que el cambio se lea comparando largos. partes: [{ nombre, valor (0 a 100), clase, claseAntes }]
+export function Reparto({ ahora, antes, rotuloAntes, etiqueta, formato = (p) => porcentaje(p) }) {
+  const tabla = { columnas: ['Marca', 'Este período', ...(antes ? [rotuloAntes] : [])], filas: ahora.map((p, i) => [p.nombre, formato(p.valor), ...(antes ? [formato(antes[i]?.valor)] : [])]) };
+  const barra = (partes, y, alto, ancho, clave) => {
+    const total = partes.reduce((s, p) => s + (p.valor || 0), 0) || 1;
+    let x0 = 0;
+    return partes.map((p, i) => {
+      const w = ((p.valor || 0) / total) * ancho, gap = i && w > 0 ? 2 : 0;
+      const r = w > 0 ? <rect key={clave + p.nombre} className={`q-parte ${clave === 'antes' ? p.claseAntes : p.clase}`} x={x0 + gap} y={y} width={Math.max(0, w - gap)} height={alto} rx="2" data-valor={p.valor} /> : null;
+      x0 += w;
+      return r;
+    });
+  };
+  return (
+    <Grafico etiqueta={etiqueta} tabla={tabla}>
+      {(ancho) => {
+        const [a, b] = ahora, alto = antes ? 88 : 56;
+        return (
+          <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
+            {barra(ahora, 0, 28, ancho, 'ahora')}
+            <text className="q-rotulo-valor" x={0} y={46}>{a.nombre} {formato(a.valor)}</text>
+            <text className="q-rotulo-valor" x={ancho} y={46} textAnchor="end">{formato(b.valor)} {b.nombre}</text>
+            {antes && <>
+              {barra(antes, 60, 8, ancho, 'antes')}
+              <text className="q-eje" x={0} y={84}>{rotuloAntes}: {formato(antes[0].valor)}</text>
+              <text className="q-eje" x={ancho} y={84} textAnchor="end">{formato(antes[1].valor)}</text>
+            </>}
+          </Svg>
+        );
+      }}
+    </Grafico>
+  );
+}
+
 export function Franja({ partes, leyenda = true, etiqueta, formato = (p) => porcentaje(p), verTabla = true }) {
   const tabla = { columnas: ['Parte', 'Valor', '%'], filas: partes.map((p) => [p.nombre, numero(p.valor), p.pct == null ? '' : formato(p.pct)]) };
   return (

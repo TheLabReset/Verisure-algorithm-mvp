@@ -59,17 +59,19 @@ export function shareLectura(v) {
     const no = sin.length ? `no tiene inversión ${sin.map(([n]) => (largo ? n : `en ${n}`)).join(' ni ')}` : null;
     return partes.length ? `tiene ${lista(partes)}${no ? ` y ${no}` : ''}` : no;
   };
-  const titulo = `${r.nombre} ${tiene(rivalDe, true)}`;
   const propia = `${p.nombre} ${tiene(propiaDe, false)}.`;
   // el cambio solo si hay con qué comparar (y días suficientes: puntosFrente lo decide)
   const cambios = us.map(([n, u]) => [n, rivalDe(u).cambioPts]).filter(([, x]) => x != null && puntosFrente(x, P));
   const cambio = (x) => (x === 0 ? 'igual' : `${numero(Math.abs(x))} ${segun(Math.abs(x), 'punto', 'puntos')} ${x > 0 ? 'más' : 'menos'}`);
   const comp = comparacionTexto(P) || '';
   const frenteA = comp.startsWith('el ') ? `al ${comp.slice(3)}` : `a ${comp}`;
-  const frente = cambios.length ? ` Frente ${frenteA}, ${r.nombre} queda ${lista(cambios.map(([n, x]) => `${cambio(x)} en ${n}`))}.` : '';
-  // la lectura no repite los porcentajes del gráfico: dice el cambio y los montos, que no están a la vista
-  const enSoles = ` En soles, ${r.nombre} puso ${lista(us.map(([n, u]) => `${solesCompacto(rivalDe(u).inversion)} en ${n}`))}.`;
-  return { titulo, lectura: `${cambios.length ? frente.trim() : propia}${enSoles}` };
+  // con comparación, el título dice cómo se movió la competencia en cada universo: «baja de 60 % a 5 % en digital»
+  const mov = ([n, u]) => { const m = rivalDe(u), x = m.cambioPts; return x === 0 ? `sigue en ${shareDe(m)} en ${n}` : `${x > 0 ? 'sube' : 'baja'} de ${porcentaje(m.sharePrevio)} a ${shareDe(m)} en ${n}`; };
+  const titulo = cambios.length === us.length ? `${r.nombre} ${lista(us.map(mov))}, frente ${frenteA}` : `${r.nombre} ${tiene(rivalDe, true)}`;
+  // la lectura no repite los porcentajes de las barras: dice frente a qué y los montos, que no están a la vista
+  const soles = (m) => lista(us.map(([n, u]) => `${solesCompacto(m(u).inversion)} en ${n}`));
+  const enSoles = `En soles, ${r.nombre} puso ${soles(rivalDe)}; ${p.nombre}, ${soles(propiaDe)}.`;
+  return { titulo, lectura: cambios.length === us.length ? enSoles : `${propia} ${enSoles}` };
 }
 
 export function presionLectura(v, universo = 'atl') {

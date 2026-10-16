@@ -4,7 +4,7 @@
 // No calcula: pinta la vista.
 import { useState } from 'react';
 import { Bloque, Tabla, Resumen, Grupo, Detalle, vigente } from '../sistema/Componentes.jsx';
-import { Pesas, Lineas } from '../sistema/graficos/Graficos.jsx';
+import { Reparto, Lineas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, soles, solesCompacto, compacto } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import { periodoTexto, comparacionTexto, puntosFrente, capital, plataformasTexto } from '../textos/comun.js';
@@ -26,10 +26,13 @@ function TablaShare({ u, P, etiqueta, conImpresiones }) {
 }
 
 // Share antes y ahora, por marca: la competencia arriba; la comparación en gris, el período en el color de cada marca
-function ShareMarcas({ u, etiqueta, rotuloA }) {
+// El reparto del universo entre la competencia y la marca propia: este período y, debajo, la comparación
+function ShareMarcas({ u, etiqueta, rotuloA, conAntes }) {
   const orden = [...u.marcas].sort((a, b) => Number(a.propia) - Number(b.propia));
-  return <Pesas etiqueta={etiqueta} formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} max={100} rotuloA={rotuloA} rotuloB="Este período"
-    filas={orden.map((m) => ({ nombre: m.nombre, a: m.sharePrevio, b: m.share, tono: m.foco ? undefined : m.propia ? 'propia' : 'resto' }))} />;
+  const parte = (m, k) => ({ nombre: m.nombre, valor: m[k], clase: m.propia ? 'q-parte-propia' : 'q-parte-foco', claseAntes: m.propia ? 'q-parte-propia-antes' : 'q-parte-foco-antes' });
+  const formato = (n) => (n == null ? 'sin dato' : n > 0 && n < 1 ? 'menos de 1 %' : porcentaje(n));
+  return <Reparto etiqueta={etiqueta} formato={formato} ahora={orden.map((m) => parte(m, 'share'))}
+    antes={conAntes && orden.every((m) => m.sharePrevio != null) ? orden.map((m) => parte(m, 'sharePrevio')) : null} rotuloAntes={rotuloA} />;
 }
 
 export default function Rendimiento({ capa, vista: v }) {
@@ -43,6 +46,7 @@ export default function Rendimiento({ capa, vista: v }) {
   const rival = (u) => u.marcas.find((m) => m.foco);
   const comparacion = comparacionTexto(P);
   const rotuloA = comparacion ? capital(comparacion) : 'Sin comparación';
+  const corto = !comparacion || diasEntre(P.desde, P.hasta) + 1 < DIAS_MINIMOS; // sin la barra de antes, como las lecturas
   const s = v.analiza.shareSemanal;
   const u = v.lee[diario];
   return (
@@ -64,8 +68,8 @@ export default function Rendimiento({ capa, vista: v }) {
             <div className="q-share-universos">
               {[['Digital', dig], ['ATL', atl]].map(([n, x]) => (
                 <div key={n} className="q-pauta-marca">
-                  <h4>{n}<span>{ok(x) ? `${solesCompacto(x.total)} entre las dos marcas` : 'no cargó'}</span></h4>
-                  {ok(x) ? <ShareMarcas u={x} etiqueta={`Share de la inversión ${n === 'ATL' ? 'ATL' : 'digital'} por marca, antes y ahora`} rotuloA={rotuloA} />
+                  <h4>{n}{!ok(x) && <span>no cargó</span>}</h4>
+                  {ok(x) ? <ShareMarcas u={x} etiqueta={`Share de la inversión ${n === 'ATL' ? 'ATL' : 'digital'} por marca, antes y ahora`} rotuloA={rotuloA} conAntes={!corto} />
                     : <p className="q-nota-bloque">Integrametrics {n === 'ATL' ? 'ATL' : 'digital'} no cargó: este universo no se muestra.</p>}
                 </div>
               ))}
