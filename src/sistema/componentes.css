@@ -289,7 +289,9 @@
 /* ── Ventana de cada tarjeta, arriba a la derecha: calendario si sigue el período, alfiler si no ── */
 .q-bloque-marcas { display: flex; align-items: center; gap: var(--e-2); flex-shrink: 0; }
 .q-ventana { display: inline-flex; align-items: center; gap: var(--e-1); padding: 2px var(--e-2); border: 1px solid var(--borde); border-radius: var(--r-control); font-size: var(--t-13); color: var(--texto-2); white-space: nowrap; }
-@media (max-width: 520px) { .q-bloque-titulo { flex-wrap: wrap; } }
+/* los chips bajan debajo del título cuando la tarjeta es angosta (el celular o media fila), no según la pantalla */
+.q-bloque-cab { container-type: inline-size; }
+@container (max-width: 560px) { .q-bloque-titulo { flex-wrap: wrap; } }
 
 /* ── Ver como tabla: debajo de cada gráfico, a la vista ── */
 .q-ver-tabla { margin-top: var(--e-3); font-size: var(--t-14); }

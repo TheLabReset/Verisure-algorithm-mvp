@@ -117,14 +117,14 @@ export default function Senales({ capa, vista: v }) {
               series={b.marcas.map((m) => ({ nombre: m.nombre, leyenda: m.crecimiento == null ? m.nombre : `${m.nombre} ${signo(m.crecimiento)}`, serie: desdeUnAnio(b.serieMarcas.find((x) => x.id === m.id)?.serie || []) }))} />
           </Bloque>
         )}
-        <Bloque universo="conversacion" {...tiktokLectura(E.tiktok)} ejemplo
+        <Bloque universo="conversacion" {...tiktokLectura(E.tiktok)} ejemplo ancho="mitad"
           ayuda={<p>La interacción es la parte de las vistas que dio me gusta, comentó o compartió. Hashtags de las últimas semanas. Se conectará con Apify.</p>}
           pie={<span>{E.tiktok.fuente}.</span>}>
           <Tabla etiqueta="Hashtags en TikTok" numericas={[1, 2, 3]} barra={{ columna: 1, valores: E.tiktok.hashtags.map((h) => h.tasa) }}
             columnas={['Hashtag', 'Interacción', 'Vistas', 'Publicaciones']}
             filas={E.tiktok.hashtags.map((h) => [h.hashtag, porcentaje(h.tasa, 1), compacto(h.vistas), numero(h.publicaciones)])} />
         </Bloque>
-        <Bloque universo="conversacion" {...facebookLectura(E.facebook)} ejemplo
+        <Bloque universo="conversacion" {...facebookLectura(E.facebook)} ejemplo ancho="mitad"
           ayuda={<p>Los temas de los comentarios en las páginas de las marcas y del rubro. El tono resta las menciones negativas a las positivas: {numero(UMBRALES_TONO.muy)} puntos o más es muy positivo; {numero(UMBRALES_TONO.tono)} o más, positivo; entre −{numero(UMBRALES_TONO.tono)} y {numero(UMBRALES_TONO.tono)}, neutro (y lo mismo hacia lo negativo). Se conectará con Apify.</p>}
           pie={<span>{E.facebook.fuente}, del {fechaCorta(E.facebook.desde)} al {fechaCorta(E.facebook.hasta)}.</span>}>
           <Tabla etiqueta="Temas de la conversación en Facebook" numericas={[1]} barra={{ columna: 1, valores: E.facebook.temas.map((t) => t.menciones) }}
