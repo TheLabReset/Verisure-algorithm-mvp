@@ -106,6 +106,7 @@
   --resalte: var(--p-prosegur);          /* rellenos de la serie en foco: la competencia, en su amarillo */
   --resalte-borde: var(--p-tinta);       /* el borde que hace visible el amarillo sobre blanco (relleno con borde, ver quincha.md) */
   --resalte-anillo: var(--p-tinta);      /* el anillo de los puntos y círculos en foco */
+  --sobre-resalte: var(--p-tinta);       /* el texto sobre un relleno de la competencia (su amarillo pide tinta en los dos temas) */
   --serie-1: var(--p-prosegur-ocre);     /* líneas de la serie en foco: el amarillo oscurecido, porque una línea no lleva borde */
   --serie-resto: var(--p-n-200);  /* el resto, cuando un gráfico resalta una sola marca */
   --propia: var(--p-rojo);               /* la marca propia en los gráficos y el mapa: Verisure en su rojo, solo en marcas, nunca en texto */
@@ -127,6 +128,7 @@
   --qf0: var(--p-am-1);
   --qf1: var(--p-am-2);
   --qf2: var(--p-am-3);
+  --mezcla-atl: color-mix(in oklab, var(--resalte) 30%, var(--superficie)); /* la parte ATL de la mezcla de la competencia: su amarillo, pálido, para separarse del digital */
   --qf3: var(--p-am-4);
   --qf4: var(--p-am-5);
   --qf5: var(--p-am-6);
@@ -220,6 +222,7 @@
     --qf0: var(--p-amo-1);
     --qf1: var(--p-amo-2);
     --qf2: var(--p-amo-3);
+    --mezcla-atl: var(--qf2);
     --qf3: var(--p-amo-4);
     --qf4: var(--p-amo-5);
     --qf5: var(--p-amo-6);
@@ -283,6 +286,7 @@
   --qf0: var(--p-amo-1);
   --qf1: var(--p-amo-2);
   --qf2: var(--p-amo-3);
+  --mezcla-atl: var(--qf2);
   --qf3: var(--p-amo-4);
   --qf4: var(--p-amo-5);
   --qf5: var(--p-amo-6);

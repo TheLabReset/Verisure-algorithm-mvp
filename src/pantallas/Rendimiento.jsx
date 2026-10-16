@@ -5,12 +5,12 @@
 import { useState } from 'react';
 import { Play, AudioLines, Image as ImagenIcono } from 'lucide-react';
 import { Bloque, Tabla, Resumen, Grupo, Detalle, VentanaAnuncios, Ventana, vigente } from '../sistema/Componentes.jsx';
-import { Reparto, Lineas, Histograma, Cronograma } from '../sistema/graficos/Graficos.jsx';
+import { Reparto, Lineas, Histograma, Cronograma, Apiladas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, soles, solesCompacto, compacto, mesCorto, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato, avisosDe } from './comun.jsx';
 import { periodoTexto, comparacionTexto, puntosFrente, capital, plataformasTexto, mesPeriodo, mesComparacion, resumenTitulo, mesTexto, tramoFechas, tramoMeses, version, ventanaTexto } from '../textos/comun.js';
 import { diasEntre, DIAS_MINIMOS } from '../calculo/periodo.js';
-import { atlLectura, digitalLectura, shareLectura, presionLectura, shareSemanalLectura, pautaSemanalLectura, temporadaLectura, textosMarca, cronogramaLectura, estrenosLectura, estrenoTitulo, estrenoDato, textosDelAbanico } from '../textos/lecturas.js';
+import { atlLectura, digitalLectura, shareLectura, presionLectura, mezclaLectura, mezclaPista, pautaSemanalLectura, temporadaLectura, textosMarca, cronogramaLectura, estrenosLectura, estrenoTitulo, estrenoDato, textosDelAbanico } from '../textos/lecturas.js';
 import { CLIENTE } from '../cliente.js';
 
 const ICONO = { video: Play, audio: AudioLines, image: ImagenIcono };
@@ -120,7 +120,7 @@ export default function Rendimiento({ capa, vista: v }) {
   const comparacion = comparacionTexto(P);
   const rotuloA = mesComparacion(P), rotuloAhora = mesPeriodo(P);
   const corto = !comparacion || diasEntre(P.desde, P.hasta) + 1 < DIAS_MINIMOS; // sin la barra de antes, como las lecturas
-  const s = v.analiza.shareSemanal;
+  const s = v.analiza.shareSemanal, mz = v.analiza.mezcla;
   const t = v.analiza.temporada;
   const etiquetaMes = (m) => `${mesCorto(+m.mes.slice(5, 7))}${m.parcial ? ' (parcial)' : ''}`;
   const [version_, setVersion] = useState(null);
@@ -160,12 +160,13 @@ export default function Rendimiento({ capa, vista: v }) {
             </div>
           </Bloque>
         )}
-        {(s.atl || s.digital) && (
-          <Bloque universo={['atl', 'digital']} {...shareSemanalLectura(s)} alcance="semanas del año"
-            ayuda={<p>La parte de la inversión de cada semana (lunes a domingo) que pone {s.marca}, en ATL y en digital, cada una sobre su propio universo. La primera semana empieza el día que empieza la data y la última puede estar en curso.</p>}
-            pie={<span>Inversión estimada por Integrametrics.</span>}>
-            <Lineas etiqueta={`Share semanal de ${s.marca}, ATL y digital`} formato={(n) => porcentaje(n)} alto={240}
-              series={[...(s.digital ? [{ nombre: 'Digital', resaltada: true, serie: s.digital }] : []), ...(s.atl ? [{ nombre: 'ATL', resaltada: true, discontinua: true, serie: s.atl }] : [])]} />
+        {mz && (
+          <Bloque universo={['atl', 'digital']} {...mezclaLectura(mz)} alcance="meses del año"
+            ayuda={<p>Cada columna es la inversión de {mz.marca} en el mes, como el {porcentaje(100)}: abajo la parte digital y arriba la ATL. Al pasar por una columna se ve cómo se reparte el ATL entre sus medios. El último mes puede estar en curso.</p>}
+            pie={<span>Suma ATL y digital, que Integrametrics estima con métodos distintos: sirve para ver hacia dónde se mueve la mezcla, no para comparar montos.</span>}>
+            <Apiladas etiqueta={`Mezcla digital y ATL de ${mz.marca}, mes a mes`}
+              partes={[{ clave: 'digital', nombre: 'Digital', clase: 'q-parte-foco' }, { clave: 'atl', nombre: 'ATL', clase: 'q-parte-mezcla-atl' }]}
+              columnas={mz.meses.map((m) => ({ clave: m.mes, corto: mesCorto(+m.mes.slice(5, 7)), nombre: `${mesCorto(+m.mes.slice(5, 7))}${m.enCurso ? ' (en curso)' : ''}`, valores: { digital: m.digital, atl: m.atl }, pista: mezclaPista(m) }))} />
           </Bloque>
         )}
         {(ok(dig) || ok(atl)) && (
@@ -211,9 +212,9 @@ export default function Rendimiento({ capa, vista: v }) {
             ayuda={<p>ATL va llena, de su primera a su última emisión registrada. Digital va en contorno, de la primera a la última variante vista. Detrás, el período elegido.</p>}
             pie={<span>Las {numero(c.filas.length)} versiones con más inversión estimada en el año{c.resto ? `; ${numero(c.resto)} ${c.resto === 1 ? 'versión' : 'versiones'} más con menos inversión no entran` : ''}. Los estrenos son de TV, radio, cable, OTT y vía pública.</span>}>
             <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true"><li><span className="q-muestra q-muestra-tramo" />ATL</li><li><span className="q-muestra q-muestra-contorno" />Digital</li></ul>
-            <Cronograma etiqueta={`Versiones de ${COMPETENCIA.nombre} en el año`} inicio={inicio} fin={v.fuentes[0].corte} periodo={P} formato={solesCompacto}
+            <Cronograma etiqueta={`Versiones de ${COMPETENCIA.nombre} en el año`} inicio={inicio} fin={v.fuentes[0].corte} periodo={P} formato={null}
               onElegir={setVersion} filas={c.filas.map((f) => ({ id: f.id, nombre: version(f.version), universo: f.universo, desde: f.desde, hasta: f.hasta, valor: f.inversion, nota: [nuevas.has(f.version) && 'nueva en el período', ...f.canales.slice(0, 2)].filter(Boolean).join(', ') }))} />
-            <VentanaAnuncios grupo={grupoCrono} onCerrar={() => setVersion(null)} t={{ ...tVersiones, bajada: () => `Versión de ${COMPETENCIA.nombre}` }} nota={filaCrono ? soles(filaCrono.inversion) : null} />
+            <VentanaAnuncios grupo={grupoCrono} onCerrar={() => setVersion(null)} t={{ ...tVersiones, bajada: () => `Versión de ${COMPETENCIA.nombre}` }} />
             {estrenos && (
               <div className="q-subbloque">
                 {/* la tarjeta es del año (alfiler); los estrenos son del período elegido y lo dicen con su calendario */}

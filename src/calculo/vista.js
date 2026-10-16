@@ -13,12 +13,13 @@ import { rango, diasEntre, diaSemana, sumarDias, periodoDelMes, periodoDe, meses
 import { agruparAnuncios, nombrePlataforma, htmlDe } from './anuncios.js';
 import { leerOoh, contornos, distritoDe, proyectar } from './ooh.js';
 import { plataformaEnFrase, grupoDigital, GRUPOS_DIGITALES } from '../textos/comun.js';
-import { versionesDelAnio, cronograma, pautaDiaria, shareSemanal, pautaSemanal } from './competencia.js';
+import { versionesDelAnio, cronograma, pautaDiaria, shareSemanal, pautaSemanal, mezclaMensual } from './competencia.js';
 import { leerBusquedas } from './busquedas.js';
 import { hechosDeLaSemana } from './semana.js';
 import { digitalDeLaSemana, atlDeLaSemana, compraDeMedios } from './senales.js';
 import { emisionesDe } from '../fuentes/medios.js';
 import { tiktokDeEjemplo, facebookDeEjemplo, plataformasDeEjemplo } from '../muestra/ejemplo.js';
+import { leerTiktok, leerFacebook } from './conversacion.js';
 import { leerPlataformas } from './plataformas.js';
 
 export { mesesDisponibles };
@@ -451,8 +452,8 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
     },
     // Data de ejemplo (src/muestra/ejemplo.js): fuentes por conectar. Va rotulada y no entra a los avisos ni a MAIA
     ejemplo: {
-      tiktok: tiktokDeEjemplo(P.hasta),
-      facebook: facebookDeEjemplo(P.hasta),
+      tiktok: leerTiktok(tiktokDeEjemplo(P.hasta)),
+      facebook: leerFacebook(facebookDeEjemplo(P.hasta)),
       plataformas: leerPlataformas(plataformasDeEjemplo(meta.firstDay, meta.lastDay), P),
     },
     analiza: {
@@ -460,6 +461,8 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
       pauta: pautaDelAnio(contrato, { atl: ok('atl'), digital: ok('digital') }),
       pautaSemanal: pautaPorSemana(contrato, { atl: ok('atl'), digital: ok('digital') }),
       shareSemanal: shareDelAnio(contrato, { atl: ok('atl'), digital: ok('digital') }),
+      // la mezcla de la competencia principal mes a mes: necesita las dos fuentes, si no el 100 % mentiría
+      mezcla: ok('atl') && ok('digital') ? { marca: nombreMarca(COMPETENCIA[0]), ...mezclaMensual(contrato.daily, contrato.digital?.daily || [], COMPETENCIA[0], contrato.meta.firstDay, contrato.meta.lastDay) } : null,
       busquedas: ok('trends') ? leerBusquedas(busquedas, { hasta: P.hasta }) : null,
     },
     sugiere: {},

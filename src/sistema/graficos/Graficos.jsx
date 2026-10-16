@@ -623,6 +623,55 @@ export function Histograma({ barras, formato = numero, rotulo, resaltar = [], et
   );
 }
 
+// ─────────────── Apiladas: columnas al 100 %, una por mes, partida en partes ───────────────
+// Para ver cómo se mueve una mezcla en el tiempo (la parte digital y la ATL de una marca, mes a mes). Cada columna
+// suma 100 %: se lee la proporción, no el monto. La primera parte va abajo. Cada parte lleva su porcentaje adentro si
+// cabe; la pista dice el resto. Una columna sin datos queda como hueco. columnas: [{ clave, corto, valores: { [parte]:
+// pct }, pista, apagada }], partes: [{ clave, nombre, clase }]
+export function Apiladas({ columnas, partes, formato = (p) => porcentaje(p), etiqueta, alto: altoPedido = 220 }) {
+  const tabla = { columnas: ['', ...partes.map((p) => p.nombre)], filas: columnas.map((c) => [c.nombre ?? c.corto, ...partes.map((p) => (c.valores[p.clave] == null ? 'sin dato' : formato(c.valores[p.clave])))]) };
+  return (
+    <Grafico etiqueta={etiqueta} tabla={tabla}>
+      {(ancho) => {
+        const alto = altoPedido, m = { t: 4, r: 0, b: 24, l: 0 };
+        const paso = ancho / Math.max(1, columnas.length), w = Math.max(8, paso - Math.min(16, paso * 0.3));
+        const h = alto - m.t - m.b;
+        return (
+          <>
+            <ul className="q-leyenda">{partes.map((p) => <li key={p.clave}><span className={`q-muestra q-muestra-${p.clase}`} />{p.nombre}</li>)}</ul>
+            <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
+              {columnas.map((c, i) => {
+                const x = i * paso + (paso - w) / 2;
+                const vacia = partes.every((p) => c.valores[p.clave] == null);
+                let y0 = alto - m.b;
+                return (
+                  <g key={c.clave} className={c.apagada ? 'q-columna-apagada' : undefined}>
+                    {vacia ? <rect className="q-hueco" x={x} y={m.t} width={w} height={h} rx="2" />
+                      : partes.map((p, k) => {
+                        const v = c.valores[p.clave] || 0, hp = (v / 100) * h, gap = k && hp > 0 ? 2 : 0;
+                        if (hp <= 0) return null;
+                        const y = y0 - hp;
+                        y0 = y;
+                        return (
+                          <g key={p.clave}>
+                            <rect className={`q-parte ${p.clase}`} x={x} y={y + gap} width={w} height={Math.max(0, hp - gap)} rx="2" data-valor={v} />
+                            {hp >= 20 && w >= 34 && <text className="q-rotulo-sobre" x={x + w / 2} y={y + gap + Math.min(hp - gap, 40) / 2 + 4} textAnchor="middle">{formato(v)}</text>}
+                          </g>
+                        );
+                      })}
+                    <text className={`q-eje${c.apagada ? '' : ''}`} x={x + w / 2} y={alto - 8} textAnchor="middle">{c.corto}</text>
+                    <Zona x={i * paso} y={m.t} w={paso} h={h} pista={c.pista} />
+                  </g>
+                );
+              })}
+            </Svg>
+          </>
+        );
+      }}
+    </Grafico>
+  );
+}
+
 // ─────────────── Dispersión: dos medidas por marca, una escala por eje ───────────────
 // x en escala logarítmica (cada marca del eje vale 10 veces la anterior): las cifras de interacción van de miles a
 // decenas de miles. y de 0 a 100 con la raya de 50 (neutro). Cada punto se elige con clic o con el teclado; el
@@ -841,14 +890,16 @@ export function Tiras({ filas, formato = numero, periodo, etiqueta }) {
 // ─────────────── Cronograma: cada versión como un tramo en el tiempo ───────────────
 // Lleno: ATL (primera a última emisión). Contorno: digital (primera a última variante vista). El período elegido
 // va con la superficie de capítulo detrás. Cada fila se abre con clic o con el teclado.
+// formato={null}: sin montos (ni a la derecha, ni en la pista, ni en la tabla); las barras usan ese ancho
 export function Cronograma({ filas, inicio, fin, periodo, formato = numero, onElegir, etiqueta }) {
-  const tabla = { columnas: ['Versión', 'Universo', 'Desde', 'Hasta', 'Inversión'], filas: filas.map((f) => [f.nombre, f.universo === 'atl' ? 'ATL' : 'Digital', fechaCorta(f.desde), fechaCorta(f.hasta), formato(f.valor)]) };
+  const conMonto = typeof formato === 'function';
+  const tabla = { columnas: ['Versión', 'Universo', 'Desde', 'Hasta', ...(conMonto ? ['Inversión'] : [])], filas: filas.map((f) => [f.nombre, f.universo === 'atl' ? 'ATL' : 'Digital', fechaCorta(f.desde), fechaCorta(f.hasta), ...(conMonto ? [formato(f.valor)] : [])]) };
   const t = (d) => new Date(`${d}T00:00:00Z`).getTime();
   return (
     <Grafico etiqueta={etiqueta} tabla={tabla}>
       {(ancho) => {
         const angosto = ancho < 560;
-        const fila = 30, m = { t: 26, r: angosto ? 8 : 84, b: 6, l: angosto ? Math.round(ancho * 0.42) : Math.min(300, Math.round(ancho * 0.36)) };
+        const fila = 30, m = { t: 26, r: angosto || !conMonto ? 8 : 84, b: 6, l: angosto ? Math.round(ancho * 0.42) : Math.min(300, Math.round(ancho * 0.36)) };
         const alto = m.t + filas.length * fila + m.b;
         const x = lineal(t(inicio), t(fin), m.l, ancho - m.r);
         const meses = [];
@@ -859,7 +910,7 @@ export function Cronograma({ filas, inicio, fin, periodo, formato = numero, onEl
             {meses.map((d) => <g key={d}><line className="q-rejilla" x1={x(t(d))} x2={x(t(d))} y1={m.t - 6} y2={alto - m.b} />{/* el mes que empieza pegado al borde (el mes en curso con pocos días) no lleva rótulo: no cabe */}{x(t(d)) + 30 <= ancho && <text className="q-eje" x={x(t(d)) + 3} y={14}>{mesCorto(+d.slice(5, 7))}</text>}</g>)}
             {filas.map((f, i) => {
               const cy = m.t + i * fila, x0 = x(t(f.desde)), x1 = Math.max(x0 + 4, x(t(f.hasta)) + 2);
-              const pista = `${f.nombre}\n${f.universo === 'atl' ? 'ATL' : 'Digital'}${f.nota ? ` · ${f.nota}` : ''}\n${fechaCorta(f.desde)} a ${fechaCorta(f.hasta)}\n${formato(f.valor)}`;
+              const pista = `${f.nombre}\n${f.universo === 'atl' ? 'ATL' : 'Digital'}${f.nota ? ` · ${f.nota}` : ''}\n${fechaCorta(f.desde)} a ${fechaCorta(f.hasta)}${conMonto ? `\n${formato(f.valor)}` : ''}`;
               const elegir = () => onElegir && onElegir(f.id);
               return (
                 <g key={f.id} className={onElegir ? 'q-elegible' : undefined} role={onElegir ? 'button' : undefined} tabIndex={onElegir ? 0 : undefined}
@@ -868,7 +919,7 @@ export function Cronograma({ filas, inicio, fin, periodo, formato = numero, onEl
                   <rect className="q-zona" x={0} y={cy} width={ancho} height={fila} data-pista={pista} />
                   <text className="q-rotulo-fila" x={m.l - 10} y={cy + fila / 2 + 4} textAnchor="end">{recortar(f.nombre, m.l)}</text>
                   <rect className={f.universo === 'atl' ? 'q-tramo' : 'q-tramo q-tramo-contorno'} x={x0} y={cy + 8} width={x1 - x0} height={fila - 16} rx="3" data-valor={f.valor} />
-                  {!angosto && <text className="q-rotulo-valor" x={ancho - m.r + 8} y={cy + fila / 2 + 4}>{formato(f.valor)}</text>}
+                  {!angosto && conMonto && <text className="q-rotulo-valor" x={ancho - m.r + 8} y={cy + fila / 2 + 4}>{formato(f.valor)}</text>}
                 </g>
               );
             })}

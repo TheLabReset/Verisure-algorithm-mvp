@@ -232,6 +232,9 @@
 .q-alerta-revisar { --nivel: var(--atencion); }
 .q-alerta-oportunidad, .q-alerta-bien { --nivel: var(--mejora); }
 .q-alerta-cab { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-1) var(--e-3); }
+.q-tono { display: inline-flex; align-items: center; gap: var(--e-1); padding: 2px var(--e-2); border-radius: var(--r-control); font-size: var(--t-13); font-weight: var(--peso-rotulo); white-space: nowrap; color: var(--texto-2); }
+.q-tono-positivo, .q-tono-muy-positivo { background: var(--mejora-suave); color: var(--mejora); }
+.q-tono-negativo, .q-tono-muy-negativo { background: var(--empeora-suave); color: var(--empeora); }
 .q-nivel { display: inline-flex; align-items: center; gap: var(--e-1); font-size: var(--t-13); font-weight: var(--peso-rotulo); color: var(--nivel); }
 .q-alerta-fuente { font-size: var(--t-13); color: var(--texto-3); }
 .q-alerta h3 { font-family: var(--f-titulo); font-size: var(--t-19); font-weight: var(--peso-titulo); line-height: 1.3; }
@@ -286,7 +289,9 @@
 /* ── Ventana de cada tarjeta, arriba a la derecha: calendario si sigue el período, alfiler si no ── */
 .q-bloque-marcas { display: flex; align-items: center; gap: var(--e-2); flex-shrink: 0; }
 .q-ventana { display: inline-flex; align-items: center; gap: var(--e-1); padding: 2px var(--e-2); border: 1px solid var(--borde); border-radius: var(--r-control); font-size: var(--t-13); color: var(--texto-2); white-space: nowrap; }
-@media (max-width: 520px) { .q-bloque-titulo { flex-wrap: wrap; } }
+/* los chips bajan debajo del título cuando la tarjeta es angosta (el celular o media fila), no según la pantalla */
+.q-bloque-cab { container-type: inline-size; }
+@container (max-width: 560px) { .q-bloque-titulo { flex-wrap: wrap; } }
 
 /* ── Ver como tabla: debajo de cada gráfico, a la vista ── */
 .q-ver-tabla { margin-top: var(--e-3); font-size: var(--t-14); }

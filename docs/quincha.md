@@ -106,7 +106,8 @@ Están en `src/sistema/graficos`. Son SVG propios, y cada marca lleva su valor e
 - `Pendiente` (dos momentos, una escala);
 - `MapaCalor` (día × hora);
 - `Tiras` (un día por celda, una fila por serie, cada fila con su escala; para series cortas: con muchas filas marea);
-- `Cronograma` (cada versión como un tramo en el tiempo; lleno y contorno para dos universos; filas que se abren);
+- `Cronograma` (cada versión como un tramo en el tiempo; lleno y contorno para dos universos; filas que se abren; con `formato={null}` va sin montos y las barras usan ese ancho);
+- `Apiladas` (columnas al 100 %, una por mes, partidas en partes; cada parte con su porcentaje adentro si cabe; para ver cómo se mueve una mezcla, no montos);
 - `MapaPaneles` (Leaflet, cargado aparte con `React.lazy`; puntos clicables por ubicación, tamaño por valor; el mapa base se calma con `--mapa-filtro`);
 - `Histograma`;
 - `Columnas` (dos medidas lado a lado, cada una con su escala);

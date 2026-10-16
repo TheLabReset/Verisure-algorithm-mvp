@@ -4,14 +4,15 @@
 // La marca propia no va en lo nuevo de la competencia: su equipo ya sabe qué tiene al aire.
 // No calcula: pinta la vista y las lecturas de src/textos.
 import { useState } from 'react';
-import { Bloque, Tabla, Resumen, Abanico, Detalle } from '../sistema/Componentes.jsx';
+import { Bloque, Tabla, Resumen, Abanico, Detalle, Tono } from '../sistema/Componentes.jsx';
 import { Lineas, Pendiente } from '../sistema/graficos/Graficos.jsx';
 import { numero, compacto, fechaCorta, porcentaje, variacion } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato, avisosDe } from './comun.jsx';
 import Ooh from './Ooh.jsx';
 import Emisiones from './Emisiones.jsx';
 import { periodoTexto, version, ventanaTexto, resumenTitulo, plataformasTexto, plataformaEnFrase, capital } from '../textos/comun.js';
-import { digitalSemanaLectura, atlSemanaLectura, oohLectura, distritosLectura, textosDelAbanico, textosMarca, trendsMarcasLectura, tiktokLectura, facebookLectura } from '../textos/lecturas.js';
+import { digitalSemanaLectura, atlSemanaLectura, oohLectura, distritosLectura, textosDelAbanico, textosMarca, trendsMarcasLectura, tiktokLectura, facebookLectura, TONOS } from '../textos/lecturas.js';
+import { UMBRALES_TONO } from '../calculo/conversacion.js';
 import { CLIENTE } from '../cliente.js';
 
 const COMPETENCIA = CLIENTE.competencia[0];
@@ -58,6 +59,7 @@ export default function Senales({ capa, vista: v }) {
   const [panelDe, setPanelDe] = useState(null);
   const tPaneles = textosDelAbanico(anio, { uno: 'panel', varios: 'paneles' });
   const d = L.digitalSemana, tv = L.tvSemana, radio = L.radioSemana, b = v.analiza.busquedas;
+  const conTrends = Boolean(b?.marcas.some((m) => m.antes != null)); // el detalle muestra un año antes solo si Trends lo trae
   const enPeriodo = (x) => x && !x.reciente;
   const desdeUnAnio = (serie) => serie.filter((p) => p.fecha >= `${Number(P.hasta.slice(0, 4)) - 1}${P.hasta.slice(4)}` && p.fecha <= P.hasta);
   return (
@@ -115,32 +117,40 @@ export default function Senales({ capa, vista: v }) {
               series={b.marcas.map((m) => ({ nombre: m.nombre, leyenda: m.crecimiento == null ? m.nombre : `${m.nombre} ${signo(m.crecimiento)}`, serie: desdeUnAnio(b.serieMarcas.find((x) => x.id === m.id)?.serie || []) }))} />
           </Bloque>
         )}
-        <Bloque universo="conversacion" {...tiktokLectura(E.tiktok)} ejemplo
-          ayuda={<p>Vistas, interacción (me gusta, comentarios y compartidos) y publicaciones de cada hashtag en las últimas semanas. Se conectará con Apify.</p>}
+        <Bloque universo="conversacion" {...tiktokLectura(E.tiktok)} ejemplo ancho="mitad"
+          ayuda={<p>La interacción es la parte de las vistas que dio me gusta, comentó o compartió. Hashtags de las últimas semanas. Se conectará con Apify.</p>}
           pie={<span>{E.tiktok.fuente}.</span>}>
-          <Tabla etiqueta="Hashtags en TikTok" numericas={[1, 2, 3, 4]} barra={{ columna: 2, valores: E.tiktok.hashtags.map((h) => h.interaccion) }}
-            columnas={['Hashtag', 'Vistas', 'Interacción', 'Publicaciones', 'Frente a las semanas previas']}
-            filas={E.tiktok.hashtags.map((h) => [h.hashtag, compacto(h.vistas), compacto(h.interaccion), numero(h.publicaciones), signo(h.crecimiento)])} />
+          <Tabla etiqueta="Hashtags en TikTok" numericas={[1, 2, 3]} barra={{ columna: 1, valores: E.tiktok.hashtags.map((h) => h.tasa) }}
+            columnas={['Hashtag', 'Interacción', 'Vistas', 'Publicaciones']}
+            filas={E.tiktok.hashtags.map((h) => [h.hashtag, porcentaje(h.tasa, 1), compacto(h.vistas), numero(h.publicaciones)])} />
         </Bloque>
-        <Bloque universo="conversacion" {...facebookLectura(E.facebook)} ejemplo
-          ayuda={<p>Los temas de los comentarios en las páginas de las marcas y del rubro, con su tono. Se conectará con Apify.</p>}
+        <Bloque universo="conversacion" {...facebookLectura(E.facebook)} ejemplo ancho="mitad"
+          ayuda={<p>Los temas de los comentarios en las páginas de las marcas y del rubro. El tono resta las menciones negativas a las positivas: {numero(UMBRALES_TONO.muy)} puntos o más es muy positivo; {numero(UMBRALES_TONO.tono)} o más, positivo; entre −{numero(UMBRALES_TONO.tono)} y {numero(UMBRALES_TONO.tono)}, neutro (y lo mismo hacia lo negativo). Se conectará con Apify.</p>}
           pie={<span>{E.facebook.fuente}, del {fechaCorta(E.facebook.desde)} al {fechaCorta(E.facebook.hasta)}.</span>}>
-          <Tabla etiqueta="Temas de la conversación en Facebook" numericas={[1, 2, 3, 4]} barra={{ columna: 1, valores: E.facebook.temas.map((t) => t.menciones) }}
-            columnas={['Tema', 'Menciones', 'Positivo', 'Neutro', 'Negativo']}
-            filas={E.facebook.temas.map((t) => [t.tema, numero(t.menciones), porcentaje(t.positivo), porcentaje(t.neutro), porcentaje(t.negativo)])} />
-          <Tabla etiqueta="Páginas de Facebook de cada marca" numericas={[1, 2, 3]}
-            columnas={['Página', 'Publicaciones', 'Interacción', 'Comentarios']}
-            filas={E.facebook.paginas.map((x) => [x.nombre, numero(x.publicaciones), numero(x.interaccion), numero(x.comentarios)])} />
+          <Tabla etiqueta="Temas de la conversación en Facebook" numericas={[1]} barra={{ columna: 1, valores: E.facebook.temas.map((t) => t.menciones) }}
+            columnas={['Tema', 'Menciones', 'Tono']}
+            filas={E.facebook.temas.map((t) => [t.tema, numero(t.menciones), <Tono key="tono" tono={t.tono} texto={TONOS[t.tono]} />])} />
         </Bloque>
-        {b?.marcas.some((m) => m.antes != null) && (
-          <Detalle id={`detalle-${s15.id}`} titulo="Detalle de las marcas de cámaras" bajada="Google Trends, Perú, por semana." vistas={['un año antes y ahora, marca por marca']}>
+        <Detalle id={`detalle-${s15.id}`} titulo="Detalle de las tendencias" bajada="Google Trends, Perú, por semana; TikTok y Facebook con data de ejemplo, por conectar."
+          vistas={[...(conTrends ? ['las marcas de cámaras, un año antes y ahora'] : []), 'las páginas de Facebook de cada marca', 'el tono de cada tema en porcentajes']}>
+          {conTrends && (
             <Bloque universo="busquedas" titulo="Las marcas de cámaras, un año antes y ahora" alcance={`semanas al ${fechaCorta(b.hasta)}`}
               pie={<span>Índice promedio de 0 a 100 · {fechaCorta(b.desde)} a {fechaCorta(b.hasta)} de {b.hasta.slice(0, 4)}{b.antesDesde ? ` frente a ${fechaCorta(b.antesDesde)} a ${fechaCorta(b.antesHasta)} de ${b.antesHasta.slice(0, 4)}` : ''}.</span>}>
               <Pendiente etiqueta="Búsquedas de marcas de cámaras, un año antes y ahora" formato={(n) => numero(Math.round(n))} rotuloA="Un año antes" rotuloB="Ahora"
                 resaltar={b.marcas.slice(0, 1).map((m) => m.nombre)} filas={b.marcas.filter((m) => m.antes != null).map((m) => ({ nombre: m.nombre, a: m.antes, b: m.ahora }))} />
             </Bloque>
-          </Detalle>
-        )}
+          )}
+          <Bloque universo="conversacion" titulo="Las páginas de cada marca" ejemplo pie={<span>{E.facebook.fuente}.</span>}>
+            <Tabla etiqueta="Páginas de Facebook de cada marca" numericas={[1, 2, 3]}
+              columnas={['Página', 'Publicaciones', 'Interacción', 'Comentarios']}
+              filas={E.facebook.paginas.map((x) => [x.nombre, numero(x.publicaciones), numero(x.interaccion), numero(x.comentarios)])} />
+          </Bloque>
+          <Bloque universo="conversacion" titulo="El tono de cada tema" ejemplo pie={<span>Parte de las menciones de cada tema.</span>}>
+            <Tabla etiqueta="Tono de cada tema de Facebook" numericas={[1, 2, 3]}
+              columnas={['Tema', 'Positivo', 'Neutro', 'Negativo']}
+              filas={E.facebook.temas.map((t) => [t.tema, porcentaje(t.positivo), porcentaje(t.neutro), porcentaje(t.negativo)])} />
+          </Bloque>
+        </Detalle>
       </SeccionDe>
     </MarcoCapa>
   );

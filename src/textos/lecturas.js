@@ -1,7 +1,7 @@
 // Lecturas de cada tarjeta. Observan, no ordenan; dos frases como máximo; cada comparación dice frente a qué.
 // Lo principal es la competencia: cada lectura empieza por ella y la marca propia va para comparar, salvo cuando
 // la tarjeta es sobre la marca propia. Toda cifra llega calculada desde src/calculo; acá solo se escribe.
-import { numero, porcentaje, soles, solesCompacto, fechaCorta } from '../sistema/formato.js';
+import { numero, porcentaje, soles, solesCompacto, fechaCorta, mesLargo } from '../sistema/formato.js';
 import { CLIENTE } from '../cliente.js';
 import { tramoMeses, periodoTexto, comparacionTexto, puntosFrente, enLetras, segun, lista, capital, horasTexto, DIAS_SEMANA, version, mesTexto, medioEnFrase, tramoFechas, tipoAviso, tipoAvisoPlural, plataformasTexto } from './comun.js';
 import { dolares, fechaSinAnio } from '../sistema/formato.js';
@@ -100,6 +100,30 @@ export function presionLectura(v, universo = 'atl') {
   const pico = mayor && mayor.valores[r.id] > 0 && dr > 1 ? ` El día de más inversión de ${r.nombre} fue el ${fechaCorta(mayor.fecha)}, con ${monto(mayor.valores[r.id])}.` : '';
   return { titulo, lectura: `${r.nombre} ${deR}; ${p.nombre}, ${deP}.${pico}` };
 }
+// La mezcla de la competencia mes a mes: el año en el título; el mes más volcado a ATL y el último mes cerrado en la lectura
+export function mezclaLectura(x) {
+  const conMezcla = x.meses.filter((m) => m.digital != null);
+  if (!x.anio || !conMezcla.length) return { titulo: `${x.marca} no tiene inversión registrada en el año`, lectura: null };
+  const titulo = `El ${porcentaje(x.anio.digital)} de la inversión de ${x.marca} en el año es digital`;
+  const cerrados = conMezcla.filter((m) => !m.enCurso);
+  const masAtl = [...cerrados].sort((a, b) => b.atl - a.atl)[0];
+  const ultimo = cerrados.at(-1);
+  const partes = [];
+  if (masAtl && masAtl.atl >= 1) partes.push(`Su mes con más ATL fue ${mesLargo(+masAtl.mes.slice(5, 7))} (${porcentaje(masAtl.atl)})${masAtl.medios[0] ? `, sobre todo en ${(MEDIOS_MEZCLA[masAtl.medios[0].medio] ?? masAtl.medios[0].medio).toLowerCase()}` : ''}.`);
+  else partes.push(`No tuvo ATL en ningún mes cerrado.`);
+  if (ultimo && ultimo !== masAtl) partes.push(`En ${mesLargo(+ultimo.mes.slice(5, 7))}, el ${porcentaje(ultimo.digital)} fue digital.`);
+  return { titulo, lectura: partes.join(' ') };
+}
+// Los medios ATL como se leen en la mezcla
+export const MEDIOS_MEZCLA = { 'TV ABIERTA': 'TV abierta', CABLE: 'Cable', RADIO: 'Radio', OTT: 'OTT y streaming', 'OTT STREAMING/LIVE': 'OTT y streaming', OOH: 'Vía pública', 'VIA PUBLICA': 'Vía pública' };
+// La pista de una columna: el mes, la parte digital y la ATL con sus medios, solo en porcentajes
+export function mezclaPista(m) {
+  const mes = `${capital(mesLargo(+m.mes.slice(5, 7)))}${m.enCurso ? ' (en curso)' : ''}`;
+  if (m.digital == null) return `${mes}\nsin inversión registrada`;
+  const medios = m.medios.filter((x) => x.pct >= 0.5).map((x) => `${MEDIOS_MEZCLA[x.medio] ?? x.medio} ${porcentaje(x.pct)}`);
+  return `${mes}\nDigital ${porcentaje(m.digital)}\nATL ${porcentaje(m.atl)}${medios.length ? ` (${medios.join(', ')})` : ''}`;
+}
+
 export function shareSemanalLectura(s) {
   const comp = (serie) => (serie || []).filter((x) => !x.parcial && x.valor != null);
   const dig = comp(s.digital), atl = comp(s.atl);
@@ -435,9 +459,15 @@ export function trendsMarcasLectura(b) {
 }
 export function tiktokLectura(t) {
   const [h] = t.hashtags;
-  const marcas = t.hashtags.filter((x) => x.deMarca);
-  return { titulo: `${h.hashtag} es el hashtag con más interacción`, lectura: `Los hashtags de marca quedan detrás de los del rubro: el más alto es ${marcas[0]?.hashtag ?? 'ninguno'}.` };
+  const marca = t.hashtags.find((x) => x.deMarca);
+  const delante = marca ? t.hashtags.indexOf(marca) : -1;
+  return {
+    titulo: `${h.hashtag} es el hashtag con más interacción`,
+    lectura: !marca ? 'Ningún hashtag de marca entra en la lista.' : delante === 0 ? `Un hashtag de marca, ${marca.hashtag}, encabeza la lista.` : `El primer hashtag de marca es ${marca.hashtag}, con ${numero(delante)} del rubro por delante.`,
+  };
 }
+// El tono de cada tema de Facebook, como se lee en su chip
+export const TONOS = { 'muy-positivo': 'Muy positivo', positivo: 'Positivo', neutro: 'Neutro', negativo: 'Negativo', 'muy-negativo': 'Muy negativo' };
 export function facebookLectura(f) {
   const [t] = f.temas;
   const negativo = [...f.temas].sort((a, b) => b.negativo - a.negativo)[0];
