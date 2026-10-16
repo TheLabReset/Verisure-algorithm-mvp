@@ -5,10 +5,14 @@
 // Una fila es repetición solo si no tiene inversión, lleva sufijo entre paréntesis y sale a dos minutos o menos de una
 // emisión con inversión de la emisora de Lima de la misma cadena, con la misma marca y versión. Una regional que sale
 // sola, o con inversión propia, es una compra local y cuenta aparte (todavía no se mide como tal).
+// La transmisión en la app, la web o el YouTube del canal repite lo que sale en su señal: si a dos minutos o menos hay
+// una emisión de TV o radio de la misma cadena, marca y versión, es esa emisión, tenga o no tarifa (una regional sin la
+// de Lima también se retransmite). Si no hay ninguna, el streaming salió solo y cuenta.
 // La usan el contrato (src/fuentes/agregado.js) y medios.json (src/fuentes/medios.js): una sola regla para los dos.
 
 export const cadena = (medio) => (medio || '').replace(/\s*\([^)]*\)\s*$/, '').trim();
 const conSufijo = (medio) => /\([^)]*\)\s*$/.test(medio || '');
+const esStreaming = (medio) => /\((APP|WEB|YOUTUBE)\)\s*$/i.test(medio || '');
 const marcaDeEmisora = (medio) => cadena(medio).split(' ')[0];
 // la principal es la emisora de Lima (sin sufijo entre paréntesis) con la misma primera palabra: «OXIGENO (CIX)» y
 // «OXIGENO FM», «LATINA (APP)» y «LATINA TV»; «ATV (TRU)» y «ATV», pero no «ATV+»
@@ -27,11 +31,21 @@ export function repeticiones(filas, campos) {
     if (!principales.has(k)) principales.set(k, []);
     principales.get(k).push({ medio: campos.medio(r), min: minutos(campos.minuto(r)) });
   }
+  // las señales de TV y radio (todas, con o sin tarifa), para el streaming que las retransmite
+  const senales = new Map();
+  for (const r of filas) {
+    if (!campos.minuto(r) || esStreaming(campos.medio(r))) continue;
+    const k = clave(r);
+    if (!senales.has(k)) senales.set(k, []);
+    senales.get(k).push({ medio: campos.medio(r), min: minutos(campos.minuto(r)) });
+  }
+  const misma = (a, b) => marcaDeEmisora(a) === marcaDeEmisora(b);
   const de = new Map();
   for (const r of filas) {
     if (campos.inversion(r) > 0 || !campos.minuto(r) || !conSufijo(campos.medio(r))) continue;
     const m = minutos(campos.minuto(r));
-    const p = principales.get(clave(r))?.find((x) => Math.abs(x.min - m) <= TOLERANCIA && mismaCadena(campos.medio(r), x.medio));
+    const p = principales.get(clave(r))?.find((x) => Math.abs(x.min - m) <= TOLERANCIA && mismaCadena(campos.medio(r), x.medio))
+      ?? (esStreaming(campos.medio(r)) ? senales.get(clave(r))?.find((x) => Math.abs(x.min - m) <= TOLERANCIA && misma(campos.medio(r), x.medio)) : null);
     if (p) de.set(r, p.medio);
   }
   return de;

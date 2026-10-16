@@ -47,3 +47,16 @@ test('cadenas: en la data real, las repeticiones suman S/ 0 y los spots del cont
   const spots = a.daily.reduce((s, d) => s + Object.values(d.brands).reduce((t, b) => t + b.spots, 0), 0);
   assert.equal(spots, filas.length - r.size);
 });
+
+test('cadenas: el streaming del canal repite su señal aunque esa señal sea regional y sin tarifa', () => {
+  const regional = fila('LATINA TV (CIX)', '09:54', 0, { grupo_medio: 'TV ABIERTA' });
+  const app = fila('LATINA (APP)', '09:55', 0, { grupo_medio: 'OTT STREAMING/LIVE' });
+  const web = fila('LATINA (WEB)', '09:54', 0, { grupo_medio: 'OTT STREAMING/LIVE' });
+  const sola = fila('LATINA (WEB)', '15:00', 0, { grupo_medio: 'OTT STREAMING/LIVE' });
+  const otraCadena = fila('WILLAX (WEB)', '09:54', 0, { grupo_medio: 'OTT STREAMING/LIVE' });
+  const r = repeticiones([regional, app, web, sola, otraCadena], CAMPOS_CSV);
+  assert.ok(r.has(app) && r.has(web), 'la app y la web del canal en el mismo minuto son la misma emisión');
+  assert.ok(!r.has(regional), 'la regional sin Lima es compra local y cuenta');
+  assert.ok(!r.has(sola), 'el streaming sin señal de TV a esa hora salió solo y cuenta');
+  assert.ok(!r.has(otraCadena), 'otra cadena no es la misma emisión');
+});
