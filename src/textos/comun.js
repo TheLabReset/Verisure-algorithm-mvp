@@ -31,6 +31,9 @@ export function tramoMeses(desde, hasta, a = 'entre') {
 // bien después de «de», «en» o «para»
 export const periodoTexto = (P) => (!P.parcial ? mesTexto(P.mes) : P.enCurso === false ? `${mesLargo(+P.mes.slice(5, 7))} hasta el ${Number(P.hasta.slice(8, 10))}` : `lo que va de ${mesLargo(+P.mes.slice(5, 7))}`);
 export const comparacionTexto = (P) => (!P.compararDesde ? null : P.parcial ? `el mismo tramo de ${mesLargo(+P.compararDesde.slice(5, 7))}` : mesTexto(P.compararDesde.slice(0, 7)));
+// El mes de cada barra, para rotularla en una palabra: «Julio» y «Junio»
+export const mesPeriodo = (P) => capital(mesLargo(+P.mes.slice(5, 7)));
+export const mesComparacion = (P) => (P.compararDesde ? capital(mesLargo(+P.compararDesde.slice(5, 7))) : null);
 
 // Cantidades chicas en letras (al inicio de una frase o en un sujeto): «dos piezas», «tres paneles»
 const LETRAS_M = ['cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez'];
