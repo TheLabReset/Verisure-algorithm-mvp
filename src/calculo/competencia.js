@@ -1,6 +1,8 @@
 // Lo que hizo la competencia en el año: sus versiones (ATL y digital) como tramos en el tiempo, y la pauta día a
 // día de cada marca para leer los encendidos y apagados. Puro.
 
+import { diaSemana } from './periodo.js';
+
 const dia = (f) => (f || '').slice(0, 10);
 
 // Versiones de una marca en el año. ATL: primera y última emisión registradas. Digital: Integrametrics registra
@@ -38,10 +40,16 @@ export function pautaDiaria(serie, marca, dias) {
 }
 
 // Share semanal de una marca (semanas de lunes a domingo; una semana incompleta al final se marca)
+// Semanas de lunes a domingo, como las de MAIA: la primera y la última pueden quedar incompletas y se marcan
+export function semanasDeLunes(dias) {
+  const out = [];
+  for (const d of dias) { if (!out.length || diaSemana(d) === 0) out.push([]); out.at(-1).push(d); }
+  return out;
+}
+
 export function shareSemanal(serie, marca, marcas, dias) {
   const semanas = [];
-  for (let i = 0; i < dias.length; i += 7) {
-    const tramo = dias.slice(i, i + 7);
+  for (const tramo of semanasDeLunes(dias)) {
     const filas = serie.filter((f) => f.fecha >= tramo[0] && f.fecha <= tramo.at(-1));
     const tot = filas.reduce((s, f) => s + marcas.reduce((t, m) => t + (f.brands[m]?.spend || 0), 0), 0);
     const suya = filas.reduce((s, f) => s + (f.brands[marca]?.spend || 0), 0);
@@ -50,13 +58,12 @@ export function shareSemanal(serie, marca, marcas, dias) {
   return semanas;
 }
 
-// Pauta semanal de una marca: inversión de cada semana (de siete días desde el primer día con data). Una semana sin
-// ningún día con registros es null; la última puede estar incompleta y se marca
+// Pauta semanal de una marca: inversión de cada semana de lunes a domingo. Una semana sin ningún día con registros
+// es null; la primera y la última pueden estar incompletas y se marcan
 export function pautaSemanal(series, marca, dias) {
   const porFecha = series.map((serie) => new Map(serie.map((f) => [f.fecha, f])));
   const out = [];
-  for (let i = 0; i < dias.length; i += 7) {
-    const tramo = dias.slice(i, i + 7);
+  for (const tramo of semanasDeLunes(dias)) {
     let suma = 0, conData = false;
     for (const d of tramo) for (const m of porFecha) { const f = m.get(d); if (f) { conData = true; suma += f.brands[marca]?.spend || 0; } }
     out.push({ fecha: tramo[0], hasta: tramo.at(-1), valor: conData ? suma : null, parcial: tramo.length < 7 });

@@ -14,6 +14,8 @@ export function assetOf(url) {
   return { url, kind: 'link' }
 }
 
+import { repeticiones, CAMPOS_API } from './cadenas.js'
+
 const num = (v) => Number(v) || 0
 const day = (f) => (f || '').slice(0, 10)
 // Medio "amigable" agrupado (TV abierta/cable/radio/OTT/OOH) desde gname/mabierta_cable.
@@ -30,7 +32,8 @@ function medioOf(r) {
 const topKey = (m) => Object.entries(m).sort((a, b) => b[1] - a[1])[0]?.[0] || null
 
 // ── Serie diaria por marca × medio × franja (aditiva) ─────────────────
-function buildDaily(registros) {
+// Una repetición regional de una cadena nacional (ver cadenas.js) no es otro spot: no suma spots ni franjas
+function buildDaily(registros, repetida = new Map()) {
   const byDay = new Map()
   for (const r of registros) {
     const d = day(r.fecha)
@@ -42,9 +45,10 @@ function buildDaily(registros) {
     const e = brands[b]
     const inv = num(r.rinversion)
     e.spend += inv
-    e.spots += 1
     const med = medioOf(r)
     e.byMedium[med] = (e.byMedium[med] || 0) + inv
+    if (repetida.has(r)) continue
+    e.spots += 1
     if (r.franja) e.byFranja[r.franja] = (e.byFranja[r.franja] || 0) + 1
   }
   return [...byDay.entries()]
@@ -56,7 +60,7 @@ function buildDaily(registros) {
 }
 
 // ── Ad Museum: un item por creativo (id_versiones_unica) con rollup + asset ──
-function buildPieces(registros, medio = 'ATL') {
+function buildPieces(registros, medio = 'ATL', repetida = new Map()) {
   const byV = new Map()
   for (const r of registros) {
     const key = r.id_versiones_unica ?? `${r.maname}:${r.vname}`
@@ -69,9 +73,10 @@ function buildPieces(registros, medio = 'ATL') {
       })
     }
     const p = byV.get(key)
-    p.spots += 1
     p.spend += num(r.rinversion)
     if (r.fecha > p.lastEmission) p.lastEmission = r.fecha
+    if (repetida.has(r)) continue
+    p.spots += 1
     if (r.mname) p._ch[r.mname] = (p._ch[r.mname] || 0) + 1
     if (r.progname) p._prog[r.progname] = (p._prog[r.progname] || 0) + 1
     if (r.genname) p._gen[r.genname] = (p._gen[r.genname] || 0) + 1
@@ -164,7 +169,8 @@ function buildDigital(digital = []) {
 
 // ── Contrato completo ─────────────────────────────────────────────────
 export function buildAlgorithm(registros = [], digital = [], { source = 'fixtures', generated = null } = {}) {
-  const daily = buildDaily(registros)
+  const repetida = repeticiones(registros, CAMPOS_API)
+  const daily = buildDaily(registros, repetida)
   const days = daily.map((d) => d.fecha)
   const brands = [...new Set(registros.map((r) => r.maname))]
   return {
@@ -177,7 +183,7 @@ export function buildAlgorithm(registros = [], digital = [], { source = 'fixture
       brands,
     },
     daily,
-    pieces: buildPieces(registros, 'ATL'),
+    pieces: buildPieces(registros, 'ATL', repetida),
     ooh: buildOoh(registros),
     events: buildEvents(registros),
     digital: buildDigital(digital),

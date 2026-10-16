@@ -123,12 +123,18 @@ function abanicoAtl(contrato, P) {
   return abanico(items, (x) => x.marca);
 }
 
-// Digital: una carta por versión (las variantes de una misma versión se juntan), las que aparecieron en el período
+// Digital: una carta por versión nueva, la que se vio por primera vez en el período. Integrametrics registra cada
+// variante (imagen, formato) el día que la ve: una variante nueva de una versión de enero no es una versión nueva
 function abanicoDigital(contrato, P) {
+  const primera = new Map();
+  for (const p of contrato.digital?.pieces || []) {
+    const k = `${p.maname}|${p.vname}`, d = dia(p.firstEmission);
+    if (!primera.has(k) || d < primera.get(k)) primera.set(k, d);
+  }
   const porVersion = new Map();
   for (const p of contrato.digital?.pieces || []) {
-    if (!enRango(p.firstEmission, P.desde, P.hasta)) continue;
     const k = `${p.maname}|${p.vname}`;
+    if (!enRango(primera.get(k), P.desde, P.hasta) || !enRango(p.firstEmission, P.desde, P.hasta)) continue;
     if (!porVersion.has(k)) porVersion.set(k, { marca: p.maname, base: p, plataformas: new Set(), variantes: 0, imagen: null, desde: dia(p.firstEmission) });
     const v = porVersion.get(k);
     v.variantes += 1;
@@ -191,8 +197,8 @@ function horarioYCanales(medios, P) {
   const cuantosDia = Array(7).fill(0);
   for (const d of dias) cuantosDia[diaSemana(d)] += 1;
   return Object.fromEntries(MARCAS.map((marca) => {
-    const b = m[marca];
-    if (!b) return [marca, null];
+    // el mes está en medios.json pero la marca no: no emitió (cero), no es un dato que falta
+    const b = m[marca] ?? { emisiones: 0, horas: Array(24).fill(0), dias: Array(7).fill(0), horaDia: Array.from({ length: 7 }, () => Array(24).fill(0)), canales: {}, programas: {}, zonas: {}, grupos: {} };
     const porHora = b.horas.map((n) => n / dias.length);
     // emisiones promedio en cada hora de cada día de la semana: la cuenta del mes dividida por cuántas veces cae ese día
     const matriz = (b.horaDia || []).map((fila, i) => fila.map((n) => (cuantosDia[i] ? n / cuantosDia[i] : null)));
@@ -200,10 +206,11 @@ function horarioYCanales(medios, P) {
     const horasAltas = porHora.map((v, h) => [v, h]).sort((a, z) => z[0] - a[0]).slice(0, 4).filter(([v]) => v > 0).map(([, h]) => h);
     const max = Math.max(...porDiaSemana.map((v) => v ?? -1));
     // Integrametrics marca «DESCONOCIDO» el canal que no identificó
-    const top = (obj, n) => Object.entries(obj).sort((a, z) => z[1] - a[1] || a[0].localeCompare(z[0])).slice(0, n).map(([nombre, valor]) => ({ nombre: nombre === 'DESCONOCIDO' ? 'Canal sin registrar' : nombre, valor }));
+    const top = (obj, n) => Object.entries(obj).filter(([, v]) => v > 0).sort((a, z) => z[1] - a[1] || a[0].localeCompare(z[0])).slice(0, n).map(([nombre, valor]) => ({ nombre: nombre === 'DESCONOCIDO' ? 'Canal sin registrar' : nombre, sinRegistrar: nombre === 'DESCONOCIDO', valor }));
+    const conInversion = Object.values(b.canales).filter((v) => v > 0).length;
     return [marca, {
       emisiones: b.emisiones, porHora, porDiaSemana, matriz, horasAltas, diaMayor: max > 0 ? porDiaSemana.indexOf(max) : null,
-      canales: top(b.canales, 8), programas: top(b.programas, 8), zonas: top(b.zonas, 8), totalCanales: Object.keys(b.canales).length, totalProgramas: Object.keys(b.programas).length,
+      canales: top(b.canales, 8), programas: top(b.programas, 8), zonas: top(b.zonas, 8), totalCanales: conInversion, totalProgramas: Object.keys(b.programas).length,
     }];
   }));
 }

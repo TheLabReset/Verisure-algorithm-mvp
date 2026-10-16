@@ -2,6 +2,8 @@
 // día × hora, canal, programa, zona y grupo de medio. Corre en el pipeline (Node) y deja public/data/medios.json.
 // El CSV es la grilla emisión por emisión que ya va al Power BI del cliente: una sola fuente para las dos cosas.
 
+import { repeticiones, CAMPOS_CSV } from './cadenas.js';
+
 // CSV con comillas: los nombres de programa pueden traer comas
 export function leerCsv(texto) {
   const filas = [];
@@ -25,12 +27,16 @@ const sumar = (obj, clave, n) => { if (clave) obj[clave] = (obj[clave] || 0) + n
 
 export function mediosDesdeCsv(texto) {
   const meses = {};
-  for (const r of leerCsv(texto)) {
+  const filas = leerCsv(texto);
+  const repetida = repeticiones(filas, CAMPOS_CSV);
+  for (const r of filas) {
     const fecha = r.fecha?.slice(0, 10);
     if (!fecha || !r.marca) continue;
     const mes = fecha.slice(0, 7);
     const m = (meses[mes] ??= {});
     const b = (m[r.marca] ??= { emisiones: 0, horas: Array(24).fill(0), dias: Array(7).fill(0), horaDia: Array.from({ length: 7 }, () => Array(24).fill(0)), canales: {}, programas: {}, zonas: {}, grupos: {} });
+    // una repetición regional de una compra nacional no es otra emisión
+    if (repetida.has(r)) continue;
     const inv = Number(r.inversion_soles) || 0;
     b.emisiones += 1;
     const h = Number((r.hora || '').slice(0, 2));

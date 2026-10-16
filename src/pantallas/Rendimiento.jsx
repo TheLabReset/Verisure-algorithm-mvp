@@ -68,7 +68,7 @@ export default function Rendimiento({ capa, vista: v }) {
         )}
         {(s.atl || s.digital) && (
           <Bloque universo={['atl', 'digital']} {...shareSemanalLectura(s)} alcance="semanas del año"
-            ayuda={<p>La parte de la inversión de cada semana (lunes a domingo) que pone {s.marca}, en ATL y en digital, cada una sobre su propio universo. La última semana puede estar incompleta.</p>}
+            ayuda={<p>La parte de la inversión de cada semana (lunes a domingo) que pone {s.marca}, en ATL y en digital, cada una sobre su propio universo. La primera y la última semana pueden estar incompletas.</p>}
             pie={<span>Inversión estimada por Integrametrics.</span>}>
             <Lineas etiqueta={`Share semanal de ${s.marca}, ATL y digital`} formato={(n) => porcentaje(n)} alto={240}
               series={[...(s.digital ? [{ nombre: 'Digital', resaltada: true, serie: s.digital }] : []), ...(s.atl ? [{ nombre: 'ATL', resaltada: false, serie: s.atl }] : [])]} />

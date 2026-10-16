@@ -128,7 +128,7 @@ export function estrenoDato(e) {
 function abanicoFrase(a, [uno, varios], cola) {
   const p = a.propio?.anuncios.length ?? 0;
   const r = a.grupos.map((g) => `${g.nombre} tiene ${numero(g.anuncios.length)} ${segun(g.anuncios.length, uno, varios)}`);
-  return `${capital(r.length ? lista(r) : `la competencia no tiene ${varios}`)} ${cola}; ${CLIENTE.nombre}, ${numero(p)}.`;
+  return `${capital(r.length ? lista(r) : `${lista(CLIENTE.competencia.map((c) => c.nombre))} no tiene ${varios}`)} ${cola}; ${CLIENTE.nombre}, ${numero(p)}.`;
 }
 export function abanicoAtlLectura(a, P) {
   return { titulo: 'Versiones ATL del período', lectura: abanicoFrase(a, ['versión', 'versiones'], `con emisiones en ${periodoTexto(P)}`) };
@@ -225,8 +225,11 @@ export function franjasLectura(v, FRANJAS) {
 export function canalesLectura(med, marca) {
   const nombre = textosMarca.nombreMarca(marca);
   if (!med || !med.canales.length) return { titulo: `Canales de ${nombre}`, lectura: `Sin emisiones de ${nombre} en el período.` };
-  const [a, b] = med.canales;
-  return { titulo: `Canales de ${nombre}`, lectura: `${numero(med.totalCanales)} ${segun(med.totalCanales, 'canal', 'canales')} con inversión; ${b ? `los dos con más son ${a.nombre} y ${b.nombre}` : `toda va en ${a.nombre}`}.` };
+  // lo que llega sin canal registrado no se nombra como si fuera un canal
+  const [a, b] = med.canales.filter((c) => !c.sinRegistrar);
+  const cuantos = `${numero(med.totalCanales)} ${segun(med.totalCanales, 'canal', 'canales')} con inversión`;
+  if (!a) return { titulo: `Canales de ${nombre}`, lectura: `${cuantos}; ninguno con su nombre registrado.` };
+  return { titulo: `Canales de ${nombre}`, lectura: `${cuantos}; ${b ? `los dos con más son ${a.nombre} y ${b.nombre}` : `el que más tiene es ${a.nombre}`}.` };
 }
 
 // ── 3.2 ──

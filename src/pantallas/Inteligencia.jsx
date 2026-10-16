@@ -32,7 +32,7 @@ function PautaSemanal({ pauta, P }) {
   const etiquetaSemana = (s, i, todas) => (i === 0 || s.fecha.slice(5, 7) !== todas[i - 1].fecha.slice(5, 7) ? mesCorto(+s.fecha.slice(5, 7)) : '');
   return (
     <Bloque universo={universo === 'todo' ? ['atl', 'digital'] : universo} {...pautaSemanalLectura(filas, universo)} alcance="semanas del año"
-      ayuda={<p>Semanas de lunes a domingo. La última puede estar incompleta.</p>}
+      ayuda={<p>Semanas de lunes a domingo. La primera y la última pueden estar incompletas.</p>}
       pie={<span>{universo === 'todo' ? 'Todo suma ATL y digital, que Integrametrics estima con métodos distintos: sirve para ver cuándo se prende la pauta, no para comparar montos.' : 'Inversión semanal estimada por Integrametrics.'}</span>}>
       <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={universo} onCambiar={setUniverso} opciones={opciones} /></div>
       <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true">

@@ -184,6 +184,23 @@ test('ningún texto que ve el socio es relleno ni jerga interna', () => {
   assert.deepEqual(malos, []);
 });
 
+test('una versión digital es nueva el mes en que se ve por primera vez, no cada vez que aparece una variante', () => {
+  const [rival] = CLIENTE.competencia;
+  const primera = new Map();
+  for (const p of contrato.digital.pieces.filter((x) => x.maname === rival.marcaFuente)) { const d = p.firstEmission.slice(0, 10); if (!primera.has(p.vname) || d < primera.get(p.vname)) primera.set(p.vname, d); }
+  for (const mes of MESES) {
+    const esperadas = [...primera.values()].filter((d) => d.startsWith(mes)).length;
+    const g = vistaDe(mes).lee.abanicoDigital.grupos.find((x) => x.nombre === rival.nombre);
+    assert.equal(g?.anuncios.length ?? 0, esperadas, `${mes}: versiones digitales nuevas`);
+  }
+});
+
+test('las semanas de la pauta y del share van de lunes a domingo, como las de MAIA', () => {
+  const v = vistaDe(MESES.at(-1));
+  for (const filas of Object.values(v.analiza.pautaSemanal)) for (const f of filas) for (const s of f.semanas.slice(1)) assert.equal(new Date(`${s.fecha}T00:00:00Z`).getUTCDay(), 1, `la semana del ${s.fecha} no empieza en lunes`);
+  for (const serie of [v.analiza.shareSemanal.atl, v.analiza.shareSemanal.digital].filter(Boolean)) for (const s of serie.slice(1)) assert.equal(new Date(`${s.fecha}T00:00:00Z`).getUTCDay(), 1);
+});
+
 test('el tramo de meses sale de la data, no de un texto fijo', () => {
   assert.equal(tramoMeses('2026-01-01', '2026-07-13'), 'entre enero y julio');
   assert.equal(tramoMeses('2026-01-01', '2026-07-13', 'de'), 'enero a julio');
