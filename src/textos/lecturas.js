@@ -51,7 +51,7 @@ export function shareLectura(v) {
   const P = v.periodo;
   const us = [['digital', v.lee.digital], ['ATL', v.lee.atl]].filter(([, u]) => u.estado === 'ok' && rivalDe(u)?.share != null);
   if (!us.length) return { titulo: 'Sin inversión registrada en el período', lectura: `Integrametrics no tiene inversión de ninguna marca en ${periodoTexto(P)}.` };
-  const r = rivalDe(us[0][1]), p = propiaDe(us[0][1]);
+  const r = rivalDe(us[0][1]);
   // cuánto tiene cada marca en cada universo; un 0 se dice «no tiene inversión», nunca «0 %»
   const tiene = (m, largo) => {
     const con = us.filter(([, u]) => m(u).inversion > 0), sin = us.filter(([, u]) => !(m(u).inversion > 0));
@@ -59,17 +59,16 @@ export function shareLectura(v) {
     const no = sin.length ? `no tiene inversión ${sin.map(([n]) => (largo ? n : `en ${n}`)).join(' ni ')}` : null;
     return partes.length ? `tiene ${lista(partes)}${no ? ` y ${no}` : ''}` : no;
   };
-  const titulo = `${r.nombre} ${tiene(rivalDe, true)}`;
-  const propia = `${p.nombre} ${tiene(propiaDe, false)}.`;
   // el cambio solo si hay con qué comparar (y días suficientes: puntosFrente lo decide)
   const cambios = us.map(([n, u]) => [n, rivalDe(u).cambioPts]).filter(([, x]) => x != null && puntosFrente(x, P));
   const cambio = (x) => (x === 0 ? 'igual' : `${numero(Math.abs(x))} ${segun(Math.abs(x), 'punto', 'puntos')} ${x > 0 ? 'más' : 'menos'}`);
   const comp = comparacionTexto(P) || '';
   const frenteA = comp.startsWith('el ') ? `al ${comp.slice(3)}` : `a ${comp}`;
-  const frente = cambios.length ? ` Frente ${frenteA}, ${r.nombre} queda ${lista(cambios.map(([n, x]) => `${cambio(x)} en ${n}`))}.` : '';
-  // la lectura no repite los porcentajes del gráfico: dice el cambio y los montos, que no están a la vista
-  const enSoles = ` En soles, ${r.nombre} puso ${lista(us.map(([n, u]) => `${solesCompacto(rivalDe(u).inversion)} en ${n}`))}.`;
-  return { titulo, lectura: `${cambios.length ? frente.trim() : propia}${enSoles}` };
+  // con comparación, el título dice cómo se movió la competencia en cada universo: «baja de 60 % a 5 % en digital»
+  const mov = ([n, u]) => { const m = rivalDe(u), x = m.cambioPts; return x === 0 ? `sigue en ${shareDe(m)} en ${n}` : `${x > 0 ? 'sube' : 'baja'} de ${porcentaje(m.sharePrevio)} a ${shareDe(m)} en ${n}`; };
+  const titulo = cambios.length === us.length ? `${r.nombre} ${lista(us.map(mov))}, frente ${frenteA}` : `${r.nombre} ${tiene(rivalDe, true)}`;
+  // sin lectura: la tarjeta va en porcentajes, y la parte de la marca propia es el resto de la barra; los soles están en el detalle
+  return { titulo, lectura: '' };
 }
 
 export function presionLectura(v, universo = 'atl') {
