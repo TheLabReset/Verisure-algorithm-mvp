@@ -8,7 +8,7 @@ import { Lineas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, dolares, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import { resumenTitulo, comparacionTexto } from '../textos/comun.js';
-import { plataformasLectura, pushPullLectura, plataformasObjetivoLectura, estadoObjetivo, extremoTexto, extremosAyuda } from '../textos/lecturas.js';
+import { plataformasLectura, pushPullLectura, plataformasObjetivoLectura, estadoObjetivo, extremoTexto, extremosAyuda, semanaRotulo } from '../textos/lecturas.js';
 import { MARGEN_OBJETIVO, extremos } from '../calculo/plataformas.js';
 
 const SEMANAS_A_LA_VISTA = 12; // como el tablero del cliente: el trimestre que termina en el período
@@ -72,7 +72,7 @@ export default function Activacion({ capa, vista: v }) {
 
       <SeccionDe def={s32} vista={v}>
         <Bloque universo="plataformas" {...pushPullLectura(x)} alcance={`${SEMANAS_A_LA_VISTA} semanas al ${fechaCorta(P.hasta)}`} ejemplo
-          ayuda={<p>Push son las redes, donde el anuncio busca a la persona (Meta y TikTok). Pull es la búsqueda, donde la persona busca la marca o el servicio (Google Ads). Semanas de lunes a domingo; la última puede estar incompleta.</p>}
+          ayuda={<p>Push son las redes, donde el anuncio busca a la persona (Meta y TikTok). Pull es la búsqueda, donde la persona busca la marca o el servicio (Google Ads). Semanas de lunes a domingo; la última puede estar en curso.</p>}
           pie={<span>{x.fuente}.</span>}>
           <Lineas etiqueta="L2B semanal de Push y Pull" formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} alto={220}
             series={x.tipos.map((g) => ({ nombre: g.tipo === 'push' ? 'Push' : 'Pull', tono: g.tipo === 'push' ? 'tinta' : 'propia', discontinua: g.tipo === 'push', serie: g.semanas.slice(-SEMANAS_A_LA_VISTA).map((s) => ({ fecha: s.desde, valor: s.l2b })) }))} />
@@ -106,7 +106,7 @@ export default function Activacion({ capa, vista: v }) {
           </ul>
         </Bloque>
         <Bloque universo="plataformas" titulo="Costo por booking, semana a semana" alcance={`${SEMANAS_A_LA_VISTA} semanas al ${fechaCorta(P.hasta)}`} ejemplo
-          pie={<span>Semanas de lunes a domingo; la última puede estar incompleta.</span>}>
+          pie={<span>Semanas de lunes a domingo; la última puede estar en curso.</span>}>
           <Lineas etiqueta="Costo por booking semanal de cada plataforma" formato={(n) => (n == null ? 'sin dato' : costo(n))} alto={240} elegible
             elegidaInicial={Math.max(0, x.plataformas.findIndex((p) => p.estadoCpb === 'lejos'))}
             series={x.plataformas.map((p) => ({ nombre: p.nombre, leyenda: `${p.nombre} (objetivo ${costo(p.objetivo.cpb)})`, serie: p.semanas.slice(-SEMANAS_A_LA_VISTA).map((s) => ({ fecha: s.desde, valor: s.cpb == null ? null : Math.round(s.cpb) })) }))} />
@@ -117,7 +117,7 @@ export default function Activacion({ capa, vista: v }) {
             <Tabla etiqueta={`${plat.nombre} por semana`} numericas={[1, 2, 3, 4, 5, 6]}
               columnas={['Semana', 'Inversión', 'Leads', 'Bookings', 'L2B', 'Costo por lead', 'Costo por booking']}
               {...marcas(ultimas(plat.semanas), 'semana')}
-              filas={ultimas(plat.semanas).map((s) => [`${fechaCorta(s.desde)}${s.dias < 7 ? ' (incompleta)' : ''}`, dolares(s.inversion), numero(s.leads), numero(s.bookings), pct(s.l2b), conTono(costo(s.cpl), s.estadoCpl), conTono(costo(s.cpb), s.estadoCpb)])} />
+              filas={ultimas(plat.semanas).map((s) => [semanaRotulo(s), dolares(s.inversion), numero(s.leads), numero(s.bookings), pct(s.l2b), conTono(costo(s.cpl), s.estadoCpl), conTono(costo(s.cpb), s.estadoCpb)])} />
           </Bloque>
           <Bloque universo="plataformas" titulo={`Las campañas de ${plat.nombre}`} ejemplo pie={<span>Campañas del período, de más a menos inversión.</span>}>
             <div className="q-control q-control-tarjeta"><span>Plataforma</span><Grupo etiqueta="Plataforma" valor={plat.id} onCambiar={setPlataforma} opciones={opciones} /></div>

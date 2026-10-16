@@ -62,7 +62,7 @@ function PautaSemanal({ pauta, P }) {
   const etiquetaSemana = (s, i, todas) => (i === 0 || s.fecha.slice(5, 7) !== todas[i - 1].fecha.slice(5, 7) ? mesCorto(+s.fecha.slice(5, 7)) : '');
   return (
     <Bloque universo={universo === 'todo' ? ['atl', 'digital'] : universo} {...pautaSemanalLectura(filas, universo)} alcance="semanas del año"
-      ayuda={<p>Semanas de lunes a domingo; la primera y la última pueden estar incompletas. La altura sigue a la raíz cuadrada de la inversión, con un mismo tope para las dos marcas: las semanas chicas se ven y la barra más alta siempre es la de más inversión.</p>}
+      ayuda={<p>Semanas de lunes a domingo; la primera empieza el día que empieza la data y la última puede estar en curso. La altura sigue a la raíz cuadrada de la inversión, con un mismo tope para las dos marcas: las semanas chicas se ven y la barra más alta siempre es la de más inversión.</p>}
       pie={<span>{universo === 'todo' ? 'Todo suma ATL y digital, que Integrametrics estima con métodos distintos: sirve para ver cuándo se prende la pauta, no para comparar montos.' : 'Inversión semanal estimada por Integrametrics.'}</span>}>
       <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={universo} onCambiar={setUniverso} opciones={opciones} /></div>
       <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true">
@@ -75,7 +75,7 @@ function PautaSemanal({ pauta, P }) {
             <h4>{f.marca}<span>{solesCompacto(f.total)} en el año</span></h4>
             <Histograma etiqueta={`Inversión semanal de ${f.marca}`} tono={f.foco ? undefined : f.propia ? 'propia' : 'resto'} formato={(n) => (n == null ? 'sin registros' : soles(n))} alto={150} max={tope} escala="raiz"
               resaltar={f.semanas.map((s, i) => (s.hasta >= P.desde && s.fecha <= P.hasta ? i : -1)).filter((i) => i >= 0)}
-              barras={f.semanas.map((s, i, todas) => ({ nombre: `Semana del ${fechaCorta(s.fecha)}${s.parcial ? ' (incompleta)' : ''}`, corto: etiquetaSemana(s, i, todas), valor: s.valor }))} />
+              barras={f.semanas.map((s, i, todas) => ({ nombre: !s.parcial ? `Semana del ${fechaCorta(s.fecha)}` : i === todas.length - 1 ? `Semana del ${fechaCorta(s.fecha)} (en curso)` : `Del ${fechaCorta(s.fecha)} al ${fechaCorta(s.hasta)}`, corto: etiquetaSemana(s, i, todas), valor: s.valor }))} />
           </div>
         ))}
       </div>
@@ -162,7 +162,7 @@ export default function Rendimiento({ capa, vista: v }) {
         )}
         {(s.atl || s.digital) && (
           <Bloque universo={['atl', 'digital']} {...shareSemanalLectura(s)} alcance="semanas del año"
-            ayuda={<p>La parte de la inversión de cada semana (lunes a domingo) que pone {s.marca}, en ATL y en digital, cada una sobre su propio universo. La primera y la última semana pueden estar incompletas.</p>}
+            ayuda={<p>La parte de la inversión de cada semana (lunes a domingo) que pone {s.marca}, en ATL y en digital, cada una sobre su propio universo. La primera semana empieza el día que empieza la data y la última puede estar en curso.</p>}
             pie={<span>Inversión estimada por Integrametrics.</span>}>
             <Lineas etiqueta={`Share semanal de ${s.marca}, ATL y digital`} formato={(n) => porcentaje(n)} alto={240}
               series={[...(s.digital ? [{ nombre: 'Digital', resaltada: true, serie: s.digital }] : []), ...(s.atl ? [{ nombre: 'ATL', resaltada: true, discontinua: true, serie: s.atl }] : [])]} />

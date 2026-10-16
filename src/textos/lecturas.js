@@ -5,7 +5,7 @@ import { numero, porcentaje, soles, solesCompacto, fechaCorta } from '../sistema
 import { CLIENTE } from '../cliente.js';
 import { tramoMeses, periodoTexto, comparacionTexto, puntosFrente, enLetras, segun, lista, capital, horasTexto, DIAS_SEMANA, version, mesTexto, medioEnFrase, tramoFechas, tipoAviso, tipoAvisoPlural, plataformasTexto } from './comun.js';
 import { dolares, fechaSinAnio } from '../sistema/formato.js';
-import { MARGEN_OBJETIVO } from '../calculo/plataformas.js';
+import { MARGEN_OBJETIVO, VECES_PROMEDIO } from '../calculo/plataformas.js';
 
 const propiaDe = (u) => u.marcas.find((m) => m.propia);
 const rivalDe = (u) => u.marcas.find((m) => !m.propia);
@@ -488,9 +488,12 @@ export function pushPullLectura(x) {
 // Un costo frente a su objetivo, en palabras: en objetivo, o cuánto lo pasa
 // Las dos filas marcadas en las tablas de plataformas, y la ayuda que dice cómo se eligen
 export const extremoTexto = (cual, unidad) => `${cual === 'mejor' ? 'Mejor' : 'Peor'} ${unidad}`;
-export const extremosAyuda = (unidad) => (unidad === 'día'
-  ? 'En verde, el día con el menor costo por booking; en rojo, el de mayor costo o con inversión y sin bookings. Con menos de tres días no se marca ninguno.'
-  : 'En verde, la semana con el menor costo por booking; en rojo, la de mayor costo o con inversión y sin bookings. La semana incompleta no entra.');
+// El rótulo de una semana en las tablas de plataformas: la en curso lo dice; la que corta el período dice sus días
+export const semanaRotulo = (s) => (s.dias >= 7 ? fechaCorta(s.desde) : s.enCurso ? `${fechaCorta(s.desde)} (en curso)` : `${fechaCorta(s.primero)} al ${fechaCorta(s.hasta)}`);
+export const extremosAyuda = (unidad) => {
+  const uno = unidad === 'día' ? 'el día' : 'la semana', otro = unidad === 'día' ? 'el' : 'la';
+  return `En verde, ${uno} con más bookings; en rojo, ${otro} de menos (si empatan, decide el costo por booking). ${unidad === 'día' ? 'Un día' : 'Una semana'} cuyo costo por booking llega a ${numero(VECES_PROMEDIO)} veces el promedio va en rojo aunque tenga bookings${unidad === 'semana' ? '; la semana en curso no entra' : ''}.`;
+};
 
 export const estadoObjetivo = (e) => ({ bien: 'En objetivo', cerca: `Hasta ${porcentaje(MARGEN_OBJETIVO)} por encima`, lejos: `Más de ${porcentaje(MARGEN_OBJETIVO)} por encima` }[e] ?? null);
 // las plataformas son de la marca propia y las maneja la agencia: lo que pasa el objetivo se dice sin juicio

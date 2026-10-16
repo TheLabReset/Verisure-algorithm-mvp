@@ -17,16 +17,27 @@ export function cifras(filas) {
 export const MARGEN_OBJETIVO = 15;
 export const frenteAlObjetivo = (costo, objetivo) => (costo == null || !objetivo ? null : costo <= objetivo ? 'bien' : costo <= objetivo * (1 + MARGEN_OBJETIVO / 100) ? 'cerca' : 'lejos');
 
-// El mejor y el peor tramo de una tabla (días o semanas), por costo por booking: el mejor, el más bajo; el peor, el más
-// alto, o un tramo con inversión y sin ningún booking si lo hay. Una semana incompleta no entra (no se compara con
-// semanas enteras), y con menos de tres tramos no se marca nada. Devuelve los tramos mismos, no su posición
+// El mejor y el peor tramo de una tabla (días o semanas). Lo que cuenta es cuántos bookings trae: el mejor es el de más
+// bookings y el peor el de menos; si empatan, decide el costo por booking. El costo pesa solo cuando se dispara: un
+// tramo que cuesta VECES_PROMEDIO veces el costo por booking del conjunto o más (o con inversión y sin bookings) es el
+// peor aunque tenga bookings, y nunca el mejor. Una semana a medias (la en curso, o la que corta el período) no entra (no se compara con semanas enteras) y
+// con menos de tres tramos no se marca nada. Devuelve los tramos mismos, no su posición
+export const VECES_PROMEDIO = 3;
 export function extremos(filas) {
+  const ninguno = { mejor: null, peor: null };
   const candidatos = filas.filter((f) => f.inversion > 0 && (f.dias == null || f.dias >= 7));
-  if (candidatos.length < 3) return { mejor: null, peor: null };
-  const conBooking = candidatos.filter((f) => f.bookings > 0), sinBooking = candidatos.filter((f) => !(f.bookings > 0));
-  const mejor = conBooking.reduce((a, f) => (a == null || f.cpb < a.cpb ? f : a), null);
-  const peor = sinBooking.length ? sinBooking.reduce((a, f) => (f.inversion > a.inversion ? f : a)) : conBooking.reduce((a, f) => (a == null || f.cpb > a.cpb ? f : a), null);
-  return mejor === peor || (mejor && peor && mejor.cpb === peor.cpb) ? { mejor: null, peor: null } : { mejor, peor };
+  if (candidatos.length < 3) return ninguno;
+  const bookings = suma(candidatos.map((f) => f.bookings));
+  const promedio = bookings ? suma(candidatos.map((f) => f.inversion)) / bookings : null;
+  const costo = (f) => (f.bookings > 0 ? f.inversion / f.bookings : Infinity);
+  const disparado = (f) => promedio == null || costo(f) >= VECES_PROMEDIO * promedio;
+  const masAlto = (a, f) => (costo(f) > costo(a) ? f : a);
+  const disparados = candidatos.filter(disparado), normales = candidatos.filter((f) => !disparado(f));
+  const peor = disparados.length ? disparados.reduce(masAlto)
+    : candidatos.reduce((a, f) => (f.bookings < a.bookings || (f.bookings === a.bookings && costo(f) > costo(a)) ? f : a));
+  const mejor = normales.length ? normales.reduce((a, f) => (f.bookings > a.bookings || (f.bookings === a.bookings && costo(f) < costo(a)) ? f : a)) : null;
+  if (!mejor || mejor === peor || (mejor.bookings === peor.bookings && costo(mejor) === costo(peor))) return ninguno;
+  return { mejor, peor };
 }
 
 export function leerPlataformas(datos, P) {
@@ -44,7 +55,12 @@ export function leerPlataformas(datos, P) {
       if (!porSemana.has(k)) porSemana.set(k, []);
       porSemana.get(k).push(...filtro(d));
     }
-    return [...porSemana.entries()].map(([desde, filas]) => ({ desde, dias: filas.length, ...cifras(filas) }));
+    // una semana de menos de siete días está en curso si llega al último día de la data; si no, la corta el período
+    const ultimo = datos.dias.filter((x) => x.fecha <= P.hasta).at(-1)?.fecha, final = datos.dias.at(-1).fecha;
+    return [...porSemana.entries()].map(([desde, filas]) => {
+      const fechas = datos.dias.filter((x) => x.fecha <= P.hasta && lunesDe(x.fecha) === desde).map((x) => x.fecha);
+      return { desde, primero: fechas[0], hasta: fechas.at(-1), dias: filas.length, enCurso: fechas.at(-1) === ultimo && ultimo === final && fechas.length < 7, ...cifras(filas) };
+    });
   };
   const plataformas = datos.plataformas.map((p) => {
     const ahora = cifras(deUna(dias, p.id));

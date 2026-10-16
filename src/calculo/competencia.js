@@ -42,8 +42,8 @@ export function pautaDiaria(serie, marca, dias) {
   return dias.map((fecha) => { const f = porFecha.get(fecha); return { fecha, valor: f ? (f.brands[marca]?.spend ?? 0) : null }; });
 }
 
-// Share semanal de una marca (semanas de lunes a domingo; una semana incompleta al final se marca)
-// Semanas de lunes a domingo, como las de MAIA: la primera y la última pueden quedar incompletas y se marcan
+// Share semanal de una marca (semanas de lunes a domingo; la semana en curso al final se marca)
+// Semanas de lunes a domingo, como las de MAIA: la primera (empieza con la data) y la última (en curso) quedan a medias y se marcan
 export function semanasDeLunes(dias) {
   const out = [];
   for (const d of dias) { if (!out.length || diaSemana(d) === 0) out.push([]); out.at(-1).push(d); }
@@ -62,7 +62,7 @@ export function shareSemanal(serie, marca, marcas, dias) {
 }
 
 // Pauta semanal de una marca: inversión de cada semana de lunes a domingo. Una semana sin ningún día con registros
-// es null; la primera y la última pueden estar incompletas y se marcan
+// es null; la primera (empieza con la data) y la última (en curso) pueden quedar a medias y se marcan
 export function pautaSemanal(series, marca, dias) {
   const porFecha = series.map((serie) => new Map(serie.map((f) => [f.fecha, f])));
   const out = [];
