@@ -52,7 +52,7 @@ export default function Rendimiento({ capa, vista: v }) {
 
       <SeccionDe def={s41} vista={v}>
         {!ok(dig) ? <Bloque titulo="Share of investment digital" universo="digital" estado={sinDato(dig.estado)} /> : (
-          <Bloque universo="digital" ancho="mitad" {...digitalLectura(v)}
+          <Bloque universo="digital" {...digitalLectura(v)}
             ayuda={<p>Inversión digital estimada por Integrametrics en Facebook, Instagram, Google Search y YouTube. Cada fila une el share de la comparación (gris) con el del período.</p>}
             pie={<span>Facebook, Instagram, Google Search y YouTube.</span>}>
             <ShareMarcas u={dig} etiqueta="Share de la inversión digital por marca, antes y ahora" rotuloA={rotuloA} />
@@ -60,7 +60,7 @@ export default function Rendimiento({ capa, vista: v }) {
           </Bloque>
         )}
         {!ok(atl) ? <Bloque titulo="Share of investment ATL" universo="atl" estado={sinDato(atl.estado)} /> : (
-          <Bloque universo="atl" ancho="mitad" {...atlLectura(v)}
+          <Bloque universo="atl" {...atlLectura(v)}
             ayuda={<p>Share of investment: la parte de la inversión de la categoría que pone cada marca. Integrametrics estima la inversión con la tarifa de cada medio (inversión bruta), no con lo que se pagó.</p>}
             pie={<span>TV abierta, cable, radio, OTT y vía pública.</span>}>
             <ShareMarcas u={atl} etiqueta="Share de la inversión ATL por marca, antes y ahora" rotuloA={rotuloA} />

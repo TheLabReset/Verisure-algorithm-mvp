@@ -10,10 +10,10 @@ import { hechoTexto } from '../src/textos/maia.js';
 import { CLIENTE } from '../src/cliente.js';
 
 const DATA = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data');
-const leer = (f) => (existsSync(join(DATA, f)) ? JSON.parse(readFileSync(join(DATA, f), 'utf8')) : null);
 const r = (n) => (n == null ? null : Math.round(n));
 
-export function armarContexto() {
+export function armarContexto(dir = DATA) {
+  const leer = (f) => (existsSync(join(dir, f)) ? JSON.parse(readFileSync(join(dir, f), 'utf8')) : null);
   const contrato = leer('algorithm.json'), medios = leer('medios.json'), mapa = leer('mapa-lima.json'), busquedas = leer('busquedas.json');
   const extras = { mapa, busquedas };
   const meses = mesesDisponibles(contrato.meta).map((mes) => {

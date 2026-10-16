@@ -568,7 +568,7 @@ export function Dispersion({ puntos, elegido, onElegir, rotuloX, rotuloY, format
         const puestos = [];
         const cajaDe = (p, lado) => {
           // el rótulo arranca fuera del anillo de elección, para que nunca lo pise
-          const w = p.nombre.length * 7.2 + 4, cx = x(p.x), cy = y(p.y), d = (p.propia ? 12 : 10) + 6;
+          const w = p.nombre.length * 7.8 + 4, cx = x(p.x), cy = y(p.y), d = (p.propia ? 12 : 10) + 6;
           if (lado === 'der') return { x0: cx + d, x1: cx + d + w, y0: cy - 8, y1: cy + 6, tx: cx + d, ty: cy + 4, ancla: 'start' };
           if (lado === 'izq') return { x0: cx - d - w, x1: cx - d, y0: cy - 8, y1: cy + 6, tx: cx - d, ty: cy + 4, ancla: 'end' };
           if (lado === 'aba') return { x0: cx - w / 2, x1: cx + w / 2, y0: cy + d, y1: cy + d + 14, tx: cx, ty: cy + d + 11, ancla: 'middle' };
@@ -641,7 +641,8 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
     <Grafico etiqueta={etiqueta} tabla={tabla}>
       {(ancho) => {
         const alto = altoPedido || Math.round(Math.min(280, Math.max(200, ancho * 0.36)));
-        const m = { t: 18, r: 92, b: 26, l: 52 };
+        // el margen derecho a la medida del rótulo final más largo
+        const m = { t: 18, r: Math.max(92, 20 + Math.ceil(Math.max(...series.map((x) => x.nombre.length)) * 7.8)), b: 26, l: 52 };
         const vals = series.flatMap((s) => s.serie.map((p) => p.valor)).filter((v) => v != null);
         const ys = marcas(Math.max(...vals, 1));
         const x = lineal(0, base.length - 1, m.l, ancho - m.r), y = lineal(0, ys.at(-1), alto - m.b, m.t);

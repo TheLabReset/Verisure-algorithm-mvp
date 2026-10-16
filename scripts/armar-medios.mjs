@@ -6,9 +6,9 @@ import { fileURLToPath } from 'node:url';
 import { mediosDesdeCsv } from '../src/fuentes/medios.js';
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data');
-export function armarMedios() {
-  const medios = mediosDesdeCsv(readFileSync(join(OUT, 'export.csv'), 'utf8'));
-  writeFileSync(join(OUT, 'medios.json'), JSON.stringify(medios));
+export function armarMedios(dir = OUT) {
+  const medios = mediosDesdeCsv(readFileSync(join(dir, 'export.csv'), 'utf8'));
+  writeFileSync(join(dir, 'medios.json'), JSON.stringify(medios));
   return medios;
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
