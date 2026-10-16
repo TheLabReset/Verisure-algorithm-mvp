@@ -4,12 +4,12 @@
 // No calcula: pinta la vista y las lecturas de src/textos.
 import { useState } from 'react';
 import { Play, AudioLines, Image as ImagenIcono } from 'lucide-react';
-import { Bloque, Tabla, Resumen, Abanico, VentanaAnuncios, Detalle, Grupo } from '../sistema/Componentes.jsx';
+import { Bloque, Tabla, Resumen, Abanico, VentanaAnuncios, Detalle, Grupo, Ventana } from '../sistema/Componentes.jsx';
 import { Cronograma } from '../sistema/graficos/Graficos.jsx';
 import { numero, solesCompacto, soles } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import Ooh from './Ooh.jsx';
-import { periodoTexto, version, tramoMeses } from '../textos/comun.js';
+import { periodoTexto, version, tramoMeses, tramoFechas } from '../textos/comun.js';
 import { estrenosLectura, estrenoTitulo, estrenoDato, abanicoAtlLectura, abanicoDigitalLectura, oohLectura, distritosLectura, cronogramaLectura, textosDelAbanico, textosMarca } from '../textos/lecturas.js';
 import { CLIENTE } from '../cliente.js';
 
@@ -60,13 +60,13 @@ function AlAire({ L, P, tVersiones, tDigital }) {
   return (
     <Bloque universo={u} {...(atl ? abanicoAtlLectura(L.abanicoAtl, P) : abanicoDigitalLectura(L.abanicoDigital, P))}
       ayuda={atl
-        ? <p>Una versión está al aire en el período si su primera y su última emisión registradas se cruzan con él. Pasa el mouse por un mazo para abrirlo; un clic muestra todas sus versiones con su video o audio.</p>
-        : <p>Integrametrics registra cada anuncio digital con su arte. Acá va una carta por versión vista por primera vez en el período: las variantes de imagen o formato de una misma versión se juntan.</p>}
-      pie={<span>{atl ? 'TV, radio, cable, OTT y vía pública · versiones con al menos una emisión en el período.' : 'Facebook, Instagram, Google Search y YouTube · versiones vistas por primera vez en el período.'}</span>}>
+        ? <p>Una versión cuenta en el período si su primera y su última emisión registradas se cruzan con él.</p>
+        : <p>Una carta por versión vista por primera vez en el período; las variantes de imagen o formato de una versión van juntas.</p>}
+      pie={<span>{atl ? 'TV, radio, cable, OTT y vía pública.' : 'Facebook, Instagram, Google Search y YouTube.'}</span>}>
       <div className="q-control q-control-tarjeta"><span>Universo</span>
         <Grupo etiqueta="Universo" valor={u} onCambiar={cambiar} opciones={[{ valor: 'atl', texto: 'ATL', desactivada: !L.abanicoAtl }, { valor: 'digital', texto: 'Digital', desactivada: !L.abanicoDigital }]} />
       </div>
-      {vacia ? <p className="q-nota-bloque">{atl ? 'Ninguna versión al aire en el período.' : 'Ninguna versión digital nueva en el período.'}</p>
+      {vacia ? <p className="q-nota-bloque">{atl ? 'Ninguna versión ATL en el período.' : 'Ninguna versión digital nueva en el período.'}</p>
         : <Abanico key={u} lista={lista} abierta={abierta} onAbrir={setAbierta} t={atl ? tVersiones : tDigital} nota={atl ? `al aire en ${periodoTexto(P)}` : `aparecieron en ${periodoTexto(P)}`} propioAlFinal />}
     </Bloque>
   );
@@ -93,7 +93,7 @@ export default function Senales({ capa, vista: v }) {
   return (
     <MarcoCapa capa={capa} vista={v}>
       <Resumen titulo={`Resumen de ${periodoTexto(P)}`}
-        pie={<span>Lo que Integrametrics registró al aire. Una pieza es nueva el día de su primera emisión; un panel cuenta el día que se detecta.</span>}
+        pie={<span>Integrametrics. Una pieza es nueva el día de su primera emisión; un panel cuenta desde el día que se detecta.</span>}
         items={[
           { rotulo: `Versiones de ${COMPETENCIA.nombre} en el año`, universo: 'atl', ir: s11.id, irTexto: s11.titulo, valor: c ? numero(c.total) : null, nota: c ? `${numero(c.atl)} en ATL y ${numero(c.digital)} en digital` : null },
           { rotulo: `Estrenos de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s11.id, irTexto: s11.titulo, valor: L.estrenos ? numero(estrenosComp) : null, nota: L.estrenos ? `${numero(L.estrenos.length - estrenosComp)} de ${CLIENTE.nombre}` : null },
@@ -104,7 +104,7 @@ export default function Senales({ capa, vista: v }) {
       <SeccionDe def={s11} vista={v}>
         {!c ? <Bloque titulo={`Las versiones de ${COMPETENCIA.nombre} en el año`} universo="atl" estado={sinDato('no-cargo')} /> : (
           <Bloque universo={['atl', 'digital']} {...cronogramaLectura(c, COMPETENCIA.nombre, inicio, v.fuentes[0].corte)} alcance={tramoMeses(inicio, v.fuentes[0].corte, 'de')}
-            ayuda={<p>Cada barra es una versión. ATL va llena, de su primera a su última emisión registrada. Digital va en contorno: Integrametrics registra cada variante el día que la ve, así que el tramo va de la primera a la última variante vista. Detrás, el período elegido. Un clic abre la pieza. Abajo, las piezas que salieron al aire por primera vez en el período, de las dos marcas.</p>}
+            ayuda={<p>ATL va llena, de su primera a su última emisión registrada. Digital va en contorno, de la primera a la última variante vista. Detrás, el período elegido.</p>}
             pie={<span>Las {numero(c.filas.length)} versiones con más inversión estimada en el año{c.resto ? `; ${numero(c.resto)} ${c.resto === 1 ? 'versión' : 'versiones'} más con menos inversión no entran` : ''}. Los estrenos son de TV, radio, cable, OTT y vía pública.</span>}>
             <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true"><li><span className="q-muestra q-muestra-tramo" />ATL</li><li><span className="q-muestra q-muestra-contorno" />Digital</li></ul>
             <Cronograma etiqueta={`Versiones de ${COMPETENCIA.nombre} en el año`} inicio={inicio} fin={v.fuentes[0].corte} periodo={P} formato={solesCompacto}
@@ -112,7 +112,8 @@ export default function Senales({ capa, vista: v }) {
             <VentanaAnuncios grupo={grupoCrono} onCerrar={() => setVersion(null)} t={{ ...tVersiones, bajada: () => `Versión de ${COMPETENCIA.nombre}` }} nota={filaCrono ? soles(filaCrono.inversion) : null} />
             {estrenos && (
               <div className="q-subbloque">
-                <h4>{estrenos.titulo}</h4>
+                {/* la tarjeta es del año (alfiler); los estrenos son del período elegido y lo dicen con su calendario */}
+                <h4>{estrenos.titulo}<Ventana texto={tramoFechas(P.desde, P.hasta).replace(/^del /, '')} /></h4>
                 <p>{estrenos.lectura}</p>
                 {/* a la vista, solo los de la competencia (hasta tres); la lista completa va en el detalle */}
                 {estrenosComp > 0 && <Estrenos lista={L.estrenos.filter((e) => !e.propia).slice(0, MAX_ESTRENOS)} t={tVersiones} />}
@@ -122,10 +123,10 @@ export default function Senales({ capa, vista: v }) {
         )}
         <AlAire L={L} P={P} tVersiones={tVersiones} tDigital={tDigital} />
         {L.estrenos?.length > Math.min(estrenosComp, MAX_ESTRENOS) && (
-          <Detalle id={`detalle-${s11.id}`} titulo="Estrenos del período" bajada={`Las piezas que salieron al aire por primera vez en ${periodoTexto(P)}, de las dos marcas.`} vistas={['todos los estrenos, de las dos marcas']}>
+          <Detalle id={`detalle-${s11.id}`} titulo="Estrenos del período" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['todos los estrenos, de las dos marcas']}>
             <Bloque universo="atl" {...estrenos}
-              ayuda={<p>Integrametrics marca una pieza como nueva el día que su versión sale al aire por primera vez. Es un evento raro: en un mes de piezas ya conocidas puede no haber ninguno.</p>}
-              pie={<span>TV, radio, cable, OTT y vía pública · el video, el audio o la foto son los que captó Integrametrics de la emisión.</span>}>
+              ayuda={<p>Una pieza es nueva el día en que su versión se emite por primera vez.</p>}
+              pie={<span>TV, radio, cable, OTT y vía pública.</span>}>
               <Estrenos lista={L.estrenos} t={tVersiones} />
             </Bloque>
           </Detalle>
@@ -135,7 +136,7 @@ export default function Senales({ capa, vista: v }) {
       <SeccionDe def={s12} vista={v}>
         {!L.ooh ? <Bloque titulo="Dónde están los paneles" universo="atl" estado={sinDato('no-cargo')} /> : <>
           <Bloque universo="atl" {...oohLectura(L.ooh, P)}
-            ayuda={<p>Integrametrics recorre la ciudad y registra cada panel con su foto o video, sus coordenadas y una inversión estimada. Cada círculo es una ubicación: las caras de una misma torre van juntas. El distrito sale de las coordenadas, con los límites de OpenStreetMap.</p>}
+            ayuda={<p>Cada círculo es una ubicación: las caras de una misma torre van juntas. El distrito sale de las coordenadas de Integrametrics y los límites de OpenStreetMap.</p>}
             pie={<span>Paneles detectados en el período · mapa base © colaboradores de OpenStreetMap.</span>}>
             {L.ooh.paneles.length > 0 ? <Ooh o={L.ooh} t={tPaneles} nota={`detectados en ${periodoTexto(P)}`} /> : <p className="q-nota-bloque">Sin paneles detectados en el período.</p>}
           </Bloque>
@@ -147,8 +148,7 @@ export default function Senales({ capa, vista: v }) {
                   columnas={['Distrito o ciudad', ...MARCAS.map(textosMarca.nombreMarca), 'Total']}
                   filas={[...L.ooh.porDistrito, ...L.ooh.fueraDeLima].map((d) => [d.nombre, ...MARCAS.map((m) => numero(d[m])), numero(d.total)])} />
               </Bloque>
-              <Bloque universo="atl" titulo="La pieza de cada panel" lectura="La foto o el video que captó Integrametrics en cada panel, con su dirección. La competencia va primero."
-                pie={<span>Un clic en un mazo abre todos los paneles de la marca.</span>}>
+              <Bloque universo="atl" titulo="La pieza de cada panel">
                 <Abanico lista={L.ooh.abanico} abierta={panelDe} onAbrir={setPanelDe} t={{ ...tPaneles, titulo: (x) => x.titulo }} nota={`detectados en ${periodoTexto(P)}`} propioAlFinal />
               </Bloque>
             </Detalle>

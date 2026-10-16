@@ -163,6 +163,27 @@ test('leerCsv respeta comillas, comas y comillas dobles dentro de un campo', () 
   assert.deepEqual(leerCsv('a,b\n"x, y","di ""hola"""\n'), [{ a: 'x, y', b: 'di "hola"' }]);
 });
 
+// Texto de relleno: frases que explican la interfaz, repiten lo que el gráfico ya muestra o usan jerga interna.
+// El socio lee lecturas, pies y ayudas; ninguna de estas frases le dice algo que no vea ya.
+const RELLENO = [
+  [/un clic|pasa el mouse|haz clic/i, 'explica cómo usar la pantalla'],
+  [/en la misma escala/i, 'explica la escala'],
+  [/cada carta es|van juntas en una carta/i, 'explica el abanico'],
+  [/en la comparación/i, 'no dice frente a qué compara'],
+  [/componente|pipeline|netlify|api_key|secrets|\/api\//i, 'jerga interna'],
+  [/cabe destacar|es importante señalar|en definitiva|asimismo/i, 'muletilla'],
+];
+test('ningún texto que ve el socio es relleno ni jerga interna', () => {
+  const archivos = ['src/textos/lecturas.js', 'src/textos/maia.js', 'src/capas/estructura.js', ...readdirSync(new URL('../src/pantallas/', import.meta.url)).map((f) => `src/pantallas/${f}`), 'src/App.jsx'];
+  const malos = [];
+  for (const f of archivos) {
+    // solo el texto: se saltan los comentarios y las importaciones
+    const s = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8').split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*|import )/.test(l)).join('\n').replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
+    for (const [re, por] of RELLENO) { const m = s.match(re); if (m) malos.push(`${f}: «${m[0]}» (${por})`); }
+  }
+  assert.deepEqual(malos, []);
+});
+
 test('el tramo de meses sale de la data, no de un texto fijo', () => {
   assert.equal(tramoMeses('2026-01-01', '2026-07-13'), 'entre enero y julio');
   assert.equal(tramoMeses('2026-01-01', '2026-07-13', 'de'), 'enero a julio');

@@ -124,7 +124,7 @@ export class Resguardo extends Component {
   componentDidCatch(error) { console.error('Resguardo', this.props.donde, error); }
   render() {
     if (!this.state.error) return this.props.children;
-    return <Estado tipo="no-cargo" titulo={`${this.props.donde || 'Esta parte'} no se pudo armar con la data de hoy`}><p>El resto del panel sigue al día. Si se repite, la data trae una forma nueva que hay que revisar.</p></Estado>;
+    return <Estado tipo="no-cargo" titulo={`${this.props.donde || 'Esta parte'} no se pudo armar con la data de hoy`}><p>El resto del panel sigue al día.</p></Estado>;
   }
 }
 

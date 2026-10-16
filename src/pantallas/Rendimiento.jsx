@@ -43,7 +43,7 @@ export default function Rendimiento({ capa, vista: v }) {
     <MarcoCapa capa={capa} vista={v}>
       <Resumen titulo={`Resumen de ${periodoTexto(P)}`}
         frases={[...(ok(atl) ? [{ segmentos: fraseShare(atl, 'ATL', P) }] : []), ...(ok(dig) ? [{ segmentos: fraseShare(dig, 'digital', P) }] : [])]}
-        pie={<span>Inversión estimada por Integrametrics a precio de tarifa. {comparacion ? `Cada cambio compara ${periodoTexto(P)} con ${comparacion}.` : 'No hay un mes anterior en la data para comparar.'} ATL y digital se miden distinto: se leen lado a lado, no se suman.</span>}
+        pie={<span>Inversión estimada por Integrametrics a precio de tarifa.</span>}
         items={[
           { rotulo: `Share digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? porcentaje(rival(dig).share) : null, nota: ok(dig) ? capital(puntosFrente(rival(dig).cambioPts, P) || `de ${solesCompacto(dig.total)} en total`) : null },
           { rotulo: `Inversión digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? solesCompacto(rival(dig).inversion) : null, nota: ok(dig) ? `${compacto(rival(dig).impresiones)} impresiones` : null },
@@ -54,8 +54,8 @@ export default function Rendimiento({ capa, vista: v }) {
       <SeccionDe def={s41} vista={v}>
         {!ok(dig) && !ok(atl) ? <Bloque titulo="Share of investment" universo={['digital', 'atl']} estado={sinDato(dig.estado)} /> : (
           <Bloque universo={[...(ok(dig) ? ['digital'] : []), ...(ok(atl) ? ['atl'] : [])]} {...shareLectura(v)}
-            ayuda={<p>Share of investment: la parte de la inversión de la categoría que pone cada marca, en digital (Facebook, Instagram, Google Search y YouTube) y en ATL (TV abierta, cable, radio, OTT y vía pública). Integrametrics estima cada universo con un método distinto: se leen lado a lado y nunca se suman. Cada fila une el share de la comparación (gris) con el del período.</p>}
-            pie={<span>Inversión estimada por Integrametrics a precio de tarifa. Las cifras en soles y las impresiones están en el detalle.</span>}>
+            ayuda={<p>Share of investment: la parte de la inversión de la categoría que pone cada marca. Digital es Facebook, Instagram, Google Search y YouTube; ATL es TV abierta, cable, radio, OTT y vía pública. Integrametrics estima cada uno con un método distinto, por eso no se suman.</p>}
+            pie={<span>Inversión estimada por Integrametrics a precio de tarifa.</span>}>
             <div className="q-share-universos">
               {[['Digital', dig], ['ATL', atl]].map(([n, x]) => (
                 <div key={n} className="q-pauta-marca">
@@ -69,8 +69,8 @@ export default function Rendimiento({ capa, vista: v }) {
         )}
         {(s.atl || s.digital) && (
           <Bloque universo={['atl', 'digital']} {...shareSemanalLectura(s)} alcance="semanas del año"
-            ayuda={<p>La parte de la inversión de cada semana (lunes a domingo) que pone {s.marca}, en ATL y en digital, cada una sobre su propio universo. Las dos son porcentajes y van en la misma escala; no se suman. La última semana puede estar incompleta.</p>}
-            pie={<span>Share semanal de {s.marca} en la inversión estimada por Integrametrics.</span>}>
+            ayuda={<p>La parte de la inversión de cada semana (lunes a domingo) que pone {s.marca}, en ATL y en digital, cada una sobre su propio universo. La última semana puede estar incompleta.</p>}
+            pie={<span>Inversión estimada por Integrametrics.</span>}>
             <Lineas etiqueta={`Share semanal de ${s.marca}, ATL y digital`} formato={(n) => porcentaje(n)} alto={240}
               series={[...(s.digital ? [{ nombre: 'Digital', resaltada: true, serie: s.digital }] : []), ...(s.atl ? [{ nombre: 'ATL', resaltada: false, serie: s.atl }] : [])]} />
           </Bloque>
@@ -89,7 +89,7 @@ export default function Rendimiento({ capa, vista: v }) {
             )}
           {ok(u) && (
             <Bloque universo={diario} {...presionLectura(v, diario)}
-              pie={<span>Inversión estimada de cada día, en soles, en la misma escala para las dos marcas. Un día sin registros es un hueco, no un cero.</span>}>
+              pie={<span>Inversión estimada por Integrametrics. Un día sin registros queda como hueco, no como cero.</span>}>
               <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={diario} onCambiar={setDiario} opciones={[{ valor: 'digital', texto: 'Digital', desactivada: !ok(dig) }, { valor: 'atl', texto: 'ATL', desactivada: !ok(atl) }]} /></div>
               <Lineas etiqueta={`Inversión ${diario === 'atl' ? 'ATL' : 'digital'} por día y por marca`} formato={solesCompacto}
                 series={[...u.marcas].sort((a, b) => Number(a.foco) - Number(b.foco)).map((m) => ({ nombre: m.nombre, resaltada: m.foco, tono: m.propia ? 'propia' : undefined, serie: u.diaria.map((d) => ({ fecha: d.fecha, valor: d.valores[m.id] })) }))} />

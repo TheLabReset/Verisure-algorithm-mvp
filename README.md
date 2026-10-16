@@ -96,6 +96,7 @@ Se muestra solo lo que tenemos. En «Qué se monitorea» quedan a la vista las f
 
 | Documento | Para qué |
 |---|---|
+| [`docs/activacion.md`](docs/activacion.md) | Qué configurar para tener la data al día y MAIA respondiendo, y las fuentes que se activan a pedido |
 | [`docs/guia-algoritmo.md`](docs/guia-algoritmo.md) | Cómo se diseña un algoritmo: capas, tarjeta, gráficos y datos honestos |
 | [`docs/quincha.md`](docs/quincha.md) | El sistema de diseño y su chequeo |
 | [`docs/abanico.md`](docs/abanico.md) | Cómo se muestran las piezas: el abanico y su ventana |

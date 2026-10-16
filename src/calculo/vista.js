@@ -27,6 +27,7 @@ export const UMBRALES = {
   atrasoFuente: 3,       // días sin datos nuevos para decir que la fuente está atrasada
   subidaCompetencia: 30, // % de subida de la inversión de la competencia frente a la comparación
   bajadaCompetencia: 50, // % de caída de la inversión de la competencia frente a la comparación
+  medioNuevo: 5,        // % de su inversión ATL que tiene que pesar un medio nuevo para avisar: lo muy chico no se menciona
   diasMinimos: DIAS_MINIMOS, // días con data en el período para leer una variación: con menos, un día raro manda
   subidaDiy: 15,         // % de subida de las búsquedas de cámaras frente a las mismas semanas del año anterior
 };
@@ -273,7 +274,7 @@ function queMirar(v, P) {
       if (pico && valores.length >= 4) out.push({ id: 'pico-competencia', nivel: 'revisar', sostiene: '4.1', fuente: 'Integrametrics', marca: m.nombre, fecha: pico.fecha, monto: pico.valores[m.id], mediana: med });
       if (v.lee.atlPrevio) {
         const antes = v.lee.atlPrevio.find((x) => x.id === m.id)?.medios || {};
-        const nuevos = Object.entries(m.medios).filter(([k, x]) => x > 0 && !(antes[k] > 0)).map(([k, x]) => ({ nombre: MEDIOS[k] || k, monto: x, pct: Math.round((x / m.inversion) * 100) }));
+        const nuevos = Object.entries(m.medios).filter(([k, x]) => x > 0 && !(antes[k] > 0)).map(([k, x]) => ({ nombre: MEDIOS[k] || k, monto: x, pct: Math.round((x / m.inversion) * 100) })).filter((x) => x.pct >= UMBRALES.medioNuevo);
         if (nuevos.length) out.push({ id: 'medio-nuevo', nivel: 'revisar', sostiene: '3.1', fuente: 'Integrametrics', marca: m.nombre, medios: nuevos });
       }
     }
@@ -314,7 +315,8 @@ function queMirar(v, P) {
   }
   // Lo de la competencia va primero dentro de cada nivel: es lo principal del panel
   const deCompetencia = (a) => ['estreno-competencia', 'sube-competencia', 'baja-competencia', 'competencia-sin-pauta', 'pico-competencia', 'medio-nuevo', 'paneles-competencia', 'digital-competencia'].includes(a.id);
-  return out.map((a) => ({ ...a, competencia: deCompetencia(a) })).sort((a, z) => Number(z.competencia) - Number(a.competencia));
+  // cada alerta lleva su período, para que su texto diga frente a qué compara
+  return out.map((a) => ({ ...a, competencia: deCompetencia(a), periodo: P })).sort((a, z) => Number(z.competencia) - Number(a.competencia));
 }
 
 export function armarVista(contrato, medios, filtros, estado = {}, { mapa = null, busquedas = null } = {}) {

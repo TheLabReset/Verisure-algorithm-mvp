@@ -58,25 +58,24 @@ export default function Activacion({ capa, vista: v }) {
       <SeccionDe def={s31} vista={v}>
         {!ok ? <Bloque titulo="Cómo reparte cada marca su inversión ATL" universo="atl" estado={sinDato(atl.estado)} /> : <>
           <Bloque universo="atl" {...mediosLectura(v, MEDIOS)}
-            ayuda={<p>Cada franja es el total ATL de una marca repartido por medio: compara cómo reparte cada una, no cuánto pone frente a la otra (para eso está el share, en Rendimiento). Cada medio tiene siempre el mismo color.</p>}
-            pie={<span>Inversión ATL estimada por medio. Las emisiones de OTT llegan sin inversión estimada de Integrametrics.</span>}>
+            ayuda={<p>Cada franja es el total ATL de una marca repartido por medio. Para comparar montos entre marcas está el share, en Rendimiento.</p>}
+            pie={<span>Inversión ATL estimada por Integrametrics. OTT llega sin inversión estimada.</span>}>
             <div className="q-mezclas">{orden.map((m) => <MezclaMedios key={m.id} m={m} />)}</div>
           </Bloque>
           <Detalle id={`detalle-${s31.id}`} titulo="Detalle de dónde está la inversión" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['la inversión por medio en soles', 'las franjas horarias', 'los canales de cada marca']}>
-            <Bloque universo="atl" titulo="Inversión ATL por medio, en soles" lectura="La misma mezcla de la vista general, en soles y en parte del total de cada marca."
+            <Bloque universo="atl" titulo="Inversión ATL por medio, en soles"
               pie={<span>Inversión ATL estimada por Integrametrics a precio de tarifa.</span>}>
               <Tabla etiqueta="Inversión ATL por medio y marca, en soles y en parte de cada marca" numericas={[1, 2, 3, 4]}
                 columnas={['Medio', r.nombre, 'De su total', p?.nombre, 'De su total']}
                 filas={ORDEN_MEDIOS.map((k) => [MEDIOS[k], soles(r.medios[k] || 0), porcentaje(r.mezclaMedios[k] ?? 0), p ? soles(p.medios[k] || 0) : 'sin dato', p ? porcentaje(p.mezclaMedios[k] ?? 0) : 'sin dato'])} />
             </Bloque>
             <Bloque universo="atl" {...franjasLectura(v, FRANJAS)}
-              ayuda={<p>Parte de las emisiones de cada marca en cada franja horaria. Cada fila une a las dos marcas en la misma escala, de 0 a 100 %.</p>}
               pie={<span>Emisiones de TV y radio por franja horaria.</span>}>
               <Pesas etiqueta="Parte de las emisiones de cada marca por franja" formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} max={100} rotuloA={p?.nombre} rotuloB={r.nombre} tonoA="propia"
                 filas={v.analiza.franjas.map((k) => ({ nombre: FRANJAS[k], a: p?.mezclaFranjas[k] ?? 0, b: r.mezclaFranjas[k] ?? 0 }))} />
             </Bloque>
             <Bloque universo="atl" {...canalesLectura(deMarca, marca)}
-              pie={<span>Los ocho canales con más inversión estimada de la marca en el período.</span>}>
+              pie={<span>Los ocho canales con más inversión estimada.</span>}>
               {control}
               {deMarca?.canales.length ? <Barras etiqueta={`Inversión de ${textosMarca.nombreMarca(marca)} por canal`} tono={marca === CLIENTE.marcaFuente ? 'propia' : undefined} formato={solesCompacto} filas={deMarca.canales.map((c) => ({ nombre: c.nombre, valor: c.valor }))} />
                 : <p className="q-nota-bloque">Sin emisiones en el período.</p>}
@@ -88,15 +87,15 @@ export default function Activacion({ capa, vista: v }) {
       <SeccionDe def={s32} vista={v}>
         {!med ? <Bloque titulo="Cuándo sale al aire" universo="atl" estado={sinDato(ok ? 'sin-datos' : atl.estado)} /> : <>
           <Bloque universo="atl" {...horarioLectura(deMarca, marca)}
-            ayuda={<p>Emisiones registradas por Integrametrics con su hora exacta. Cada celda es el promedio de emisiones en esa hora de ese día de la semana, en el período. Es el insumo para que el BI de {CLIENTE.nombre} cruce las emisiones de la competencia con su curva de llamadas.</p>}
-            pie={<span>Emisiones de TV, radio, cable y OTT con hora registrada · promedio por día de la semana.</span>}>
+            ayuda={<p>Cada celda es el promedio de emisiones en esa hora y ese día de la semana, en el período.</p>}
+            pie={<span>Emisiones de TV, radio, cable y OTT con hora registrada.</span>}>
             {control}
             {deMarca?.matriz?.length ? <MapaCalor etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por día de la semana y hora`} tono={marca === CLIENTE.marcaFuente ? 'propia' : 'foco'} matriz={deMarca.matriz} formato={(n) => (n == null ? 'sin dato' : numero(n, n > 0 && n < 10 ? 1 : 0))} />
               : <p className="q-nota-bloque">Sin emisiones con hora en el período.</p>}
           </Bloque>
           <Detalle id={`detalle-${s32.id}`} titulo="Detalle de cuándo sale al aire" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['los programas de cada marca']}>
             <Bloque universo="atl" {...programasLectura(deMarca, marca)}
-              pie={<span>Los ocho programas con más emisiones de la marca en el período.</span>}>
+              pie={<span>Los ocho programas con más emisiones.</span>}>
               {control}
               {deMarca?.programas.length ? <Barras etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por programa`} tono={marca === CLIENTE.marcaFuente ? 'propia' : undefined} formato={(n) => numero(n)} filas={deMarca.programas.map((x) => ({ nombre: version(x.nombre), valor: x.valor }))} />
                 : <p className="q-nota-bloque">Sin programas registrados en el período.</p>}

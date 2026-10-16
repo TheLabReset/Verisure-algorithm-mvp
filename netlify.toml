@@ -25,6 +25,14 @@
   path = "/*"
   function = "auth"
 
+# MAIA: /api/maia va a la función antes de la redirección de la SPA (las reglas se leen de arriba abajo y gana
+# la primera; sin esta regla, /api/maia podría devolver index.html)
+[[redirects]]
+  from = "/api/maia"
+  to = "/.netlify/functions/maia"
+  status = 200
+  force = true
+
 # Redirects para SPA (Single Page Application)
 [[redirects]]
   from = "/*"

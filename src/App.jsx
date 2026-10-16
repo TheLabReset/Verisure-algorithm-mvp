@@ -144,7 +144,7 @@ export default function App() {
       <main>
         {data.estado === 'no-cargo' ? (
           <div className="q-envoltura q-capa-vacia">
-            <Estado tipo="no-cargo" titulo="La data no cargó">No se pudo leer el contrato publicado por el pipeline ({data.error}). El panel no muestra cifras viejas ni inventadas: vuelve a intentar en unos minutos.</Estado>
+            <Estado tipo="no-cargo" titulo="La data no cargó">No se pudo leer la data del panel. No se muestran cifras viejas ni inventadas: vuelve a intentar en unos minutos.</Estado>
           </div>
         ) : (
           <CargandoContexto.Provider value={cargando}>
@@ -159,8 +159,8 @@ export default function App() {
       {vista && <Maia abierta={maiaAbierta} onCerrar={() => setMaiaAbierta(false)} vista={vista} reporte={data.maia} />}
 
       <footer className="q-envoltura q-pie">
-        <p>Toda cifra sale de Integrametrics (inversión estimada a precio de tarifa) o de Google Trends, y de una sola capa de cálculo; ningún número está escrito en un componente. Es inteligencia externa: el panel no toca la data de ventas ni de clientes de {CLIENTE.nombre}.</p>
-        <p>The Algorithm · By The Lab · sistema de diseño Quincha</p>
+        <p>Las cifras salen de Integrametrics (inversión estimada a precio de tarifa) y de Google Trends. El panel no usa data de ventas ni de clientes de {CLIENTE.nombre}.</p>
+        <p>The Algorithm · By The Lab</p>
       </footer>
     </div>
   );

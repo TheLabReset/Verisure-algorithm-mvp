@@ -75,7 +75,7 @@ export default function Ooh({ o, t, nota }) {
         </Suspense>
         <ul className="q-leyenda" aria-hidden="true">
           {[...new Map(o.ubicaciones.map((x) => [x.nombre, x])).values()].sort((a, b) => Number(b.foco) - Number(a.foco)).map((x) => <li key={x.nombre}><span className={`q-muestra ${x.foco ? 'q-muestra-mapa-foco' : x.propia ? 'q-muestra-mapa-propia' : 'q-muestra-mapa-resto'}`} />{x.nombre}</li>)}
-          <li className="q-nota">El tamaño de cada círculo sigue a su inversión estimada. Un clic abre su panel.</li>
+          <li className="q-nota">El tamaño de cada círculo sigue a su inversión estimada.</li>
         </ul>
       </div>
       <aside className="q-ooh-ficha" aria-label="Panel elegido">

@@ -53,7 +53,7 @@ export function MarcoCapa({ capa, vista, bajada, conResumen = true, children }) 
             {ids.length > 0 && <FuentesCapa fuentes={fuentesDe(ids, vista)} />}
             <BotonMonitoreo onClick={() => setMonitoreo(true)} />
           </div>
-          <PanelLateral titulo="Qué se monitorea" bajada={`Lo que sigue cada fuente. Es configuración, no medición: se cambia a pedido de ${CLIENTE.nombre}.`} abierto={monitoreo} onCerrar={() => setMonitoreo(false)}>
+          <PanelLateral titulo="Qué se monitorea" bajada={`Lo que sigue cada fuente. Se cambia a pedido de ${CLIENTE.nombre}.`} abierto={monitoreo} onCerrar={() => setMonitoreo(false)}>
             <Monitoreo grupos={vista.monitoreo} />
           </PanelLateral>
         </header>

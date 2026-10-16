@@ -9,7 +9,7 @@ const competencia = CLIENTE.competencia.map((c) => c.nombre).join(' y ');
 export const CAPAS = [
   {
     id: 'senales', numero: '1', nombre: 'Captura de señales', descripcion: `Qué hizo ${competencia} y qué salió al aire`,
-    titulo: 'Captura de señales', bajada: `Qué hizo ${competencia}: sus versiones en el año, lo que estrenó, lo que tiene al aire y dónde están sus paneles. ${CLIENTE.nombre} va para comparar.`,
+    titulo: 'Captura de señales', bajada: `Qué hizo ${competencia}: sus versiones en el año, lo que estrenó, lo que tiene en ATL y digital, y dónde están sus paneles.`,
     secciones: [
       { id: 's-1-1', numero: '1.1', titulo: 'Qué hizo la competencia', pregunta: `¿Qué versiones tuvo ${competencia} en el año, qué estrenó y qué tiene al aire en el período?`, universos: ['atl', 'digital'], fuentes: ['atl', 'digital'] },
       { id: 's-1-2', numero: '1.2', titulo: 'OOH', pregunta: '¿Dónde están los paneles de cada marca y qué pieza lleva cada uno?', universos: ['atl'], fuentes: ['atl'] },
@@ -28,15 +28,15 @@ export const CAPAS = [
     id: 'activacion', numero: '3', nombre: 'Activación estratégica', descripcion: 'Dónde y cuándo está la inversión',
     titulo: 'Activación estratégica', bajada: `Dónde y cuándo está la inversión de ${competencia} y de ${CLIENTE.nombre}, según Integrametrics.`,
     secciones: [
-      { id: 's-3-1', numero: '3.1', titulo: 'Dónde está la inversión', pregunta: 'Cómo se reparte entre medios, canales y franjas.', universos: ['atl', 'digital'], fuentes: ['atl', 'digital'] },
-      { id: 's-3-2', numero: '3.2', titulo: 'Cuándo sale al aire', pregunta: 'Las horas, los días y los programas con más emisiones.', universos: ['atl'], fuentes: ['atl'] },
+      { id: 's-3-1', numero: '3.1', titulo: 'Dónde está la inversión', pregunta: '¿Cómo reparte cada marca su inversión entre medios, canales y franjas?', universos: ['atl', 'digital'], fuentes: ['atl', 'digital'] },
+      { id: 's-3-2', numero: '3.2', titulo: 'Cuándo sale al aire', pregunta: '¿En qué horas, días y programas emite cada marca?', universos: ['atl'], fuentes: ['atl'] },
     ],
   },
   {
     id: 'rendimiento', numero: '4', nombre: 'Rendimiento y optimización', descripcion: 'Cómo viene el período frente al anterior',
-    titulo: 'Rendimiento y optimización', bajada: `Cómo viene el share de ${competencia} en el período frente al anterior, semana a semana y día por día.`,
+    titulo: 'Rendimiento y optimización', bajada: `Cómo viene el share de ${competencia} frente al período anterior y semana a semana.`,
     secciones: [
-      { id: 's-4-1', numero: '4.1', titulo: 'Cómo viene el período', pregunta: 'Share of investment en ATL y en digital, el share semana a semana y la inversión día por día.', universos: ['atl', 'digital'], fuentes: ['atl', 'digital'] },
+      { id: 's-4-1', numero: '4.1', titulo: 'Cómo viene el período', pregunta: `¿Qué parte de la inversión pone ${competencia} frente al mes anterior, y cómo viene semana a semana?`, universos: ['atl', 'digital'], fuentes: ['atl', 'digital'] },
     ],
   },
 ];

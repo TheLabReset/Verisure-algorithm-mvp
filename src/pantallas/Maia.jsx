@@ -9,8 +9,9 @@ import { GRUPOS_MAIA, hechoTexto, semanaTexto, PREGUNTAS } from '../textos/maia.
 import { preguntarMaia } from '../fuentes/maia-navegador.js';
 
 const AVISOS = {
-  'sin-funcion': 'MAIA no está conectada en esta vista. En el sitio publicado responde con la data del panel, a través de la función /api/maia.',
-  'sin-clave': 'MAIA está publicada pero no tiene su clave. Se configura en Netlify, en las variables de entorno (ANTHROPIC_API_KEY).',
+  // los detalles de cómo se activa van en docs/activacion.md, no en la pantalla del socio
+  'sin-funcion': 'MAIA no está activa en esta vista.',
+  'sin-clave': 'MAIA todavía no está activa en el panel.',
   'sin-red': 'No hay conexión con el sitio. Vuelve a intentar en unos minutos.',
   modelo: 'MAIA no pudo responder ahora. Vuelve a intentar en unos minutos.',
 };
@@ -32,7 +33,7 @@ function Reporte({ semana, reporte, corte }) {
       <section aria-labelledby="maia-lectura">
         <h3 id="maia-lectura">La lectura de MAIA</h3>
         {vigente ? reporte.lectura.split(/\n+/).map((p, i) => <p key={i}>{p}</p>)
-          : <p className="q-maia-aviso">La lectura se escribe cada lunes, cuando el pipeline tiene la clave de MAIA (ANTHROPIC_API_KEY en Secrets). Mientras tanto van los hechos de la semana, que salen de la data con reglas fijas.</p>}
+          : <p className="q-maia-aviso">La lectura de MAIA llega cada lunes cuando esté activa. Por ahora, estos son los hechos de la semana.</p>}
         {vigente && <p className="q-maia-firma">Escrita por MAIA el {fecha(reporte.generado.slice(0, 10))} con la data al {fecha(reporte.corte?.integrametrics ?? corte)}.</p>}
       </section>
       {GRUPOS_MAIA.map((g) => {

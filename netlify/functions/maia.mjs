@@ -25,4 +25,5 @@ export default async (req) => {
   }
 };
 
-export const config = { path: '/api/maia' };
+// La ruta /api/maia la pone netlify.toml, antes de la redirección de la SPA: así no depende del orden en que
+// Netlify evalúa funciones con ruta propia y redirecciones.

@@ -541,7 +541,9 @@ export function Histograma({ barras, formato = numero, rotulo, resaltar = [], et
         const paso = (ancho - m.l - m.r) / barras.length, w = Math.max(2, paso - Math.min(8, paso * 0.28));
         const y = lineal(0, max, alto - m.b, m.t);
         const cada = Math.ceil(30 / paso);
-        const tope = resaltar.length ? resaltar.reduce((a, i) => (barras[i].valor > barras[a].valor ? i : a), resaltar[0]) : -1;
+        // la cifra va sobre la barra más alta: de las resaltadas si las hay, si no de todas
+        const candidatas = resaltar.length ? resaltar : barras.map((_, i) => i).filter((i) => barras[i].valor > 0);
+        const tope = candidatas.length ? candidatas.reduce((a, i) => ((barras[i].valor ?? 0) > (barras[a].valor ?? 0) ? i : a), candidatas[0]) : -1;
         return (
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
             <line className="q-rejilla" x1={m.l} x2={ancho - m.r} y1={y(0)} y2={y(0)} />
