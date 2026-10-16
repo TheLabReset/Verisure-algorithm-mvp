@@ -109,7 +109,7 @@ export function cronogramaLectura(c, marca, desde, hasta) {
   if (!c?.total) return { titulo, lectura: `Integrametrics no registró versiones de ${marca} en el año.` };
   const atl = c.filas.filter((f) => f.universo === 'atl').length, dig = c.filas.filter((f) => f.universo === 'digital').length;
   const top = [...c.filas].sort((a, b) => b.inversion - a.inversion)[0];
-  return { titulo, lectura: `${marca} tuvo ${numero(c.total)} versiones ${tramoMeses(desde, hasta)}. La de más inversión es ${cita(top.version)}, del ${fechaCorta(top.desde)} al ${fechaCorta(top.hasta)}.` };
+  return { titulo, lectura: `${marca} tuvo ${numero(c.total)} versiones entre ATL y digital ${tramoMeses(desde, hasta)}. La de más inversión es ${cita(top.version)}, del ${fechaCorta(top.desde)} al ${fechaCorta(top.hasta)}.` };
 }
 export function estrenosLectura(v) {
   const e = v.lee.estrenos, P = v.periodo;
@@ -144,7 +144,7 @@ export function oohLectura(o, P) {
   const [r] = CLIENTE.competencia;
   const nr = o.porMarca[r.marcaFuente], np = o.porMarca[CLIENTE.marcaFuente];
   const fuera = o.fueraDeLima.filter((c) => c.nombre !== 'Sin coordenadas' && c[r.marcaFuente] > 0 && !c[CLIENTE.marcaFuente]);
-  return { titulo, lectura: `${r.nombre} tiene ${numero(nr)} ${segun(nr, 'panel detectado', 'paneles detectados')} en ${periodoTexto(P)} y ${CLIENTE.nombre} ${numero(np)}.${fuera.length ? ` Fuera de Lima solo está ${r.nombre}: ${lista(fuera.map((c) => `${c.nombre} (${numero(c[r.marcaFuente])})`))}.` : ''}` };
+  return { titulo, lectura: `${r.nombre} tiene ${numero(nr)} ${segun(nr, 'panel detectado', 'paneles detectados')} en ${periodoTexto(P)} y ${CLIENTE.nombre} ${numero(np)}.${fuera.length ? ` Fuera de Lima${np ? ` solo está ${r.nombre}` : ''}: ${lista(fuera.map((c) => `${c.nombre} (${numero(c[r.marcaFuente])})`))}.` : ''}` };
 }
 export function distritosLectura(o) {
   const titulo = 'Paneles por distrito';
@@ -170,7 +170,7 @@ export function marcasDiyLectura(b) {
   if (!b?.marcas.length) return { titulo, lectura: 'Sin data de marcas de cámaras.' };
   const [top] = b.marcas;
   const otras = b.marcas.filter((m) => m.id !== top.id && m.crecimiento != null && m.crecimiento >= 10).sort((a, z) => z.crecimiento - a.crecimiento);
-  return { titulo, lectura: `${top.nombre} es la marca de cámaras más buscada${top.crecimiento != null ? ` (${signo(top.crecimiento)} frente a las mismas semanas de un año antes)` : ''}.${otras.length ? ` También sube ${lista(otras.map((m) => `${m.nombre} (${signo(m.crecimiento)})`))}.` : ''}` };
+  return { titulo, lectura: `${top.nombre} es la marca de cámaras más buscada${top.crecimiento != null ? ` (${signo(top.crecimiento)} frente a las mismas semanas de un año antes)` : ''}.${otras.length ? ` También ${otras.length > 1 ? 'suben' : 'sube'} ${lista(otras.map((m) => `${m.nombre} (${signo(m.crecimiento)})`))}.` : ''}` };
 }
 
 // ── 2.3 ──
@@ -292,7 +292,7 @@ const ALERTAS = {
   }),
   'medio-nuevo': (a) => ({
     titulo: `${a.marca} invierte en ${lista(a.medios.map((m) => medioEnFrase(m.nombre)))}, que no tenía en ${comp(a)}`,
-    dato: `${capital(lista(a.medios.map((m) => `${medioEnFrase(m.nombre)} con ${monto(m.monto)}, ${m.pct < 1 ? 'menos del 1 %' : `el ${porcentaje(m.pct)}`} de su inversión ATL`)))}.`,
+    dato: `${capital(lista(a.medios.map((m) => `${medioEnFrase(m.nombre)} con ${monto(m.monto)} (${m.pct < 1 ? 'menos del 1 %' : `el ${porcentaje(m.pct)}`} de su inversión ATL)`)))}.`,
     mirar: 'Si es una prueba puntual o el inicio de una presencia sostenida.',
   }),
   'paneles-competencia': (a) => ({
@@ -313,7 +313,7 @@ const ALERTAS = {
   'share-digital': (a) => ({
     titulo: `${CLIENTE.nombre} pierde share en digital`,
     dato: `${porcentaje(a.share)} de la inversión digital, frente a ${porcentaje(a.antes)} en ${comp(a)}.`,
-    mirar: 'Qué plataformas y piezas sumó la competencia.',
+    mirar: 'Cuánto cambió la inversión digital de cada marca, la propia incluida.',
   }),
   'dias-sin-dato': (a) => ({
     titulo: `${capital(enLetras(a.dias.length))} ${segun(a.dias.length, 'día', 'días')} sin registros de Integrametrics`,
@@ -322,13 +322,13 @@ const ALERTAS = {
   }),
   'dominio-atl': (a) => ({
     titulo: `${CLIENTE.nombre} concentra ${porcentaje(a.share)} de la inversión ATL`,
-    dato: 'En TV, radio, cable, OTT y vía pública, la presencia de la competencia es marginal.',
+    dato: !a.marca ? 'En TV, radio, cable, OTT y vía pública.' : a.shareCompetencia > 0 ? `${a.marca} tiene ${a.shareCompetencia < 1 ? 'menos del 1 %' : porcentaje(a.shareCompetencia)} en ${per(a)}.` : `${a.marca} no tiene inversión ATL en ${per(a)}.`,
     mirar: 'Cuántas veces sale al aire cada pieza.',
   }),
   'share-digital-sube': (a) => ({
     titulo: `${CLIENTE.nombre} gana share en digital`,
     dato: `${porcentaje(a.share)} de la inversión digital, frente a ${porcentaje(a.antes)} en ${comp(a)}.`,
-    mirar: 'Qué piezas digitales nuevas sostienen la subida.',
+    mirar: 'Cuánto cambió la inversión digital de cada marca, la propia incluida.',
   }),
 };
 export function alerta(a) {

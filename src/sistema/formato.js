@@ -21,10 +21,11 @@ export function numero(n, decimales = 0) {
   return `${signo}${miles}${dec ? DECIMAL + dec : ''}`;
 }
 
-// Abreviado para ejes y rótulos: 12 300 -> «12,3 mil»; 2 450 000 -> «2,5 M»
+// Abreviado para ejes y rótulos: 12 300 -> «12,3 mil»; 2 450 000 -> «2,5 M»; 1 115 000 000 -> «1,1 mil M»
 export function compacto(n) {
   if (!finito(n)) return NO_MEDIDO;
   const a = Math.abs(n);
+  if (a >= 1e9) return numero(n / 1e9, a >= 1e10 ? 0 : 1) + ' mil M';
   if (a >= 1e6) return numero(n / 1e6, a >= 1e7 ? 0 : 1) + ' M';
   if (a >= 1e4) return numero(n / 1e3, a >= 1e5 ? 0 : 1) + ' mil';
   return numero(n, 0);
@@ -40,6 +41,8 @@ export function porcentaje(p, decimales = 0) {
   if (!finito(p)) return NO_MEDIDO;
   return `${numero(p, decimales)}${' '}%`;
 }
+// Una parte que existe pero redondea a cero no se escribe «0 %»
+export const parte = (p) => (finito(p) && p > 0 && p < 0.5 ? 'menos de 1 %' : porcentaje(p));
 
 // Variación con signo explícito; el cero no lleva signo
 export function variacion(p, decimales = 0) {

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { IndiceCapa, Seccion, FuentesCapa, AvisosCapitulo, VentanaContexto, PanelLateral, Monitoreo, BotonMonitoreo } from '../sistema/Componentes.jsx';
 import { Histograma, Barras } from '../sistema/graficos/Graficos.jsx';
 import { diaSemanaLargo, fechaCorta, numero } from '../sistema/formato.js';
-import { tramoFechas } from '../textos/comun.js';
+import { ventanaTexto } from '../textos/comun.js';
 import { alerta } from '../textos/lecturas.js';
 import { seccionPorNumero } from '../capas/estructura.js';
 import { CLIENTE } from '../cliente.js';
@@ -39,7 +39,7 @@ export const sinDato = (estado) => ({ tipo: estado === 'no-cargo' ? 'no-cargo' :
 // Da a cada tarjeta la ventana del período («1 al 30 de junio»), que la tarjeta muestra arriba a la derecha.
 export function MarcoCapa({ capa, vista, bajada, conResumen = true, children }) {
   const ids = [...new Set(capa.secciones.flatMap((s) => s.fuentes))];
-  const ventana = tramoFechas(vista.periodo.desde, vista.periodo.hasta).replace(/^del /, '');
+  const ventana = ventanaTexto(vista.periodo.desde, vista.periodo.hasta);
   const [monitoreo, setMonitoreo] = useState(false);
   return (
     <VentanaContexto.Provider value={ventana}>

@@ -27,7 +27,8 @@ export function leerBusquedas(datos, { semanas = VENTANA } = {}) {
   const camaras = series.find((s) => s.id === 'camaras'), marca = series.find((s) => s.propia);
   const vd = diy?.semanas?.length ? ventanas(diy, semanas) : null;
   const marcas = vd ? diy.series.map((s) => ({ id: s.id, nombre: s.nombre, ahora: promedio(s, vd.ahora), antes: vd.antes ? promedio(s, vd.antes) : null }))
-    .map((s) => ({ ...s, crecimiento: crecimiento(s.antes, s.ahora) })).sort((a, b) => b.ahora - a.ahora) : [];
+    // el crecimiento sale de los promedios redondeados, los mismos que muestra el gráfico
+    .map((s) => ({ ...s, crecimiento: crecimiento(s.antes == null ? null : Math.round(s.antes), Math.round(s.ahora)) })).sort((a, b) => b.ahora - a.ahora) : [];
   const semanaDe = (i) => cat.semanas[i];
   return {
     consultado: datos.consultado,

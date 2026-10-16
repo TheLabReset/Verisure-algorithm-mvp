@@ -8,17 +8,20 @@ import { Pesas, Lineas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, soles, solesCompacto, compacto } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import { periodoTexto, comparacionTexto, puntosFrente, capital } from '../textos/comun.js';
+import { diasEntre, DIAS_MINIMOS } from '../calculo/periodo.js';
 import { atlLectura, digitalLectura, shareLectura, presionLectura, shareSemanalLectura } from '../textos/lecturas.js';
 
 const pts = (n) => (n == null ? 'sin comparación' : n === 0 ? 'igual' : `${n > 0 ? '+' : '−'}${numero(Math.abs(n))} pts`);
 
-function TablaShare({ u, etiqueta, conImpresiones }) {
+// Con menos días que el mínimo no se lee el cambio de share, igual que en las lecturas y las alertas
+function TablaShare({ u, P, etiqueta, conImpresiones }) {
   const orden = [...u.marcas].sort((a, b) => Number(a.propia) - Number(b.propia));
+  const corto = diasEntre(P.desde, P.hasta) + 1 < DIAS_MINIMOS;
   return (
     <Tabla etiqueta={etiqueta} numericas={conImpresiones ? [1, 2, 3, 4, 5] : [1, 2, 3, 4]} destacada={orden.findIndex((m) => m.foco)}
       columnas={['Marca', 'Inversión estimada', ...(conImpresiones ? ['Impresiones'] : []), 'Share', 'Share antes', 'Cambio']}
       filas={orden.map((m) => [m.nombre, soles(m.inversion), ...(conImpresiones ? [compacto(m.impresiones)] : []), porcentaje(m.share), m.sharePrevio == null ? 'sin dato' : porcentaje(m.sharePrevio),
-        { texto: pts(m.cambioPts), tono: !m.foco || !m.cambioPts ? null : m.cambioPts > 0 ? 'empeora' : 'mejora' }])} />
+        corto ? `desde el día ${DIAS_MINIMOS}` : { texto: pts(m.cambioPts), tono: !m.foco || !m.cambioPts ? null : m.cambioPts > 0 ? 'empeora' : 'mejora' }])} />
   );
 }
 
@@ -74,19 +77,19 @@ export default function Rendimiento({ capa, vista: v }) {
             ayuda={<p>La parte de la inversión de cada semana (lunes a domingo) que pone {s.marca}, en ATL y en digital, cada una sobre su propio universo. La primera y la última semana pueden estar incompletas.</p>}
             pie={<span>Inversión estimada por Integrametrics.</span>}>
             <Lineas etiqueta={`Share semanal de ${s.marca}, ATL y digital`} formato={(n) => porcentaje(n)} alto={240}
-              series={[...(s.digital ? [{ nombre: 'Digital', resaltada: true, serie: s.digital }] : []), ...(s.atl ? [{ nombre: 'ATL', resaltada: false, serie: s.atl }] : [])]} />
+              series={[...(s.digital ? [{ nombre: 'Digital', resaltada: true, serie: s.digital }] : []), ...(s.atl ? [{ nombre: 'ATL', resaltada: true, discontinua: true, serie: s.atl }] : [])]} />
           </Bloque>
         )}
         {(ok(dig) || ok(atl)) && (
           <Detalle id={`detalle-${s41.id}`} titulo="Detalle de cómo viene el período" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['la inversión y el share en soles', 'la inversión día por día']}>
             {ok(dig) && (
               <Bloque universo="digital" {...digitalLectura(v)} pie={<span>Facebook, Instagram, Google Search y YouTube.</span>}>
-                <TablaShare u={dig} etiqueta="Inversión, impresiones y share digital por marca" conImpresiones />
+                <TablaShare u={dig} P={P} etiqueta="Inversión, impresiones y share digital por marca" conImpresiones />
               </Bloque>
             )}
             {ok(atl) && (
               <Bloque universo="atl" {...atlLectura(v)} pie={<span>TV abierta, cable, radio, OTT y vía pública.</span>}>
-                <TablaShare u={atl} etiqueta="Inversión y share ATL por marca" />
+                <TablaShare u={atl} P={P} etiqueta="Inversión y share ATL por marca" />
               </Bloque>
             )}
           {ok(u) && (

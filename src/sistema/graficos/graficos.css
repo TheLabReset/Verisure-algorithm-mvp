@@ -165,6 +165,12 @@
 .q-svg .q-punto-final-resto { fill: var(--serie-resto); stroke: var(--superficie); stroke-width: 2; }
 .q-svg .q-rotulo-resto { fill: var(--texto-2); font-weight: var(--peso-lectura); }
 .q-svg .q-linea-propia { fill: none; stroke: var(--propia-linea); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+/* La serie principal que no es de ninguna marca va en tinta: el amarillo y el rojo quedan para las marcas */
+.q-svg .q-linea-tinta { fill: none; stroke: var(--texto-1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.q-svg .q-punto-final-tinta, .q-svg .q-punto-tinta { fill: var(--texto-1); stroke: var(--superficie); stroke-width: 2; }
+.q-svg .q-pendiente-tinta { stroke: var(--texto-1); stroke-width: 3; }
+/* La misma marca en otro universo: su color, en trazo discontinuo */
+.q-svg .q-discontinua { stroke-dasharray: 6 4; }
 .q-svg .q-punto-final-propia { fill: var(--propia-linea); stroke: var(--superficie); stroke-width: 2; }
 /* Tiras: un día sin inversión es vacío; un día sin registros de la fuente, punteado */
 .q-svg .q-celda-cero { fill: var(--superficie-capitulo); }

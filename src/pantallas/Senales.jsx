@@ -9,7 +9,7 @@ import { Cronograma } from '../sistema/graficos/Graficos.jsx';
 import { numero, solesCompacto, soles } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import Ooh from './Ooh.jsx';
-import { periodoTexto, version, tramoMeses, tramoFechas } from '../textos/comun.js';
+import { periodoTexto, version, tramoMeses, ventanaTexto } from '../textos/comun.js';
 import { estrenosLectura, estrenoTitulo, estrenoDato, abanicoAtlLectura, abanicoDigitalLectura, oohLectura, distritosLectura, cronogramaLectura, textosDelAbanico, textosMarca } from '../textos/lecturas.js';
 import { CLIENTE } from '../cliente.js';
 
@@ -95,7 +95,7 @@ export default function Senales({ capa, vista: v }) {
   return (
     <MarcoCapa capa={capa} vista={v}>
       <Resumen titulo={`Resumen de ${periodoTexto(P)}`}
-        pie={<span>Integrametrics. Una pieza es nueva el día de su primera emisión; un panel cuenta desde el día que se detecta.</span>}
+        pie={<span>Integrametrics, que marca qué piezas son estrenos. Un panel cuenta desde el día que se detecta.</span>}
         items={[
           { rotulo: `Versiones de ${COMPETENCIA.nombre} en el año`, universo: 'atl', ir: s11.id, irTexto: s11.titulo, valor: c ? numero(c.total) : null, nota: c ? `${numero(c.atl)} en ATL y ${numero(c.digital)} en digital` : null },
           { rotulo: `Estrenos de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s11.id, irTexto: s11.titulo, valor: L.estrenos ? numero(estrenosComp) : null, nota: L.estrenos ? `${numero(L.estrenos.length - estrenosComp)} de ${CLIENTE.nombre}` : null },
@@ -115,7 +115,7 @@ export default function Senales({ capa, vista: v }) {
             {estrenos && (
               <div className="q-subbloque">
                 {/* la tarjeta es del año (alfiler); los estrenos son del período elegido y lo dicen con su calendario */}
-                <h4>{estrenos.titulo}<Ventana texto={tramoFechas(P.desde, P.hasta).replace(/^del /, '')} /></h4>
+                <h4>{estrenos.titulo}<Ventana texto={ventanaTexto(P.desde, P.hasta)} /></h4>
                 <p>{estrenos.lectura}</p>
                 {/* a la vista, solo los de la competencia (hasta tres); la lista completa va en el detalle */}
                 {estrenosComp > 0 && <Estrenos lista={L.estrenos.filter((e) => !e.propia).slice(0, MAX_ESTRENOS)} t={tVersiones} />}

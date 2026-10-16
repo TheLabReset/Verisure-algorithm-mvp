@@ -30,7 +30,7 @@ const css = archivos.filter((f) => f.endsWith('.css')).map((f) => readFileSync(j
 rmSync(tmp, { recursive: true, force: true });
 
 const html = `<title>The Algorithm · ${CLIENTE.nombre}</title>
-<meta name="description" content="The Algorithm, by The Lab: demo con data de muestra de ${CLIENTE.nombre}.">
+<meta name="description" content="The Algorithm, by The Lab: panel de ${CLIENTE.nombre} con data de Integrametrics y Google Trends.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>${css}</style>
 <div id="root"></div>

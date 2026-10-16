@@ -5,9 +5,9 @@
 import { useState } from 'react';
 import { Bloque, Tabla, Resumen, Grupo, Detalle, vigente } from '../sistema/Componentes.jsx';
 import { Franja, Pesas, Barras, MapaCalor } from '../sistema/graficos/Graficos.jsx';
-import { numero, porcentaje, soles, solesCompacto } from '../sistema/formato.js';
+import { numero, porcentaje, parte, soles, solesCompacto } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
-import { periodoTexto, version, horasTexto } from '../textos/comun.js';
+import { periodoTexto, version, horasTexto, enLetras } from '../textos/comun.js';
 import { mediosLectura, franjasLectura, canalesLectura, horarioLectura, programasLectura, textosMarca } from '../textos/lecturas.js';
 import { MEDIOS, FRANJAS } from '../calculo/vista.js';
 import { CLIENTE } from '../cliente.js';
@@ -20,14 +20,16 @@ const ORDEN_MEDIOS = ['TV ABIERTA', 'RADIO', 'OOH', 'CABLE', 'OTT'];
 const CLASE_MEDIO = { 'TV ABIERTA': 'q-p0', RADIO: 'q-p-tinta', OOH: 'q-p2', CABLE: 'q-p5', OTT: 'q-p5' };
 
 function MezclaMedios({ m }) {
-  const principales = ['TV ABIERTA', 'RADIO', 'OOH'].map((k) => ({ nombre: MEDIOS[k], valor: m.medios[k] || 0, pct: m.mezclaMedios[k] ?? 0, clase: CLASE_MEDIO[k] }));
+  // la parte sale del monto, sin redondear: Cable y OTT con inversión no se escribe «0 %»
+  const pct = (valor) => (m.inversion ? (valor / m.inversion) * 100 : 0);
+  const principales = ['TV ABIERTA', 'RADIO', 'OOH'].map((k) => ({ nombre: MEDIOS[k], valor: m.medios[k] || 0, pct: pct(m.medios[k] || 0), clase: CLASE_MEDIO[k] }));
   const resto = ['CABLE', 'OTT'].reduce((s, k) => s + (m.medios[k] || 0), 0);
-  const restoPct = ['CABLE', 'OTT'].reduce((s, k) => s + (m.mezclaMedios[k] ?? 0), 0);
+  const restoPct = pct(resto);
   const partes = [...principales, { nombre: 'Cable y OTT', valor: resto, pct: restoPct, clase: 'q-p5' }].filter((p) => p.valor > 0);
   return (
     <div className="q-mezcla">
       <h4>{m.nombre}<span>{solesCompacto(m.inversion)} en ATL</span></h4>
-      {partes.length ? <Franja etiqueta={`Reparto de la inversión ATL de ${m.nombre} por medio`} partes={partes} verTabla={false} /> : <p className="q-nota-bloque">Sin inversión ATL en el período.</p>}
+      {partes.length ? <Franja etiqueta={`Reparto de la inversión ATL de ${m.nombre} por medio`} partes={partes} formato={parte} verTabla={false} /> : <p className="q-nota-bloque">Sin inversión ATL en el período.</p>}
     </div>
   );
 }
@@ -53,7 +55,7 @@ export default function Activacion({ capa, vista: v }) {
           { rotulo: `Medio principal de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s31.id, irTexto: s31.titulo, valor: ok && r.inversion ? MEDIOS[principal(r)[0]] ?? null : null, nota: ok && r.inversion ? `${porcentaje(principal(r)[1])} de su inversión ATL` : null },
           { rotulo: `Emisiones de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s32.id, irTexto: s32.titulo, valor: compMed ? numero(compMed.emisiones) : null, nota: med?.[CLIENTE.marcaFuente] ? `${numero(med[CLIENTE.marcaFuente].emisiones)} de ${CLIENTE.nombre}` : null },
           { rotulo: `Canales de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s31.id, irTexto: s31.titulo, valor: compMed ? numero(compMed.totalCanales) : null, nota: compMed?.canales[0] ? `${compMed.canales[0].nombre} es el principal` : null },
-          { rotulo: `Hora con más emisiones de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s32.id, irTexto: s32.titulo, valor: compMed?.horasAltas.length ? `${compMed.horasAltas[0]} h` : null, nota: compMed?.horasAltas.length ? `más ${horasTexto(compMed.horasAltas)}` : null },
+          { rotulo: `Hora con más emisiones de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s32.id, irTexto: s32.titulo, valor: compMed?.horasAltas.length ? `${compMed.horasAltas[0]} h` : null, nota: compMed?.horasAltas.length > 1 ? `las ${enLetras(compMed.horasAltas.length, true)} más altas van ${horasTexto(compMed.horasAltas)}` : null },
         ]} />
 
       <SeccionDe def={s31} vista={v}>
@@ -68,7 +70,7 @@ export default function Activacion({ capa, vista: v }) {
               pie={<span>Inversión ATL estimada por Integrametrics a precio de tarifa.</span>}>
               <Tabla etiqueta="Inversión ATL por medio y marca, en soles y en parte de cada marca" numericas={[1, 2, 3, 4]}
                 columnas={['Medio', r.nombre, 'De su total', p?.nombre, 'De su total']}
-                filas={ORDEN_MEDIOS.map((k) => [MEDIOS[k], soles(r.medios[k] || 0), porcentaje(r.mezclaMedios[k] ?? 0), p ? soles(p.medios[k] || 0) : 'sin dato', p ? porcentaje(p.mezclaMedios[k] ?? 0) : 'sin dato'])} />
+                filas={ORDEN_MEDIOS.map((k) => [MEDIOS[k], soles(r.medios[k] || 0), r.inversion ? parte(((r.medios[k] || 0) / r.inversion) * 100) : 'sin inversión', p ? soles(p.medios[k] || 0) : 'sin dato', p ? (p.inversion ? parte(((p.medios[k] || 0) / p.inversion) * 100) : 'sin inversión') : 'sin dato'])} />
             </Bloque>
             <Bloque universo="atl" {...franjasLectura(v, FRANJAS)}
               pie={<span>Emisiones de TV y radio por franja horaria.</span>}>

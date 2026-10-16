@@ -37,11 +37,13 @@ function alBorde([x, y], anillo) {
 }
 // Un panel justo en un límite puede caer en la rendija que deja la simplificación: va al distrito con el borde más
 // cercano, si está a menos de ~500 m (20 unidades del mapa)
+// El mapa llama «Lima» al distrito del centro; en pantalla es el Cercado, para no confundirlo con la ciudad
+const nombreDistrito = (n) => (n === 'Lima' ? 'Cercado de Lima' : n);
 export function distritoDe(mapa, punto) {
   const d = mapa.distritos.find((x) => x.anillos.some((a) => dentro(punto, a)));
-  if (d) return d.nombre;
+  if (d) return nombreDistrito(d.nombre);
   const [cerca, dist] = mapa.distritos.map((x) => [x, Math.min(...x.anillos.map((a) => alBorde(punto, a)))]).sort((a, b) => a[1] - b[1])[0] || [];
-  return cerca && dist < 20 ? cerca.nombre : null;
+  return cerca && dist < 20 ? nombreDistrito(cerca.nombre) : null;
 }
 
 // paneles: los del contrato que se cruzan con el período, con `marca` (id de la fuente)

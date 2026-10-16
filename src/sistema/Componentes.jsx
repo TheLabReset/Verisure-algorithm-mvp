@@ -15,7 +15,7 @@ export const UNIVERSOS = {
   busquedas: { icono: Search, nombre: 'Búsquedas' },
   conversacion: { icono: MessagesSquare, nombre: 'Conversación' },
   web: { icono: Globe, nombre: 'Sitio web' },
-  modelo: { icono: Sigma, nombre: 'Modelo' },
+  modelo: { icono: Sigma, nombre: 'Reglas' },
   atl: { icono: Tv, nombre: 'ATL' },
   digital: { icono: MonitorSmartphone, nombre: 'Digital' },
 };
@@ -566,7 +566,7 @@ export function Detalle({ id, titulo, bajada, vistas, children }) {
     <div className="q-detalle" id={id}>
       <button ref={boton} type="button" className="q-boton q-detalle-boton" aria-haspopup="dialog" aria-expanded={abierto} onClick={() => setAbierto(true)}>
         <PanelRightOpen size={16} aria-hidden="true" />
-        <span>Ver el detalle<span className="q-detalle-vistas">: {vistas.join(', ').replace(/, ([^,]*)$/, ' y $1')}</span></span>
+        <span>Ver el detalle<span className="q-detalle-vistas">: {vistas.length > 1 ? `${vistas.slice(0, -1).join(', ')} y ${vistas.at(-1)}` : vistas[0]}</span></span>
       </button>
       <PanelLateral titulo={titulo} bajada={bajada} abierto={abierto} onCerrar={cerrar} className="q-panel-detalle">
         {abierto && <div className="q-detalle-cuerpo">{children}</div>}

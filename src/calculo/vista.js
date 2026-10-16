@@ -286,7 +286,8 @@ function queMirar(v, P) {
       }
     }
     const propia = v.lee.atl.marcas.find((m) => m.propia);
-    if (propia.share != null && propia.share >= UMBRALES.dominioAtl) out.push({ id: 'dominio-atl', nivel: 'bien', sostiene: '4.1', fuente: 'Integrametrics', share: propia.share });
+    const principal = v.lee.atl.marcas.find((m) => m.id === COMPETENCIA[0]);
+    if (propia.share != null && propia.share >= UMBRALES.dominioAtl) out.push({ id: 'dominio-atl', nivel: 'bien', sostiene: '4.1', fuente: 'Integrametrics', share: propia.share, periodo: P, marca: principal?.nombre, shareCompetencia: principal?.share ?? 0 });
     if (v.lee.atl.sinDato.length) out.push({ id: 'dias-sin-dato', nivel: 'revisar', sostiene: '4.1', fuente: 'Integrametrics', dias: v.lee.atl.sinDato });
   }
   // La competencia sube, baja o se apaga frente a la comparación (ATL y digital por separado). Apagarse también es

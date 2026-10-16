@@ -38,7 +38,7 @@ function PautaSemanal({ pauta, P }) {
       pie={<span>{universo === 'todo' ? 'Todo suma ATL y digital, que Integrametrics estima con métodos distintos: sirve para ver cuándo se prende la pauta, no para comparar montos.' : 'Inversión semanal estimada por Integrametrics.'}</span>}>
       <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={universo} onCambiar={setUniverso} opciones={opciones} /></div>
       <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true">
-        <li><span className="q-muestra q-muestra-tramo" /><span className="q-muestra q-muestra-propia-cuadro" />Semanas con días {tramoFechas(P.desde, P.hasta)}</li>
+        <li><span className="q-muestra q-muestra-tramo" /><span className="q-muestra q-muestra-propia-cuadro" />{P.desde === P.hasta ? 'La semana' : 'Semanas'} con días {tramoFechas(P.desde, P.hasta)}</li>
         <li><span className="q-muestra q-muestra-resto" />El resto del año</li>
       </ul>
       <div className="q-pauta-semanal">
@@ -73,7 +73,7 @@ export default function Inteligencia({ capa, vista: v }) {
             <li>Un día de la competencia que triplica su mediana de días con inversión.</li>
             <li>Un medio con {v.umbrales.medioNuevo} % o más de la inversión ATL de la competencia, o una zona con sus paneles, que no tenía el mes anterior.</li>
             <li>Las búsquedas de cámaras suben {v.umbrales.subidaDiy} % o más frente a las mismas semanas de un año antes.</li>
-            <li>Un cambio de {v.umbrales.caidaShareDigital} puntos o más en el share digital de {CLIENTE.nombre}.</li>
+            <li>Un cambio de {v.umbrales.caidaShareDigital} puntos o más en el share digital de {CLIENTE.nombre}, o {v.umbrales.dominioAtl} % o más de la inversión ATL.</li>
             <li>Días sin registros de Integrametrics.</li>
           </ul><p>Con menos de {v.umbrales.diasMinimos} días con data en el período no se lee ninguna subida, bajada ni cambio de share: un solo día raro las movería.</p></>}>
           {todas.length ? <ListaAlertas grupos={GRUPOS.map((g) => ({ ...g, items: todas.filter((a) => a.nivel === g.nivel) }))} />
@@ -84,10 +84,10 @@ export default function Inteligencia({ capa, vista: v }) {
       <SeccionDe def={s22} vista={v}>
         {!b ? <Bloque titulo="Cámaras de seguridad frente a la marca" universo="busquedas" estado={sinDato('no-cargo')} /> : <>
           <Bloque universo="busquedas" {...busquedasLectura(b)} alcance={`semanas al ${fechaCorta(b.hasta)}`}
-            ayuda={<p>Google Trends da un índice de 0 a 100 en Perú, no la cantidad de búsquedas. Los tres términos van en una misma consulta, así que se comparan entre sí. «Cámaras de seguridad» junta las dos formas de escribirlo. La comparación es el promedio de las últimas {numero(b.semanas)} semanas completas frente a las mismas semanas de un año antes.</p>}
+            ayuda={<p>Google Trends da un índice en Perú, no la cantidad de búsquedas: 100 es la semana con más búsquedas de toda la consulta. Los términos van en una misma consulta, así que se comparan entre sí. «Cámaras de seguridad» suma las dos formas de escribirlo, por eso puede pasar de 100. La comparación es el promedio de las últimas {numero(b.semanas)} semanas completas frente a las mismas semanas de un año antes.</p>}
             pie={<span>Google Trends, Perú · consultado el {fechaCorta(b.consultado)}.</span>}>
             <Lineas etiqueta="Búsquedas semanales de cámaras y de la marca en Google Trends" formato={(n) => numero(n)} alto={260}
-              series={b.series.map((s) => ({ nombre: s.nombre, resaltada: s.id === 'camaras', tono: s.propia ? 'propia' : undefined, serie: desdeAnioPasado(s.serie) }))} />
+              series={b.series.map((s) => ({ nombre: s.nombre, resaltada: false, tono: s.propia ? 'propia' : s.id === 'camaras' ? 'tinta' : undefined, serie: desdeAnioPasado(s.serie) }))} />
           </Bloque>
           <Detalle id={`detalle-${s22.id}`} titulo="Detalle de cámaras DIY" bajada="Google Trends, Perú, por semana." vistas={['las marcas de cámaras que más se buscan']}>
             <Bloque universo="busquedas" {...marcasDiyLectura(b)} alcance={`semanas al ${fechaCorta(b.hasta)}`}

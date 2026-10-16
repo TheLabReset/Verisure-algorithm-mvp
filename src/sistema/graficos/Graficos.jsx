@@ -170,9 +170,15 @@ export function Pesas({ filas, formato = numero, max, min = 0, rotuloA, rotuloB,
                   {f.b != null && <circle className={f.tono === 'propia' ? 'q-punto-propia' : f.tono === 'resto' ? 'q-punto-actual-resto' : 'q-punto-actual'} cx={x(f.b)} cy={cy} r="6" data-valor={f.b} />}
                   {/* la cifra va junto a su punto (el del período): a la derecha si queda adelante de la comparación, si no a la izquierda */}
                   {/* a la izquierda solo si cabe sin pisar el nombre de la fila; si no, a la derecha del punto más alejado */}
-                  {f.b != null && !(tonoA === 'propia' && f.a != null && f.a > f.b && x(f.b) - m.l < 44 && x(f.a) - x(f.b) >= 12) && (f.a == null || f.b >= f.a || x(f.b) - m.l < 44
-                    ? <text className="q-rotulo-valor" x={x(Math.max(f.b, f.a ?? f.b)) + 12} y={cy + 4}>{formato(f.b)}</text>
-                    : <text className="q-rotulo-valor" x={x(f.b) - 12} y={cy + 4} textAnchor="end">{formato(f.b)}</text>)}
+                  {/* B a la izquierda de su punto si va detrás de A y cabe; si no cabe, entre los dos puntos si hay lugar, y si
+                      tampoco, encima de su punto: nunca al lado del punto A, donde se leería como la cifra de A */}
+                  {f.b != null && !(tonoA === 'propia' && f.a != null && f.a > f.b && x(f.b) - m.l < 44 && x(f.a) - x(f.b) >= 12) && (() => {
+                    const t = formato(f.b), ancho = t.length * 7.8;
+                    if (f.a == null || f.b >= f.a) return <text className="q-rotulo-valor" x={x(Math.max(f.b, f.a ?? f.b)) + 12} y={cy + 4}>{t}</text>;
+                    if (x(f.b) - m.l >= ancho + 16) return <text className="q-rotulo-valor" x={x(f.b) - 12} y={cy + 4} textAnchor="end">{t}</text>;
+                    if (x(f.a) - x(f.b) >= ancho + 24) return <text className="q-rotulo-valor" x={x(f.b) + 10} y={cy + 4}>{t}</text>;
+                    return <text className="q-rotulo-valor" x={x(f.b)} y={cy - 9} textAnchor="middle">{t}</text>;
+                  })()}
                   {/* si A es la marca propia también lleva su cifra, del lado contrario a B; la que no cabe sin pisar algo queda en la tabla; si los puntos se tapan, solo va la de B */}
                   {tonoA === 'propia' && f.a != null && f.b != null && Math.abs(x(f.a) - x(f.b)) >= 12 && (f.a > f.b
                     ? <text className="q-rotulo-valor" x={x(f.a) + 12} y={cy + 4}>{formato(f.a)}</text>
@@ -206,9 +212,9 @@ export function Pendiente({ filas, formato = numero, rotuloA, rotuloB, resaltar 
               const r = resaltar.includes(f.nombre);
               return (
                 <g key={f.nombre}>
-                  <line className={r ? 'q-pendiente-propia' : 'q-pendiente'} x1={xa} y1={y(f.a)} x2={xb} y2={y(f.b)} />
-                  <circle className={r ? 'q-punto-actual' : 'q-punto-previo'} cx={xa} cy={y(f.a)} r="4" data-valor={f.a} />
-                  <circle className={r ? 'q-punto-actual' : 'q-punto-previo'} cx={xb} cy={y(f.b)} r="4" data-valor={f.b} />
+                  <line className={r ? 'q-pendiente-tinta' : 'q-pendiente'} x1={xa} y1={y(f.a)} x2={xb} y2={y(f.b)} />
+                  <circle className={r ? 'q-punto-tinta' : 'q-punto-previo'} cx={xa} cy={y(f.a)} r="4" data-valor={f.a} />
+                  <circle className={r ? 'q-punto-tinta' : 'q-punto-previo'} cx={xb} cy={y(f.b)} r="4" data-valor={f.b} />
                   <text className={`q-rotulo-fila${r ? ' q-fuerte' : ''}`} x={xa - 8} y={la[i]} textAnchor="end">{recortar(f.nombre, ml - 40)} {formato(f.a)}</text>
                   <text className={`q-rotulo-fila${r ? ' q-fuerte' : ''}`} x={xb + 8} y={lb[i]}>{formato(f.b)} {recortar(f.nombre, mr - 40)}</text>
                 </g>
@@ -655,6 +661,7 @@ function rotulosX(base, x) {
 }
 
 // ─────────────── Varias series en la misma escala: la de foco resaltada, la propia en su color, el resto en gris ───────────────
+// tono 'tinta': la serie principal cuando no es de ninguna marca (búsquedas de un rubro). discontinua: la misma marca en otro universo.
 // Un día sin dato es un hueco en todas las series. El rótulo final de cada serie va al lado de su último punto.
 export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta }) {
   const base = series[0]?.serie || [];
@@ -670,7 +677,9 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
         const m = { t: 18, r: Math.max(92, 20 + Math.ceil(Math.max(...series.map((x) => x.nombre.length)) * 7.8)), b: 26, l: Math.max(52, 14 + Math.ceil(Math.max(...ys.map((v) => formato(v).length)) * 7.8)) };
         const x = lineal(0, base.length - 1, m.l, ancho - m.r), y = lineal(0, ys.at(-1), alto - m.b, m.t);
         const finales = series.map((s) => { const i = ultimoConValor(s.serie); return i >= 0 ? y(s.serie[i].valor) + 4 : null; });
-        const separados = separar(finales.map((v) => v ?? 0), 14);
+        // los rótulos finales se separan y no bajan al eje de fechas
+        const sueltos = separar(finales.map((v) => v ?? 0), 14), sobra = Math.max(0, Math.max(...sueltos) - (alto - m.b - 6));
+        const separados = sueltos.map((v) => v - sobra);
         const orden = [...series].sort((a, b) => Number(a.resaltada) - Number(b.resaltada)); // la resaltada se dibuja encima
         return (
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
@@ -678,14 +687,14 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
             {rotulosX(base, x).map(({ i, texto }) => <text key={base[i].fecha} className="q-eje" x={x(i)} y={alto - 8} textAnchor="middle">{texto}</text>)}
             {base.map((p, i) => (series.every((s) => s.serie[i]?.valor == null) && i > 0 && i < base.length - 1 ? <rect key={'h' + p.fecha} className="q-hueco" x={x(i) - 3} y={m.t} width={6} height={alto - m.b - m.t} /> : null))}
             {base.map((p, i) => <Zona key={'z' + p.fecha} x={x(i) - (x(1) - x(0)) / 2} y={m.t} w={x(1) - x(0)} h={alto - m.b - m.t} pista={`${fecha(p.fecha)}\n${series.map((s) => `${s.nombre}: ${formato(s.serie[i]?.valor)}`).join('\n')}`} />)}
-            {orden.map((s) => <path key={s.nombre} className={s.resaltada ? 'q-linea' : s.tono === 'propia' ? 'q-linea-propia' : 'q-linea-resto'} d={camino(s.serie, x, y)} />)}
+            {orden.map((s) => <path key={s.nombre} className={`${s.resaltada ? 'q-linea' : s.tono === 'propia' ? 'q-linea-propia' : s.tono === 'tinta' ? 'q-linea-tinta' : 'q-linea-resto'}${s.discontinua ? ' q-discontinua' : ''}`} d={camino(s.serie, x, y)} />)}
             {series.map((s, k) => {
               const i = ultimoConValor(s.serie);
               if (i < 0) return null;
               return (
                 <g key={'f' + s.nombre}>
-                  <circle className={s.resaltada ? 'q-punto-final' : s.tono === 'propia' ? 'q-punto-final-propia' : 'q-punto-final-resto'} cx={x(i)} cy={y(s.serie[i].valor)} r="4" data-valor={s.serie[i].valor} />
-                  <text className={`q-rotulo-final${s.resaltada || s.tono === 'propia' ? '' : ' q-rotulo-resto'}`} x={x(i) + 8} y={separados[k]}>{s.nombre}</text>
+                  <circle className={s.resaltada ? 'q-punto-final' : s.tono === 'propia' ? 'q-punto-final-propia' : s.tono === 'tinta' ? 'q-punto-final-tinta' : 'q-punto-final-resto'} cx={x(i)} cy={y(s.serie[i].valor)} r="4" data-valor={s.serie[i].valor} />
+                  <text className={`q-rotulo-final${s.resaltada || s.tono === 'propia' || s.tono === 'tinta' ? '' : ' q-rotulo-resto'}`} x={x(i) + 8} y={separados[k]}>{s.nombre}</text>
                 </g>
               );
             })}

@@ -10,9 +10,12 @@ export const lista = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).
 // «del 24 al 30 de junio» si es el mismo mes; si no, cada fecha completa
 export function tramoFechas(desde, hasta) {
   const d = desde.slice(8, 10), h = hasta.slice(8, 10);
+  if (desde === hasta) return `el ${Number(d)} de ${mesLargo(+hasta.slice(5, 7))}`;
   if (desde.slice(0, 7) === hasta.slice(0, 7)) return `del ${Number(d)} al ${Number(h)} de ${mesLargo(+hasta.slice(5, 7))}`;
   return `del ${Number(d)} de ${mesLargo(+desde.slice(5, 7))} al ${Number(h)} de ${mesLargo(+hasta.slice(5, 7))}`;
 }
+// El chip de una tarjeta: «1 al 30 de junio», o «1 de julio» si el período es de un solo día
+export const ventanaTexto = (desde, hasta) => tramoFechas(desde, hasta).replace(/^(del|el) /, '');
 // El período: el mes entero, o el tramo cuando el mes todavía corre («del 1 al 13 de julio»)
 // El mes en curso se dice «lo que va de julio»: se lee bien después de «de», «en» o «para», y el tramo exacto va en el chip de cada tarjeta
 // Un tramo de meses que se escribe con lo que tiene la data: «entre enero y julio», «en julio»,
@@ -44,7 +47,7 @@ export function puntosFrente(pts, P) {
 // Las horas más altas: «entre las 14:00 y las 16:00» si son seguidas; si no, «a las 8, 14, 15 y 18 h»
 export const horasTexto = (hs) => {
   const o = [...hs].sort((a, b) => a - b);
-  return o.length > 1 && o.every((h, i) => i === 0 || h === o[i - 1] + 1) ? `entre las ${o[0]}:00 y las ${o.at(-1) + 1}:00` : `a las ${lista(o.map(String))} h`;
+  return o.length > 1 && o.every((h, i) => i === 0 || h === o[i - 1] + 1) ? `entre las ${o[0]}:00 y ${o.at(-1) + 1 === 24 ? 'la medianoche' : `las ${o.at(-1) + 1}:00`}` : `a las ${lista(o.map(String))} h`;
 };
 export const DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 
