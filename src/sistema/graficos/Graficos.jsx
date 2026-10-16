@@ -701,7 +701,8 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
         return (
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
             {ys.map((v) => <g key={v}><line className="q-rejilla" x1={m.l} x2={ancho - m.r} y1={y(v)} y2={y(v)} /><text className="q-eje" x={m.l - 8} y={y(v) + 4} textAnchor="end">{formato(v)}</text></g>)}
-            {rotulosX(base, x).map(({ i, texto }) => <text key={base[i].fecha} className="q-eje" x={x(i)} y={alto - 8} textAnchor="middle">{texto}</text>)}
+            {/* un rótulo de fecha en el borde se alinea hacia adentro para no salirse del gráfico */}
+            {rotulosX(base, x).map(({ i, texto }) => { const medio = (texto.length * 7.8) / 2, cx = x(i); const anc = cx + medio > ancho - 2 ? 'end' : cx - medio < 2 ? 'start' : 'middle'; return <text key={base[i].fecha} className="q-eje" x={anc === 'end' ? ancho - 2 : anc === 'start' ? 2 : cx} y={alto - 8} textAnchor={anc}>{texto}</text>; })}
             {base.map((p, i) => (series.every((s) => s.serie[i]?.valor == null) && i > 0 && i < base.length - 1 ? <rect key={'h' + p.fecha} className="q-hueco" x={x(i) - 3} y={m.t} width={6} height={alto - m.b - m.t} /> : null))}
             {base.map((p, i) => <Zona key={'z' + p.fecha} x={x(i) - (x(1) - x(0)) / 2} y={m.t} w={x(1) - x(0)} h={alto - m.b - m.t} pista={`${fecha(p.fecha)}\n${series.map((s) => `${s.nombre}: ${formato(s.serie[i]?.valor)}`).join('\n')}`} />)}
             {orden.map((s) => <path key={s.nombre} className={`${s.resaltada ? 'q-linea' : s.tono === 'propia' ? 'q-linea-propia' : s.tono === 'tinta' ? 'q-linea-tinta' : 'q-linea-resto'}${s.discontinua ? ' q-discontinua' : ''}`} d={camino(s.serie, x, y)} />)}
