@@ -9,7 +9,7 @@ import { Cronograma } from '../sistema/graficos/Graficos.jsx';
 import { numero, solesCompacto, soles } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import Ooh from './Ooh.jsx';
-import { periodoTexto, version, tramoMeses, ventanaTexto } from '../textos/comun.js';
+import { periodoTexto, version, tramoMeses, ventanaTexto, plataformasTexto, capital } from '../textos/comun.js';
 import { estrenosLectura, estrenoTitulo, estrenoDato, abanicoAtlLectura, abanicoDigitalLectura, oohLectura, distritosLectura, cronogramaLectura, textosDelAbanico, textosMarca } from '../textos/lecturas.js';
 import { CLIENTE } from '../cliente.js';
 
@@ -64,7 +64,7 @@ function AlAire({ L, P, tVersiones, tDigital }) {
       ayuda={atl
         ? <p>Una versión cuenta en el período si su primera y su última emisión registradas se cruzan con él.</p>
         : <p>Una carta por versión vista por primera vez en el período; las variantes de imagen o formato de una versión van juntas.</p>}
-      pie={<span>{atl ? 'TV, radio, cable, OTT y vía pública.' : 'Facebook, Instagram, Google Search y YouTube.'}</span>}>
+      pie={<span>{atl ? 'TV, radio, cable, OTT y vía pública.' : `${capital(plataformasTexto(L.digital?.plataformas || []) || 'Plataformas digitales')}.`}</span>}>
       <div className="q-control q-control-tarjeta"><span>Universo</span>
         <Grupo etiqueta="Universo" valor={u} onCambiar={cambiar} opciones={opcionesU} />
       </div>
@@ -97,9 +97,9 @@ export default function Senales({ capa, vista: v }) {
       <Resumen titulo={`Resumen de ${periodoTexto(P)}`}
         pie={<span>Integrametrics, que marca qué piezas son estrenos. Un panel cuenta desde el día que se detecta.</span>}
         items={[
-          { rotulo: `Versiones de ${COMPETENCIA.nombre} en el año`, universo: 'atl', ir: s11.id, irTexto: s11.titulo, valor: c ? numero(c.total) : null, nota: c ? `${numero(c.atl)} en ATL y ${numero(c.digital)} en digital` : null },
+          { rotulo: `Versiones de ${COMPETENCIA.nombre} en el año`, universo: 'atl', ir: s11.id, irTexto: s11.titulo, valor: c ? numero(c.distintas) : null, nota: c ? `${numero(c.atl)} en ATL y ${numero(c.digital)} en digital${c.atl + c.digital > c.distintas ? `; ${numero(c.atl + c.digital - c.distintas)} en los dos` : ''}` : null },
           { rotulo: `Estrenos de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s11.id, irTexto: s11.titulo, valor: L.estrenos ? numero(estrenosComp) : null, nota: L.estrenos ? `${numero(L.estrenos.length - estrenosComp)} de ${CLIENTE.nombre}` : null },
-          { rotulo: `Versiones digitales nuevas de ${COMPETENCIA.nombre}`, universo: 'digital', ir: s11.id, irTexto: s11.titulo, valor: digComp == null ? null : numero(digComp), nota: L.abanicoDigital ? `${numero(L.abanicoDigital.propio?.anuncios.length ?? 0)} de ${CLIENTE.nombre}` : null },
+          { rotulo: `Versiones digitales ${L.abanicoDigital?.sinHistoria ? 'vistas' : 'nuevas'} de ${COMPETENCIA.nombre}`, universo: 'digital', ir: s11.id, irTexto: s11.titulo, valor: digComp == null ? null : numero(digComp), nota: L.abanicoDigital ? `${numero(L.abanicoDigital.propio?.anuncios.length ?? 0)} de ${CLIENTE.nombre}` : null },
           { rotulo: `Paneles de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s12.id, irTexto: s12.titulo, valor: L.ooh ? numero(L.ooh.porMarca[COMPETENCIA.marcaFuente]) : null, nota: L.ooh ? `${numero(L.ooh.porMarca[CLIENTE.marcaFuente])} de ${CLIENTE.nombre}` : null },
         ]} />
 

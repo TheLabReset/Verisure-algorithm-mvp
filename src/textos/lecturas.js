@@ -8,6 +8,8 @@ import { tramoMeses, periodoTexto, comparacionTexto, puntosFrente, enLetras, seg
 const propiaDe = (u) => u.marcas.find((m) => m.propia);
 const rivalDe = (u) => u.marcas.find((m) => !m.propia);
 const pct = (n) => porcentaje(n);
+// el share de una marca: si tiene inversión pero redondea a cero, «menos de 1 %», no «0 %»
+const shareDe = (m) => (m.inversion > 0 && !m.share ? 'menos de 1 %' : porcentaje(m.share));
 // un nombre de versión muy largo se corta: la tarjeta lo muestra entero
 const corto = (t, n = 60) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
 const cita = (v) => `«${corto(version(v))}»`;
@@ -26,22 +28,22 @@ export function atlLectura(v) {
   const frente = puntosFrente(r.cambioPts, P);
   const cola = `según Integrametrics para ${periodoTexto(P)}.${frente ? ` ${r.nombre} queda ${frente}.` : ''}`;
   if (r.share == null) return { titulo: 'Sin inversión ATL registrada', lectura: `Ninguna marca tiene inversión en TV, radio, cable, OTT ni vía pública, ${cola}` };
-  if (!r.share) return { titulo: `${r.nombre} no tiene inversión ATL registrada`, lectura: `Toda la inversión en TV, radio, cable, OTT y vía pública es de ${p.nombre}, ${cola}` };
-  if (!p.share) return { titulo: `${r.nombre} tiene toda la inversión ATL`, lectura: `${p.nombre} no tiene inversión en TV, radio, cable, OTT ni vía pública, ${cola}` };
-  return { titulo: `${r.nombre} tiene ${pct(r.share)} de la inversión ATL`, lectura: `${p.nombre} pone el resto (${pct(p.share)}) en TV, radio, cable, OTT y vía pública, ${cola}` };
+  if (!r.inversion) return { titulo: `${r.nombre} no tiene inversión ATL registrada`, lectura: `Toda la inversión en TV, radio, cable, OTT y vía pública es de ${p.nombre}, ${cola}` };
+  if (!p.inversion) return { titulo: `${r.nombre} tiene toda la inversión ATL`, lectura: `${p.nombre} no tiene inversión en TV, radio, cable, OTT ni vía pública, ${cola}` };
+  return { titulo: `${r.nombre} tiene ${shareDe(r)} de la inversión ATL`, lectura: `${p.nombre} pone el resto (${shareDe(p)}) en TV, radio, cable, OTT y vía pública, ${cola}` };
 }
 export function digitalLectura(v) {
   const u = v.lee.digital, P = v.periodo, r = rivalDe(u), p = propiaDe(u);
   const frente = puntosFrente(r.cambioPts, P);
   const cola = frente ? ` ${r.nombre} queda ${frente}.` : '';
-  if (r.share == null) return { titulo: 'Sin inversión digital registrada', lectura: `Ninguna marca tiene inversión en Facebook, Instagram, Google ni YouTube en ${periodoTexto(P)}.` };
-  if (!r.share || !p.share) {
-    const sola = r.share ? r : p, otra = r.share ? p : r;
-    return { titulo: `Solo ${sola.nombre} invierte en digital`, lectura: `${otra.nombre} no tiene inversión en Facebook, Instagram, Google ni YouTube en ${periodoTexto(P)}.${cola}` };
+  if (r.share == null) return { titulo: 'Sin inversión digital registrada', lectura: `Ninguna marca tiene inversión digital en ${periodoTexto(P)}.` };
+  if (!r.inversion || !p.inversion) {
+    const sola = r.inversion ? r : p, otra = r.inversion ? p : r;
+    return { titulo: `Solo ${sola.nombre} invierte en digital`, lectura: `${otra.nombre} no tiene inversión digital en ${periodoTexto(P)}.${cola}` };
   }
   const parejo = Math.abs(p.share - r.share) <= 10;
   const titulo = parejo ? 'En digital la inversión está pareja' : `${r.share > p.share ? r.nombre : p.nombre} lidera la inversión digital`;
-  return { titulo, lectura: `En Facebook, Instagram, Google y YouTube, ${r.nombre} tiene ${pct(r.share)} y ${p.nombre} ${pct(p.share)}.${cola}` };
+  return { titulo, lectura: `En digital, ${r.nombre} tiene ${shareDe(r)} y ${p.nombre} ${shareDe(p)}.${cola}` };
 }
 // El share del período en una sola tarjeta: digital y ATL lado a lado (universos distintos, nunca sumados).
 // La competencia en el título; la marca propia y el cambio frente a la comparación en la lectura
@@ -52,8 +54,8 @@ export function shareLectura(v) {
   const r = rivalDe(us[0][1]), p = propiaDe(us[0][1]);
   // cuánto tiene cada marca en cada universo; un 0 se dice «no tiene inversión», nunca «0 %»
   const tiene = (m, largo) => {
-    const con = us.filter(([, u]) => m(u).share), sin = us.filter(([, u]) => !m(u).share);
-    const partes = con.map(([n, u]) => (largo ? `${pct(m(u).share)} de la inversión ${n}` : `${pct(m(u).share)} en ${n}`));
+    const con = us.filter(([, u]) => m(u).inversion > 0), sin = us.filter(([, u]) => !(m(u).inversion > 0));
+    const partes = con.map(([n, u]) => (largo ? `${shareDe(m(u))} de la inversión ${n}` : `${shareDe(m(u))} en ${n}`));
     const no = sin.length ? `no tiene inversión ${sin.map(([n]) => (largo ? n : `en ${n}`)).join(' ni ')}` : null;
     return partes.length ? `tiene ${lista(partes)}${no ? ` y ${no}` : ''}` : no;
   };
@@ -93,7 +95,9 @@ export function shareSemanalLectura(s) {
   const comp = (serie) => (serie || []).filter((x) => !x.parcial && x.valor != null);
   const dig = comp(s.digital), atl = comp(s.atl);
   const titulo = `El share de ${s.marca}, semana a semana`;
-  if (!dig.length) return { titulo, lectura: 'Sin semanas completas con data.' };
+  if (!dig.length && !atl.length) return { titulo, lectura: 'Sin semanas completas con data.' };
+  // con digital caída (o sin semanas completas), lo que hay de ATL
+  if (!dig.length) { const m = atl.reduce((a, x) => (x.valor > a.valor ? x : a)); return { titulo, lectura: `En ATL, la semana más alta de ${s.marca} llega a ${pct(m.valor)}, la del ${fechaCorta(m.fecha)}.` }; }
   const max = dig.reduce((a, x) => (x.valor > a.valor ? x : a));
   const ult = dig.at(-1);
   const topeAtl = atl.length ? Math.max(...atl.map((x) => x.valor)) : null;
@@ -109,7 +113,7 @@ export function cronogramaLectura(c, marca, desde, hasta) {
   if (!c?.total) return { titulo, lectura: `Integrametrics no registró versiones de ${marca} en el año.` };
   const atl = c.filas.filter((f) => f.universo === 'atl').length, dig = c.filas.filter((f) => f.universo === 'digital').length;
   const top = [...c.filas].sort((a, b) => b.inversion - a.inversion)[0];
-  return { titulo, lectura: `${marca} tuvo ${numero(c.total)} versiones entre ATL y digital ${tramoMeses(desde, hasta)}. La de más inversión es ${cita(top.version)}, del ${fechaCorta(top.desde)} al ${fechaCorta(top.hasta)}.` };
+  return { titulo, lectura: `${marca} tuvo ${numero(c.distintas ?? c.total)} versiones entre ATL y digital ${tramoMeses(desde, hasta)}. La de más inversión es ${cita(top.version)}, del ${fechaCorta(top.desde)} al ${fechaCorta(top.hasta)}.` };
 }
 export function estrenosLectura(v) {
   const e = v.lee.estrenos, P = v.periodo;
@@ -134,6 +138,8 @@ export function abanicoAtlLectura(a, P) {
   return { titulo: 'Versiones ATL del período', lectura: abanicoFrase(a, ['versión', 'versiones'], `con emisiones en ${periodoTexto(P)}`) };
 }
 export function abanicoDigitalLectura(a, P) {
+  // el primer mes de data no sabe qué ya estaba al aire: se dice «vistas desde», no «nuevas»
+  if (a?.sinHistoria) return { titulo: 'Piezas digitales vistas', lectura: abanicoFrase(a, ['versión vista', 'versiones vistas'], `desde el ${fechaCorta(a.inicio)}, el primer día con data digital`) };
   return { titulo: 'Piezas digitales nuevas', lectura: abanicoFrase(a, ['versión nueva', 'versiones nuevas'], `en ${periodoTexto(P)}`) };
 }
 
@@ -143,8 +149,10 @@ export function oohLectura(o, P) {
   if (!o.paneles.length) return { titulo, lectura: `Integrametrics no detectó paneles de las marcas que se siguen en ${periodoTexto(P)}.` };
   const [r] = CLIENTE.competencia;
   const nr = o.porMarca[r.marcaFuente], np = o.porMarca[CLIENTE.marcaFuente];
-  const fuera = o.fueraDeLima.filter((c) => c.nombre !== 'Sin coordenadas' && c[r.marcaFuente] > 0 && !c[CLIENTE.marcaFuente]);
-  return { titulo, lectura: `${r.nombre} tiene ${numero(nr)} ${segun(nr, 'panel detectado', 'paneles detectados')} en ${periodoTexto(P)} y ${CLIENTE.nombre} ${numero(np)}.${fuera.length ? ` Fuera de Lima${np ? ` solo está ${r.nombre}` : ''}: ${lista(fuera.map((c) => `${c.nombre} (${numero(c[r.marcaFuente])})`))}.` : ''}` };
+  // todas las ciudades donde está la competencia fuera de Lima; si la propia no tiene ninguna, se dice
+  const fuera = o.fueraDeLima.filter((c) => c.nombre !== 'Sin coordenadas' && c[r.marcaFuente] > 0);
+  const propiaFuera = o.fueraDeLima.some((c) => c.nombre !== 'Sin coordenadas' && c[CLIENTE.marcaFuente] > 0);
+  return { titulo, lectura: `${r.nombre} tiene ${numero(nr)} ${segun(nr, 'panel detectado', 'paneles detectados')} en ${periodoTexto(P)} y ${CLIENTE.nombre} ${numero(np)}.${fuera.length ? ` Fuera de Lima, ${r.nombre} tiene paneles en ${lista(fuera.map((c) => `${c.nombre} (${numero(c[r.marcaFuente])})`))}${np && !propiaFuera ? `; ${CLIENTE.nombre}, en ninguna ciudad` : ''}.` : ''}` };
 }
 export function distritosLectura(o) {
   const titulo = 'Paneles por distrito';
@@ -215,7 +223,8 @@ export function mediosLectura(v, MEDIOS) {
 }
 export function franjasLectura(v, FRANJAS) {
   const u = v.lee.atl, r = rivalDe(u), p = propiaDe(u);
-  const parte = (m, k) => { const tot = Object.values(m.franjas).reduce((t, x) => t + x, 0); return tot ? Math.round(((m.franjas[k] || 0) / tot) * 100) : null; };
+  // la misma parte que muestran el gráfico y la tabla (reparto que suma 100), no otro redondeo
+  const parte = (m, k) => (Object.values(m.franjas).some((x) => x > 0) ? m.mezclaFranjas[k] ?? 0 : null);
   const k = Object.entries(r.franjas).sort((a, b) => b[1] - a[1])[0]?.[0];
   if (!k) return { titulo: 'Emisiones por franja', lectura: `Sin emisiones de ${r.nombre} en el período.` };
   const donde = k === 'DIA' ? 'de día' : `en ${FRANJAS[k].toLowerCase()}`;
@@ -227,7 +236,7 @@ export function canalesLectura(med, marca) {
   if (!med || !med.canales.length) return { titulo: `Canales de ${nombre}`, lectura: `Sin emisiones de ${nombre} en el período.` };
   // lo que llega sin canal registrado no se nombra como si fuera un canal
   const [a, b] = med.canales.filter((c) => !c.sinRegistrar);
-  const cuantos = `${numero(med.totalCanales)} ${segun(med.totalCanales, 'canal', 'canales')} con inversión`;
+  const cuantos = `${capital(enLetras(med.totalCanales))} ${segun(med.totalCanales, 'canal', 'canales')} con inversión${med.sinCanal ? ', más emisiones sin canal registrado' : ''}`;
   if (!a) return { titulo: `Canales de ${nombre}`, lectura: `${cuantos}; ninguno con su nombre registrado.` };
   return { titulo: `Canales de ${nombre}`, lectura: `${cuantos}; ${b ? `los dos con más son ${a.nombre} y ${b.nombre}` : `el que más tiene es ${a.nombre}`}.` };
 }
@@ -238,7 +247,8 @@ export function horarioLectura(med, marca) {
   const titulo = `Cuándo emite ${nombre}`;
   if (!med || !med.horasAltas.length) return { titulo, lectura: `Sin emisiones de ${nombre} con hora en el período.` };
   const dia = med.diaMayor == null ? null : DIAS_SEMANA[med.diaMayor];
-  return { titulo, lectura: `Las cuatro horas con más emisiones van ${horasTexto(med.horasAltas)}.${dia ? ` El día con más es el ${dia}.` : ''}` };
+  const n = med.horasAltas.length;
+  return { titulo, lectura: `${n > 1 ? `Las ${enLetras(n, true)} horas con más emisiones van` : 'La hora con más emisiones es'} ${n > 1 ? horasTexto(med.horasAltas) : `las ${med.horasAltas[0]}:00`}.${dia ? ` El día con más es el ${dia}.` : ''}` };
 }
 export function programasLectura(med, marca) {
   const nombre = textosMarca.nombreMarca(marca);
@@ -271,7 +281,8 @@ const ALERTAS = {
     mirar: 'Qué versiones y qué medios explican la subida.',
   }),
   'baja-competencia': (a) => ({
-    titulo: `${a.marca} baja ${numero(a.baja)} % su inversión ${a.universo}`,
+    // con algo de inversión, una baja que redondea a 100 % se dice «más de 99 %»
+    titulo: `${a.marca} baja ${a.monto > 0 && Math.round(a.baja) >= 100 ? 'más de 99' : numero(a.baja)} % su inversión ${a.universo}`,
     dato: `${monto(a.monto)} en ${per(a)}, frente a ${monto(a.antes)} en ${comp(a)}.`,
     mirar: 'Qué versiones dejó de pautar y si su pauta del año muestra pausas parecidas.',
   }),
@@ -286,7 +297,7 @@ const ALERTAS = {
     mirar: 'Los estrenos y los paneles nuevos, que sí se leen desde el primer día.',
   }),
   'pico-competencia': (a) => ({
-    titulo: `${a.marca} tuvo un día de inversión fuera de lo normal`,
+    titulo: `${a.marca} tuvo un día de inversión ATL fuera de lo normal`,
     dato: `El ${fechaCorta(a.fecha)} invirtió ${monto(a.monto)}; un día típico con inversión, unos ${monto(a.mediana)}.`,
     mirar: 'Qué salió al aire ese día y en qué medio.',
   }),
@@ -307,7 +318,7 @@ const ALERTAS = {
   }),
   'diy-sube': (a) => ({
     titulo: `Las búsquedas de cámaras de seguridad suben ${numero(a.crecimiento)} %`,
-    dato: `Frente a las mismas semanas de un año antes, del ${fechaCorta(a.desde)} al ${fechaCorta(a.hasta)}.`,
+    dato: `Del ${fechaCorta(a.desde)} al ${fechaCorta(a.hasta)} de ${a.hasta.slice(0, 4)}, frente a las mismas semanas de ${Number(a.hasta.slice(0, 4)) - 1}.`,
     mirar: 'Qué marcas de cámaras explican la subida.',
   }),
   'share-digital': (a) => ({
@@ -316,13 +327,13 @@ const ALERTAS = {
     mirar: 'Cuánto cambió la inversión digital de cada marca, la propia incluida.',
   }),
   'dias-sin-dato': (a) => ({
-    titulo: `${capital(enLetras(a.dias.length))} ${segun(a.dias.length, 'día', 'días')} sin registros de Integrametrics`,
-    dato: `Sin emisiones registradas de ninguna marca: ${lista(a.dias.map(fechaCorta))}. Puede ser un día sin pauta o un hueco de la fuente.`,
+    titulo: `${capital(enLetras(a.dias.length))} ${segun(a.dias.length, 'día', 'días')} sin registros ATL de Integrametrics`,
+    dato: `Sin emisiones ATL registradas de ninguna marca: ${lista(a.dias.map(fechaCorta))}. Puede ser un día sin pauta o un hueco de la fuente.`,
     mirar: 'Con Integrametrics, si el día llegó completo.',
   }),
   'dominio-atl': (a) => ({
     titulo: `${CLIENTE.nombre} concentra ${porcentaje(a.share)} de la inversión ATL`,
-    dato: !a.marca ? 'En TV, radio, cable, OTT y vía pública.' : a.shareCompetencia > 0 ? `${a.marca} tiene ${a.shareCompetencia < 1 ? 'menos del 1 %' : porcentaje(a.shareCompetencia)} en ${per(a)}.` : `${a.marca} no tiene inversión ATL en ${per(a)}.`,
+    dato: !a.marca ? 'En TV, radio, cable, OTT y vía pública.' : a.inversionCompetencia > 0 ? `${a.marca} tiene ${a.shareCompetencia < 1 ? 'menos del 1 %' : porcentaje(a.shareCompetencia)} en ${per(a)}.` : `${a.marca} no tiene inversión ATL en ${per(a)}.`,
     mirar: 'Cuántas veces sale al aire cada pieza.',
   }),
   'share-digital-sube': (a) => ({

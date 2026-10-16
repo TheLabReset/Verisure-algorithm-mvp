@@ -252,3 +252,14 @@ test('búsquedas o mapa con otra forma no tumban la vista', () => {
     revisarTextos(v);
   }
 });
+
+// Con la fuente atrasada, el último mes no está «en curso»: se dice hasta qué día tiene data
+test('el último mes con la fuente atrasada no se lee como en curso', () => {
+  const ultimo = MESES.at(-1), P0 = periodoDelMes(contrato.meta, ultimo);
+  if (!P0.parcial) return;
+  const lejos = new Date(Date.parse(`${contrato.meta.lastDay}T00:00:00Z`) + 30 * 864e5).toISOString().slice(0, 10);
+  const v = armarVista(contrato, medios, { mes: ultimo }, { hoy: lejos }, { mapa, busquedas });
+  assert.equal(v.periodo.enCurso, false);
+  assert.doesNotMatch(L.estrenosLectura(v).lectura + L.atlLectura(v).lectura, /lo que va de/);
+  assert.equal(armarVista(contrato, medios, { mes: ultimo }, { hoy: contrato.meta.lastDay }, { mapa, busquedas }).periodo.enCurso, undefined);
+});

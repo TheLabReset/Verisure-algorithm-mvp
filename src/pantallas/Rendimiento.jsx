@@ -7,7 +7,7 @@ import { Bloque, Tabla, Resumen, Grupo, Detalle, vigente } from '../sistema/Comp
 import { Pesas, Lineas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, soles, solesCompacto, compacto } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
-import { periodoTexto, comparacionTexto, puntosFrente, capital } from '../textos/comun.js';
+import { periodoTexto, comparacionTexto, puntosFrente, capital, plataformasTexto } from '../textos/comun.js';
 import { diasEntre, DIAS_MINIMOS } from '../calculo/periodo.js';
 import { atlLectura, digitalLectura, shareLectura, presionLectura, shareSemanalLectura } from '../textos/lecturas.js';
 
@@ -21,7 +21,7 @@ function TablaShare({ u, P, etiqueta, conImpresiones }) {
     <Tabla etiqueta={etiqueta} numericas={conImpresiones ? [1, 2, 3, 4, 5] : [1, 2, 3, 4]} destacada={orden.findIndex((m) => m.foco)}
       columnas={['Marca', 'Inversión estimada', ...(conImpresiones ? ['Impresiones'] : []), 'Share', 'Share antes', 'Cambio']}
       filas={orden.map((m) => [m.nombre, soles(m.inversion), ...(conImpresiones ? [compacto(m.impresiones)] : []), porcentaje(m.share), m.sharePrevio == null ? 'sin dato' : porcentaje(m.sharePrevio),
-        corto ? `desde el día ${DIAS_MINIMOS}` : { texto: pts(m.cambioPts), tono: !m.foco || !m.cambioPts ? null : m.cambioPts > 0 ? 'empeora' : 'mejora' }])} />
+        corto ? 'sin comparación' : { texto: pts(m.cambioPts), tono: !m.foco || !m.cambioPts ? null : m.cambioPts > 0 ? 'empeora' : 'mejora' }])} />
   );
 }
 
@@ -59,7 +59,7 @@ export default function Rendimiento({ capa, vista: v }) {
       <SeccionDe def={s41} vista={v}>
         {!ok(dig) && !ok(atl) ? <Bloque titulo="Share of investment" universo={['digital', 'atl']} estado={sinDato(dig.estado)} /> : (
           <Bloque universo={[...(ok(dig) ? ['digital'] : []), ...(ok(atl) ? ['atl'] : [])]} {...shareLectura(v)}
-            ayuda={<p>Share of investment: la parte de la inversión de la categoría que pone cada marca. Digital es Facebook, Instagram, Google Search y YouTube; ATL es TV abierta, cable, radio, OTT y vía pública. Integrametrics estima cada uno con un método distinto, por eso no se suman.</p>}
+            ayuda={<p>Share of investment: la parte de la inversión de la categoría que pone cada marca. Digital son las redes, Google Search, YouTube y los sitios que mide Integrametrics; ATL es TV abierta, cable, radio, OTT y vía pública. Integrametrics estima cada uno con un método distinto, por eso no se suman.</p>}
             pie={<span>Inversión estimada por Integrametrics a precio de tarifa.</span>}>
             <div className="q-share-universos">
               {[['Digital', dig], ['ATL', atl]].map(([n, x]) => (
@@ -83,7 +83,7 @@ export default function Rendimiento({ capa, vista: v }) {
         {(ok(dig) || ok(atl)) && (
           <Detalle id={`detalle-${s41.id}`} titulo="Detalle de cómo viene el período" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['la inversión y el share en soles', 'la inversión día por día']}>
             {ok(dig) && (
-              <Bloque universo="digital" {...digitalLectura(v)} pie={<span>Facebook, Instagram, Google Search y YouTube.</span>}>
+              <Bloque universo="digital" {...digitalLectura(v)} pie={<span>{capital(plataformasTexto(dig.plataformas || []) || 'Plataformas digitales')}.</span>}>
                 <TablaShare u={dig} P={P} etiqueta="Inversión, impresiones y share digital por marca" conImpresiones />
               </Bloque>
             )}

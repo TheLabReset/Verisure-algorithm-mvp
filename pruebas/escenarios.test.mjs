@@ -55,4 +55,5 @@ test('los escenarios mueven lo que dicen mover', (t) => {
   const alertasUnDia = vu.sugiere.queMirar;
   assert.ok(alertasUnDia.some((a) => a.id === 'pocos-dias') && !alertasUnDia.some((a) => ['sube-competencia', 'baja-competencia', 'medio-nuevo', 'pico-competencia'].includes(a.id)), 'con un día de data se leen variaciones');
   assert.equal(vista('sin-paneles').lee.ooh?.paneles?.length ?? 0, 0);
+  if (base.analiza.busquedas) assert.ok(vista('pico-trends').analiza.busquedas.camaras.crecimiento > base.analiza.busquedas.camaras.crecimiento, 'el pico de búsquedas no sube las búsquedas');
 });

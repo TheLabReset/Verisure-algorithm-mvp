@@ -5,7 +5,7 @@ import { Moon, Sun, Presentation, Download } from 'lucide-react';
 import { armarVista, mesesDisponibles } from './calculo/vista.js';
 import { ESCENARIOS, aplicarEscenario } from './calculo/escenarios.js';
 import { CAPAS } from './capas/estructura.js';
-import { fecha } from './sistema/formato.js';
+import { fecha, fechaCorta } from './sistema/formato.js';
 import { mesTexto } from './textos/comun.js';
 import { NavegacionCapas, Selector, BarraDemo, CargandoContexto, Estado, Resguardo } from './sistema/Componentes.jsx';
 import Senales from './pantallas/Senales.jsx';
@@ -156,7 +156,7 @@ export default function App() {
           <div className="q-filtros-controles">
             {meses.length > 0 && (
               <Selector etiqueta="Mes" valor={mesActivo} onCambiar={setMes}
-                opciones={[...meses].reverse().map((m) => ({ valor: m, texto: vista && m === vista.periodo.mes && vista.periodo.parcial ? `${mesTexto(m)} (en curso)` : mesTexto(m) }))} />
+                opciones={[...meses].reverse().map((m) => ({ valor: m, texto: vista && m === vista.periodo.mes && vista.periodo.parcial ? `${mesTexto(m)} (${vista.periodo.enCurso === false ? `hasta el ${fechaCorta(vista.periodo.hasta)}` : 'en curso'})` : mesTexto(m) }))} />
             )}
             {vista && <span className="q-control-nota">{vista.periodo.compararDesde ? 'Comparado con el mes anterior' + (vista.periodo.parcial ? ', mismo tramo de días' : '') : 'Sin mes anterior para comparar'}</span>}
           </div>

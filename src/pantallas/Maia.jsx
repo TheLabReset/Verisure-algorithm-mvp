@@ -24,8 +24,8 @@ export function BotonMaia({ onClick }) {
   );
 }
 
-function Reporte({ semana, reporte, corte }) {
-  if (!semana) return <p className="q-nota-bloque">Todavía no hay una semana completa con data.</p>;
+function Reporte({ semana, reporte, corte, sinAtl }) {
+  if (!semana) return <p className="q-nota-bloque">{sinAtl ? 'Integrametrics ATL no cargó: el reporte de la semana no se puede armar.' : 'Todavía no hay una semana completa con data.'}</p>;
   const vigente = reporte?.semana?.desde === semana.desde && reporte?.lectura;
   return (
     <div className="q-maia-reporte">
@@ -91,7 +91,7 @@ export default function Maia({ abierta, onCerrar, vista, reporte }) {
   return (
     <PanelLateral titulo="MAIA" bajada="Media Analyst IA · tu reporte de cada semana y consultas sobre la data" abierto={abierta} onCerrar={onCerrar} className="q-panel-maia">
       <Grupo etiqueta="Vista de MAIA" valor={pestana} onCambiar={setPestana} opciones={[{ valor: 'reporte', texto: 'Reporte de la semana' }, { valor: 'consulta', texto: 'Preguntar' }]} />
-      {pestana === 'reporte' ? <Reporte semana={vista.sugiere.semana} reporte={reporte} corte={corte} /> : <Consulta corte={corte} />}
+      {pestana === 'reporte' ? <Reporte semana={vista.sugiere.semana} reporte={reporte} corte={corte} sinAtl={vista.sugiere.semanaSinAtl} /> : <Consulta corte={corte} />}
     </PanelLateral>
   );
 }

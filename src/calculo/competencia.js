@@ -2,6 +2,7 @@
 // día de cada marca para leer los encendidos y apagados. Puro.
 
 import { diaSemana } from './periodo.js';
+import { plataformaEnFrase } from '../textos/comun.js';
 
 const dia = (f) => (f || '').slice(0, 10);
 
@@ -9,7 +10,7 @@ const dia = (f) => (f || '').slice(0, 10);
 // cada variante el día que la ve por primera vez; el tramo va de la primera a la última variante vista.
 export function versionesDelAnio(contrato, marca) {
   const atl = (contrato.pieces || []).filter((p) => p.maname === marca).map((p) => ({
-    id: `atl:${p.key}`, version: p.vname, universo: 'atl', canales: p.channels || [], programa: p.programa || null,
+    id: `atl:${p.key}`, version: p.vname, universo: 'atl', canales: (p.channels || []).filter((c) => c !== 'DESCONOCIDO'), programa: p.programa || null,
     desde: dia(p.firstEmission), hasta: dia(p.lastEmission || p.firstEmission), inversion: p.spend || 0, emisiones: p.spots || 0, asset: p.asset || null,
   }));
   const porVersion = new Map();
@@ -22,14 +23,16 @@ export function versionesDelAnio(contrato, marca) {
     if (dia(p.firstEmission) > v.hasta) v.hasta = dia(p.firstEmission);
     if (!v.asset && p.asset && p.asset.kind !== 'link') v.asset = p.asset;
   }
-  const digital = [...porVersion.values()].map((v) => ({ ...v, canales: [...v.canales] }));
+  // las plataformas como se escriben («Facebook», «clarin.com»); un canal sin registrar no se nombra
+  const digital = [...porVersion.values()].map((v) => ({ ...v, canales: [...v.canales].map(plataformaEnFrase) }));
   return [...atl, ...digital].sort((a, b) => b.inversion - a.inversion);
 }
 
 // Cronograma: las versiones con más inversión, ordenadas por cuándo empezaron
 export function cronograma(versiones, { max = 12 } = {}) {
   const filas = versiones.slice(0, max).sort((a, b) => (a.desde < b.desde ? -1 : a.desde > b.desde ? 1 : b.inversion - a.inversion));
-  return { filas, resto: Math.max(0, versiones.length - max), total: versiones.length, atl: versiones.filter((v) => v.universo === 'atl').length, digital: versiones.filter((v) => v.universo === 'digital').length };
+  // distintas: una versión que sale en ATL y en digital es una sola versión
+  return { filas, resto: Math.max(0, versiones.length - max), total: versiones.length, distintas: new Set(versiones.map((v) => v.version)).size, atl: versiones.filter((v) => v.universo === 'atl').length, digital: versiones.filter((v) => v.universo === 'digital').length };
 }
 
 // Pauta del año: inversión diaria de una marca en un universo, de enero al último día con data. Un día sin

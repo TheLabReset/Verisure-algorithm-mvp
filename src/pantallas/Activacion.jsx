@@ -45,7 +45,8 @@ export default function Activacion({ capa, vista: v }) {
   const marca = vigente(elegida, opcionesMarca);
   const deMarca = med?.[marca];
   const compMed = med?.[COMPETENCIA.marcaFuente];
-  const principal = (m) => Object.entries(m.mezclaMedios).sort((a, b) => b[1] - a[1])[0];
+  // la parte sale del monto, con el mismo redondeo que la franja de la mezcla y su lectura
+  const principal = (m) => Object.entries(m.medios).map(([k, x]) => [k, m.inversion ? (x / m.inversion) * 100 : 0]).sort((a, b) => b[1] - a[1])[0];
   const control = <div className="q-control q-control-tarjeta"><span>Marca</span><Grupo etiqueta="Marca" valor={marca} onCambiar={setMarca} opciones={opcionesMarca} /></div>;
   return (
     <MarcoCapa capa={capa} vista={v}>

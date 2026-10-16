@@ -92,7 +92,7 @@ export default function Inteligencia({ capa, vista: v }) {
           <Detalle id={`detalle-${s22.id}`} titulo="Detalle de cámaras DIY" bajada="Google Trends, Perú, por semana." vistas={['las marcas de cámaras que más se buscan']}>
             <Bloque universo="busquedas" {...marcasDiyLectura(b)} alcance={`semanas al ${fechaCorta(b.hasta)}`}
               ayuda={<p>Las cinco marcas van en otra consulta de Google Trends, con su propia escala: no se comparan con la tarjeta de cámaras y marca. Cada línea va del promedio de las mismas semanas de un año antes al de las últimas {numero(b.semanas)}.</p>}
-              pie={<span>Índice promedio de 0 a 100 · {b.antesDesde ? `${fechaCorta(b.antesDesde)} a ${fechaCorta(b.antesHasta)} frente a ` : ''}{fechaCorta(b.desde)} a {fechaCorta(b.hasta)}.</span>}>
+              pie={<span>Índice promedio de 0 a 100 · {fechaCorta(b.desde)} a {fechaCorta(b.hasta)} de {b.hasta.slice(0, 4)}{b.antesDesde ? ` frente a ${fechaCorta(b.antesDesde)} a ${fechaCorta(b.antesHasta)} de ${b.antesHasta.slice(0, 4)}` : ''}.</span>}>
               {!b.marcas.some((m) => m.antes != null) ? <p className="q-nota-bloque">Google Trends todavía no tiene un año de historia para comparar estas semanas.</p> : <Pendiente etiqueta="Búsquedas de marcas de cámaras, un año antes y ahora" formato={(n) => numero(Math.round(n))} rotuloA="Un año antes" rotuloB="Ahora"
                 resaltar={b.marcas.slice(0, 1).map((m) => m.nombre)} filas={b.marcas.filter((m) => m.antes != null).map((m) => ({ nombre: m.nombre, a: m.antes, b: m.ahora }))} />}
             </Bloque>

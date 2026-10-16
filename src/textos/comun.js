@@ -27,7 +27,9 @@ export function tramoMeses(desde, hasta, a = 'entre') {
   const [x, y] = ad === ah ? [mesLargo(md), mesLargo(mh)] : [`${mesLargo(md)} de ${ad}`, `${mesLargo(mh)} de ${ah}`];
   return a === 'de' ? `${x} a ${y}` : `entre ${x} y ${y}`;
 }
-export const periodoTexto = (P) => (P.parcial ? `lo que va de ${mesLargo(+P.mes.slice(5, 7))}` : mesTexto(P.mes));
+// Si la fuente está atrasada, el mes no «va»: se dice hasta dónde tiene data («julio hasta el 13»), que también se lee
+// bien después de «de», «en» o «para»
+export const periodoTexto = (P) => (!P.parcial ? mesTexto(P.mes) : P.enCurso === false ? `${mesLargo(+P.mes.slice(5, 7))} hasta el ${Number(P.hasta.slice(8, 10))}` : `lo que va de ${mesLargo(+P.mes.slice(5, 7))}`);
 export const comparacionTexto = (P) => (!P.compararDesde ? null : P.parcial ? `el mismo tramo de ${mesLargo(+P.compararDesde.slice(5, 7))}` : mesTexto(P.compararDesde.slice(0, 7)));
 
 // Cantidades chicas en letras (al inicio de una frase o en un sujeto): «dos piezas», «tres paneles»
@@ -66,3 +68,14 @@ export function version(v) {
   return t;
 }
 // Medios y canales en mayúsculas de la fuente: «LATINA TV» queda igual (son nombres); los grupos se traducen en el cálculo
+
+// Una plataforma digital como se escribe: «Facebook», «Google Search», «X»; un sitio, en minúsculas («infobae.com»)
+const PLATAFORMAS = { FACEBOOK: 'Facebook', INSTAGRAM: 'Instagram', YOUTUBE: 'YouTube', 'GOOGLE SEARCH': 'Google Search', TWITTER: 'X', TIKTOK: 'TikTok', LINKEDIN: 'LinkedIn' };
+export const plataformaEnFrase = (k) => PLATAFORMAS[k] ?? (k.includes('.') ? k.toLowerCase() : k[0] + k.slice(1).toLowerCase());
+// «Facebook, YouTube, Instagram y Google Search», o con la cola de los sitios: «…, Google Search y 12 sitios y redes más»
+export function plataformasTexto(ks, max = 4) {
+  const n = ks.map(plataformaEnFrase);
+  if (n.length <= max) return lista(n);
+  const resto = n.length - max;
+  return `${n.slice(0, max).join(', ')} y ${numero(resto)} ${resto === 1 ? 'sitio o red más' : 'sitios y redes más'}`;
+}

@@ -140,7 +140,8 @@ export const ESCENARIOS = [
       const pico = (g, id, k) => {
         const s = g.series.find((x) => x.id === id) ?? g.series[0];
         const completas = g.semanas.map((_, i) => i).filter((i) => !g.parcial[i]).slice(-4);
-        for (const i of completas) s.valores[i] = Math.min(100, Math.round(s.valores[i] * k)) || s.valores[i];
+        // sin tope de 100: la serie de cámaras suma dos términos y ya pasa de 100; con tope, el «pico» la bajaría
+        for (const i of completas) s.valores[i] = Math.round(s.valores[i] * k) || s.valores[i];
       };
       pico(d.busquedas.categoria, 'camaras', 2);
       if (d.busquedas.marcasDiy) pico(d.busquedas.marcasDiy, null, 5);
