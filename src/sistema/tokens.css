@@ -45,6 +45,7 @@
 
   /* ── Primitivos: neutros del oscuro, de la tinta hacia arriba ── */
   --p-o-950: #0b0c0f;
+  --p-o-950: #121318;      /* la página en oscuro: más oscura que el capítulo, para que se lean los tres niveles */
   --p-o-900: #1c1d23;
   --p-o-800: #272930;
   --p-o-750: #33353d;
@@ -172,7 +173,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --fondo: var(--p-tinta);
+    --fondo: var(--p-o-950);
     --superficie-capitulo: var(--p-o-900);
     --superficie: var(--p-o-800);
     --elevada: var(--p-o-750);
@@ -235,7 +236,7 @@
 }
 
 :root[data-theme="dark"] {
-  --fondo: var(--p-tinta);
+  --fondo: var(--p-o-950);
   --superficie-capitulo: var(--p-o-900);
   --superficie: var(--p-o-800);
   --elevada: var(--p-o-750);
