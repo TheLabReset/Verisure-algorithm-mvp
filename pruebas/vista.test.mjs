@@ -17,7 +17,7 @@ import { consultar } from '../src/fuentes/trends.js';
 import { armarMensajes, responder } from '../src/fuentes/maia.js';
 import { preguntarMaia } from '../src/fuentes/maia-navegador.js';
 import { MEDIOS, FRANJAS } from '../src/calculo/vista.js';
-import { numerosRotos, revisarTextos } from './revisar.mjs';
+import { numerosRotos, revisarTextos, RELLENO } from './revisar.mjs';
 
 const leer = (f) => readFileSync(new URL(`../public/data/${f}`, import.meta.url), 'utf8');
 const contrato = JSON.parse(leer('algorithm.json'));
@@ -165,20 +165,17 @@ test('leerCsv respeta comillas, comas y comillas dobles dentro de un campo', () 
 
 // Texto de relleno: frases que explican la interfaz, repiten lo que el gráfico ya muestra o usan jerga interna.
 // El socio lee lecturas, pies y ayudas; ninguna de estas frases le dice algo que no vea ya.
-const RELLENO = [
-  [/un clic|pasa el mouse|haz clic/i, 'explica cómo usar la pantalla'],
-  [/en la misma escala/i, 'explica la escala'],
-  [/cada carta es|van juntas en una carta/i, 'explica el abanico'],
-  [/en la comparación/i, 'no dice frente a qué compara'],
-  [/componente|pipeline|netlify|api_key|secrets|\/api\//i, 'jerga interna'],
-  [/cabe destacar|es importante señalar|en definitiva|asimismo/i, 'muletilla'],
-];
 test('ningún texto que ve el socio es relleno ni jerga interna', () => {
-  const archivos = ['src/textos/lecturas.js', 'src/textos/maia.js', 'src/capas/estructura.js', ...readdirSync(new URL('../src/pantallas/', import.meta.url)).map((f) => `src/pantallas/${f}`), 'src/App.jsx'];
+  const carpeta = (c) => readdirSync(new URL(`../${c}/`, import.meta.url)).filter((f) => /\.(jsx?|mjs)$/.test(f)).map((f) => `${c}/${f}`);
+  const archivos = ['src/textos/lecturas.js', 'src/textos/maia.js', 'src/textos/comun.js', 'src/capas/estructura.js', 'src/App.jsx',
+    ...carpeta('src/pantallas'), ...carpeta('src/sistema'), ...carpeta('src/sistema/graficos')];
+  // las funciones de Netlify y src/fuentes no muestran texto: sus mensajes se traducen en el panel, que sí se revisa en render.test.mjs
   const malos = [];
   for (const f of archivos) {
     // solo el texto: se saltan los comentarios y las importaciones
-    const s = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8').split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*|import )/.test(l)).join('\n').replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
+    // los comentarios al final de una línea de código también se saltan (no los de una URL: «https://»)
+    const s = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8').split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*|import )/.test(l))
+      .map((l) => l.replace(/(^|[^:'"`])\/\/ .*$/, '$1')).join('\n').replace(/\{\/\*[\s\S]*?\*\/\}/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
     for (const [re, por] of RELLENO) { const m = s.match(re); if (m) malos.push(`${f}: «${m[0]}» (${por})`); }
   }
   assert.deepEqual(malos, []);

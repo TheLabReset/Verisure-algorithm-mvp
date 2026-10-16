@@ -44,7 +44,7 @@ export function armarContexto(dir = DATA) {
     versionesCompetencia: (ultimo.lee.cronograma?.filas || []).map((f) => ({ version: f.version, universo: f.universo, desde: f.desde, hasta: f.hasta, inversion: r(f.inversion), canales: f.canales.slice(0, 4) })),
     shareSemanalCompetencia: ultimo.analiza.shareSemanal,
     busquedas: b ? {
-      nota: 'Índice de 0 a 100 de Google Trends Perú dentro de cada grupo; promedio de las últimas semanas completas frente a las mismas semanas de un año antes.',
+      nota: 'Índice de Google Trends Perú: 100 es la semana con más búsquedas de cada consulta; «cámaras de seguridad» suma dos formas de escribirlo y puede pasar de 100. Promedio de las últimas semanas completas frente a las mismas semanas de un año antes.',
       desde: b.desde, hasta: b.hasta, razonCamarasPorMarca: b.razon && Math.round(b.razon * 10) / 10,
       categoria: b.series.map((s) => ({ termino: s.nombre, ahora: r(s.ahora), antes: r(s.antes), crecimiento: s.crecimiento })),
       marcasDiy: b.marcas.map((m) => ({ marca: m.nombre, ahora: r(m.ahora), antes: r(m.antes), crecimiento: m.crecimiento })),

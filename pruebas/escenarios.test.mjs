@@ -10,7 +10,8 @@ import { numerosRotos, revisarTextos } from './revisar.mjs';
 
 const leer = (f) => JSON.parse(readFileSync(new URL(`../public/data/${f}`, import.meta.url), 'utf8'));
 const DATOS = { contrato: leer('algorithm.json'), medios: leer('medios.json'), mapa: leer('mapa-lima.json'), busquedas: leer('busquedas.json') };
-const original = JSON.stringify(DATOS.contrato.meta);
+// toda la data, no solo meta: un escenario que mutara una fila del contrato, de medios o de búsquedas cambiaría la data real
+const original = JSON.stringify(DATOS);
 
 for (const e of ESCENARIOS) {
   test(`escenario «${e.titulo}»: cada mes arma una vista sana y lecturas legibles`, () => {
@@ -24,8 +25,11 @@ for (const e of ESCENARIOS) {
 }
 
 test('los escenarios no tocan la data original', () => {
-  for (const e of ESCENARIOS) aplicarEscenario(e.id, DATOS);
-  assert.equal(JSON.stringify(DATOS.contrato.meta), original);
+  for (const e of ESCENARIOS) {
+    const meses = mesesDisponibles(DATOS.contrato.meta);
+    for (const mes of [undefined, meses[0], meses.at(-1)]) aplicarEscenario(e.id, DATOS, { mes });
+    assert.ok(JSON.stringify(DATOS) === original, `«${e.titulo}» cambió la data original`);
+  }
 });
 
 test('los escenarios mueven lo que dicen mover', () => {

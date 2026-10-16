@@ -136,6 +136,8 @@ export class Resguardo extends Component {
 export const VentanaContexto = createContext(null);
 // Demo: mientras «carga», cada tarjeta muestra su esqueleto en lugar del cuerpo
 export const CargandoContexto = createContext(false);
+// Los detalles abiertos de entrada: solo para la prueba de render, que pinta cada capa con su panel de detalle
+export const DetallesAbiertos = createContext(false);
 export function Ventana({ texto, fija }) {
   const Icono = fija ? Pin : Calendar;
   return <span className={`q-ventana${fija ? ' q-ventana-fija' : ''}`} title={fija ? 'No sigue el período elegido' : 'Sigue el período elegido'}><Icono size={12} aria-hidden="true" />{texto}</span>;
@@ -547,7 +549,7 @@ export function PanelLateral({ titulo, bajada, abierto, onCerrar, children, clas
 // de la derecha. El botón nombra lo que hay adentro, para que nada quede escondido sin aviso. Un ancla #detalle-…
 // (la que usan las alertas cuyo dato vive en el detalle) lo abre. El contenido se arma solo con el panel abierto.
 export function Detalle({ id, titulo, bajada, vistas, children }) {
-  const [abierto, setAbierto] = useState(false);
+  const [abierto, setAbierto] = useState(useContext(DetallesAbiertos));
   useEffect(() => {
     const mirar = () => { if (location.hash === '#' + id) setAbierto(true); };
     mirar();

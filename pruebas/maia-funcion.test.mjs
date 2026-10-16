@@ -94,3 +94,11 @@ test('Acceso: /api/maia y /data quedan detrás del Basic Auth, y una clave con �
   entorno({});
   assert.equal(await auth(new Request('https://panel.ejemplo/'), {}), undefined, 'sin credenciales el sitio queda abierto (modo demo)');
 });
+
+// MAIA responde con el archivo commiteado: si la capa de cálculo cambia y nadie corre `npm run contexto`, MAIA leería
+// cifras distintas de las que muestra el panel
+test('maia-contexto.json está al día con la capa de cálculo', async () => {
+  const { armarContexto } = await import('../scripts/armar-contexto.mjs');
+  const commiteado = JSON.parse(readFileSync(new URL('../public/data/maia-contexto.json', import.meta.url), 'utf8'));
+  assert.deepEqual(commiteado, JSON.parse(JSON.stringify(armarContexto())), 'corre npm run contexto');
+});
