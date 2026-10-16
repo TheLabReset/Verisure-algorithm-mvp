@@ -73,7 +73,7 @@ netlify/functions/    maia.mjs: la consulta a MAIA, con la clave de Anthropic en
 | `public/data/maia-contexto.json` | Lo que MAIA sabe: la misma data del panel, ya calculada | `npm run contexto`, cada día |
 | `public/data/maia.json` | La lectura de MAIA de la última semana | `npm run maia`, los lunes |
 
-El navegador solo lee estos archivos: no habla con Integrametrics ni ve el token. El botón «Export para su BI» descarga el CSV.
+El navegador solo lee estos archivos: no habla con Integrametrics ni ve el token. El CSV spot a spot (`export.csv`) lo publica el pipeline para el BI; el panel no lo ofrece como descarga.
 
 La data cubre del 1 de enero al 13 de julio de 2026. El panel dice cuántos días lleva sin datos nuevos; con el token en Secrets, el pipeline la pone al día.
 
