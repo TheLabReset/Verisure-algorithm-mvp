@@ -73,3 +73,35 @@ export function pautaSemanal(series, marca, dias) {
   }
   return out;
 }
+
+// La mezcla de una marca mes a mes: de su inversión del mes (el 100 %), qué parte es digital y qué parte ATL, y cómo
+// se reparte el ATL por medio. Suma ATL y digital, que Integrametrics estima con métodos distintos: sirve para ver
+// hacia dónde se mueve la mezcla, no para comparar montos. Solo porcentajes. Un mes sin inversión queda sin mezcla
+export function mezclaMensual(atlDaily, digDaily, marca, primerDia, ultimoDia) {
+  const meses = new Map();
+  for (let m = primerDia.slice(0, 7); m <= ultimoDia.slice(0, 7); m = siguienteMes(m)) meses.set(m, { atl: 0, digital: 0, medios: {} });
+  for (const d of atlDaily) {
+    const x = meses.get(d.fecha.slice(0, 7)), b = d.brands?.[marca];
+    if (!x || !b) continue;
+    x.atl += b.spend || 0;
+    for (const [medio, v] of Object.entries(b.byMedium || {})) x.medios[medio] = (x.medios[medio] || 0) + (v || 0);
+  }
+  for (const d of digDaily) {
+    const x = meses.get(d.fecha.slice(0, 7)), b = d.brands?.[marca];
+    if (x && b) x.digital += b.spend || 0;
+  }
+  const finDeMes = (m) => { const [a, mm] = m.split('-').map(Number); return new Date(Date.UTC(a, mm, 0)).toISOString().slice(0, 10); };
+  // el año, ponderado por la inversión de cada mes (no el promedio de los porcentajes)
+  const atl = [...meses.values()].reduce((s, x) => s + x.atl, 0), digital = [...meses.values()].reduce((s, x) => s + x.digital, 0);
+  const anio = atl + digital ? { digital: (digital / (atl + digital)) * 100, atl: (atl / (atl + digital)) * 100 } : null;
+  const lista = [...meses.entries()].map(([mes, x]) => {
+    const total = x.atl + x.digital;
+    const pct = (v) => (total ? (v / total) * 100 : null);
+    return {
+      mes, enCurso: ultimoDia < finDeMes(mes), digital: pct(x.digital), atl: pct(x.atl),
+      medios: Object.entries(x.medios).filter(([, v]) => v > 0).map(([medio, v]) => ({ medio, pct: pct(v) })).sort((a, b) => b.pct - a.pct),
+    };
+  });
+  return { anio, meses: lista };
+}
+const siguienteMes = (m) => { const [a, mm] = m.split('-').map(Number); return mm === 12 ? `${a + 1}-01` : `${a}-${String(mm + 1).padStart(2, '0')}`; };
