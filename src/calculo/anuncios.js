@@ -13,6 +13,9 @@ const PLATAFORMAS = {
 const ENLACE_BIBLIOTECA = /^https:\/\/(www\.)?facebook\.com\/ads\/library\//;
 const IMAGEN_DE_META = /^https:\/\/[a-z0-9.-]+\.fbcdn\.net\//i;
 const SIN_IDENTIFICAR = new Set(['desconocida', 'desconocido', 'unknown', '']);
+// Un anuncio HTML de portal que guardó Integrametrics: pasa solo si es un .html por https de su almacenamiento
+const PIEZA_HTML = /^https:\/\/integra-metrics-[a-z0-9-]+\.s3\.amazonaws\.com\/[^?#]+\.html?$/i;
+export const htmlDe = (asset) => (asset?.kind === 'link' && PIEZA_HTML.test(asset.url) ? asset.url : null);
 
 export const nombrePlataforma = (p) => PLATAFORMAS[p] ?? String(p || '').toLowerCase()
   .replace(/(^|_)(\w)/g, (_, s, c) => `${s ? ' ' : ''}${c.toUpperCase()}`);

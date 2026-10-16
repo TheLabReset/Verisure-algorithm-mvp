@@ -4,7 +4,7 @@ import {
   ArrowDownRight, ArrowUpRight, ArrowRight, CircleHelp, Megaphone, Contact, Search, MessagesSquare, Globe,
   Sigma, CircleCheck, TriangleAlert, CloudOff, Inbox, CalendarX2, CircleDashed, Hourglass, FlaskConical,
   Eye, TrendingUp, Bot, Calendar, Pin, ChevronDown, CornerDownRight, ListChecks, X, Layers, ArrowUpRight as Ir,
-  ExternalLink, Check, Play, Pause, RotateCcw, RotateCw, Tv, MonitorSmartphone, AudioLines, Image as ImagenIcono, PanelRightOpen, ZoomIn, ZoomOut, Maximize2,
+  ExternalLink, Check, Play, Pause, RotateCcw, RotateCw, Tv, MonitorSmartphone, AudioLines, Image as ImagenIcono, PanelRightOpen, ZoomIn, ZoomOut, Maximize2, Minimize2,
 } from 'lucide-react';
 import { NO_MEDIDO, variacion } from './formato.js';
 
@@ -576,7 +576,9 @@ export function Selector({ etiqueta, opciones, valor, onCambiar }) {
 // Una celda puede ser texto o { texto, sub, tono }: sub va debajo en gris; tono 'empeora' o 'mejora' colorea la cifra.
 // destacada: índice de la fila que se resalta (la propia marca, la página nueva).
 const celda = (v) => (v && typeof v === 'object' && !Array.isArray(v) && 'texto' in v ? v : { texto: v });
-export function Tabla({ etiqueta, columnas, filas, numericas = [], barra, destacada, apagadas = [] }) {
+// mejor y peor: { fila, texto } para marcar dos filas (la de mejor y la de peor desempeño) con fondo verde o rojo claro.
+// A pedido del equipo se ve solo el resaltado; el texto queda para el lector de pantalla y la ayuda de la tarjeta lo explica
+export function Tabla({ etiqueta, columnas, filas, numericas = [], barra, destacada, apagadas = [], mejor, peor }) {
   const positivos = barra ? barra.valores.filter((x) => x != null && x > 0) : [];
   const max = positivos.length ? Math.max(...positivos) : 1;
   return (
@@ -585,10 +587,11 @@ export function Tabla({ etiqueta, columnas, filas, numericas = [], barra, destac
         <thead><tr>{columnas.map((c, j) => <th key={c} scope="col" className={numericas.includes(j) ? 'q-num' : undefined}>{c}</th>)}</tr></thead>
         <tbody>
           {filas.map((f, i) => (
-            <tr key={i} className={i === destacada ? 'q-fila-destacada' : apagadas.includes(i) ? 'q-fila-apagada' : undefined}>{f.map((v, j) => {
+            <tr key={i} className={i === mejor?.fila ? 'q-fila-mejor' : i === peor?.fila ? 'q-fila-peor' : i === destacada ? 'q-fila-destacada' : apagadas.includes(i) ? 'q-fila-apagada' : undefined}>{f.map((v, j) => {
               const c = celda(v);
               const contenido = <>{c.texto}{c.sub && <span className="q-tabla-sub">{c.sub}</span>}</>;
-              if (j === 0) return <th key={j} scope="row">{contenido}</th>;
+              const marca = i === mejor?.fila ? mejor : i === peor?.fila ? peor : null;
+              if (j === 0) return <th key={j} scope="row">{contenido}{marca && <span className="solo-lector"> ({marca.texto})</span>}</th>;
               const clase = [numericas.includes(j) && 'q-num', c.tono && 'q-tono-' + c.tono].filter(Boolean).join(' ') || undefined;
               if (barra && j === barra.columna) {
                 const valor = barra.valores[i];
@@ -708,6 +711,9 @@ export function BarraDemo({ opciones, valor, onCambiar, escenarios, escenario, o
 
 // ── Ventana modal genérica (<dialog> nativo): atrapa el foco, Escape la cierra, solo se desplaza su cuerpo.
 // El clic en el velo cierra solo si empezó en el velo. Al cerrar, el foco vuelve a quien la abrió (o a `volver`).
+// Escape sale primero de la pantalla completa: ese mismo Escape no cierra la ventana que queda detrás
+let salidaPantalla = 0;
+if (typeof document !== 'undefined') document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) salidaPantalla = Date.now(); });
 export function Dialogo({ abierto, titulo, bajada, onCerrar, volver, children }) {
   const ref = useRef(null);
   const previo = useRef(null);
@@ -726,14 +732,15 @@ export function Dialogo({ abierto, titulo, bajada, onCerrar, volver, children })
   }, [abierto]);
   useEffect(() => () => document.documentElement.classList.remove('q-sin-desplazar'), []);
   const alCerrar = () => {
-    document.documentElement.classList.remove('q-sin-desplazar');
+    // una foto ampliada se abre sobre la ventana de anuncios: al cerrarla, la de abajo sigue sin desplazar la página
+    if (!document.querySelector('dialog.q-dialogo[open]')) document.documentElement.classList.remove('q-sin-desplazar');
     const v = previo.current;
     if (v?.isConnected && v.offsetParent !== null) v.focus(); else volver?.();
     if (abierto) onCerrar?.();
   };
   return (
     <dialog ref={ref} className="q-dialogo" aria-labelledby={tituloId} onClose={alCerrar}
-      onCancel={(e) => { e.preventDefault(); ref.current?.close(); }}
+      onCancel={(e) => { e.preventDefault(); if (document.fullscreenElement || Date.now() - salidaPantalla < 500) return; ref.current?.close(); }}
       onPointerDown={(e) => { enVelo.current = e.target === e.currentTarget; }}
       onClick={(e) => { if (e.target === e.currentTarget && enVelo.current) ref.current?.close(); enVelo.current = false; }}>
       <div className="q-dialogo-marco">
@@ -825,8 +832,25 @@ export function unSoloMedio() {
     for (const m of document.querySelectorAll('audio, video')) if (m !== e.target && !m.paused && !m.muted) m.pause();
   }, true);
 }
+// La pantalla completa: el marco entero (el video y su barra) o, donde el navegador no lo deja (el iPhone), el video solo
+function usePantallaCompleta(marco, video) {
+  const [completa, setCompleta] = useState(false);
+  useEffect(() => {
+    const cambio = () => setCompleta(!!marco.current && document.fullscreenElement === marco.current);
+    document.addEventListener('fullscreenchange', cambio);
+    return () => document.removeEventListener('fullscreenchange', cambio);
+  }, [marco]);
+  const alternar = () => {
+    if (document.fullscreenElement) { document.exitFullscreen?.(); return; }
+    const c = marco.current, v = video?.current;
+    const respaldo = () => v?.webkitEnterFullscreen?.();
+    if (c?.requestFullscreen) c.requestFullscreen().catch(respaldo); else respaldo();
+  };
+  return [completa, alternar];
+}
 export function Reproductor({ src, tipo, etiqueta, onError }) {
-  const ref = useRef(null);
+  const ref = useRef(null), marco = useRef(null);
+  const [completa, pantalla] = usePantallaCompleta(marco, ref);
   useEffect(() => { unSoloMedio(); const m = ref.current; return () => m?.pause(); }, []);
   const [sonando, setSonando] = useState(false), [t, setT] = useState(0), [total, setTotal] = useState(0);
   const el = () => ref.current;
@@ -835,17 +859,46 @@ export function Reproductor({ src, tipo, etiqueta, onError }) {
   const eventos = { ref, src, preload: 'metadata', onPlay: () => setSonando(true), onPause: () => setSonando(false), onEnded: () => setSonando(false),
     onTimeUpdate: (e) => setT(e.currentTarget.currentTime), onLoadedMetadata: (e) => setTotal(e.currentTarget.duration), onDurationChange: (e) => setTotal(e.currentTarget.duration), onError };
   return (
-    <div className={`q-reproductor q-reproductor-${tipo}`}>
+    <div ref={marco} className={`q-reproductor q-reproductor-${tipo}`}>
       {tipo === 'video' ? <video {...eventos} playsInline aria-label={etiqueta} onClick={alternar} /> : <><audio {...eventos} aria-label={etiqueta} /><span className="q-reproductor-onda" aria-hidden="true"><AudioLines size={28} /></span></>}
       <div className="q-reproductor-barra">
         <button type="button" className="q-reproductor-boton q-reproductor-play" onClick={alternar} aria-label={sonando ? 'Pausar' : 'Reproducir'}>{sonando ? <Pause size={20} aria-hidden="true" /> : <Play size={20} aria-hidden="true" />}</button>
-        <button type="button" className="q-reproductor-boton" onClick={() => saltar(-10)} aria-label="Retroceder 10 segundos"><RotateCcw size={18} aria-hidden="true" /></button>
+        <button type="button" className="q-reproductor-boton q-reproductor-salto" onClick={() => saltar(-10)} aria-label="Retroceder 10 segundos"><RotateCcw size={18} aria-hidden="true" /></button>
         <input type="range" className="q-reproductor-avance" min={0} max={total || 0} step={0.1} value={Math.min(t, total || 0)} aria-label={`Avance de ${etiqueta}`}
           aria-valuetext={`${reloj(t)} de ${reloj(total)}`} onChange={(e) => { const m = el(); if (m) { m.currentTime = Number(e.target.value); setT(m.currentTime); } }}
           style={{ '--avance': total ? `${(Math.min(t, total) / total) * 100}%` : '0%' }} />
-        <button type="button" className="q-reproductor-boton" onClick={() => saltar(10)} aria-label="Adelantar 10 segundos"><RotateCw size={18} aria-hidden="true" /></button>
+        <button type="button" className="q-reproductor-boton q-reproductor-salto" onClick={() => saltar(10)} aria-label="Adelantar 10 segundos"><RotateCw size={18} aria-hidden="true" /></button>
         <span className="q-reproductor-tiempo">{reloj(t)} / {reloj(total)}</span>
+        {tipo === 'video' && <button type="button" className="q-reproductor-boton q-reproductor-ampliar" onClick={pantalla} aria-label={completa ? 'Salir de la pantalla completa' : 'Ver en pantalla completa'}>{completa ? <Minimize2 size={18} aria-hidden="true" /> : <Maximize2 size={18} aria-hidden="true" />}</button>}
       </div>
+    </div>
+  );
+}
+
+// ── Un anuncio HTML de un portal, como lo guardó la fuente: en un marco aislado, reducido al ancho de la tarjeta y con
+// su botón de pantalla completa. El marco corre sus scripts en su propio origen (el almacenamiento de Integrametrics,
+// que nunca es el del panel: htmlDe solo deja pasar esa dirección), así que no toca el panel, no abre ventanas y no
+// navega. El tamaño va en el nombre del archivo («…_1366x1296.html»); si no está, va en un cuadrado ──
+export function PiezaHtml({ url, etiqueta }) {
+  const [, w = 300, h = 300] = (url.match(/_(\d+)x(\d+)\.html?(?:[?#]|$)/i) || []).map(Number);
+  const marco = useRef(null);
+  const [esc, setEsc] = useState({ s: 0, x: 0, y: 0 });
+  const [completa, pantalla] = usePantallaCompleta(marco);
+  useLayoutEffect(() => {
+    const c = marco.current;
+    if (!c || typeof ResizeObserver === 'undefined') return undefined;
+    const medir = () => { const r = c.getBoundingClientRect(), s = Math.min(r.width / w, r.height / h); setEsc({ s, x: (r.width - w * s) / 2, y: (r.height - h * s) / 2 }); };
+    medir();
+    const o = new ResizeObserver(medir); o.observe(c);
+    return () => o.disconnect();
+  }, [w, h]);
+  return (
+    <div ref={marco} className="q-pieza-html" style={{ aspectRatio: `${w} / ${h}` }}>
+      <iframe src={url} title={etiqueta} width={w} height={h} sandbox="allow-scripts allow-same-origin" loading="lazy" referrerPolicy="no-referrer" tabIndex={-1}
+        style={{ transform: `translate(${esc.x}px, ${esc.y}px) scale(${esc.s || 0.001})` }} />
+      <button type="button" className="q-pieza-ampliar" onClick={pantalla} aria-label={completa ? 'Salir de la pantalla completa' : `Ver en pantalla completa: ${etiqueta}`}>
+        {completa ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
+      </button>
     </div>
   );
 }
@@ -853,11 +906,18 @@ export function Reproductor({ src, tipo, etiqueta, onError }) {
 // ── Un anuncio entero, en la ventana. Una imagen que no carga sale; la tarjeta sigue sin ella ──
 function TarjetaAnuncio({ a, anunciante, t }) {
   const [rota, setRota] = useState(false), [videoRoto, setVideoRoto] = useState(false); // el video o el audio
+  const [ampliada, setAmpliada] = useState(false);
   const meta = t.meta(a);
   const texto = a.texto || t.texto(a);
+  const alt = `Imagen del anuncio de ${anunciante}`;
   return (
     <article className="q-anuncio" data-anuncio={a.id}>
-      {a.imagen && !rota && <div className="q-anuncio-pieza"><img src={a.imagen} alt={`Imagen del anuncio de ${anunciante}`} loading="lazy" referrerPolicy="no-referrer" onError={() => setRota(true)} /></div>}
+      {a.imagen && !rota && <div className="q-anuncio-pieza">
+        <img src={a.imagen} alt={alt} loading="lazy" referrerPolicy="no-referrer" onError={() => setRota(true)} />
+        <button type="button" className="q-ficha-ampliar" onClick={() => setAmpliada(true)} aria-label="Ampliar la imagen del anuncio"><span className="q-ficha-ampliar-icono" aria-hidden="true"><Maximize2 size={16} /></span></button>
+        <VisorFoto abierto={ampliada} onCerrar={() => setAmpliada(false)} src={a.imagen} alt={alt} titulo={a.titulo || anunciante} bajada={meta} />
+      </div>}
+      {!a.imagen && a.html && <div className="q-anuncio-pieza q-anuncio-pieza-html"><PiezaHtml url={a.html} etiqueta={`Anuncio de ${a.titulo || anunciante}`} /></div>}
       {!a.imagen && a.arte != null && <div className="q-anuncio-pieza"><ArteMuestra a={a} grande /></div>}
       {a.medio?.kind === 'video' && (videoRoto ? <p className="q-nota-bloque">El video de esta pieza no cargó.</p>
         : <div className="q-anuncio-reproductor"><Reproductor tipo="video" src={a.medio.url} etiqueta={`Video de ${a.titulo || anunciante}`} onError={() => setVideoRoto(true)} /></div>)}

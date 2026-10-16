@@ -172,6 +172,22 @@ export function distritosLectura(o) {
   return { titulo, lectura: `${lista(empatados.map((x) => x.nombre))} ${empatados.length > 1 ? 'son los distritos' : 'es el distrito'} con más paneles (${numero(d[0].total)}${empatados.length > 1 ? ' cada uno' : ''}).` };
 }
 export const panelTitulo = (p) => p.direccion || [p.tipo && version(p.tipo), p.distrito || p.localidad].filter(Boolean).join(' en ') || 'Panel sin dirección';
+// Un círculo del mapa que junta varias ubicaciones de una marca: su título y su pista, y cómo se nombra cada una en la lista
+export function grupoPanelesTexto(us) {
+  const caras = us.reduce((s, u) => s + u.paneles.length, 0), inversion = us.reduce((s, u) => s + u.inversion, 0);
+  const marcas = [...new Set(us.map((u) => u.nombre))];
+  const de = marcas.length === 1 ? ` de ${marcas[0]}` : `: ${lista(marcas.map((m) => `${numero(us.filter((u) => u.nombre === m).length)} de ${m}`))}`;
+  const titulo = `${numero(us.length)} ubicaciones${de}`;
+  return { titulo, pista: `${titulo}\n${numero(caras)} ${segun(caras, 'cara', 'caras')} · ${soles(inversion)}` };
+}
+// paneles: las caras de esa ubicación, con su dirección y su tipo
+// (la misma torre puede salir como dos puntos vecinos, detectada en días distintos: la fecha los distingue)
+export function ubicacionEnLista(u, paneles) {
+  const desde = paneles.map((p) => p.desde).sort()[0], hasta = paneles.map((p) => p.hasta).sort().at(-1);
+  const cuando = !desde ? null : desde === hasta ? `el ${fechaCorta(desde)}` : `del ${fechaCorta(desde)} al ${fechaCorta(hasta)}`;
+  const que = paneles.length > 1 ? `${panelTitulo(paneles[0])} (${numero(paneles.length)} caras)` : panelTitulo(paneles[0] ?? {});
+  return [que, cuando && `detectado ${cuando}`, soles(u.inversion)].filter(Boolean).join(' · ');
+}
 
 // ── 2.2 Cámaras DIY ──
 export function busquedasLectura(b) {
@@ -470,6 +486,12 @@ export function pushPullLectura(x) {
   return { titulo: `${nombre(mas)} convierte más: ${porcentaje(mas.l2b)} de sus leads llegan a booking`, lectura: `${nombre(menos)}, ${porcentaje(menos.l2b)}.` };
 }
 // Un costo frente a su objetivo, en palabras: en objetivo, o cuánto lo pasa
+// Las dos filas marcadas en las tablas de plataformas, y la ayuda que dice cómo se eligen
+export const extremoTexto = (cual, unidad) => `${cual === 'mejor' ? 'Mejor' : 'Peor'} ${unidad}`;
+export const extremosAyuda = (unidad) => (unidad === 'día'
+  ? 'En verde, el día con el menor costo por booking; en rojo, el de mayor costo o con inversión y sin bookings. Con menos de tres días no se marca ninguno.'
+  : 'En verde, la semana con el menor costo por booking; en rojo, la de mayor costo o con inversión y sin bookings. La semana incompleta no entra.');
+
 export const estadoObjetivo = (e) => ({ bien: 'En objetivo', cerca: `Hasta ${porcentaje(MARGEN_OBJETIVO)} por encima`, lejos: `Más de ${porcentaje(MARGEN_OBJETIVO)} por encima` }[e] ?? null);
 // las plataformas son de la marca propia y las maneja la agencia: lo que pasa el objetivo se dice sin juicio
 export function plataformasObjetivoLectura(x) {

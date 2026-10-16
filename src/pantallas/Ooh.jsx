@@ -1,11 +1,11 @@
 // OOH: el mapa de paneles (Leaflet, cargado aparte) y la ficha de la ubicación elegida, con su foto o video.
 // Lo de la competencia se elige primero. La ficha abre la ventana con todos los paneles de esa marca.
-import { lazy, Suspense, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { MapPin, Maximize2 } from 'lucide-react';
 import { Grupo, VentanaAnuncios, VisorFoto } from '../sistema/Componentes.jsx';
 import { numero, soles, fechaCorta } from '../sistema/formato.js';
 import { segun, version } from '../textos/comun.js';
-import { panelTitulo } from '../textos/lecturas.js';
+import { panelTitulo, grupoPanelesTexto, ubicacionEnLista } from '../textos/lecturas.js';
 
 const MapaPaneles = lazy(() => import('../sistema/graficos/MapaPaneles.jsx'));
 
@@ -68,6 +68,7 @@ export default function Ooh({ o, t, nota }) {
   const grupos = [...o.abanico.grupos, o.abanico.propio].filter(Boolean);
   const grupo = grupos.find((g) => g.nombre === ventana) ?? null;
   const elegirZona = (z) => { setZona(z); setElegida(null); };
+  const rotulo = useCallback((x) => ubicacionEnLista(x, o.paneles.filter((p) => p.ubicacion === x.id)), [o.paneles]);
   return (
     <div className="q-ooh">
       {/* la zona va en su propia fila, sobre las dos columnas: así el mapa y la foto del panel empiezan a la misma altura */}
@@ -79,7 +80,7 @@ export default function Ooh({ o, t, nota }) {
       <div className="q-ooh-mapa">
         <Suspense fallback={<div className="q-mapa q-mapa-cargando">Cargando el mapa…</div>}>
           <MapaPaneles key={o.zonas.map((z) => z.nombre).join()} ubicaciones={ubicaciones} elegida={id} onElegir={setElegida} encuadre={encuadre} contornos={o.contornos}
-            etiqueta={`Mapa de paneles OOH en ${actual?.nombre ?? 'Lima'}`} />
+            etiqueta={`Mapa de paneles OOH en ${actual?.nombre ?? 'Lima'}`} textoGrupo={grupoPanelesTexto} rotulo={rotulo} />
         </Suspense>
         <ul className="q-leyenda" aria-hidden="true">
           {[...new Map(o.ubicaciones.map((x) => [x.nombre, x])).values()].sort((a, b) => Number(b.foco) - Number(a.foco)).map((x) => <li key={x.nombre}><span className={`q-muestra ${x.foco ? 'q-muestra-mapa-foco' : x.propia ? 'q-muestra-mapa-propia' : 'q-muestra-mapa-resto'}`} />{x.nombre}</li>)}

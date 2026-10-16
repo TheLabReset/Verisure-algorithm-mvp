@@ -17,6 +17,18 @@ export function cifras(filas) {
 export const MARGEN_OBJETIVO = 15;
 export const frenteAlObjetivo = (costo, objetivo) => (costo == null || !objetivo ? null : costo <= objetivo ? 'bien' : costo <= objetivo * (1 + MARGEN_OBJETIVO / 100) ? 'cerca' : 'lejos');
 
+// El mejor y el peor tramo de una tabla (días o semanas), por costo por booking: el mejor, el más bajo; el peor, el más
+// alto, o un tramo con inversión y sin ningún booking si lo hay. Una semana incompleta no entra (no se compara con
+// semanas enteras), y con menos de tres tramos no se marca nada. Devuelve los tramos mismos, no su posición
+export function extremos(filas) {
+  const candidatos = filas.filter((f) => f.inversion > 0 && (f.dias == null || f.dias >= 7));
+  if (candidatos.length < 3) return { mejor: null, peor: null };
+  const conBooking = candidatos.filter((f) => f.bookings > 0), sinBooking = candidatos.filter((f) => !(f.bookings > 0));
+  const mejor = conBooking.reduce((a, f) => (a == null || f.cpb < a.cpb ? f : a), null);
+  const peor = sinBooking.length ? sinBooking.reduce((a, f) => (f.inversion > a.inversion ? f : a)) : conBooking.reduce((a, f) => (a == null || f.cpb > a.cpb ? f : a), null);
+  return mejor === peor || (mejor && peor && mejor.cpb === peor.cpb) ? { mejor: null, peor: null } : { mejor, peor };
+}
+
 export function leerPlataformas(datos, P) {
   if (!datos?.dias?.length) return null;
   const enTramo = (a, b) => datos.dias.filter((d) => d.fecha >= a && d.fecha <= b);

@@ -8,8 +8,8 @@ import { Lineas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, dolares, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import { resumenTitulo, comparacionTexto } from '../textos/comun.js';
-import { plataformasLectura, pushPullLectura, plataformasObjetivoLectura, estadoObjetivo } from '../textos/lecturas.js';
-import { MARGEN_OBJETIVO } from '../calculo/plataformas.js';
+import { plataformasLectura, pushPullLectura, plataformasObjetivoLectura, estadoObjetivo, extremoTexto, extremosAyuda } from '../textos/lecturas.js';
+import { MARGEN_OBJETIVO, extremos } from '../calculo/plataformas.js';
 
 const SEMANAS_A_LA_VISTA = 12; // como el tablero del cliente: el trimestre que termina en el período
 const TONO = { bien: 'mejora', cerca: null, lejos: 'empeora' };
@@ -29,6 +29,11 @@ export default function Activacion({ capa, vista: v }) {
   const frente = comparacionTexto(P);
   const delta = (k, mejorSi) => (a ? { cambio: cambio(t[k], a[k]), mejorSi, referencia: `frente a ${frente}` } : null);
   const ultimas = (semanas) => semanas.slice(-SEMANAS_A_LA_VISTA).reverse();
+  // las filas de mejor y peor desempeño de una tabla, en el orden en que se pintan
+  const marcas = (lista, unidad) => {
+    const e = extremos(lista), fila = (f) => (f ? { fila: lista.indexOf(f) } : null);
+    return { mejor: e.mejor && { ...fila(e.mejor), texto: extremoTexto('mejor', unidad) }, peor: e.peor && { ...fila(e.peor), texto: extremoTexto('peor', unidad) } };
+  };
   return (
     <MarcoCapa capa={capa} vista={v}>
       <Resumen titulo={resumenTitulo(P)} ejemplo
@@ -56,9 +61,10 @@ export default function Activacion({ capa, vista: v }) {
             series={[{ nombre: 'Leads', tono: 'tinta', serie: x.diaria.map((d) => ({ fecha: d.fecha, valor: d.leads })) }, { nombre: 'Bookings', tono: 'propia', serie: x.diaria.map((d) => ({ fecha: d.fecha, valor: d.bookings })) }]} />
         </Bloque>
         <Detalle id={`detalle-${s31.id}`} titulo="Detalle de las plataformas, día por día" bajada="Data de ejemplo, por conectar." vistas={['inversión, leads, bookings y costos de cada día']}>
-          <Bloque universo="plataformas" titulo="Cada día del período" ejemplo pie={<span>{x.fuente}.</span>}>
+          <Bloque universo="plataformas" titulo="Cada día del período" ejemplo pie={<span>{x.fuente}.</span>} ayuda={<p>{extremosAyuda('día')}</p>}>
             <Tabla etiqueta="Inversión, leads, bookings y costos por día" numericas={[1, 2, 3, 4, 5, 6]}
               columnas={['Día', 'Inversión', 'Leads', 'Bookings', 'L2B', 'Costo por lead', 'Costo por booking']}
+              {...marcas([...x.diaria].reverse(), 'día')}
               filas={[...x.diaria].reverse().map((d) => [fechaCorta(d.fecha), dolares(d.inversion), numero(d.leads), numero(d.bookings), pct(d.l2b), costo(d.cpl), costo(d.cpb)])} />
           </Bloque>
         </Detalle>
@@ -106,10 +112,11 @@ export default function Activacion({ capa, vista: v }) {
             series={x.plataformas.map((p) => ({ nombre: p.nombre, leyenda: `${p.nombre} (objetivo ${costo(p.objetivo.cpb)})`, serie: p.semanas.slice(-SEMANAS_A_LA_VISTA).map((s) => ({ fecha: s.desde, valor: s.cpb == null ? null : Math.round(s.cpb) })) }))} />
         </Bloque>
         <Detalle id={`detalle-${s33.id}`} titulo="Detalle de cada plataforma" bajada="Data de ejemplo, por conectar." vistas={['cada plataforma semana a semana', 'sus campañas']}>
-          <Bloque universo="plataformas" titulo={`${plat.nombre}, semana a semana`} ejemplo pie={<span>{x.fuente}.</span>}>
+          <Bloque universo="plataformas" titulo={`${plat.nombre}, semana a semana`} ejemplo pie={<span>{x.fuente}.</span>} ayuda={<p>{extremosAyuda('semana')}</p>}>
             <div className="q-control q-control-tarjeta"><span>Plataforma</span><Grupo etiqueta="Plataforma" valor={plat.id} onCambiar={setPlataforma} opciones={opciones} /></div>
             <Tabla etiqueta={`${plat.nombre} por semana`} numericas={[1, 2, 3, 4, 5, 6]}
               columnas={['Semana', 'Inversión', 'Leads', 'Bookings', 'L2B', 'Costo por lead', 'Costo por booking']}
+              {...marcas(ultimas(plat.semanas), 'semana')}
               filas={ultimas(plat.semanas).map((s) => [`${fechaCorta(s.desde)}${s.dias < 7 ? ' (incompleta)' : ''}`, dolares(s.inversion), numero(s.leads), numero(s.bookings), pct(s.l2b), conTono(costo(s.cpl), s.estadoCpl), conTono(costo(s.cpb), s.estadoCpb)])} />
           </Bloque>
           <Bloque universo="plataformas" titulo={`Las campañas de ${plat.nombre}`} ejemplo pie={<span>Campañas del período, de más a menos inversión.</span>}>

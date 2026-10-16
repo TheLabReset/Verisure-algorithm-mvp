@@ -99,6 +99,8 @@
   --foco: var(--p-tinta);                /* anillo de foco */
   --mejora: var(--p-verde-oscuro);       /* variación favorable: siempre con flecha y signo */
   --empeora: var(--p-rojo-texto);        /* variación desfavorable */
+  --mejora-suave: color-mix(in oklab, var(--mejora) 12%, var(--superficie));   /* fondo de la fila de mejor desempeño */
+  --empeora-suave: color-mix(in oklab, var(--empeora) 12%, var(--superficie)); /* fondo de la fila de peor desempeño */
   --atencion: var(--p-tinta);            /* pocos casos, dato parcial: en tinta con su ícono, para no confundirse con el amarillo de la competencia */
   --s1: var(--resalte);                  /* puntos de la serie en foco */
   --resalte: var(--p-prosegur);          /* rellenos de la serie en foco: la competencia, en su amarillo */
