@@ -595,6 +595,12 @@ export function Histograma({ barras, formato = numero, rotulo, resaltar = [], et
         // la cifra va sobre la barra más alta: de las resaltadas si las hay, si no de todas
         const candidatas = resaltar.length ? resaltar : barras.map((_, i) => i).filter((i) => barras[i].valor > 0);
         const tope = candidatas.length ? candidatas.reduce((a, i) => ((barras[i].valor ?? 0) > (barras[a].valor ?? 0) ? i : a), candidatas[0]) : -1;
+        // la cifra va por encima de todas las barras que quedan debajo de su ancho, no solo de la suya: así no se les encima
+        const sobre = (i, texto) => {
+          const cx = m.l + i * paso + paso / 2, medio = (String(texto).length * 7.8) / 2;
+          const debajo = barras.filter((_, j) => Math.abs(m.l + j * paso + paso / 2 - cx) < medio + paso / 2);
+          return Math.max(12, Math.min(...debajo.map((d) => y(d.valor ?? 0))) - 6);
+        };
         return (
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
             <line className="q-rejilla" x1={m.l} x2={ancho - m.r} y1={y(0)} y2={y(0)} />
@@ -606,7 +612,7 @@ export function Histograma({ barras, formato = numero, rotulo, resaltar = [], et
                   {b.valor > 0 && <rect className={r ? (tono === 'propia' ? 'q-barra-propia' : tono === 'resto' ? 'q-barra-resto-fuerte' : 'q-barra-acento') : resaltar.length || tono === 'resto' ? 'q-barra-resto' : tono === 'propia' ? 'q-barra-propia' : 'q-barra'} x={x} y={y(b.valor)} width={w} height={y(0) - y(b.valor)} rx="2" data-valor={b.valor} />}
                   {/* rótulos a intervalo fijo; una barra resaltada fuera del intervalo se rotula solo si cabe */}
                   {(i % cada === 0 || (r && cada === 1)) && <text className={`q-eje${r ? ' q-fuerte' : ''}`} x={Math.max(x + w / 2, 12)} y={alto - 8} textAnchor="middle">{b.corto ?? b.nombre}</text>}
-                  {(rotulo || i === tope) && <Rotulo texto={rotulo ? rotulo(b) : formato(b.valor)} cx={x + w / 2} y={y(b.valor ?? 0) - 6} ancho={ancho} />}
+                  {(rotulo || i === tope) && <Rotulo texto={rotulo ? rotulo(b) : formato(b.valor)} cx={x + w / 2} y={rotulo ? y(b.valor ?? 0) - 6 : sobre(i, formato(b.valor))} ancho={ancho} />}
                 </g>
               );
             })}
@@ -743,11 +749,23 @@ export function Lineas({ series: dadas, formato = numero, alto: altoPedido, etiq
           x0 += largo;
         }
         const filasLeyenda = leyenda.length ? leyenda.at(-1).fila + 1 : 0;
-        const m = { t: 18 + 20 * filasLeyenda, r: 12, b: 26, l: Math.max(52, 14 + Math.ceil(Math.max(...ys.map((v) => formato(v).length)) * 7.8)) };
+        // la leyenda elegible es un botón: cada fila mide 28 px de alto para que se pueda tocar con el dedo
+        const pasoLeyenda = elegible ? 28 : 20, baseLeyenda = elegible ? 20 : 12;
+        const m = { t: elegible ? 10 + 28 * filasLeyenda : 18 + 20 * filasLeyenda, r: 12, b: 26, l: Math.max(52, 14 + Math.ceil(Math.max(...ys.map((v) => formato(v).length)) * 7.8)) };
         const x = lineal(0, base.length - 1, m.l, ancho - m.r), y = lineal(0, ys.at(-1), alto - m.b, m.t);
         // la resaltada (o la elegida) se dibuja encima
         const orden = [...series].sort((a, b) => (elegible ? Number(a === series[activa]) - Number(b === series[activa]) : Number(a.resaltada) - Number(b.resaltada)));
         const elegir = (k) => (e) => { if (!e.key || e.key === 'Enter' || e.key === ' ') { e.preventDefault?.(); setElegida(k); } };
+        // un toque sobre las líneas elige la más cercana al dedo en ese punto, no la que quedó dibujada encima
+        const elegirCerca = (e) => {
+          const svg = e.currentTarget.ownerSVGElement, ctm = svg?.getScreenCTM();
+          if (!ctm) return;
+          const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
+          const i = Math.max(0, Math.min(base.length - 1, Math.round((p.x - m.l) / ((ancho - m.r - m.l) / Math.max(1, base.length - 1)))));
+          let mejor = -1, dist = Infinity;
+          series.forEach((s, k) => { const v = s.serie[i]?.valor; if (v != null && Math.abs(y(v) - p.y) < dist) { dist = Math.abs(y(v) - p.y); mejor = k; } });
+          if (mejor >= 0) setElegida(mejor);
+        };
         return (
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
             {ys.map((v) => <g key={v}><line className="q-rejilla" x1={m.l} x2={ancho - m.r} y1={y(v)} y2={y(v)} /><text className="q-eje" x={m.l - 8} y={y(v) + 4} textAnchor="end">{formato(v)}</text></g>)}
@@ -757,10 +775,10 @@ export function Lineas({ series: dadas, formato = numero, alto: altoPedido, etiq
             {base.map((p, i) => <Zona key={'z' + p.fecha} x={x(i) - (x(1) - x(0)) / 2} y={m.t} w={x(1) - x(0)} h={alto - m.b - m.t} pista={`${fecha(p.fecha)}\n${series.map((s) => `${s.nombre}: ${formato(s.serie[i]?.valor)}`).join('\n')}`} />)}
             {orden.map((s) => <path key={s.nombre} className={`${claseLinea(s)}${s.discontinua ? ' q-discontinua' : ''}`} d={camino(s.serie, x, y)} />)}
             {/* un área de toque ancha sobre cada línea, para elegirla */}
-            {elegible && series.map((s, k) => <path key={'t' + s.nombre} className="q-linea-toque" d={camino(s.serie, x, y)} onClick={elegir(k)} aria-hidden="true" />)}
+            {elegible && series.map((s) => <path key={'t' + s.nombre} className="q-linea-toque" d={camino(s.serie, x, y)} onClick={elegirCerca} aria-hidden="true" />)}
             {leyenda.map((s, k) => (
-              <g key={'l' + s.nombre} transform={`translate(${4 + s.x}, ${12 + s.fila * 20})`} {...(elegible ? { role: 'button', tabIndex: 0, 'aria-pressed': k === activa, 'aria-label': `Resaltar ${s.nombre}`, className: 'q-leyenda-elegible', onClick: elegir(k), onKeyDown: elegir(k) } : {})}>
-                {elegible && <rect className="q-leyenda-toque" x={-4} y={-14} width={34 + Math.ceil((s.leyenda ?? s.nombre).length * 7.8)} height={20} />}
+              <g key={'l' + s.nombre} transform={`translate(${4 + s.x}, ${baseLeyenda + s.fila * pasoLeyenda})`} {...(elegible ? { role: 'button', tabIndex: 0, 'aria-pressed': k === activa, 'aria-label': `Resaltar ${s.nombre}`, className: 'q-leyenda-elegible', onClick: elegir(k), onKeyDown: elegir(k) } : {})}>
+                {elegible && <rect className="q-leyenda-toque" x={-4} y={-18} width={34 + Math.ceil((s.leyenda ?? s.nombre).length * 7.8)} height={26} rx="4" />}
                 <line className={`${claseLinea(s)}${s.discontinua ? ' q-discontinua' : ''}`} x1={0} x2={24} y1={-4} y2={-4} />
                 <text className={`q-rotulo-final${s.resaltada || (s.tono && s.tono !== 'resto') ? '' : ' q-rotulo-resto'}`} x={30} y={0}>{s.leyenda ?? s.nombre}</text>
               </g>

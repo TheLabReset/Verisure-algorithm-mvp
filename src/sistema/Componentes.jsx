@@ -113,7 +113,7 @@ export function Ayuda({ titulo = 'Cómo se calcula', children }) {
 
 // ── Selector de período: atajos y, aparte, dos fechas para cualquier tramo ──
 // El panel nunca sale de la pantalla: se mide y se corre hacia adentro, como la ayuda
-export function SelectorPeriodo({ texto, atajo, atajos, desde, hasta, min, max, comparacion, onAtajo, onRango }) {
+export function SelectorPeriodo({ texto, atajo, atajos, desde, hasta, min, max, comparacion, aviso, onAtajo, onRango }) {
   const [abierto, setAbierto] = useState(false);
   const [borrador, setBorrador] = useState({ desde, hasta });
   const id = useId();
@@ -142,6 +142,8 @@ export function SelectorPeriodo({ texto, atajo, atajos, desde, hasta, min, max, 
   }, [abierto]);
   const valida = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d || '') && d >= min && d <= max;
   const aplicar = (b) => { if (valida(b.desde) && valida(b.hasta) && b.desde <= b.hasta) onRango(b.desde, b.hasta); };
+  // una fecha fuera de la data o un «desde» después del «hasta» no cambia el período: se marca el campo y se dice por qué
+  const malDesde = !valida(borrador.desde) || (valida(borrador.hasta) && borrador.desde > borrador.hasta), malHasta = !valida(borrador.hasta);
   const nombre = atajos.find((a) => a.id === atajo)?.nombre;
   return (
     <div className="q-periodo" ref={ref}>
@@ -159,9 +161,10 @@ export function SelectorPeriodo({ texto, atajo, atajos, desde, hasta, min, max, 
         </div>
         <p className="q-periodo-titulo">Fechas</p>
         <div className="q-periodo-rango">
-          <label>Desde<input type="date" value={borrador.desde} min={min} max={borrador.hasta || max} onChange={(e) => { const b = { ...borrador, desde: e.target.value }; setBorrador(b); aplicar(b); }} /></label>
-          <label>Hasta<input type="date" value={borrador.hasta} min={borrador.desde || min} max={max} onChange={(e) => { const b = { ...borrador, hasta: e.target.value }; setBorrador(b); aplicar(b); }} /></label>
+          <label>Desde<input type="date" value={borrador.desde} min={min} max={valida(borrador.hasta) ? borrador.hasta : max} aria-invalid={malDesde} onChange={(e) => { const b = { ...borrador, desde: e.target.value }; setBorrador(b); aplicar(b); }} /></label>
+          <label>Hasta<input type="date" value={borrador.hasta} min={valida(borrador.desde) ? borrador.desde : min} max={max} aria-invalid={malHasta} onChange={(e) => { const b = { ...borrador, hasta: e.target.value }; setBorrador(b); aplicar(b); }} /></label>
         </div>
+        {(malDesde || malHasta) && aviso && <p className="q-periodo-error" role="alert">{aviso}</p>}
         {comparacion && <p className="q-periodo-nota">{comparacion}</p>}
       </div>
     </div>
@@ -813,8 +816,18 @@ export function ArteMuestra({ a, grande = false }) {
 // ── Reproductor de audio y video: botón grande, barra de avance que se agarra con el dedo, el tiempo a la vista y
 // saltos de 10 segundos. Los controles del navegador quedan chicos en una tarjeta angosta ──
 const reloj = (s) => (Number.isFinite(s) ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}` : '0:00');
+// Suena un solo medio a la vez: el play de uno pausa a los demás, también a los que quedaron detrás de una ventana
+let excluyente = false;
+export function unSoloMedio() {
+  if (excluyente || typeof document === 'undefined') return;
+  excluyente = true;
+  document.addEventListener('play', (e) => {
+    for (const m of document.querySelectorAll('audio, video')) if (m !== e.target && !m.paused && !m.muted) m.pause();
+  }, true);
+}
 export function Reproductor({ src, tipo, etiqueta, onError }) {
   const ref = useRef(null);
+  useEffect(() => { unSoloMedio(); const m = ref.current; return () => m?.pause(); }, []);
   const [sonando, setSonando] = useState(false), [t, setT] = useState(0), [total, setTotal] = useState(0);
   const el = () => ref.current;
   const alternar = () => { const m = el(); if (!m) return; if (m.paused) m.play().catch(() => {}); else m.pause(); };

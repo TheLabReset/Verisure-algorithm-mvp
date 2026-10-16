@@ -16,6 +16,8 @@ export function tramoFechas(desde, hasta) {
 }
 // El chip de una tarjeta: «1 al 30 de junio», o «1 de julio» si el período es de un solo día
 export const ventanaTexto = (desde, hasta) => tramoFechas(desde, hasta).replace(/^(del|el) /, '');
+// El aviso del selector cuando una fecha a mano no sirve
+export const avisoFechas = (min, max) => `Hay data ${tramoFechas(min, max)}, y «Desde» va antes de «Hasta».`;
 // El período: el mes entero, o el tramo cuando el mes todavía corre («del 1 al 13 de julio»)
 // El mes en curso se dice «lo que va de julio»: se lee bien después de «de», «en» o «para», y el tramo exacto va en el chip de cada tarjeta
 // Un tramo de meses que se escribe con lo que tiene la data: «entre enero y julio», «en julio»,

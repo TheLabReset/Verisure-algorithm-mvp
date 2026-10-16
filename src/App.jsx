@@ -7,8 +7,8 @@ import { ATAJOS, ATAJO_INICIAL } from './calculo/periodo.js';
 import { ESCENARIOS, aplicarEscenario } from './calculo/escenarios.js';
 import { CAPAS } from './capas/estructura.js';
 import { fecha } from './sistema/formato.js';
-import { ventanaTexto, comparacionTexto } from './textos/comun.js';
-import { NavegacionCapas, SelectorPeriodo, BarraDemo, CargandoContexto, Estado, Resguardo } from './sistema/Componentes.jsx';
+import { ventanaTexto, comparacionTexto, avisoFechas } from './textos/comun.js';
+import { NavegacionCapas, SelectorPeriodo, BarraDemo, CargandoContexto, Estado, Resguardo, unSoloMedio } from './sistema/Componentes.jsx';
 import Senales from './pantallas/Senales.jsx';
 import Inteligencia from './pantallas/Inteligencia.jsx';
 import Activacion from './pantallas/Activacion.jsx';
@@ -73,6 +73,7 @@ export default function App() {
   const [demo, setDemo] = useState('datos');
   const [presentar, setPresentar] = useState(false);
   const [maiaAbierta, setMaiaAbierta] = useState(false);
+  useEffect(() => { unSoloMedio(); }, []);
   useEffect(() => { document.documentElement.dataset.theme = tema; }, [tema]);
   useEffect(() => { if (presentar) document.documentElement.dataset.presentar = ''; else delete document.documentElement.dataset.presentar; }, [presentar]);
   const cambiarTema = () => { const t = tema === 'dark' ? 'light' : 'dark'; setTema(t); guardarPref('tema-elegido', t); };
@@ -156,6 +157,7 @@ export default function App() {
               <SelectorPeriodo texto={ventanaTexto(vista.periodo.desde, vista.periodo.hasta)} atajo={vista.periodo.atajo} atajos={ATAJOS}
                 desde={vista.periodo.desde} hasta={vista.periodo.hasta} min={data.contrato.meta.firstDay} max={data.contrato.meta.lastDay}
                 comparacion={vista.periodo.compararDesde ? `Se compara con ${comparacionTexto(vista.periodo)}, ${ventanaTexto(vista.periodo.compararDesde, vista.periodo.compararHasta)}.` : 'Sin días antes con qué comparar.'}
+                aviso={avisoFechas(data.contrato.meta.firstDay, data.contrato.meta.lastDay)}
                 onAtajo={(atajo) => setFiltros({ atajo })} onRango={(desde, hasta) => setFiltros({ desde, hasta })} />
             )}
           </div>
