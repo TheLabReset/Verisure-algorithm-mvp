@@ -328,7 +328,10 @@ function queMirar(v, P) {
   return out.map((a) => ({ ...a, competencia: deCompetencia(a), periodo: P })).sort((a, z) => Number(z.competencia) - Number(a.competencia));
 }
 
-export function armarVista(contrato, medios, filtros, estado = {}, { mapa = null, busquedas = null } = {}) {
+export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaLeido = null, busquedas: busquedasLeidas = null } = {}) {
+  // un archivo opcional con otra forma (vacío, de otra versión) cuenta como que no llegó
+  const mapa = mapaLeido?.proyeccion && Array.isArray(mapaLeido.distritos) ? mapaLeido : null;
+  const busquedas = busquedasLeidas?.categoria?.semanas?.length && Array.isArray(busquedasLeidas.categoria.series) ? busquedasLeidas : null;
   const meta = contrato.meta;
   const P = periodoDelMes(meta, filtros.mes);
   const caidas = new Set(estado.fuentesCaidas || []);

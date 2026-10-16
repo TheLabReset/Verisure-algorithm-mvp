@@ -58,3 +58,16 @@ for (const e of [{ id: null, titulo: 'Data real' }, ...ESCENARIOS]) {
     assert.deepEqual([...malos].slice(0, 12), []);
   });
 }
+
+// Los estados de la barra Demo: cada fuente caída y la carga, en cada mes, con los avisos que trae cada uno
+test('render: fuentes caídas y cargando, sin texto roto', () => {
+  const malos = new Set();
+  for (const mes of mesesDisponibles(DATOS.contrato.meta)) {
+    for (const caida of ['atl', 'digital', 'trends', null]) {
+      const v = armarVista(DATOS.contrato, DATOS.medios, { mes }, { fuentesCaidas: caida ? [caida] : [] }, { mapa: DATOS.mapa, busquedas: DATOS.busquedas });
+      const nombres = nombresDeLaFuente(v);
+      for (const id of IDS) for (const m of textoRoto(texto(pintar(id, v, { cargando: !caida })), nombres)) malos.add(`${id} ${mes} ${caida ?? 'cargando'}: ${m}`);
+    }
+  }
+  assert.deepEqual([...malos].slice(0, 12), []);
+});

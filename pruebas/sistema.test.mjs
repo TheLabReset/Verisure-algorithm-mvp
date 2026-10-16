@@ -65,3 +65,17 @@ test('el contraste coincide con valores de referencia WCAG', () => {
   assert.equal(+contraste('#000000', '#ffffff').toFixed(2), 21);
   assert.equal(+contraste('#777777', '#ffffff').toFixed(2), 4.48);
 });
+
+// Franjas de resalte disfrazadas: cada forma de escribir un borde o una sombra gruesa tiene que dar rojo
+test('el chequeo atrapa las franjas en cualquier unidad, en calc, en sombras y en un style', async () => {
+  const { revisar, TOKENS } = await import('../herramientas/revisar-sistema.mjs');
+  const tokens = readFileSync(new URL(`../${TOKENS}`, import.meta.url), 'utf8');
+  const franjas = ['border-left: 4px solid var(--borde)', 'border-left: 0.25rem solid var(--borde)', 'border-left: calc(1px + 2px) solid var(--borde)',
+    'border-left: 0.2cm solid var(--borde)', 'border-left: 0.5vw solid var(--borde)', 'border-left: 5Q solid var(--borde)', 'border-inline-start: 4px solid var(--borde)',
+    'BORDER-LEFT-WIDTH: 4PX', 'border-left: thick solid var(--borde)', 'border-image: linear-gradient(var(--propia), var(--propia)) 1 / 0 0 0 6px',
+    'box-shadow: var(--sombra-flota), inset 4px 0 0 var(--propia)', 'border-left: 2.5px solid var(--borde)'];
+  for (const c of franjas) assert.ok(revisar({ [TOKENS]: tokens, 'src/a.css': `.a { ${c}; }` }).errores.some((e) => e.startsWith('src/a.css')), `no atrapó «${c}»`);
+  assert.ok(revisar({ [TOKENS]: tokens, 'src/a.jsx': "export default () => <div style={{ borderLeft: '6px solid var(--propia)' }} />" }).errores.some((e) => e.startsWith('src/a.jsx')), 'no atrapó un borde en un style');
+  for (const c of ['border: 1px solid var(--borde)', 'border-left: 2px solid var(--borde)', 'box-shadow: var(--sombra-flota), 0 0 0 1px var(--borde)', 'box-shadow: none'])
+    assert.deepEqual(revisar({ [TOKENS]: tokens, 'src/a.css': `.a { ${c}; }` }).errores.filter((e) => e.startsWith('src/a.css')), [], `marcó «${c}», que no es franja`);
+});

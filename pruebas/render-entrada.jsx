@@ -1,7 +1,7 @@
 // Entrada de la prueba de render: pinta una capa (o el panel de MAIA) a HTML, con los paneles de detalle abiertos.
 // La arma esbuild en pruebas/render.test.mjs; el mapa de Leaflet queda afuera, porque necesita un navegador.
 import { renderToStaticMarkup } from 'react-dom/server';
-import { DetallesAbiertos } from '../src/sistema/Componentes.jsx';
+import { DetallesAbiertos, CargandoContexto } from '../src/sistema/Componentes.jsx';
 import { CAPAS } from '../src/capas/estructura.js';
 import Senales from '../src/pantallas/Senales.jsx';
 import Inteligencia from '../src/pantallas/Inteligencia.jsx';
@@ -12,8 +12,8 @@ import Maia from '../src/pantallas/Maia.jsx';
 const PANTALLAS = { senales: Senales, inteligencia: Inteligencia, activacion: Activacion, rendimiento: Rendimiento };
 export const IDS = CAPAS.map((c) => c.id).filter((id) => PANTALLAS[id]);
 
-export function pintar(id, vista) {
+export function pintar(id, vista, { cargando = false } = {}) {
   const Pantalla = PANTALLAS[id];
-  return renderToStaticMarkup(<DetallesAbiertos.Provider value={true}><Pantalla capa={CAPAS.find((c) => c.id === id)} vista={vista} irACapa={() => {}} /></DetallesAbiertos.Provider>);
+  return renderToStaticMarkup(<CargandoContexto.Provider value={cargando}><DetallesAbiertos.Provider value={true}><Pantalla capa={CAPAS.find((c) => c.id === id)} vista={vista} irACapa={() => {}} /></DetallesAbiertos.Provider></CargandoContexto.Provider>);
 }
 export const pintarMaia = (vista, reporte) => renderToStaticMarkup(<Maia abierta onCerrar={() => {}} vista={vista} reporte={reporte} />);

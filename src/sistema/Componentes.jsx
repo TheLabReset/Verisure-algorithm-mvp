@@ -531,6 +531,10 @@ export function PanelLateral({ titulo, bajada, abierto, onCerrar, children, clas
     if (!d) return;
     if (abierto && !d.open) d.showModal();
     if (!abierto && d.open) d.close();
+    // con el panel abierto, la rueda no mueve la página de atrás (igual que en las ventanas)
+    if (!abierto) return undefined; // un panel cerrado no toca la clase: podría haber una ventana abierta
+    document.documentElement.classList.add('q-sin-desplazar');
+    return () => document.documentElement.classList.remove('q-sin-desplazar');
   }, [abierto]);
   return (
     <dialog ref={ref} className={`q-panel ${className}`} aria-labelledby={tituloId} onClose={onCerrar} onClick={(e) => { if (e.target === ref.current) onCerrar(); }}>
@@ -551,7 +555,13 @@ export function PanelLateral({ titulo, bajada, abierto, onCerrar, children, clas
 export function Detalle({ id, titulo, bajada, vistas, children }) {
   const [abierto, setAbierto] = useState(useContext(DetallesAbiertos));
   useEffect(() => {
-    const mirar = () => { if (location.hash === '#' + id) setAbierto(true); };
+    // el ancla lo abre; si el ancla cambia (el botón Atrás), lo cierra. Un detalle abierto con clic no tiene ancla
+    // propia, así que solo se cierra si antes lo había abierto el ancla
+    let porAncla = false;
+    const mirar = () => {
+      if (location.hash === '#' + id) { porAncla = true; setAbierto(true); }
+      else if (porAncla) { porAncla = false; setAbierto(false); }
+    };
     mirar();
     window.addEventListener('hashchange', mirar);
     return () => window.removeEventListener('hashchange', mirar);
@@ -667,7 +677,7 @@ export function ArteMuestra({ a, grande = false }) {
 
 // ── Un anuncio entero, en la ventana. Una imagen que no carga sale; la tarjeta sigue sin ella ──
 function TarjetaAnuncio({ a, anunciante, t }) {
-  const [rota, setRota] = useState(false), [videoRoto, setVideoRoto] = useState(false);
+  const [rota, setRota] = useState(false), [videoRoto, setVideoRoto] = useState(false); // el video o el audio
   const meta = t.meta(a);
   const texto = a.texto || t.texto(a);
   return (
@@ -676,7 +686,8 @@ function TarjetaAnuncio({ a, anunciante, t }) {
       {!a.imagen && a.arte != null && <div className="q-anuncio-pieza"><ArteMuestra a={a} grande /></div>}
       {a.medio?.kind === 'video' && (videoRoto ? <p className="q-nota-bloque">El video de esta pieza no cargó.</p>
         : <div className="q-anuncio-pieza q-anuncio-video"><video controls preload="none" src={a.medio.url} aria-label={`Video de ${a.titulo || anunciante}`} onError={() => setVideoRoto(true)} /></div>)}
-      {a.medio?.kind === 'audio' && <div className="q-anuncio-audio"><AudioLines size={18} aria-hidden="true" /><audio controls preload="none" src={a.medio.url} aria-label={`Audio de ${a.titulo || anunciante}`} /></div>}
+      {a.medio?.kind === 'audio' && (videoRoto ? <p className="q-nota-bloque">El audio de esta pieza no cargó.</p>
+        : <div className="q-anuncio-audio"><AudioLines size={18} aria-hidden="true" /><audio controls preload="none" src={a.medio.url} aria-label={`Audio de ${a.titulo || anunciante}`} onError={() => setVideoRoto(true)} /></div>)}
       <div className="q-anuncio-cuerpo">
         {a.titulo && <h3>{t.titulo ? t.titulo(a) : a.titulo}</h3>}
         {texto && <p className="q-anuncio-texto">{texto}</p>}

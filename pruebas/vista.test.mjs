@@ -186,7 +186,7 @@ test('ningún texto que ve el socio es relleno ni jerga interna', () => {
     // los comentarios al final de una línea de código también se saltan (no los de una URL: «https://»)
     const s = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8').split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*|import )/.test(l))
       .map((l) => l.replace(/(^|[^:'"`])\/\/ .*$/, '$1')).join('\n').replace(/\{\/\*[\s\S]*?\*\/\}/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
-    for (const [re, por] of RELLENO) { const m = s.match(re); if (m) malos.push(`${f}: «${m[0]}» (${por})`); }
+    for (const [re, por] of [...RELLENO, [/—/, 'raya larga']]) { const m = s.match(re); if (m) malos.push(`${f}: «${m[0]}» (${por})`); }
   }
   assert.deepEqual(malos, []);
 });
@@ -241,4 +241,14 @@ test('la marca, su competencia y su rubro solo se escriben en src/cliente.js', (
     return palabras.filter((w) => new RegExp(`(?<![\\w-])${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w-])`).test(texto)).map((w) => `${p}: ${w}`);
   });
   assert.deepEqual(fugas, [], 'la marca o su competencia quedaron escritas fuera de src/cliente.js');
+});
+
+// Un archivo opcional que llega con otra forma (vacío, de otra versión) cuenta como que no llegó: la capa lo dice
+test('búsquedas o mapa con otra forma no tumban la vista', () => {
+  for (const raro of [{}, [], { categoria: { semanas: [] } }, { categoria: {} }, 'texto']) {
+    const v = armarVista(contrato, medios, { mes: MESES.at(-1) }, {}, { mapa: raro, busquedas: raro });
+    assert.equal(v.analiza.busquedas, null);
+    assert.equal(v.fuentes.find((f) => f.id === 'trends').estado, 'no-cargo');
+    revisarTextos(v);
+  }
 });

@@ -45,6 +45,26 @@ const PROP_COLOR = /^(color|background(-color)?|fill|stroke|border(-(top|right|b
 const NOMBRADOS = /\b(white|black|red|green|blue|gray|grey|purple|violet|orange|yellow|pink|navy|silver|maroon|teal|aqua|fuchsia|lime|olive)\b/i;
 const PROP_ESPACIO = /^(margin|padding|gap|row-gap|column-gap|inset|top|right|bottom|left)(-(top|right|bottom|left|inline|block)(-(start|end))?)?$/;
 
+// El ancho de un borde en px. Unidades absolutas convertidas (1rem = 1em = 16px, 1pt ≈ 1,33px, 1in = 96px…); las que
+// dependen de la pantalla o la letra (vw, vh, ch, ex), una cuenta con calc() o «medium»/«thick» cuentan como gruesas,
+// porque no se puede asegurar que queden en 2px
+const A_PX = { px: 1, rem: 16, em: 16, pt: 4 / 3, pc: 16, in: 96, cm: 96 / 2.54, mm: 96 / 25.4, q: 96 / 101.6 };
+function anchoBorde(valor) {
+  const v = valor.toLowerCase();
+  if (/\b(calc|min|max|clamp)\(/.test(v) || /\b(medium|thick)\b/.test(v)) return Infinity;
+  let max = 0;
+  for (const n of v.matchAll(/(\d*\.?\d+)(px|rem|em|pt|pc|in|cm|mm|q|vw|vh|vmin|vmax|ch|ex|lh)\b/g)) max = Math.max(max, A_PX[n[2]] ? +n[1] * A_PX[n[2]] : +n[1] > 0 ? Infinity : 0);
+  return max;
+}
+
+function sombraPermitida(valor) {
+  const v = valor.trim().replace(/\s*!important$/, '');
+  if (v === 'none') return true;
+  const partes = v.split(/,(?![^(]*\))/).map((x) => x.trim());
+  const anillo = /^(inset\s+)?(0|[0-2](\.\d+)?px)(\s+(0|[0-2](\.\d+)?px)){1,3}\s+var\(--[\w-]+\)$/;
+  return partes.every((x) => /^var\(--[\w-]+\)$/.test(x) || anillo.test(x));
+}
+
 export function revisar(archivos) {
   const errores = [];
   const err = (ruta, msg) => errores.push(`${ruta}: ${msg}`);
@@ -65,8 +85,13 @@ export function revisar(archivos) {
       err(ruta, `color literal ${m[0]}`);
     }
     for (const m of texto.matchAll(/\b(rgba?|hsla?|oklch|oklab|lab|lch|hwb)\(/g)) err(ruta, `color literal ${m[0]}…)`);
-    if (!esCss) continue;
-    for (const m of texto.matchAll(/([a-z-]+)\s*:\s*([^;{}]+);?/g)) {
+    // un borde grueso escrito en el style de un componente también es una franja
+    if (!esCss) {
+      for (const m of texto.matchAll(/border\w*\s*:\s*['"`]([^'"`]+)['"`]/gi)) if (anchoBorde(m[1]) > 2) err(ruta, `borde de ${m[1]} en un style: franja de resalte`);
+      continue;
+    }
+    // en minúsculas: «BORDER-LEFT: 4PX» es lo mismo que «border-left: 4px»
+    for (const m of texto.toLowerCase().matchAll(/([a-z-]+)\s*:\s*([^;{}]+);?/g)) {
       const [, prop, valor] = m;
       if (prop.startsWith('--')) continue;
       if (PROP_COLOR.test(prop) && NOMBRADOS.test(valor)) err(ruta, `color con nombre en ${prop}: ${valor.trim()}`);
@@ -74,14 +99,15 @@ export function revisar(archivos) {
       if (prop === 'font' && /\d+(px|rem|em)\b/.test(valor) && !/var\(--t-|var\(--c-/.test(valor)) err(ruta, `font con tamaño literal: ${valor.trim()}`);
       if (PROP_ESPACIO.test(prop)) for (const n of valor.matchAll(/(-?\d*\.?\d+)px/g)) if (Math.abs(+n[1]) > 2) err(ruta, `${prop} con ${n[0]} literal`);
       if (prop === 'border-radius' && !/^(var\(|50%|0|2px)/.test(valor.trim())) err(ruta, `border-radius literal: ${valor.trim()}`);
-      if (prop === 'box-shadow' && !/^(var\(|none)/.test(valor.trim())) err(ruta, `box-shadow literal: ${valor.trim()}`);
+      // sombras del sistema (var) o anillos de 2px como máximo: una sombra «inset 4px 0 0» pegada a una var() es
+      // una franja disfrazada
+      if (prop === 'box-shadow' && !sombraPermitida(valor)) err(ruta, `box-shadow literal: ${valor.trim()}`);
+      if (prop === 'border-image' || prop.startsWith('border-image-')) err(ruta, `${prop}: franja de resalte`);
       // Sin franjas de resalte: una tarjeta con una barra de color al costado (o arriba) es el resalte de
       // plantilla que el estándar prohíbe. Lo importante se resalta con el orden, el tamaño o el peso del texto.
       // Se mide en px, rem, em y pt (1rem = 16px, 1pt ≈ 1,33px), y «medium» o «thick» también cuentan como gruesos.
       if (/^border(-(top|right|bottom|left|inline|block)(-(start|end))?)?(-width)?$/.test(prop)) {
-        const aPx = { px: 1, rem: 16, em: 16, pt: 4 / 3 };
-        for (const n of valor.matchAll(/(\d*\.?\d+)(px|rem|em|pt)\b/g)) if (+n[1] * aPx[n[2]] > 2) err(ruta, `${prop} de ${n[0]}: franja de resalte; se resalta con orden, tamaño o peso, no con bordes gruesos`);
-        if (/\b(medium|thick)\b/.test(valor)) err(ruta, `${prop} con ${valor.match(/\b(medium|thick)\b/)[0]}: franja de resalte`);
+        if (anchoBorde(valor) > 2) err(ruta, `${prop}: ${valor.trim()}: franja de resalte; se resalta con orden, tamaño o peso, no con bordes gruesos`);
       }
       if (/^(transition|animation)(-duration)?$/.test(prop) && /(^|[\s,])\d*\.?\d+m?s\b/.test(valor)) err(ruta, `duración literal en ${prop}: ${valor.trim()}`);
     }

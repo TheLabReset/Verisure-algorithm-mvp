@@ -5,10 +5,10 @@ Lo que falta para que el panel pase de la data de julio a la data al día, con M
 ## 1. Integrametrics al día
 
 1. En GitHub, **Settings → Secrets and variables → Actions**, crear `INTEGRAMETRICS_TOKEN`.
-2. En **Actions → Pipeline**, correrlo a mano con «Run workflow».
+2. En **Actions → Pipeline**, correrlo a mano con «Run workflow». Sin fecha de inicio, baja desde el día siguiente al último que tiene la data, así que no queda un hueco aunque el pipeline haya estado apagado semanas. El backfill del domingo vuelve a bajar el año en curso y deja intacto lo de años anteriores.
 3. Verificar el artefacto, no el check verde: el commit del pipeline tiene que tocar `public/data/algorithm.json`, `export.csv`, `medios.json` y `maia-contexto.json`, y el sello de la barra («Datos al …») tiene que pasar a ayer.
 
-Sin token, el pipeline falla en rojo a propósito. El panel dice cuántos días lleva sin datos nuevos.
+Sin token, el pipeline falla en rojo a propósito. Si fallan Google Trends o MAIA un lunes, la data de Integrametrics del día igual se publica y la corrida queda en rojo al final. El commit del bot no lleva `[skip ci]`, porque con eso Netlify no despliega: cada commit de data dispara un deploy. El panel dice cuántos días lleva sin datos nuevos.
 
 ## 2. MAIA
 

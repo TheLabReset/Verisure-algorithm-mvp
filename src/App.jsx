@@ -33,7 +33,8 @@ const capaDeAncla = (h) => {
 const ancla = () => (typeof location !== 'undefined' ? location.hash.slice(1) : '');
 const capaDeLaUrl = () => capaDeAncla(ancla()) || INICIO;
 // ?escenario=… abre la demo con la data movida (src/calculo/escenarios.js); sirve también para las fotos
-const escenarioDeLaUrl = () => (typeof location !== 'undefined' ? new URLSearchParams(location.search).get('escenario') : null);
+// un id que no es de ningún escenario se ignora: la data real no se anuncia como escenario de prueba
+const escenarioDeLaUrl = () => { const id = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('escenario') : null; return ESCENARIOS.some((e) => e.id === id) ? id : null; };
 const hoyIso = () => new Date().toISOString().slice(0, 10); // solo para medir el atraso de la fuente
 
 // La data publicada por el pipeline (public/data). Solo el contrato es obligatorio: si otra fuente no carga, sus
@@ -47,7 +48,10 @@ function useData() {
     Promise.all([fetch(`${base}data/algorithm.json`), opcional('medios.json'), opcional('mapa-lima.json'), opcional('busquedas.json'), opcional('maia.json')])
       .then(async ([a, medios, mapa, busquedas, maia]) => {
         if (!a.ok) throw new Error(`contrato ${a.status}`);
-        return { contrato: await a.json(), medios, mapa, busquedas, maia };
+        const contrato = await a.json();
+        // un contrato sin su forma (sin meta o sin días) es una data que no cargó, no una pantalla en blanco
+        if (!contrato?.meta?.lastDay || !Array.isArray(contrato.daily)) throw new Error('contrato sin meta');
+        return { contrato, medios, mapa, busquedas, maia };
       })
       .then((d) => vivo && setR({ estado: 'ok', ...d }))
       .catch((e) => vivo && setR({ estado: 'no-cargo', error: e.message }));
@@ -96,11 +100,19 @@ export default function App() {
   }, []);
   const irACapa = (id) => { setCapa(id); history.replaceState(null, '', '#' + id); window.scrollTo({ top: 0 }); };
 
-  const vista = useMemo(() => {
+  // armarVista corre fuera del Resguardo de cada capa: si la data trae algo que el cálculo no esperaba, se dice que
+  // no se pudo armar, en vez de dejar la pantalla en blanco
+  const armada = useMemo(() => {
     if (data.estado !== 'ok' || !mesActivo) return null;
     const caidas = ['atl', 'digital', 'trends'].includes(demo) ? [demo] : [];
-    return armarVista(data.contrato, data.medios, { mes: mesActivo }, { fuentesCaidas: caidas, hoy: hoyIso() }, { mapa: data.mapa, busquedas: data.busquedas });
+    try {
+      return { vista: armarVista(data.contrato, data.medios, { mes: mesActivo }, { fuentesCaidas: caidas, hoy: hoyIso() }, { mapa: data.mapa, busquedas: data.busquedas }) };
+    } catch (e) {
+      console.error('armarVista', e);
+      return { fallo: true };
+    }
   }, [data, mesActivo, demo]);
+  const vista = armada?.vista ?? null;
   const actual = CAPAS.find((c) => c.id === capa);
   const Pantalla = PANTALLAS[capa];
   const cargando = data.estado === 'cargando' || demo === 'cargando';
@@ -152,7 +164,7 @@ export default function App() {
       </div>
 
       <main>
-        {data.estado === 'no-cargo' ? (
+        {data.estado === 'no-cargo' || armada?.fallo ? (
           <div className="q-envoltura q-capa-vacia">
             <Estado tipo="no-cargo" titulo="La data no cargó">No se pudo leer la data del panel. No se muestran cifras viejas ni inventadas: vuelve a intentar en unos minutos.</Estado>
           </div>
