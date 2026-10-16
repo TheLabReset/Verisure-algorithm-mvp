@@ -1,0 +1,304 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Quincha · tokens de The Algorithm
+   Quincha es la técnica limeña de caña y barro: liviana, flexible, resiste temblores.
+   Un sistema que se adapta por cliente sin romperse: este archivo lleva la marca del cliente
+   (Verisure: tinta, cal, rojo y verde azulado) y nada más cambia.
+
+   Dos capas:
+   1. Primitivos (--p-*): la paleta. Ningún componente los usa directo.
+   2. Semánticos: lo único que tocan los componentes. Cada uno dice para qué sirve;
+      su contraste no se escribe a mano: lo mide `npm run sistema`.
+   Regla de huérfanos (la vigila `npm run sistema`): todo primitivo lo usa al menos
+   un semántico, y todo semántico lo usa al menos un componente.
+
+   Claro por defecto: se proyecta en reuniones y se lee de día. Oscuro con
+   [data-theme="dark"] o la preferencia del sistema, armado por niveles propios
+   (más claro es más cerca), no invertido.
+
+   Tres niveles de superficie, del fondo hacia el lector:
+   fondo (la página) → capítulo (el panel que agrupa) → superficie (la tarjeta).
+   La profundidad sale del valor de la superficie, no de sombras ni de bordes gruesos.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Primitivos: marca Verisure ──
+     El rojo sale del logo oficial que entregó el cliente (#ED002F, confirmé). El verde azulado #00B49C se midió en los
+     botones de sus piezas publicadas (confirmé, octubre de 2026). No hay guía de marca pública: el resto lo asumo. */
+  --p-tinta: #1d1d1f;      /* el gris casi negro de sus piezas: texto y la serie de Verisure en los gráficos */
+  --p-cal: #f5f5f3;        /* fondo claro neutro */
+  --p-rojo: #ed002f;       /* el rojo oficial de Verisure (su logo, #ED002F): identidad, y Verisure en los gráficos */
+  --p-rojo-texto: #b8002a; /* rojo legible sobre claro */
+  --p-rojo-claro: #ff8a9b; /* rojo legible sobre oscuro */
+  --p-rojo-vivo: #ff5c75;  /* Verisure en los gráficos sobre oscuro: más rojo que el de texto, 4,9 : 1 sobre la tarjeta */
+  --p-verde: #00b49c;      /* el verde azulado de sus botones, sobre oscuro */
+  --p-verde-oscuro: #00705f; /* verde azulado legible sobre claro */
+
+  /* ── Primitivos: neutros con el tono cálido de la cal ── */
+  --p-n-0: #ffffff;
+  --p-n-75: #ebebe6;
+  --p-n-100: #e3e3dd;
+  --p-n-200: #c8c9c4;   /* barras que no se resaltan */
+  --p-n-300: #a3a6ad;   /* niebla */
+  --p-n-400: #7d8088;
+  --p-n-600: #5c5f67;
+  --p-n-750: #44474f;
+
+  /* ── Primitivos: neutros del oscuro, de la tinta hacia arriba ── */
+  --p-o-950: #0b0c0f;
+  --p-o-950: #121318;      /* la página en oscuro: más oscura que el capítulo, para que se lean los tres niveles */
+  --p-o-900: #1c1d23;
+  --p-o-800: #272930;
+  --p-o-750: #33353d;
+  --p-o-700: #3c3e46;
+  --p-o-600: #55575f;   /* barras que no se resaltan, sobre oscuro */
+  --p-o-400: #7b7e86;
+  --p-o-300: #a4a7ae;
+  --p-o-200: #c9cacd;
+
+  /* ── Primitivos: rampa de tinta para magnitud (mapa de calor, tiras), de menos a más ── */
+  /* rampa secuencial de tinta: del gris del fondo a la tinta de la marca; en oscuro, del gris oscuro a la cal */
+  --p-r-1: #efefec; --p-r-2: #d9d9d5; --p-r-3: #bcbcb7; --p-r-4: #96968f; --p-r-5: #6e6e69; --p-r-6: #464644; --p-r-7: #1d1d1f;
+  --p-ro-1: #34363d; --p-ro-2: #4a4c54; --p-ro-3: #666870; --p-ro-4: #8b8d94; --p-ro-5: #b1b2b7; --p-ro-6: #d5d6d8; --p-ro-7: #f5f5f3;
+  /* rampas de magnitud en el color de cada marca (el mapa de calor de una marca): de menos a más, un solo tono.
+     Calculadas en OKLCH, con cada escalón separado del vecino (lo mide el chequeo) */
+  --p-am-1: #fffcf1; --p-am-2: #fbe6a1; --p-am-3: #facb39; --p-am-4: #eab532; --p-am-5: #c59128; --p-am-6: #9d6c1d; --p-am-7: #724c1e;
+  --p-amo-1: #3e311a; --p-amo-2: #5a4414; --p-amo-3: #785b18; --p-amo-4: #97751a; --p-amo-5: #ba9320; --p-amo-6: #ddb227; --p-amo-7: #ffd338;
+  --p-rj-1: #feeff0; --p-rj-2: #ffd1d3; --p-rj-3: #ffa4a8; --p-rj-4: #f96f74; --p-rj-5: #ea2f3b; --p-rj-6: #ba1d2a; --p-rj-7: #8a1522;
+  --p-rjo-1: #492828; --p-rjo-2: #6d2e30; --p-rjo-3: #96353a; --p-rjo-4: #c13b42; --p-rjo-5: #e54b52; --p-rjo-6: #f5727b; --p-rjo-7: #fca0a7;
+
+  /* ── Primitivos: estado (reservados, nunca serie) ── */
+  --p-prosegur: #ffc800;    /* el amarillo de Prosegur, medido en sus piezas digitales: los rellenos de la competencia en foco */
+  --p-prosegur-ocre: #a67c00; /* el mismo tono, oscurecido: las líneas finas de la competencia en claro (un amarillo de 2 px no se ve sobre blanco) */
+
+  /* ── Primitivos: categorías, orden fijo, validadas para daltonismo en las dos superficies ── */
+  --p-cat-menta: #0c8a66;
+  --p-cat-naranja: #c2601a;
+  --p-cat-azul: #4b63c4;
+  --p-cat-menta-o: #1ea47f;
+  --p-cat-naranja-o: #d26a26;
+  --p-cat-azul-o: #6d84e6;
+
+  /* ══════════ Semánticos · tema claro (por defecto) ══════════ */
+  --fondo: var(--p-cal);                 /* la página */
+  --superficie-capitulo: var(--p-n-75);  /* panel que agrupa las tarjetas de un capítulo */
+  --superficie: var(--p-n-0);            /* tarjetas */
+  --elevada: var(--p-n-0);               /* lo que flota: ayuda, pista de gráfico */
+  --barra: var(--p-tinta);               /* barra de marca arriba */
+  --sobre-barra: var(--p-cal);           /* texto sobre la barra */
+  --sobre-barra-2: var(--p-n-300);       /* texto secundario sobre la barra */
+  --texto-1: var(--p-tinta);             /* cifras y títulos */
+  --texto-2: var(--p-n-750);             /* texto de lectura */
+  --texto-3: var(--p-n-600);             /* notas, ejes, rótulos secundarios */
+  --borde: var(--p-n-100);               /* separadores */
+  --borde-control: var(--p-n-400);       /* bordes de controles y marcas que hay que ver (≥ 3:1) */
+  --acento: var(--p-rojo);               /* la capa activa y el número de capítulo: marca, no dato */
+  --acento-texto: var(--p-rojo-texto);   /* texto en el rojo de la marca */
+  --acento-suave: color-mix(in oklab, var(--p-rojo) 9%, var(--superficie)); /* fondo de la capa activa */
+  --seleccion: var(--p-tinta);           /* opción elegida en un control */
+  --sobre-seleccion: var(--p-cal);       /* texto sobre la opción elegida */
+  --foco: var(--p-tinta);                /* anillo de foco */
+  --mejora: var(--p-verde-oscuro);       /* variación favorable: siempre con flecha y signo */
+  --empeora: var(--p-rojo-texto);        /* variación desfavorable */
+  --atencion: var(--p-tinta);            /* pocos casos, dato parcial: en tinta con su ícono, para no confundirse con el amarillo de la competencia */
+  --s1: var(--resalte);                  /* puntos de la serie en foco */
+  --resalte: var(--p-prosegur);          /* rellenos de la serie en foco: la competencia, en su amarillo */
+  --resalte-borde: var(--p-tinta);       /* el borde que hace visible el amarillo sobre blanco (relleno con borde, ver quincha.md) */
+  --resalte-anillo: var(--p-tinta);      /* el anillo de los puntos y círculos en foco */
+  --serie-1: var(--p-prosegur-ocre);     /* líneas de la serie en foco: el amarillo oscurecido, porque una línea no lleva borde */
+  --serie-resto: var(--p-n-200);  /* el resto, cuando un gráfico resalta una sola marca */
+  --propia: var(--p-rojo);               /* la marca propia en los gráficos y el mapa: Verisure en su rojo, solo en marcas, nunca en texto */
+  --propia-linea: var(--p-rojo-texto);   /* sus líneas, más oscuras: el rojo puro y el ocre de la competencia se confunden con deuteranopía */
+  --resalte-suave: color-mix(in oklab, var(--resalte) 10%, var(--superficie));
+  --s2: var(--p-cat-menta);              /* categorías en orden fijo */
+  --s3: var(--p-cat-naranja);
+  --s4: var(--p-cat-azul);
+  --previa: var(--p-n-400);              /* período de comparación: siempre gris */
+  --mapa-filtro: grayscale(0.9) contrast(0.9) brightness(1.04);  /* el mapa base, tenue: lo que se lee son los puntos */
+  --q0: var(--p-r-1);                    /* rampa secuencial de tinta, de menos a más: un solo tono, el del foco */
+  --q1: var(--p-r-2);
+  --q2: var(--p-r-3);
+  --q3: var(--p-r-4);
+  --q4: var(--p-r-5);
+  --q5: var(--p-r-6);
+  --q6: var(--p-r-7);
+  /* el mapa de calor de una marca va en su color: la competencia en amarillo, la propia en rojo */
+  --qf0: var(--p-am-1);
+  --qf1: var(--p-am-2);
+  --qf2: var(--p-am-3);
+  --qf3: var(--p-am-4);
+  --qf4: var(--p-am-5);
+  --qf5: var(--p-am-6);
+  --qf6: var(--p-am-7);
+  --qp0: var(--p-rj-1);
+  --qp1: var(--p-rj-2);
+  --qp2: var(--p-rj-3);
+  --qp3: var(--p-rj-4);
+  --qp4: var(--p-rj-5);
+  --qp5: var(--p-rj-6);
+  --qp6: var(--p-rj-7);
+  --banda-0: var(--p-n-100);             /* la zona hasta el objetivo en una bala: un solo gris, nunca escalones */
+  --sombra-flota: 0 10px 28px rgb(18 19 24 / 0.14);
+  color-scheme: light;
+
+  /* ── Tipografía de la marca: Bricolage Grotesque para títulos y cifras, Atkinson Hyperlegible Next para leer ── */
+  /* Sin tipografía de marca pública: las del estándar (Sofia Sans, licencia OFL), como pide la guía */
+  --f-titulo: 'Sofia Sans Condensed Variable', 'Sofia Sans Condensed', 'Arial Narrow', Arial, sans-serif;
+  --f-texto: 'Sofia Sans Variable', 'Sofia Sans', 'Helvetica Neue', Arial, sans-serif;
+  --f-tabla: 'Sofia Sans Semi Condensed Variable', 'Sofia Sans Semi Condensed', 'Arial Narrow', Arial, sans-serif;
+  --f-tarjeta: var(--f-texto);    /* título de tarjeta: la condensada solo va desde 24 px; más chica se aprieta */
+  --t-13: 0.8125rem; --t-14: 0.875rem; --t-16: 1rem; --t-19: 1.1875rem; --t-24: 1.5rem; --t-28: 1.75rem; --t-36: 2.25rem;
+  --c-24: 1.5rem; --c-32: 2rem;
+  --peso-lectura: 400; --peso-rotulo: 560; --peso-cifra: 640; --peso-titulo: 700;
+
+  /* ── Espacio (base 4) ── */
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 20px; --e-6: 24px; --e-8: 32px; --e-10: 40px; --e-12: 48px; --e-16: 64px;
+
+  /* ── Medidas de composición ── */
+  --ancho-max: 1360px;     /* la página no crece más: las líneas largas se leen mal */
+  --ancho-lectura: 68ch;   /* texto corrido */
+  --ancho-indice: 184px;   /* índice lateral de la capa */
+  --alto-barra: 52px;      /* barra de marca */
+  --alto-capas: 112px;     /* pestañas y filtros, fijos al bajar; la app lo reemplaza por el alto medido */
+
+  /* ── Radio: tres, con rol ── */
+  --escala-presentar: 112.5%; /* tamaño de letra al presentar */
+  --r-control: 6px; --r-bloque: 10px; --r-capitulo: 16px; --r-marca: 999px;
+
+  /* ── Movimiento: corto y productivo; nada se anima por adorno ── */
+  --d-110: 110ms;
+  --d-latido: 1200ms; /* solo el esqueleto de carga */
+  --d-240: 240ms;     /* el abanico que se abre y la ventana que entra */
+  --curva-productiva: cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fondo: var(--p-o-950);
+    --superficie-capitulo: var(--p-o-900);
+    --superficie: var(--p-o-800);
+    --elevada: var(--p-o-750);
+    --barra: var(--p-o-950);
+    --sobre-barra: var(--p-cal);
+    --sobre-barra-2: var(--p-o-300);
+    --texto-1: var(--p-cal);
+    --texto-2: var(--p-o-200);
+    --texto-3: var(--p-o-300);
+    --borde: var(--p-o-750);
+    --borde-control: var(--p-o-400);
+    --acento: var(--p-rojo-claro);
+    --acento-texto: var(--p-rojo-claro);
+    --acento-suave: color-mix(in oklab, var(--p-rojo) 16%, var(--superficie));
+    --seleccion: var(--p-cal);
+    --sobre-seleccion: var(--p-tinta);
+    --foco: var(--p-cal);
+    --mejora: var(--p-verde);
+    --empeora: var(--p-rojo-claro);
+    --atencion: var(--p-cal);
+    --s1: var(--resalte);
+    --resalte: var(--p-prosegur);
+    --resalte-borde: transparent;
+    --resalte-anillo: var(--superficie);
+    --serie-1: var(--resalte);
+    --serie-resto: var(--p-o-600);
+    --propia: var(--p-rojo-vivo);
+    --propia-linea: var(--propia);
+    --resalte-suave: color-mix(in oklab, var(--resalte) 18%, var(--superficie));
+    --s2: var(--p-cat-menta-o);
+    --s3: var(--p-cat-naranja-o);
+    --s4: var(--p-cat-azul-o);
+    --previa: var(--p-o-400);
+    --mapa-filtro: invert(1) hue-rotate(180deg) grayscale(0.85) brightness(0.8) contrast(0.95);
+    --q0: var(--p-ro-1);
+    --q1: var(--p-ro-2);
+    --q2: var(--p-ro-3);
+    --q3: var(--p-ro-4);
+    --q4: var(--p-ro-5);
+    --q5: var(--p-ro-6);
+    --q6: var(--p-ro-7);
+    --qf0: var(--p-amo-1);
+    --qf1: var(--p-amo-2);
+    --qf2: var(--p-amo-3);
+    --qf3: var(--p-amo-4);
+    --qf4: var(--p-amo-5);
+    --qf5: var(--p-amo-6);
+    --qf6: var(--p-amo-7);
+    --qp0: var(--p-rjo-1);
+    --qp1: var(--p-rjo-2);
+    --qp2: var(--p-rjo-3);
+    --qp3: var(--p-rjo-4);
+    --qp4: var(--p-rjo-5);
+    --qp5: var(--p-rjo-6);
+    --qp6: var(--p-rjo-7);
+    --banda-0: var(--p-o-700);
+    --sombra-flota: 0 12px 32px rgb(0 0 0 / 0.45);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --fondo: var(--p-o-950);
+  --superficie-capitulo: var(--p-o-900);
+  --superficie: var(--p-o-800);
+  --elevada: var(--p-o-750);
+  --barra: var(--p-o-950);
+  --sobre-barra: var(--p-cal);
+  --sobre-barra-2: var(--p-o-300);
+  --texto-1: var(--p-cal);
+  --texto-2: var(--p-o-200);
+  --texto-3: var(--p-o-300);
+  --borde: var(--p-o-750);
+  --borde-control: var(--p-o-400);
+  --acento: var(--p-rojo-claro);
+  --acento-texto: var(--p-rojo-claro);
+  --acento-suave: color-mix(in oklab, var(--p-rojo) 16%, var(--superficie));
+  --seleccion: var(--p-cal);
+  --sobre-seleccion: var(--p-tinta);
+  --foco: var(--p-cal);
+  --mejora: var(--p-verde);
+  --empeora: var(--p-rojo-claro);
+  --atencion: var(--p-cal);
+  --s1: var(--resalte);
+  --resalte: var(--p-prosegur);
+  --resalte-borde: transparent;
+  --resalte-anillo: var(--superficie);
+  --serie-1: var(--resalte);
+  --serie-resto: var(--p-o-600);
+  --propia: var(--p-rojo-vivo);
+  --propia-linea: var(--propia);
+  --resalte-suave: color-mix(in oklab, var(--resalte) 18%, var(--superficie));
+  --s2: var(--p-cat-menta-o);
+  --s3: var(--p-cat-naranja-o);
+  --s4: var(--p-cat-azul-o);
+  --previa: var(--p-o-400);
+  --mapa-filtro: invert(1) hue-rotate(180deg) grayscale(0.85) brightness(0.8) contrast(0.95);
+  --q0: var(--p-ro-1);
+  --q1: var(--p-ro-2);
+  --q2: var(--p-ro-3);
+  --q3: var(--p-ro-4);
+  --q4: var(--p-ro-5);
+  --q5: var(--p-ro-6);
+  --q6: var(--p-ro-7);
+  --qf0: var(--p-amo-1);
+  --qf1: var(--p-amo-2);
+  --qf2: var(--p-amo-3);
+  --qf3: var(--p-amo-4);
+  --qf4: var(--p-amo-5);
+  --qf5: var(--p-amo-6);
+  --qf6: var(--p-amo-7);
+  --qp0: var(--p-rjo-1);
+  --qp1: var(--p-rjo-2);
+  --qp2: var(--p-rjo-3);
+  --qp3: var(--p-rjo-4);
+  --qp4: var(--p-rjo-5);
+  --qp5: var(--p-rjo-6);
+  --qp6: var(--p-rjo-7);
+  --banda-0: var(--p-o-700);
+  --sombra-flota: 0 12px 32px rgb(0 0 0 / 0.45);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --d-110: 0ms; --d-latido: 0ms; --d-240: 0ms; }
+}

@@ -1,23 +1,25 @@
-# Pipeline de datos de The Algorithm (Fase 7 · Integrametrics real).
-# INCREMENTAL por defecto: cada corrida jala los ÚLTIMOS 7 DÍAS (incluyendo hoy) y hace
-# merge idempotente sobre el contrato commiteado (public/data/algorithm.json) — sin
-# duplicar, reescribiendo por clave estable. Así las llamadas son ligeras (no reconstruye
-# todo 2026). Con ~1 día de rezago de la fuente, la ventana de 7 días recupera lo que llega
-# tarde y corrige cualquier ajuste de la semana.
-# BACKFILL manual: workflow_dispatch con `start_date` (ej. 2026-01-01) reconstruye el rango.
-# Cron 11:00 UTC = 06:00 America/Lima; workflow_dispatch de respaldo.
+# Pipeline de datos de The Algorithm: baja lo nuevo de Integrametrics y commitea public/data.
+# Incremental por omisión: los últimos 7 días, incluido hoy, con merge idempotente (la fuente llega con ~1 día de
+# rezago y a veces corrige la semana). Backfill: workflow_dispatch con start_date, o el cron del domingo.
+# Cron 10:52 UTC = 05:52 de Lima (minuto corrido para no caer en la hora en punto, cuando GitHub atrasa los crones).
+# Cada día arma también el contexto de MAIA. Los lunes baja Google Trends y MAIA escribe su lectura de la semana.
+# Presupuesto de minutos y por qué falla en rojo sin token: docs/produccion-actions.md y README.
 name: Pipeline de datos
 
 on:
   schedule:
-    - cron: '0 11 * * *'   # diario 06:00 Lima → incremental 7 días (rápido)
-    - cron: '0 10 * * 0'   # domingo → backfill completo (re-cuadra acumulados exactos)
+    - cron: '52 10 * * *'   # diario → incremental de 7 días
+    - cron: '52 9 * * 0'    # domingo → backfill desde enero (recuadra los acumulados)
   workflow_dispatch:
     inputs:
       start_date:
-        description: 'Backfill desde esta fecha (YYYY-MM-DD). Vacío = incremental 7 días.'
+        description: 'Backfill desde esta fecha (AAAA-MM-DD). Vacío = incremental de 7 días.'
         required: false
         default: ''
+      semanal:
+        description: 'Correr también lo de los lunes (Google Trends y la lectura de MAIA).'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -29,35 +31,33 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
-      # Expone el secret como env para poder guardar los pasos que escriben data:
-      # sin token NO corremos el pipeline (evita sobrescribir el contrato real con fixtures).
       INTEGRAMETRICS_TOKEN: ${{ secrets.INTEGRAMETRICS_TOKEN }}
     steps:
+      # Sin token no hay trabajo posible: el workflow falla en rojo para que se note, no queda verde sin hacer nada
+      - name: Exigir el token
+        run: |
+          if [ -z "$INTEGRAMETRICS_TOKEN" ]; then
+            echo "::error::Falta INTEGRAMETRICS_TOKEN en Settings → Secrets and variables → Actions. Sin token no se actualiza la data."
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Tests
-        run: node --test
+      - name: Pruebas
+        run: npm run prueba
 
-      - name: Aviso si falta el token
-        if: ${{ env.INTEGRAMETRICS_TOKEN == '' }}
-        run: echo "::warning::Sin INTEGRAMETRICS_TOKEN en Secrets — se omite la actualización de datos (no se sobrescribe el contrato real)."
-
-      # Fuente live: incremental (7 días) o backfill si se pasó start_date. El token vive
-      # SOLO aquí (Secret de Actions), nunca en el bundle del navegador (governance §B.2).
-      # start_date sale del input manual, o de la fecha piso de datos (2026-01-01) cuando
-      # dispara el cron dominical (backfill semanal). En el cron diario queda vacío → incremental.
-      - name: Actualizar datos (incremental 7 días o backfill)
-        if: ${{ env.INTEGRAMETRICS_TOKEN != '' }}
+      - name: Actualizar datos
         env:
-          DATA_SOURCE: live
           MANUAL_START: ${{ github.event.inputs.start_date }}
           SCHEDULE: ${{ github.event.schedule }}
           PIPELINE_WINDOW: '7'
@@ -65,20 +65,50 @@ jobs:
           export PIPELINE_STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           if [ -n "$MANUAL_START" ]; then
             export PIPELINE_START="$MANUAL_START"
-          elif [ "$SCHEDULE" = "0 10 * * 0" ]; then
-            export PIPELINE_START="2026-01-01"   # backfill completo semanal
+          elif [ "$SCHEDULE" = "52 9 * * 0" ]; then
+            # el backfill vuelve a bajar el año en curso y lo reemplaza; lo de años anteriores se queda (merge)
+            export PIPELINE_START="$(date -u +%Y)-01-01"
           fi
           node scripts/run-pipeline.mjs
 
-      - name: Commit del contrato si cambió
-        if: ${{ env.INTEGRAMETRICS_TOKEN != '' }}
+      # Los lunes (o a mano): Google Trends es semanal y la lectura de MAIA es de la semana que cerró el domingo.
+      # Sin ANTHROPIC_API_KEY este paso falla en rojo, igual que el de Integrametrics sin su token.
+      - name: Búsquedas y lectura de MAIA (lunes)
+        id: lunes
+        # si Trends o Anthropic fallan, la data de Integrametrics del día igual se publica; la corrida queda en rojo al final
+        continue-on-error: true
+        if: ${{ github.event.inputs.semanal == 'true' || (github.event.schedule == '52 10 * * *' && github.event_name == 'schedule') }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.semanal }}" != "true" ] && [ "$(date -u +%u)" != "1" ]; then
+            echo "No es lunes: se omite."
+            exit 0
+          fi
+          node scripts/bajar-busquedas.mjs
+          node scripts/armar-contexto.mjs
+          node scripts/maia-reporte.mjs
+
+      # Cada día: el contexto que lee MAIA cuando le preguntan, con la data recién bajada
+      - name: Contexto de MAIA
+        run: node scripts/armar-contexto.mjs
+
+      - name: Commit de la data si cambió
         run: |
           git config user.name "algorithm-pipeline[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/data
           if git diff --cached --quiet; then
-            echo "Sin cambios en el contrato: nada que commitear."
+            echo "Sin cambios en la data."
           else
-            git commit -m "chore(pipeline): actualización de datos Integrametrics [skip ci]"
+            # sin [skip ci]: Netlify no despliega un commit que lo lleve, y la data nueva tiene que llegar al sitio
+            git commit -m "chore(pipeline): data de Integrametrics al $(date -u +%Y-%m-%d)"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
             git push
           fi
+
+      - name: Avisar si falló el paso de los lunes
+        if: ${{ steps.lunes.outcome == 'failure' }}
+        run: |
+          echo "::error::Fallaron las búsquedas de Google Trends o la lectura de MAIA. La data de Integrametrics sí se publicó."
+          exit 1

@@ -182,3 +182,42 @@ Fuentes de autoridad (orden): `docs/DESIGN (Verisure).md` → mockup `design/ref
 **Auto-verificación Gate 1.** 43 tests verdes · build ok · snapshot regenerado (reproducible) · skeleton estático bajo `reduce` · docs v1 fuera · `package.json`/`lock` intactos.
 
 **Criterio de gate.** Gate 1 sin bloqueante/mayor; los 2 menores resueltos, 1 sugerencia adoptada y 1 justificada por escrito (protocolo §1.4, precedente F1–F4). Se procede al merge — **última fase**.
+
+
+## Rediseño al estándar de The Algorithm (octubre de 2026)
+
+El panel se rehizo entero sobre la plantilla Reset-The-Algorithm, antes de presentarlo al cliente.
+
+- **Cuatro capas** del estándar en lugar de los cuatro módulos (Radar, Demanda, Contexto, MAIA): captura de señales, inteligencia de mercado, activación estratégica y rendimiento. La competencia va en la capa 1.
+- **Quincha** reemplaza a Tailwind y al sistema anterior: tokens con la paleta de Verisure, Sofia Sans por defecto, gráficos SVG del estándar (Verisure en tinta, Prosegur en gris; el rojo es identidad). Logo oficial en la barra y símbolo en el favicon.
+- **Solo lo que tenemos:** salen MAIA, el chat, el índice de oportunidad y las capas de Trends, SIDPOL y BCRP, que se servían de fixtures. Quedan listadas como «por conectar».
+- **Abanico** para las piezas ATL, digitales y los paneles de vía pública, con su video, audio o foto. El mapa OOH pasa a una tabla por distrito: la localidad de Integrametrics es un distrito y el mapa anterior estaba centrado fuera de Lima.
+- **Capa 3 sin otra llamada a la API:** `medios.json` sale del `export.csv` commiteado (canales, programas, horas y días por mes y marca).
+- **Períodos:** mes cerrado contra el mes anterior entero; mes en curso contra los mismos días.
+- **Pipeline:** falla en rojo sin token (antes quedaba verde sin hacer nada y la data quedó en el 13 de julio), arma `medios.json` al final y deja de escribir fixtures.
+- **Pruebas:** 47, incluida la vista con la data real de todos los meses, los textos (sin undefined, sin rayas largas, dos frases como máximo) y la marca solo en `src/cliente.js`.
+- **Dependencias:** de 134 a 67 paquetes.
+
+## La competencia primero, MAIA y el mapa (octubre de 2026)
+
+Ajustes pedidos por The Lab después de ver el rediseño.
+
+- **Prosegur primero:** cada capa y cada lectura empiezan por la competencia; en los gráficos y el mapa Prosegur va en tinta y Verisure en gris. Alertas nuevas de competencia: sube su inversión, versiones digitales nuevas, paneles en zonas donde no tenía.
+- **Cámaras DIY de vuelta, con data real:** Google Trends Perú (cámaras de seguridad y cámara wifi frente a «verisure», y cinco marcas de cámaras). El índice anterior salía de fixtures. Marketplaces y Meta Ad Library quedan por conectar.
+- **MAIA de vuelta, sin simular:** los hechos de la semana salen con reglas; la lectura la escribe el modelo cada lunes en el pipeline; la consulta va a una función de Netlify con la clave en el servidor. Sin clave, el panel lo dice.
+- **OOH con su apartado y un mapa Leaflet** sobre OpenStreetMap: cada ubicación se elige y abre su foto o video. El distrito sale de las coordenadas (límites de OpenStreetMap), no del texto de Integrametrics. CARTO se descartó: sin clave sus mosaicos salen con marca de agua.
+- **Gráficos variados:** cronograma de versiones, mancuernas, pendiente, franjas de partes, mapa de calor día × hora y la pauta semanal (con selector ATL, digital o todo). Rampa de magnitud en tinta, no en verde.
+- **Corrección:** los selectores dentro de una tarjeta abrían columnas implícitas y dejaban los gráficos angostos, con un hueco a la derecha. Ahora cada gráfico mide lo mismo que su tarjeta.
+
+- **Prosegur en su amarillo** (#FFC800, medido en sus piezas): relleno con borde de tinta en claro, amarillo puro en oscuro, líneas en ocre. «Atención» pasa a tinta y Radio a tinta en las franjas de medios, para no chocar con el amarillo. El chequeo de Quincha mide el borde de un relleno que lo tiene.
+
+## Vista general y detalle, Verisure en su rojo y data en movimiento (octubre de 2026)
+
+The Lab pidió menos scroll y no cargar las vistas pensando en la data que va a llegar (Google, Meta, TikTok, un Google Sheets).
+
+- **De 22 tarjetas a la vista a 10.** Cada capítulo muestra lo que cambia la decisión de la semana; lo minucioso va en su detalle, un panel a la derecha con un botón que nombra lo que hay adentro. Tope de tres tarjetas por capítulo y diez en el panel, escrito en la guía.
+- **Fusiones:** los estrenos del período van bajo el cronograma de versiones (solo los de la competencia a la vista); ATL y digital al aire son un solo abanico con selector; el share digital y el ATL, una tarjeta lado a lado.
+- **Al detalle:** todos los estrenos, paneles por distrito, la pieza de cada panel, las marcas de cámaras, la inversión de cada mes, la inversión por medio en soles, franjas, canales, programas, las cifras de share en soles y la inversión día por día. «Lo que falta conectar» queda en «Qué se monitorea».
+- **Verisure en su rojo** en los gráficos y el mapa; el gris queda para la comparación. El mapa de calor va en la rampa de la marca elegida (amarillo o rojo). La pauta del año pone las dos marcas en la misma escala: con escalas propias, Prosegur se veía más alto que Verisure invirtiendo menos.
+- **Data en movimiento:** once escenarios sobre la data real, en las pruebas y en la barra de demo. Salieron una caída real (Trends sin un año de historia dejaba el panel en blanco), alertas que faltaban (la competencia que baja a la mitad o se apaga) y variaciones leídas con un solo día de data. Cada gráfico y cada capa van en un resguardo.
+- **Textos sin fechas fijas:** el cronograma decía «entre enero y julio» escrito a mano; ahora sale de la data.

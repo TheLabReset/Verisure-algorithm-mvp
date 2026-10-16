@@ -1,44 +1,33 @@
-// Pipeline de datos de The Algorithm (Fase 7 · data real Integrametrics).
-// PUBLICA en public/data/ un CONTRATO digerible que el frontend fetchea:
+// Pipeline de datos de The Algorithm: baja lo nuevo de Integrametrics y publica en public/data/ lo que lee el panel.
 //   algorithm.json → contrato agregado { meta, daily, pieces, ooh, events, digital }
-//                    (serie temporal + entidades únicas con assets; ~120 KB, no 32 MB)
-//   export.csv     → grid spot-a-spot en dimensiones compartidas con el BI (§A.7)
-//   meta.json      → { generated, source, firstDay, lastDay, days, registros } salud/frescura
-//   trends.json · contexto.json · catalogos.json → capas EXTERNAS (Trends/BCRP/SIDPOL) aún
-//                    servidas de fixtures honestos hasta que aterricen sus conectores (§B.6)
+//   export.csv     → grilla emisión por emisión, con las dimensiones que comparte con el BI del cliente
+//   medios.json    → canales, programas, horas y días por mes y marca, armado desde export.csv
+//   meta.json      → { generated, source, firstDay, lastDay, days, registros, mode }
 //
 // Dos modos:
-//   • BACKFILL  (PIPELINE_START set): reconstruye TODO el rango → reescribe el contrato + CSV.
-//   • INCREMENTAL (por defecto en CI): ventana de 7 días incluyendo hoy → mergeAlgorithm
-//     idempotente sobre el contrato commiteado (upsert por clave, sin duplicar) + CSV de la
-//     ventana reemplazado en su rango. Llamadas ligeras (~7 días, no todo 2026).
+//   • BACKFILL  (PIPELINE_START): reconstruye todo el rango y reescribe el contrato y el CSV.
+//   • INCREMENTAL (por omisión): los últimos 7 días, incluido hoy, con merge idempotente sobre lo commiteado.
 //
-// Fuente: fixtures deterministas por defecto. Con DATA_SOURCE=live + INTEGRAMETRICS_TOKEN,
-// ATL sale de /registros (paginado por día, filtrado a Verisure+Prosegur) y digital de
-// /registros-digital (sin filtro server-side → se filtra por subsector en cliente).
-// El token vive SOLO aquí (Node); jamás en el bundle del navegador (governance §B.2).
+// Sin INTEGRAMETRICS_TOKEN el pipeline falla en rojo: un workflow que no puede hacer su trabajo no puede quedar verde
+// (docs/produccion-actions.md). El token vive solo acá, en Node; nunca en el bundle del navegador.
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildAlgorithm, mergeAlgorithm } from '../src/data/aggregate.js'
-import { registrosToCSV } from '../src/data/csvExport.js'
-import { fetchRegistros, fetchRegistrosDigital } from '../src/data/integrametrics.js'
+import { buildAlgorithm, mergeAlgorithm } from '../src/fuentes/agregado.js'
+import { registrosToCSV } from '../src/fuentes/exportCsv.js'
+import { fetchRegistros, fetchRegistrosDigital } from '../src/fuentes/integrametrics.js'
+import { armarMedios } from './armar-medios.mjs'
+import { CLIENTE } from '../src/cliente.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const FX = join(ROOT, 'src', 'data', 'fixtures')
 const OUT = join(ROOT, 'public', 'data')
-const readFx = (f) => JSON.parse(readFileSync(join(FX, f), 'utf8'))
-const readOut = (f) => (existsSync(join(OUT, f)) ? JSON.parse(readFileSync(join(OUT, f), 'utf8')) : null)
+const leerDe = (dir, f) => (existsSync(join(dir, f)) ? JSON.parse(readFileSync(join(dir, f), 'utf8')) : null)
 
-const token = process.env.INTEGRAMETRICS_TOKEN || null
-const wantLive = process.env.DATA_SOURCE === 'live' && Boolean(token)
-
-// Set competitivo del producto = Verisure + Prosegur (Hunter=B2B y Securitas=seguros
-// quedan fuera; validado contra la API). ATL se filtra server-side por NOMBRE de marca.
-const BRANDS = (process.env.PIPELINE_BRANDS || 'VERISURE,PROSEGUR')
+// Marcas que se siguen: la propia y su competencia, con su nombre en Integrametrics (src/cliente.js).
+// ATL se filtra en el servidor por marca; digital no acepta filtros y se filtra acá por subsector y marca.
+const BRANDS = (process.env.PIPELINE_BRANDS || [CLIENTE.marcaFuente, ...CLIENTE.competencia.map((c) => c.marcaFuente)].join(','))
   .split(',').map((s) => s.trim()).filter(Boolean)
-// Digital NO acepta filtros server-side → se filtra en cliente por subsector de seguridad.
-const SEC_RE = /SEGURIDAD/i
+const SEC_RE = new RegExp(CLIENTE.subsectores.map((s) => s.split(' ')[0]).filter((x, i, a) => a.indexOf(x) === i).join('|'), 'i')
 const BRAND_RE = new RegExp(BRANDS.join('|'), 'i')
 
 // ATL: cada registro trae ~150 campos (decenas de audiencia vacíos). Guardamos SOLO
@@ -55,28 +44,34 @@ const KEEP_DIG = [
 ]
 const slim = (keep) => (r) => { const o = {}; for (const k of keep) if (r[k] !== undefined) o[k] = r[k]; return o }
 
-// Ventana [start, end] en fechas locales. Backfill: PIPELINE_START..PIPELINE_DAY.
-// Incremental: últimos WINDOW_DAYS (incl. hoy) para no encarecer las llamadas.
-const WINDOW_DAYS = Number(process.env.PIPELINE_WINDOW || 7)
-function resolveWindow() {
-  const end = process.env.PIPELINE_DAY || new Date().toISOString().slice(0, 10)
-  let start = process.env.PIPELINE_START
+// Ventana [start, end] en fechas locales. Backfill: desde `inicio` hasta `hoy`.
+// Incremental: los últimos `ventana` días (incluido hoy) para no encarecer las llamadas; si la data commiteada
+// termina antes (el pipeline estuvo apagado), arranca el día siguiente a su último día, para no dejar un hueco.
+function resolveWindow({ hoy, inicio, ventana, ultimoDia }) {
+  const end = hoy || new Date().toISOString().slice(0, 10)
+  let start = inicio
   const isBackfill = Boolean(start)
   if (!start) {
     const d = new Date(`${end}T00:00:00Z`)
-    d.setUTCDate(d.getUTCDate() - (WINDOW_DAYS - 1))
+    d.setUTCDate(d.getUTCDate() - (ventana - 1))
     start = d.toISOString().slice(0, 10)
+    if (ultimoDia) {
+      const sig = new Date(`${ultimoDia}T00:00:00Z`)
+      sig.setUTCDate(sig.getUTCDate() + 1)
+      const desde = sig.toISOString().slice(0, 10)
+      if (desde < start) start = desde
+    }
   }
   return { start, end, isBackfill }
 }
 
 // Digital en vivo: paginar por día (misma lógica que ATL) y filtrar a seguridad V/P.
-async function fetchDigitalWindow(start, end) {
+async function fetchDigitalWindow(start, end, token, fetchImpl) {
   const out = []
   let d = start
   let guard = 0
   while (d <= end && guard < 400) {
-    const rows = await fetchRegistrosDigital({ token, startDate: `${d} 00:00:00`, endDate: `${d} 23:59:59` })
+    const rows = await fetchRegistrosDigital({ token, startDate: `${d} 00:00:00`, endDate: `${d} 23:59:59`, fetchImpl })
     if (Array.isArray(rows)) {
       for (const r of rows) if (SEC_RE.test(r.ssname || '') && BRAND_RE.test(r.maname || '')) out.push(slim(KEEP_DIG)(r))
     }
@@ -86,23 +81,21 @@ async function fetchDigitalWindow(start, end) {
   return out
 }
 
-async function loadData() {
-  if (!wantLive) {
-    return { registros: readFx('registros.json'), digital: readFx('registros-digital.json'), source: 'fixtures', isBackfill: true }
-  }
-  const { start, end, isBackfill } = resolveWindow()
+async function loadData({ token, fetchImpl, hoy, inicio, ventana, ultimoDia }) {
+  if (!token) throw new Error('falta INTEGRAMETRICS_TOKEN: sin token no hay data nueva, y el contrato commiteado no se toca')
+  const { start, end, isBackfill } = resolveWindow({ hoy, inicio, ventana, ultimoDia })
   const rawAtl = await fetchRegistros({
-    token, startDate: `${start} 00:00:00`, endDate: `${end} 23:59:59`, filters: { maname: BRANDS },
+    token, startDate: `${start} 00:00:00`, endDate: `${end} 23:59:59`, filters: { maname: BRANDS }, fetchImpl,
   })
-  const digital = await fetchDigitalWindow(start, end)
+  const digital = await fetchDigitalWindow(start, end, token, fetchImpl)
   return { registros: rawAtl.map(slim(KEEP_ATL)), digital, source: 'live', isBackfill, start, end }
 }
 
 // Reemplaza en el CSV commiteado las filas cuya fecha ∈ [start,end] por las frescas
-// (idempotente: reejecutar la misma ventana no duplica). Backfill reescribe entero.
-function mergeCsv(freshCsv, isBackfill, start, end) {
-  if (isBackfill) return freshCsv
-  const prev = existsSync(join(OUT, 'export.csv')) ? readFileSync(join(OUT, 'export.csv'), 'utf8') : ''
+// (idempotente: reejecutar la misma ventana no duplica). El backfill también: lo de antes de su ventana (el año
+// anterior, que va al BI del cliente) se queda.
+function mergeCsv(out, freshCsv, start, end) {
+  const prev = existsSync(join(out, 'export.csv')) ? readFileSync(join(out, 'export.csv'), 'utf8') : ''
   if (!prev) return freshCsv
   const [freshHeader, ...freshRows] = freshCsv.split('\n')
   const prevLines = prev.split('\n')
@@ -112,48 +105,43 @@ function mergeCsv(freshCsv, isBackfill, start, end) {
   return [header, ...kept, ...freshRows.filter(Boolean)].join('\n')
 }
 
-async function main() {
-  const { registros, digital, source, isBackfill, start, end } = await loadData()
+// Una corrida completa. Todo se inyecta (token, fetch, carpeta, fechas) para poder probarla de punta a punta
+export async function correrPipeline({ token, fetchImpl = fetch, out = OUT, hoy, inicio, ventana = 7, stamp = null, log = console.log } = {}) {
+  const base = leerDe(out, 'algorithm.json')
+  const { registros, digital, source, isBackfill, start, end } = await loadData({ token, fetchImpl, hoy, inicio, ventana, ultimoDia: base?.meta?.lastDay })
   if (!registros.length) throw new Error('pipeline: sin registros en la ventana, nada que publicar')
 
-  const generated = process.env.PIPELINE_STAMP || null
-  const fresh = buildAlgorithm(registros, digital, { source, generated })
+  const fresh = buildAlgorithm(registros, digital, { source, generated: stamp })
+  mkdirSync(out, { recursive: true })
+  const write = (name, data) => writeFileSync(join(out, name), typeof data === 'string' ? data : JSON.stringify(data))
 
-  mkdirSync(OUT, { recursive: true })
-  const write = (name, data) =>
-    writeFileSync(join(OUT, name), typeof data === 'string' ? data : JSON.stringify(data))
-
-  // Contrato: backfill reescribe; incremental hace merge idempotente sobre lo commiteado.
-  const base = isBackfill ? null : readOut('algorithm.json')
+  // Contrato: merge idempotente sobre lo commiteado, en incremental y en backfill: los días de la ventana se
+  // reemplazan y los de antes se quedan. Para rehacer todo desde cero se borra el contrato antes de correr.
   const algorithm = base ? mergeAlgorithm(base, fresh) : fresh
   write('algorithm.json', algorithm)
 
   // CSV spot-a-spot (BI) — merge por ventana en incremental.
-  const csv = mergeCsv(registrosToCSV(registros), isBackfill, start, end)
-  write('export.csv', csv)
+  write('export.csv', mergeCsv(out, registrosToCSV(registros), start, end))
 
-  // Capas externas (fixtures honestos hasta que aterricen sus conectores).
-  write('trends.json', readFx('trends.json'))
-  write('contexto.json', readFx('contexto.json'))
-  write('catalogos.json', readFx('catalogos.json'))
+  // Canales, programas, horas y días: salen del CSV ya mergeado, sin otra llamada a la API
+  const medios = armarMedios(out)
 
-  write('meta.json', {
-    generated: algorithm.meta.generated,
-    source,
-    firstDay: algorithm.meta.firstDay,
-    lastDay: algorithm.meta.lastDay,
-    days: algorithm.meta.days.length,
-    registros: registros.length,
-    mode: isBackfill ? 'backfill' : 'incremental',
-  })
+  const meta = { generated: algorithm.meta.generated, source, firstDay: algorithm.meta.firstDay, lastDay: algorithm.meta.lastDay, days: algorithm.meta.days.length, registros: registros.length, mode: isBackfill ? 'backfill' : 'incremental' }
+  write('meta.json', meta)
 
-  const topBrand = algorithm.daily.at(-1)?.brands
-  const lead = topBrand ? Object.entries(topBrand).sort((a, b) => b[1].spend - a[1].spend)[0]?.[0] : '—'
-  console.log(`✅ pipeline (${source} · ${isBackfill ? 'backfill' : 'incremental'}) · ${algorithm.meta.firstDay}→${algorithm.meta.lastDay}`)
-  console.log(`   ${algorithm.meta.days.length} días · ${algorithm.pieces.length} piezas · ${algorithm.ooh.length} OOH · ${algorithm.events.length} estrenos · líder ${lead}`)
+  log(`✅ pipeline (${source} · ${meta.mode}) · ${algorithm.meta.firstDay}→${algorithm.meta.lastDay}`)
+  log(`   ${algorithm.meta.days.length} días · ${algorithm.pieces.length} piezas · ${algorithm.ooh.length} OOH · ${algorithm.events.length} estrenos`)
+  log(`   medios.json · ${Object.keys(medios.meses).length} meses`)
+  return { algorithm, medios, meta }
 }
 
-main().catch((e) => {
-  console.error('❌ pipeline falló:', e.message)
-  process.exit(1)
-})
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  correrPipeline({
+    token: process.env.INTEGRAMETRICS_TOKEN || null,
+    hoy: process.env.PIPELINE_DAY, inicio: process.env.PIPELINE_START,
+    ventana: Number(process.env.PIPELINE_WINDOW || 7), stamp: process.env.PIPELINE_STAMP || null,
+  }).catch((e) => {
+    console.error('❌ pipeline falló:', e.message)
+    process.exit(1)
+  })
+}

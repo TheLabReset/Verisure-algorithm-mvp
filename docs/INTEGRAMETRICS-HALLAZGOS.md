@@ -1,5 +1,7 @@
 # Integrametrics — hallazgos de la exploración en vivo
 
+> Documento de la fase de datos reales (julio de 2026), se conserva como registro. Desde el rediseño de octubre de 2026 el código vive en `src/fuentes/` (`agregado.js`, `exportCsv.js`, `integrametrics.js`) y MAIA ya no es parte del panel.
+
 > Exploración de la API real (token de Reset) para modelar el ambiente del algoritmo.
 > Complementa `docs/Documentación API Integra Metrics.pdf`. **Ningún secreto aquí** — el
 > token vive solo en el entorno de Netlify/Actions. Cifras: muestra de 7 días (7–13 jul 2026).
