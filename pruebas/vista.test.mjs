@@ -28,12 +28,22 @@ const MESES = mesesDisponibles(contrato.meta);
 const vistaDe = (mes, estado) => armarVista(contrato, medios, { mes }, estado, { mapa, busquedas });
 
 test('el período: mes cerrado contra el mes anterior entero, mes en curso contra los mismos días, enero sin comparación', () => {
-  const junio = periodoDelMes(contrato.meta, '2026-06');
-  assert.deepEqual([junio.desde, junio.hasta, junio.parcial, junio.compararDesde, junio.compararHasta], ['2026-06-01', '2026-06-30', false, '2026-05-01', '2026-05-31']);
+  // un mes cerrado con mes anterior: el penúltimo con data (o junio de 2026, el ejemplo de siempre, si está)
+  const cerrado = MESES.includes('2026-06') ? '2026-06' : MESES.at(-2);
+  if (cerrado && cerrado !== MESES[0]) {
+    const p = periodoDelMes(contrato.meta, cerrado), [a, m] = cerrado.split('-').map(Number);
+    const fin = (y, mm) => `${y}-${String(mm).padStart(2, '0')}-${String(new Date(Date.UTC(y, mm, 0)).getUTCDate()).padStart(2, '0')}`;
+    const [ay, am] = m === 1 ? [a - 1, 12] : [a, m - 1];
+    assert.deepEqual([p.desde, p.hasta, p.parcial, p.compararDesde, p.compararHasta], [`${cerrado}-01`, fin(a, m), false, `${ay}-${String(am).padStart(2, '0')}-01`, fin(ay, am)]);
+  }
   const ultimo = MESES.at(-1);
   const enCurso = periodoDelMes(contrato.meta, ultimo);
   assert.equal(enCurso.hasta, contrato.meta.lastDay);
-  assert.equal(enCurso.compararHasta.slice(8), enCurso.hasta.slice(8), 'el mes en curso se compara con los mismos días del mes anterior');
+  // la data puede terminar a mitad de mes (en curso: los mismos días, o el mes anterior entero si es más corto)
+  // o el último día del mes (cerrado: el mes anterior entero)
+  const finDelMesAnterior = new Date(Date.UTC(+enCurso.desde.slice(0, 4), +enCurso.desde.slice(5, 7) - 1, 0)).getUTCDate();
+  const esperado = enCurso.parcial ? Math.min(+enCurso.hasta.slice(8), finDelMesAnterior) : finDelMesAnterior;
+  if (enCurso.compararDesde) assert.equal(+enCurso.compararHasta.slice(8), esperado, 'el mes en curso se compara con los mismos días del mes anterior');
   assert.equal(periodoDelMes(contrato.meta, MESES[0]).compararDesde, null, 'el primer mes con data no tiene con qué compararse');
 });
 
@@ -209,7 +219,7 @@ test('el tramo de meses sale de la data, no de un texto fijo', () => {
 test('las lecturas de la vista no traen meses escritos a mano', () => {
   // si la data empieza en marzo, el cronograma no puede decir «entre enero y julio»
   const v = vistaDe(MESES.at(-1));
-  const x = L.cronogramaLectura(v.lee.cronograma, 'La competencia', '2026-03-01', v.fuentes[0].corte);
+  const x = L.cronogramaLectura(v.lee.cronograma, 'La competencia', '2026-03-01', '2026-07-13');
   assert.match(x.lectura, /entre marzo y julio/);
 });
 

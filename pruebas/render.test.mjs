@@ -8,7 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { armarVista, mesesDisponibles } from '../src/calculo/vista.js';
 import { ESCENARIOS, aplicarEscenario } from '../src/calculo/escenarios.js';
-import { textoRoto } from './revisar.mjs';
+import { periodoDelMes, DIAS_MINIMOS } from '../src/calculo/periodo.js';
+import { textoRoto, nombresDeLaFuente } from './revisar.mjs';
 
 const raiz = new URL('../', import.meta.url);
 const leer = (f) => JSON.parse(readFileSync(new URL(`public/data/${f}`, raiz), 'utf8'));
@@ -32,7 +33,10 @@ const { pintar, pintarMaia, IDS } = await import(`${salida.href}?${Date.now()}`)
 const texto = (html) => [...html.matchAll(/(?:aria-label|title|data-pista)="([^"]*)"/g)].map((m) => m[1]).join(' \n') + ' \n' + html.replace(/<[^>]+>/g, ' \n');
 
 test('la prueba pinta cada capa y abre los detalles', () => {
-  const v = armarVista(DATOS.contrato, DATOS.medios, { mes: mesesDisponibles(DATOS.contrato.meta).at(-1) }, {}, { mapa: DATOS.mapa, busquedas: DATOS.busquedas });
+  // un mes con data suficiente para que cada capa tenga su detalle (el último puede tener un solo día)
+  const conData = (P) => DATOS.contrato.daily.filter((d) => d.fecha >= P.desde && d.fecha <= P.hasta).length;
+  const mes = [...mesesDisponibles(DATOS.contrato.meta)].reverse().find((m) => conData(periodoDelMes(DATOS.contrato.meta, m)) >= DIAS_MINIMOS);
+  const v = armarVista(DATOS.contrato, DATOS.medios, { mes }, {}, { mapa: DATOS.mapa, busquedas: DATOS.busquedas });
   assert.deepEqual(IDS, ['senales', 'inteligencia', 'activacion', 'rendimiento']);
   for (const id of IDS) {
     const html = pintar(id, v);
@@ -47,8 +51,9 @@ for (const e of [{ id: null, titulo: 'Data real' }, ...ESCENARIOS]) {
     const malos = new Set();
     for (const mes of mesesDisponibles(d.contrato.meta)) {
       const v = armarVista(d.contrato, d.medios, { mes }, {}, { mapa: d.mapa, busquedas: d.busquedas });
-      for (const id of IDS) for (const m of textoRoto(texto(pintar(id, v)))) malos.add(`${id} ${mes}: ${m}`);
-      for (const m of textoRoto(texto(pintarMaia(v, null)))) malos.add(`maia ${mes}: ${m}`);
+      const nombres = nombresDeLaFuente(v);
+      for (const id of IDS) for (const m of textoRoto(texto(pintar(id, v)), nombres)) malos.add(`${id} ${mes}: ${m}`);
+      for (const m of textoRoto(texto(pintarMaia(v, null)), nombres)) malos.add(`maia ${mes}: ${m}`);
     }
     assert.deepEqual([...malos].slice(0, 12), []);
   });

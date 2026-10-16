@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import * as L from '../src/textos/lecturas.js';
 import { hechoTexto } from '../src/textos/maia.js';
 import { MEDIOS, FRANJAS } from '../src/calculo/vista.js';
+import { version, medioEnFrase } from '../src/textos/comun.js';
 
 // Recorre la vista buscando NaN o Infinity: un cálculo roto se ve así antes de llegar a la pantalla
 export function numerosRotos(x, ruta = 'vista', out = []) {
@@ -22,12 +23,34 @@ export const RELLENO = [
   [/cabe destacar|es importante señalar|en definitiva|asimismo/i, 'muletilla'],
 ];
 
+// Los nombres que vienen de la fuente (versiones, canales, programas, direcciones) los escribe otra gente: una
+// versión llamada «VERANO — 2026» no es una raya nuestra. Se juntan de la vista los textos de la data que tropiezan
+// con las reglas, en las formas en que se escriben en pantalla, para sacarlos antes de revisar.
+const TROPIEZA = new RegExp(['—', ...RELLENO.map(([r]) => r.source)].join('|'), 'i');
+export function nombresDeLaFuente(v) {
+  const out = new Set();
+  const recorrer = (x) => {
+    if (typeof x === 'string') { if (TROPIEZA.test(x)) for (const f of [x, version(x), medioEnFrase(x), x.toLowerCase()]) out.add(f); }
+    else if (x && typeof x === 'object') for (const y of Object.values(x)) recorrer(y);
+  };
+  recorrer(v);
+  return [...out].sort((a, b) => b.length - a.length);
+}
+const sinNombres = (t, nombres) => nombres.reduce((s, n) => s.split(n).join(' '), t);
+// Un nombre puede aparecer recortado («…edición es…»): una coincidencia es de la fuente si el trozo que la rodea
+// (seis letras antes o después) está dentro de alguno de esos nombres
+const enUnNombre = (t, i, largo, nombres) => {
+  const antes = t.slice(Math.max(0, i - 6), i + largo).toLowerCase(), despues = t.slice(i, i + largo + 6).toLowerCase();
+  return nombres.some((n) => { const x = n.toLowerCase(); return x.includes(antes) || x.includes(despues); });
+};
+
 // Lo que se ve en pantalla: sin cálculos rotos, sin rayas largas, sin relleno. Devuelve cada problema con su contexto
-export function textoRoto(t) {
+export function textoRoto(texto, nombres = []) {
+  const t = sinNombres(texto, nombres);
   const out = [];
   const contexto = (i, largo) => t.slice(Math.max(0, i - 40), i + largo + 40).replace(/\s+/g, ' ').trim();
   for (const [re, por] of [[/undefined|NaN|\bnull\b|Infinity|\[object/g, 'cálculo roto'], [/—/g, 'raya larga'], ...RELLENO.map(([r, por]) => [new RegExp(r.source, 'gi'), por])]) {
-    for (const m of t.matchAll(re)) out.push(`${por}: «${contexto(m.index, m[0].length)}»`);
+    for (const m of t.matchAll(re)) if (por === 'cálculo roto' || !enUnNombre(t, m.index, m[0].length, nombres)) out.push(`${por}: «${contexto(m.index, m[0].length)}»`);
   }
   return out;
 }
@@ -61,10 +84,12 @@ export function revisarTextos(v, donde = '') {
       return ab.grupos.flatMap((g) => [t.bajada(g), t.detalle(g), ...g.anuncios.flatMap((x) => [t.titulo(x), t.meta(x)])]);
     }),
   ];
+  const nombres = nombresDeLaFuente(v);
   for (const t of [...lecturas.flatMap((x) => [x.titulo, x.lectura]), ...alertas.flatMap((a) => [a.titulo, a.dato, a.mirar]), ...ventanas]) {
     assert.equal(typeof t, 'string', `${donde} un texto no es texto: ${t}`);
     assert.doesNotMatch(t, /undefined|NaN|null|Infinity|\[object/, `${donde} ${t}`);
-    assert.doesNotMatch(t, /—/, `${donde} raya larga en «${t}»`);
+    const raya = sinNombres(t, nombres).search(/—/);
+    assert.ok(raya < 0 || enUnNombre(sinNombres(t, nombres), raya, 1, nombres), `${donde} raya larga en «${t}»`);
   }
   for (const x of lecturas) {
     const frases = x.lectura.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ«¿])/u).filter(Boolean);

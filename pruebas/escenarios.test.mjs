@@ -7,6 +7,7 @@ import { armarVista, mesesDisponibles } from '../src/calculo/vista.js';
 import { ESCENARIOS, aplicarEscenario } from '../src/calculo/escenarios.js';
 import { periodoDelMes, diasEntre, DIAS_MINIMOS } from '../src/calculo/periodo.js';
 import { numerosRotos, revisarTextos } from './revisar.mjs';
+import { CLIENTE } from '../src/cliente.js';
 
 const leer = (f) => JSON.parse(readFileSync(new URL(`../public/data/${f}`, import.meta.url), 'utf8'));
 const DATOS = { contrato: leer('algorithm.json'), medios: leer('medios.json'), mapa: leer('mapa-lima.json'), busquedas: leer('busquedas.json') };
@@ -32,11 +33,16 @@ test('los escenarios no tocan la data original', () => {
   }
 });
 
-test('los escenarios mueven lo que dicen mover', () => {
+test('los escenarios mueven lo que dicen mover', (t) => {
   // un mes con días suficientes para leer variaciones, fijo frente a la data viva: el pipeline corre estas pruebas
   // antes de bajar data nueva, y el día 1 de un mes el último mes tiene un solo día
   const meses = mesesDisponibles(DATOS.contrato.meta);
-  const mes = [...meses].reverse().find((m) => { const P = periodoDelMes(DATOS.contrato.meta, m); return diasEntre(P.desde, P.hasta) + 1 >= DIAS_MINIMOS; });
+  // y con inversión de la competencia en la comparación: si el mes anterior no tiene, no hay subida que leer
+  const idRival = CLIENTE.competencia[0].marcaFuente;
+  const conPauta = (desde, hasta) => DATOS.contrato.daily.some((d) => d.fecha >= desde && d.fecha <= hasta && d.brands[idRival]?.spend > 0);
+  const mes = [...meses].reverse().find((m) => { const P = periodoDelMes(DATOS.contrato.meta, m); return diasEntre(P.desde, P.hasta) + 1 >= DIAS_MINIMOS && P.compararDesde && conPauta(P.compararDesde, P.compararHasta) && conPauta(P.desde, P.hasta); });
+  // sin un mes así (una data que no tiene dos meses seguidos con pauta de la competencia) no hay subida que mover
+  if (!mes) return t.skip('la data no tiene un mes con pauta de la competencia en él y en el anterior');
   const vista = (id) => { const d = aplicarEscenario(id, DATOS, { mes }); return armarVista(d.contrato, d.medios, { mes }, {}, { mapa: d.mapa, busquedas: d.busquedas }); };
   const base = vista(null);
   const rival = (v) => v.lee.atl.marcas.find((m) => m.foco);

@@ -11,7 +11,10 @@ import { armarVista } from '../src/calculo/vista.js';
 import { CLIENTE } from '../src/cliente.js';
 
 const DATA = new URL('../public/data/', import.meta.url).pathname;
-const DIA = '2026-07-14';
+// el día nuevo es el siguiente al último de la data commiteada: la prueba corre igual cuando el pipeline la mueve
+const masDias = (iso, n) => { const d = new Date(`${iso}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const ULTIMO = JSON.parse(readFileSync(join(DATA, 'algorithm.json'), 'utf8')).meta.lastDay;
+const DIA = masDias(ULTIMO, 1), MES = DIA.slice(0, 7);
 const [RIVAL] = CLIENTE.competencia;
 const ATL = [
   { id_unico: 990001, maname: RIVAL.marcaFuente, fecha: `${DIA} 07:15:00`, rinversion: 1200, hour: 7, minute: 15, gname: 'RADIO', mname: 'RPP FM', tname: 'SPOT', vname: 'VERSION DE PRUEBA', id_versiones_unica: 990001, franja: 'DIA', progname: 'PROGRAMA DE PRUEBA', ciuname: 'LIMA' },
@@ -38,7 +41,7 @@ test('pipeline: un día nuevo llega al contrato, al CSV, a medios y a MAIA, sin 
   const dir = copiaDeLaData();
   try {
     const antes = leer(join(DATA), 'algorithm.json');
-    const correr = () => correrPipeline({ token: 'prueba', fetchImpl, out: dir, hoy: '2026-07-15', ventana: 3, log: () => {} });
+    const correr = () => correrPipeline({ token: 'prueba', fetchImpl, out: dir, hoy: masDias(DIA, 1), ventana: 3, log: () => {} });
     await correr();
     const a = leer(dir, 'algorithm.json');
     assert.equal(a.meta.lastDay, DIA, 'el último día del contrato pasa al día nuevo');
@@ -50,7 +53,7 @@ test('pipeline: un día nuevo llega al contrato, al CSV, a medios y a MAIA, sin 
     const csv = readFileSync(join(dir, 'export.csv'), 'utf8');
     assert.equal(csv.split('\n').filter((l) => l.startsWith(DIA)).length, 2);
     const medios = leer(dir, 'medios.json');
-    assert.ok(medios.meses['2026-07'][RIVAL.marcaFuente].programas['PROGRAMA DE PRUEBA'] === 1);
+    assert.ok(medios.meses[MES][RIVAL.marcaFuente].programas['PROGRAMA DE PRUEBA'] === 1);
 
     // idempotente: la misma ventana otra vez no suma de nuevo
     await correr();
@@ -61,7 +64,7 @@ test('pipeline: un día nuevo llega al contrato, al CSV, a medios y a MAIA, sin 
     // el contexto de MAIA y la vista se arman con la data nueva
     const c = armarContexto(dir);
     assert.equal(c.corte.integrametrics, DIA);
-    const v = armarVista(b, leer(dir, 'medios.json'), { mes: '2026-07' }, { hoy: '2026-07-15' }, { mapa: leer(dir, 'mapa-lima.json'), busquedas: leer(dir, 'busquedas.json') });
+    const v = armarVista(b, leer(dir, 'medios.json'), { mes: MES }, { hoy: masDias(DIA, 1) }, { mapa: leer(dir, 'mapa-lima.json'), busquedas: leer(dir, 'busquedas.json') });
     assert.equal(v.periodo.hasta, DIA);
     assert.equal(v.fuentes[0].estado, 'ok', 'con data de ayer la fuente está al día');
     assert.ok(v.lee.estrenos !== null && v.analiza.pautaSemanal.atl);
@@ -76,6 +79,41 @@ test('pipeline: sin token falla con un mensaje claro y no toca la data', async (
     const antes = readFileSync(join(dir, 'algorithm.json'), 'utf8');
     await assert.rejects(() => correrPipeline({ token: null, fetchImpl, out: dir, log: () => {} }), /INTEGRAMETRICS_TOKEN/);
     assert.equal(readFileSync(join(dir, 'algorithm.json'), 'utf8'), antes);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// Pedidos que hace el pipeline a la API simulada: así se ve qué ventana bajó
+function registrar() {
+  const dias = [];
+  const f = async (url) => { const d = (new URL(url).searchParams.get('startDate') || '').slice(0, 10); dias.push(d); return fetchImpl(url); };
+  return { f, dias };
+}
+
+test('pipeline: si la data quedó atrás, la ventana arranca el día siguiente al último, sin hueco', async () => {
+  const dir = copiaDeLaData();
+  try {
+    const { f, dias } = registrar();
+    // 40 días después del último día: la ventana de 7 dejaría 33 días sin bajar
+    await correrPipeline({ token: 'prueba', fetchImpl: f, out: dir, hoy: masDias(ULTIMO, 40), ventana: 7, log: () => {} });
+    assert.equal(dias.sort()[0], DIA, 'la ventana empieza el día siguiente al último de la data');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('pipeline: el backfill reemplaza su ventana y deja lo de antes (el año anterior no se borra)', async () => {
+  const dir = copiaDeLaData();
+  try {
+    const antes = leer(dir, 'algorithm.json');
+    const filasAntes = readFileSync(join(dir, 'export.csv'), 'utf8').split('\n').filter(Boolean).length;
+    // un backfill de un año nuevo que solo trae el día nuevo
+    await correrPipeline({ token: 'prueba', fetchImpl, out: dir, inicio: DIA, hoy: masDias(DIA, 1), log: () => {} });
+    const a = leer(dir, 'algorithm.json');
+    assert.equal(a.meta.firstDay, antes.meta.firstDay, 'el primer día de la data sigue siendo el mismo');
+    assert.equal(a.daily.length, antes.daily.length + 1);
+    assert.equal(readFileSync(join(dir, 'export.csv'), 'utf8').split('\n').filter(Boolean).length, filasAntes + 2);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

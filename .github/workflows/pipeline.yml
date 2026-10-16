@@ -66,7 +66,7 @@ jobs:
           if [ -n "$MANUAL_START" ]; then
             export PIPELINE_START="$MANUAL_START"
           elif [ "$SCHEDULE" = "52 9 * * 0" ]; then
-            # el backfill rehace el año en curso; lo de años anteriores ya está en el contrato y no se toca
+            # el backfill vuelve a bajar el año en curso y lo reemplaza; lo de años anteriores se queda (merge)
             export PIPELINE_START="$(date -u +%Y)-01-01"
           fi
           node scripts/run-pipeline.mjs
@@ -74,6 +74,9 @@ jobs:
       # Los lunes (o a mano): Google Trends es semanal y la lectura de MAIA es de la semana que cerró el domingo.
       # Sin ANTHROPIC_API_KEY este paso falla en rojo, igual que el de Integrametrics sin su token.
       - name: Búsquedas y lectura de MAIA (lunes)
+        id: lunes
+        # si Trends o Anthropic fallan, la data de Integrametrics del día igual se publica; la corrida queda en rojo al final
+        continue-on-error: true
         if: ${{ github.event.inputs.semanal == 'true' || (github.event.schedule == '52 10 * * *' && github.event_name == 'schedule') }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -98,6 +101,14 @@ jobs:
           if git diff --cached --quiet; then
             echo "Sin cambios en la data."
           else
-            git commit -m "chore(pipeline): data de Integrametrics al $(date -u +%Y-%m-%d) [skip ci]"
+            # sin [skip ci]: Netlify no despliega un commit que lo lleve, y la data nueva tiene que llegar al sitio
+            git commit -m "chore(pipeline): data de Integrametrics al $(date -u +%Y-%m-%d)"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
             git push
           fi
+
+      - name: Avisar si falló el paso de los lunes
+        if: ${{ steps.lunes.outcome == 'failure' }}
+        run: |
+          echo "::error::Fallaron las búsquedas de Google Trends o la lectura de MAIA. La data de Integrametrics sí se publicó."
+          exit 1

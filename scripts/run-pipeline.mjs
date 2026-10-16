@@ -45,8 +45,9 @@ const KEEP_DIG = [
 const slim = (keep) => (r) => { const o = {}; for (const k of keep) if (r[k] !== undefined) o[k] = r[k]; return o }
 
 // Ventana [start, end] en fechas locales. Backfill: desde `inicio` hasta `hoy`.
-// Incremental: los últimos `ventana` días (incluido hoy) para no encarecer las llamadas.
-function resolveWindow({ hoy, inicio, ventana }) {
+// Incremental: los últimos `ventana` días (incluido hoy) para no encarecer las llamadas; si la data commiteada
+// termina antes (el pipeline estuvo apagado), arranca el día siguiente a su último día, para no dejar un hueco.
+function resolveWindow({ hoy, inicio, ventana, ultimoDia }) {
   const end = hoy || new Date().toISOString().slice(0, 10)
   let start = inicio
   const isBackfill = Boolean(start)
@@ -54,6 +55,12 @@ function resolveWindow({ hoy, inicio, ventana }) {
     const d = new Date(`${end}T00:00:00Z`)
     d.setUTCDate(d.getUTCDate() - (ventana - 1))
     start = d.toISOString().slice(0, 10)
+    if (ultimoDia) {
+      const sig = new Date(`${ultimoDia}T00:00:00Z`)
+      sig.setUTCDate(sig.getUTCDate() + 1)
+      const desde = sig.toISOString().slice(0, 10)
+      if (desde < start) start = desde
+    }
   }
   return { start, end, isBackfill }
 }
@@ -74,9 +81,9 @@ async function fetchDigitalWindow(start, end, token, fetchImpl) {
   return out
 }
 
-async function loadData({ token, fetchImpl, hoy, inicio, ventana }) {
+async function loadData({ token, fetchImpl, hoy, inicio, ventana, ultimoDia }) {
   if (!token) throw new Error('falta INTEGRAMETRICS_TOKEN: sin token no hay data nueva, y el contrato commiteado no se toca')
-  const { start, end, isBackfill } = resolveWindow({ hoy, inicio, ventana })
+  const { start, end, isBackfill } = resolveWindow({ hoy, inicio, ventana, ultimoDia })
   const rawAtl = await fetchRegistros({
     token, startDate: `${start} 00:00:00`, endDate: `${end} 23:59:59`, filters: { maname: BRANDS }, fetchImpl,
   })
@@ -85,9 +92,9 @@ async function loadData({ token, fetchImpl, hoy, inicio, ventana }) {
 }
 
 // Reemplaza en el CSV commiteado las filas cuya fecha ∈ [start,end] por las frescas
-// (idempotente: reejecutar la misma ventana no duplica). Backfill reescribe entero.
-function mergeCsv(out, freshCsv, isBackfill, start, end) {
-  if (isBackfill) return freshCsv
+// (idempotente: reejecutar la misma ventana no duplica). El backfill también: lo de antes de su ventana (el año
+// anterior, que va al BI del cliente) se queda.
+function mergeCsv(out, freshCsv, start, end) {
   const prev = existsSync(join(out, 'export.csv')) ? readFileSync(join(out, 'export.csv'), 'utf8') : ''
   if (!prev) return freshCsv
   const [freshHeader, ...freshRows] = freshCsv.split('\n')
@@ -100,20 +107,21 @@ function mergeCsv(out, freshCsv, isBackfill, start, end) {
 
 // Una corrida completa. Todo se inyecta (token, fetch, carpeta, fechas) para poder probarla de punta a punta
 export async function correrPipeline({ token, fetchImpl = fetch, out = OUT, hoy, inicio, ventana = 7, stamp = null, log = console.log } = {}) {
-  const { registros, digital, source, isBackfill, start, end } = await loadData({ token, fetchImpl, hoy, inicio, ventana })
+  const base = leerDe(out, 'algorithm.json')
+  const { registros, digital, source, isBackfill, start, end } = await loadData({ token, fetchImpl, hoy, inicio, ventana, ultimoDia: base?.meta?.lastDay })
   if (!registros.length) throw new Error('pipeline: sin registros en la ventana, nada que publicar')
 
   const fresh = buildAlgorithm(registros, digital, { source, generated: stamp })
   mkdirSync(out, { recursive: true })
   const write = (name, data) => writeFileSync(join(out, name), typeof data === 'string' ? data : JSON.stringify(data))
 
-  // Contrato: backfill reescribe; incremental hace merge idempotente sobre lo commiteado.
-  const base = isBackfill ? null : leerDe(out, 'algorithm.json')
+  // Contrato: merge idempotente sobre lo commiteado, en incremental y en backfill: los días de la ventana se
+  // reemplazan y los de antes se quedan. Para rehacer todo desde cero se borra el contrato antes de correr.
   const algorithm = base ? mergeAlgorithm(base, fresh) : fresh
   write('algorithm.json', algorithm)
 
   // CSV spot-a-spot (BI) — merge por ventana en incremental.
-  write('export.csv', mergeCsv(out, registrosToCSV(registros), isBackfill, start, end))
+  write('export.csv', mergeCsv(out, registrosToCSV(registros), start, end))
 
   // Canales, programas, horas y días: salen del CSV ya mergeado, sin otra llamada a la API
   const medios = armarMedios(out)
