@@ -23,7 +23,7 @@ export const CAPAS = [
     id: 'inteligencia', numero: '2', nombre: 'Inteligencia de mercado', descripcion: 'Dónde, cómo y cuándo compra medios la competencia',
     titulo: 'Inteligencia de mercado', bajada: `Cómo se mueve ${competencia}: dónde pone su inversión, qué medios compra frente a ${CLIENTE.nombre} y cuándo sale al aire.`,
     secciones: [
-      { id: 's-2-1', numero: '2.1', titulo: 'Dónde está la inversión', pregunta: '¿Cómo reparte cada marca su inversión entre plataformas digitales y medios ATL?', universos: ['digital', 'atl'], fuentes: ['digital', 'atl'] },
+      { id: 's-2-1', numero: '2.1', titulo: 'Dónde está la inversión', pregunta: '¿Dónde aparece cada marca en digital y cómo reparte su inversión ATL?', universos: ['digital', 'atl'], fuentes: ['digital', 'atl'] },
       { id: 's-2-2', numero: '2.2', titulo: 'Compra de medios', pregunta: `¿En qué canales, programas y tipos de aviso compra ${competencia}, frente a ${CLIENTE.nombre}?`, universos: ['atl'], fuentes: ['atl'] },
       { id: 's-2-3', numero: '2.3', titulo: 'Cuándo sale al aire', pregunta: '¿En qué horas, días y programas emite cada marca?', universos: ['atl'], fuentes: ['atl'] },
     ],
@@ -41,7 +41,7 @@ export const CAPAS = [
     id: 'rendimiento', numero: '4', nombre: 'Históricos', descripcion: 'El share, el año y las versiones de cada marca',
     titulo: 'Históricos', bajada: `Cómo viene el share de ${competencia}, cómo se movió la pauta en el año y qué versiones tuvo.`,
     secciones: [
-      { id: 's-4-1', numero: '4.1', titulo: 'Cómo viene el período', pregunta: `¿Qué parte de la inversión pone ${competencia} frente al mes anterior, y cómo viene semana a semana?`, universos: ['digital', 'atl'], fuentes: ['digital', 'atl'] },
+      { id: 's-4-1', numero: '4.1', titulo: 'Cómo viene el período', pregunta: `¿Qué parte de la inversión pone ${competencia} y cómo viene semana a semana?`, universos: ['digital', 'atl'], fuentes: ['digital', 'atl'] },
       { id: 's-4-2', numero: '4.2', titulo: 'Cómo viene el año', pregunta: '¿Cuándo se prende y se apaga la pauta de cada marca, y cuánto invierte mes a mes?', universos: ['digital', 'atl'], fuentes: ['digital', 'atl'] },
       { id: 's-4-3', numero: '4.3', titulo: 'Versiones en el año', pregunta: `¿Qué versiones tuvo ${competencia} en el año, en ATL y en digital?`, universos: ['atl', 'digital'], fuentes: ['atl', 'digital'] },
     ],

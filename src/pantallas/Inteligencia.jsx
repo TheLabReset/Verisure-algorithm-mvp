@@ -4,9 +4,9 @@
 import { useState } from 'react';
 import { Bloque, Tabla, Resumen, Grupo, Detalle, vigente } from '../sistema/Componentes.jsx';
 import { Franja, Pesas, Barras, MapaCalor } from '../sistema/graficos/Graficos.jsx';
-import { numero, porcentaje, parte, soles, solesCompacto } from '../sistema/formato.js';
+import { numero, porcentaje, parte, soles, solesCompacto, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato, avisosDe } from './comun.jsx';
-import { periodoTexto, version, horasTexto, enLetras, resumenTitulo, tipoAviso, GRUPOS_DIGITALES, nombreGrupoDigital, ventanaTexto, lista } from '../textos/comun.js';
+import { periodoTexto, version, horasTexto, enLetras, resumenTitulo, tipoAviso, GRUPOS_DIGITALES, nombreGrupoDigital, ventanaTexto, lista, ventanaPatron } from '../textos/comun.js';
 import { mediosLectura, franjasLectura, canalesLectura, horarioLectura, programasLectura, textosMarca, digitalPlataformasLectura, compraLectura } from '../textos/lecturas.js';
 import { MEDIOS, FRANJAS } from '../calculo/vista.js';
 import { CLIENTE } from '../cliente.js';
@@ -82,12 +82,12 @@ export default function Inteligencia({ capa, vista: v }) {
   return (
     <MarcoCapa capa={capa} vista={v}>
       <Resumen titulo={resumenTitulo(P)}
-        pie={<span>Inversión estimada por Integrametrics a precio de tarifa; emisiones registradas en TV, radio, cable, OTT y vía pública.</span>}
+        pie={<span>Inversión estimada por Integrametrics a precio de tarifa. Emisiones de TV, cable, radio y OTT; la vía pública va en OOH.</span>}
         items={[
           { rotulo: `Medio principal de ${nC}`, universo: 'atl', ir: s21.id, irTexto: s21.titulo, valor: ok && r.inversion ? MEDIOS[principal(r)[0]] ?? null : null, nota: ok && r.inversion ? `${porcentaje(principal(r)[1])} de su inversión ATL` : null },
-          { rotulo: `Emisiones de ${nC}${mv.ampliada ? ' en cuatro semanas' : ''}`, universo: 'atl', ir: s22.id, irTexto: s22.titulo, valor: compra ? numero(compra.totales[C].emisiones) : null, nota: compra ? `${numero(compra.totales[Pr].emisiones)} de ${nP}` : null },
-          { rotulo: `Canales de ${nC}${mv.ampliada ? ' en cuatro semanas' : ''}`, universo: 'atl', ir: s22.id, irTexto: s22.titulo, valor: compra ? numero(compra.totales[C].canales) : null, nota: compra ? (compra.enComun ? `${compra.enComun === 1 ? 'uno' : enLetras(compra.enComun)} en común con ${nP}` : `ninguno en común con ${nP}`) : null },
-          { rotulo: `Hora con más emisiones de ${nC}${mv.ampliada ? ' en cuatro semanas' : ''}`, universo: 'atl', ir: s23.id, irTexto: s23.titulo, valor: compMed?.horasAltas.length ? `${compMed.horasAltas[0]} h` : null, nota: compMed?.horasAltas.length > 1 ? `las ${enLetras(compMed.horasAltas.length, true)} más altas van ${horasTexto(compMed.horasAltas)}` : null },
+          { rotulo: `Emisiones de ${nC}${mv.ampliada ? ` ${ventanaPatron(mv)}` : ''}`, universo: 'atl', ir: s22.id, irTexto: s22.titulo, valor: compra ? numero(compra.totales[C].emisiones) : null, nota: compra ? `${numero(compra.totales[Pr].emisiones)} de ${nP}` : null },
+          { rotulo: `Canales de ${nC}${mv.ampliada ? ` ${ventanaPatron(mv)}` : ''}`, universo: 'atl', ir: s22.id, irTexto: s22.titulo, valor: compra ? numero(compra.totales[C].canales) : null, nota: compra ? (compra.enComun ? `${compra.enComun === 1 ? 'uno' : enLetras(compra.enComun)} en común con ${nP}` : `ninguno en común con ${nP}`) : null },
+          { rotulo: `Hora con más emisiones de ${nC}${mv.ampliada ? ` ${ventanaPatron(mv)}` : ''}`, universo: 'atl', ir: s23.id, irTexto: s23.titulo, valor: compMed?.horasAltas.length ? `${compMed.horasAltas[0]} h` : null, nota: compMed?.horasAltas.length > 1 ? `las ${enLetras(compMed.horasAltas.length, true)} más altas van ${horasTexto(compMed.horasAltas)}` : null },
         ]} />
 
       <SeccionDe def={s21} vista={v}>
@@ -100,7 +100,7 @@ export default function Inteligencia({ capa, vista: v }) {
         )}
         {!ok ? <Bloque titulo="Cómo reparte cada marca su inversión ATL" universo="atl" estado={sinDato(atl.estado)} /> : <>
           <Bloque universo="atl" {...mediosLectura(v, MEDIOS)} avisos={avisosDe(v, 'medios')}
-            ayuda={<p>Cada franja es el total ATL de una marca repartido por medio. Para comparar montos entre marcas está el share, en Históricos.</p>}
+            ayuda={<p>Cada franja es el total ATL de una marca repartido por medio.</p>}
             pie={<span>Inversión ATL estimada por Integrametrics. OTT llega sin inversión estimada.</span>}>
             <div className="q-mezclas">{orden.map((m) => <MezclaMedios key={m.id} m={m} />)}</div>
           </Bloque>
@@ -117,7 +117,7 @@ export default function Inteligencia({ capa, vista: v }) {
                 filas={v.analiza.franjas.map((k) => ({ nombre: FRANJAS[k], a: p?.mezclaFranjas[k] ?? 0, b: r.mezclaFranjas[k] ?? 0 }))} />
             </Bloque>
             <Bloque universo="atl" {...canalesLectura(deMarca, marca)}
-              pie={<span>Los ocho canales con más inversión estimada.</span>}>
+              pie={<span>Los canales con más inversión estimada, hasta ocho.</span>}>
               {control}
               {deMarca?.canales.length ? <Barras etiqueta={`Inversión de ${textosMarca.nombreMarca(marca)} por canal`} tono={marca === Pr ? 'propia' : undefined} formato={solesCompacto} filas={deMarca.canales.map((c) => ({ nombre: c.nombre, valor: c.valor }))} />
                 : <p className="q-nota-bloque">Sin emisiones en el período.</p>}
@@ -128,7 +128,7 @@ export default function Inteligencia({ capa, vista: v }) {
 
       <SeccionDe def={s22} vista={v}>
         {!compra ? <Bloque titulo="Compra de medios" universo="atl" estado={sinDato(ok ? 'sin-datos' : atl.estado)} /> : <>
-          <Bloque universo="atl" {...compraLectura(compra, mv)} ventana={mv.ampliada ? ventanaTexto(mv.desde, mv.hasta) : undefined}
+          <Bloque universo="atl" {...compraLectura(compra, mv, mv.ampliada ? ventanaPatron(mv) : null)} ventana={mv.ampliada ? ventanaTexto(mv.desde, mv.hasta) : undefined}
             ayuda={<p>Los canales y emisoras de TV abierta, cable, radio y OTT donde salió cada marca, de más a menos emisiones. Con un período de menos de cuatro semanas se leen las cuatro que terminan en su último día. La vía pública va en OOH.</p>}
             pie={<span>Integrametrics, emisión por emisión. Una emisión de cadena nacional repetida en sus señales regionales cuenta una sola vez.</span>}>
             <div className="q-mezclas">
@@ -141,7 +141,7 @@ export default function Inteligencia({ capa, vista: v }) {
                       filas={x.canales.map((c) => ({ nombre: c.canal === 'DESCONOCIDO' ? 'Canal sin registrar' : version(c.canal), valor: c.emisiones }))} />
                       : <p className="q-nota-bloque">Sin compra de medios ATL en el período.</p>}
                     {x.canales.some((c) => c.enComun) && <p className="q-nota-bloque">También los compra {textosMarca.nombreMarca(m === Pr ? C : Pr)}: {lista(x.canales.filter((c) => c.enComun).map((c) => version(c.canal)))}.</p>}
-                    {x.restoCanales > 0 && <p className="q-nota-bloque">{numero(x.restoCanales)} {x.restoCanales === 1 ? 'canal más' : 'canales más'} con menos emisiones, en el detalle.</p>}
+                    {x.restoCanales > 0 && <p className="q-nota-bloque">Y {numero(x.restoCanales)} {x.restoCanales === 1 ? 'canal más' : 'canales más'} con menos emisiones.</p>}
                   </div>
                 );
               })}
@@ -184,7 +184,7 @@ export default function Inteligencia({ capa, vista: v }) {
               : <p className="q-nota-bloque">Sin emisiones con hora en el período.</p>}
           </Bloque>
           <Bloque universo="atl" {...programasLectura(deMarca, marca)} ventana={mv.ampliada ? ventanaTexto(mv.desde, mv.hasta) : undefined}
-            pie={<span>Los ocho programas con más emisiones{mv.ampliada ? ', en las cuatro semanas que terminan en el período' : ''}.</span>}>
+            pie={<span>Los programas con más emisiones, hasta ocho{mv.ampliada ? `, ${ventanaPatron(mv)} al ${fechaCorta(mv.hasta)}` : ''}.</span>}>
             {control}
             {deMarca?.programas.length > 0 && <Barras etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por programa`} tono={marca === Pr ? 'propia' : undefined} formato={(n) => numero(n)} filas={deMarca.programas.map((x) => ({ nombre: version(x.nombre), valor: x.valor }))} />}
           </Bloque>

@@ -53,6 +53,12 @@ export const ATAJOS = [
   { id: '6m', nombre: 'Últimos 6 meses' },
 ];
 export const ATAJO_INICIAL = '7d';
+// El día después del mismo día seis meses antes, sin correrse a fin de mes: del 31 ago, el 1 mar
+function seisMesesAntes(iso) {
+  const [a, m, d] = iso.split('-').map(Number);
+  const ultimoDelMes = new Date(Date.UTC(a, m - 6, 0)).getUTCDate();
+  return sumarDias(aIso(new Date(Date.UTC(a, m - 7, Math.min(d, ultimoDelMes)))), 1);
+}
 
 // Un tramo cualquiera: se compara con los mismos días justo antes, si el contrato los tiene
 export function periodoDelTramo(meta, desde0, hasta0) {
@@ -74,7 +80,7 @@ export function periodoDe(meta, filtros = {}) {
   const ultimo = meta.lastDay, atajo = ATAJOS.some((a) => a.id === filtros.atajo) ? filtros.atajo : ATAJO_INICIAL;
   const P = atajo === 'mes' ? periodoDelMes(meta, ultimo.slice(0, 7))
     : atajo === 'mes-pasado' ? periodoDelMes(meta, ultimo.slice(0, 7) > meta.firstDay.slice(0, 7) ? mesAnterior(ultimo.slice(0, 7)) : ultimo.slice(0, 7))
-    : atajo === '6m' ? periodoDelTramo(meta, sumarDias(aIso(new Date(Date.UTC(+ultimo.slice(0, 4), +ultimo.slice(5, 7) - 7, +ultimo.slice(8, 10)))), 1), ultimo)
+    : atajo === '6m' ? periodoDelTramo(meta, seisMesesAntes(ultimo), ultimo)
     : periodoDelTramo(meta, sumarDias(ultimo, atajo === '30d' ? -29 : -6), ultimo);
   return { ...P, atajo };
 }

@@ -401,11 +401,12 @@ export function ListaAlertas({ grupos }) {
 
 // Avisos de un capítulo: una línea por alerta, que lleva a su fila en Qué mirar
 // Frente al objetivo: icono y palabra (el color nunca va solo), con los colores de los niveles de alerta
-const SEMAFORO = { bien: { nivel: 'bien', icono: CircleCheck, texto: 'En objetivo' }, cerca: { nivel: 'revisar', icono: Eye, texto: 'Cerca del objetivo' }, lejos: { nivel: 'atencion', icono: TriangleAlert, texto: 'Por encima del objetivo' } };
-export function Semaforo({ estado }) {
+// el texto llega escrito desde src/textos (dice el margen del objetivo)
+const SEMAFORO = { bien: { nivel: 'bien', icono: CircleCheck }, cerca: { nivel: 'revisar', icono: Eye }, lejos: { nivel: 'atencion', icono: TriangleAlert } };
+export function Semaforo({ estado, texto }) {
   const x = SEMAFORO[estado];
   if (!x) return null;
-  return <span className={`q-nivel q-alerta-${x.nivel}`}><x.icono size={14} aria-hidden="true" strokeWidth={2.4} />{x.texto}</span>;
+  return <span className={`q-nivel q-alerta-${x.nivel}`}><x.icono size={14} aria-hidden="true" strokeWidth={2.4} />{texto}</span>;
 }
 
 // Los avisos de una tarjeta: el nivel (icono y palabra, el color nunca va solo) y la frase, sin enlace a otro lado

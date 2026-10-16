@@ -88,7 +88,12 @@ function sumarTramo(serie, desde, hasta) {
 
 function leerUniverso(serie, P) {
   const ahora = sumarTramo(serie, P.desde, P.hasta);
-  const antes = P.compararDesde ? sumarTramo(serie, P.compararDesde, P.compararHasta) : null;
+  const antes0 = P.compararDesde ? sumarTramo(serie, P.compararDesde, P.compararHasta) : null;
+  // una comparación con menos días con data que el mínimo no compara: un solo día raro mandaría (como en el período)
+  const diasAntes = P.compararDesde ? rango(P.compararDesde, P.compararHasta).length : 0;
+  const antes = antes0 && antes0.diasConData.size >= Math.min(DIAS_MINIMOS, diasAntes) ? antes0 : null;
+  // si el período o su comparación tienen días sin registros, una suma frente a la otra cuenta huecos como ceros
+  const conHuecos = Boolean(antes && (antes.diasConData.size < diasAntes || ahora.diasConData.size < rango(P.desde, P.hasta).length));
   const marcas = MARCAS.map((m) => ({
     id: m, nombre: nombreMarca(m), propia: m === PROPIA, foco: m !== PROPIA,
     inversion: ahora.porMarca[m].inversion, share: ahora.shares[m], spots: ahora.porMarca[m].spots, impresiones: ahora.porMarca[m].impresiones,
@@ -110,7 +115,7 @@ function leerUniverso(serie, P) {
   const cuenta = {};
   for (const m of marcas) for (const [k, x] of Object.entries(m.plataformas || {})) cuenta[k] = (cuenta[k] || 0) + x;
   const plataformas = Object.entries(cuenta).sort((a, b) => b[1] - a[1]).map(([k]) => k);
-  return { estado: 'ok', marcas, total: ahora.total, totalPrevio: antes ? antes.total : null, diaria, sinDato, plataformas };
+  return { estado: 'ok', marcas, total: ahora.total, totalPrevio: antes ? antes.total : null, diaria, sinDato, plataformas, conHuecos };
 }
 
 // Las plataformas digitales del año, de más a menos piezas: lo que de verdad entra al universo digital
@@ -176,7 +181,10 @@ function ooh(contrato, mapa, P) {
   const mapaLeido = leerOoh(paneles, mapa, MARCAS);
   // La comparación: en qué distritos tenía paneles cada marca antes (Integrametrics registra cada panel el día que lo
   // detecta, así que lo nuevo no es el panel sino el distrito)
-  const previos = P.compararDesde ? (contrato.ooh || []).filter((p) => MARCAS.includes(p.maname) && dia(p.firstFecha || p.lastFecha) <= P.compararHasta && dia(p.lastFecha || p.firstFecha) >= P.compararDesde).map((p) => ({ ...p, marca: p.maname })) : null;
+  // la zona es nueva si la marca no tuvo paneles ahí en los 90 días anteriores: Integrametrics detecta los paneles a
+  // saltos, y contra una semana cualquier distrito parece nuevo
+  const desdeBase = sumarDias(P.desde, -90), hastaBase = sumarDias(P.desde, -1);
+  const previos = hastaBase >= contrato.meta.firstDay ? (contrato.ooh || []).filter((p) => MARCAS.includes(p.maname) && dia(p.firstFecha || p.lastFecha) <= hastaBase && dia(p.lastFecha || p.firstFecha) >= desdeBase).map((p) => ({ ...p, marca: p.maname })) : null;
   const leidoAntes = previos ? leerOoh(previos, mapa, MARCAS) : null;
   const zonasDe = (leido, m) => new Set([...leido.porDistrito, ...leido.fueraDeLima].filter((d) => d[m] > 0).map((d) => d.nombre));
   const conPieza = (p) => ({
@@ -215,9 +223,10 @@ function estrenos(contrato, P) {
 }
 
 // Medios del período (hora, día, canal, programa, zona) en TV, radio, cable y OTT: de cada emisión de medios.json
-function horarioYCanales(medios, P) {
+// diasConData: los días con registros de la fuente; un día sin registros es un hueco, no un día sin emisiones
+function horarioYCanales(medios, P, diasConData) {
   if (!medios?.emisiones) return null;
-  const dias = rango(P.desde, P.hasta);
+  const dias = rango(P.desde, P.hasta).filter((d) => !diasConData || diasConData.has(d));
   const cuantosDia = Array(7).fill(0);
   for (const d of dias) cuantosDia[diaSemana(d)] += 1;
   return Object.fromEntries(MARCAS.map((marca) => {
@@ -234,7 +243,7 @@ function horarioYCanales(medios, P) {
       if (e.programa) b.programas[e.programa] = (b.programas[e.programa] || 0) + 1;
       if (e.zona) b.zonas[e.zona] = (b.zonas[e.zona] || 0) + e.inversion;
     }
-    const porHora = b.horas.map((n) => n / dias.length);
+    const porHora = b.horas.map((n) => n / (dias.length || 1));
     // emisiones promedio en cada hora de cada día de la semana: la cuenta del período dividida por cuántas veces cae ese día
     const matriz = b.horaDia.map((fila, i) => fila.map((n) => (cuantosDia[i] ? n / cuantosDia[i] : null)));
     const porDiaSemana = b.dias.map((n, i) => (cuantosDia[i] ? n / cuantosDia[i] : null));
@@ -335,7 +344,8 @@ function queMirar(v, P) {
   // La competencia sube, baja o se apaga frente a la comparación (ATL y digital por separado). Apagarse también es
   // una señal: puede ser una pausa de temporada o la antesala de un lanzamiento
   for (const [u, fuente] of [[v.lee.atl, 'Integrametrics'], [v.lee.digital, 'Integrametrics digital']]) {
-    if (u.estado !== 'ok' || diasConData(u) < UMBRALES.diasMinimos) continue;
+    // con huecos en el período o en la comparación, una subida o una bajada puede ser solo el hueco: no se avisa
+    if (u.estado !== 'ok' || diasConData(u) < UMBRALES.diasMinimos || u.conHuecos) continue;
     const universo = u === v.lee.atl ? 'ATL' : 'digital';
     for (const m of comp(u)) {
       if (!m.inversionPrevia) continue;
@@ -402,10 +412,12 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
   const atlPrevio = ok('atl') && P.compararDesde ? leerUniverso(contrato.daily, { ...P, desde: P.compararDesde, hasta: P.compararHasta, compararDesde: null }).marcas : null;
 
   // la semana de la capa 1 es el período elegido: con el atajo inicial, los últimos siete días
+  const diasConData = new Set(contrato.daily.map((d) => d.fecha));
   const S = { desde: P.desde, hasta: P.hasta };
   const DIAS_PATRON = 28;
   const desdePatron = sumarDias(P.hasta, -(DIAS_PATRON - 1));
   const PM = P.dias >= DIAS_PATRON ? P : { desde: desdePatron < meta.firstDay ? meta.firstDay : desdePatron, hasta: P.hasta };
+  const medPM = ok('atl') ? horarioYCanales(medios, PM, diasConData) : null;
   const vista = {
     periodo: P, fuentes, umbrales: UMBRALES,
     monitoreo: [
@@ -423,8 +435,10 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
       abanicoDigital: ok('digital') ? abanicoDigital(contrato, P) : null,
       ooh: ok('atl') ? ooh(contrato, mapa, P) : null,
       // cuándo sale al aire es un patrón: con menos de cuatro semanas se lee en las cuatro que terminan en el período
-      medios: ok('atl') ? horarioYCanales(medios, PM) : null,
-      mediosVentana: { desde: PM.desde, hasta: PM.hasta, ampliada: PM.desde !== P.desde },
+      medios: medPM,
+      mediosVentana: { desde: PM.desde, hasta: PM.hasta, ampliada: PM.desde !== P.desde, dias: diasEntre(PM.desde, PM.hasta) + 1 },
+      // los mismos medios en el período exacto: para MAIA y para las cifras que dicen el período
+      mediosDelPeriodo: PM === P ? medPM : (ok('atl') ? horarioYCanales(medios, P, diasConData) : null),
       // las versiones del año de la competencia principal (la primera de cliente.js)
       cronograma: ok('atl') ? cronograma(versionesDelAnio(contrato, COMPETENCIA[0])) : null,
       // la semana de la competencia: los siete días que terminan en el último día del período
@@ -452,7 +466,7 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
   };
   // sin ATL no hay semana que armar: el panel de MAIA lo dice; sin digital, los hechos digitales no se cuentan
   const distritoPanel = (p) => (mapa && Number.isFinite(p.lat) && Number.isFinite(p.lng) ? distritoDe(mapa, proyectar(mapa, p.lat, p.lng)) : null) ?? p.localidad;
-  vista.sugiere.semana = ok('atl') ? hechosDeLaSemana(contrato, { propia: PROPIA, competencia: COMPETENCIA, nombreMarca, busquedas: vista.analiza.busquedas, sinDigital: !ok('digital'), distritoDe: distritoPanel }) : null;
+  vista.sugiere.semana = ok('atl') ? hechosDeLaSemana(contrato, { propia: PROPIA, competencia: COMPETENCIA, nombreMarca, busquedas: ok('trends') ? leerBusquedas(busquedas) : null, sinDigital: !ok('digital'), distritoDe: distritoPanel }) : null;
   vista.sugiere.semanaSinAtl = !ok('atl');
   vista.sugiere.queMirar = queMirar(vista, P).filter((a) => a.nivel !== 'bien');
   vista.sugiere.queVaBien = queMirar(vista, P).filter((a) => a.nivel === 'bien');

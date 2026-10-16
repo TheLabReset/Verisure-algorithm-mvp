@@ -66,7 +66,7 @@ function PautaSemanal({ pauta, P }) {
       pie={<span>{universo === 'todo' ? 'Todo suma ATL y digital, que Integrametrics estima con métodos distintos: sirve para ver cuándo se prende la pauta, no para comparar montos.' : 'Inversión semanal estimada por Integrametrics.'}</span>}>
       <div className="q-control q-control-tarjeta"><span>Universo</span><Grupo etiqueta="Universo" valor={universo} onCambiar={setUniverso} opciones={opciones} /></div>
       <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true">
-        <li><span className="q-muestra q-muestra-tramo" /><span className="q-muestra q-muestra-propia-cuadro" />{P.desde === P.hasta ? 'La semana' : 'Semanas'} con días {tramoFechas(P.desde, P.hasta)}</li>
+        <li><span className="q-muestra q-muestra-tramo" /><span className="q-muestra q-muestra-propia-cuadro" />{P.desde === P.hasta ? `La semana que incluye ${tramoFechas(P.desde, P.hasta)}` : `Semanas con días ${tramoFechas(P.desde, P.hasta)}`}</li>
         <li><span className="q-muestra q-muestra-resto" />El resto del año</li>
       </ul>
       <div className="q-pauta-semanal">
@@ -116,6 +116,7 @@ export default function Rendimiento({ capa, vista: v }) {
   const diario = vigente(elegidoDiario, opcionesDiario);
   const ok = (x) => x.estado === 'ok';
   const rival = (u) => u.marcas.find((m) => m.foco);
+  const rivalId = COMPETENCIA.marcaFuente;
   const comparacion = comparacionTexto(P);
   const rotuloA = mesComparacion(P), rotuloAhora = mesPeriodo(P);
   const corto = !comparacion || diasEntre(P.desde, P.hasta) + 1 < DIAS_MINIMOS; // sin la barra de antes, como las lecturas
@@ -140,7 +141,7 @@ export default function Rendimiento({ capa, vista: v }) {
           { rotulo: `Share digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? porcentaje(rival(dig).share) : null, nota: ok(dig) ? capital(puntosFrente(rival(dig).cambioPts, P) || `de ${solesCompacto(dig.total)} en total`) : null },
           { rotulo: `Inversión digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? solesCompacto(rival(dig).inversion) : null, nota: ok(dig) ? `${compacto(rival(dig).impresiones)} impresiones` : null },
           { rotulo: `Share ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? porcentaje(rival(atl).share) : null, nota: ok(atl) ? capital(puntosFrente(rival(atl).cambioPts, P) || `de ${solesCompacto(atl.total)} en total`) : null },
-          { rotulo: `Inversión ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? solesCompacto(rival(atl).inversion) : null, nota: ok(atl) ? `${numero(rival(atl).spots)} emisiones` : null },
+          { rotulo: `Inversión ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? solesCompacto(rival(atl).inversion) : null, nota: v.lee.mediosDelPeriodo?.[rivalId] ? `${numero(v.lee.mediosDelPeriodo[rivalId].emisiones)} ${v.lee.mediosDelPeriodo[rivalId].emisiones === 1 ? 'emisión' : 'emisiones'} al aire` : null },
         ]} />
 
       <SeccionDe def={s41} vista={v}>

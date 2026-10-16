@@ -29,9 +29,9 @@ export function tramoMeses(desde, hasta, a = 'entre') {
 }
 // Si la fuente está atrasada, el mes no «va»: se dice hasta dónde tiene data («julio hasta el 13»), que también se lee
 // bien después de «de», «en» o «para»
-// Un tramo de días («Últimos 7 días» o dos fechas) se dice «los días del 7 al 13 de julio», o «el 5 de marzo» si es
+// Un tramo de días («Últimos 7 días» o dos fechas) se dice «los días del 7 al 13 de julio», o «el día 5 de marzo» si es
 // uno solo: se lee bien después de «en» o «para»
-export const periodoTexto = (P) => (P.tramo ? (P.desde === P.hasta ? tramoFechas(P.desde, P.hasta) : `los días ${tramoFechas(P.desde, P.hasta)}`)
+export const periodoTexto = (P) => (P.tramo ? (P.desde === P.hasta ? `el día ${tramoFechas(P.desde, P.hasta).replace(/^el /, '')}` : `los días ${tramoFechas(P.desde, P.hasta)}`)
   : !P.parcial ? mesTexto(P.mes) : P.enCurso === false ? `${mesLargo(+P.mes.slice(5, 7))} hasta el ${Number(P.hasta.slice(8, 10))}` : `lo que va de ${mesLargo(+P.mes.slice(5, 7))}`);
 // La comparación: el mes anterior, el mismo tramo del mes anterior o los mismos días justo antes
 export const comparacionTexto = (P) => (!P.compararDesde ? null : P.tramo ? (P.dias === 1 ? 'el día anterior' : `los ${numero(P.dias)} días anteriores`)
@@ -101,3 +101,6 @@ export const tipoAvisoPlural = (t, n) => (n === 1 ? tipoAviso(t).toLowerCase() :
 export const GRUPOS_DIGITALES = ['FACEBOOK', 'INSTAGRAM', 'YOUTUBE', 'OTROS'];
 export const grupoDigital = (k) => (GRUPOS_DIGITALES.includes(k) ? k : 'OTROS');
 export const nombreGrupoDigital = (k) => ({ FACEBOOK: 'Facebook', INSTAGRAM: 'Instagram', YOUTUBE: 'YouTube', OTROS: 'TikTok, sitios y otros' }[k]);
+
+// La ventana de un patrón (horario, compra): «en cuatro semanas», o los días que hay si la data empieza antes
+export const ventanaPatron = (mv) => (mv.dias >= 28 ? 'en cuatro semanas' : `en ${numero(mv.dias)} ${mv.dias === 1 ? 'día' : 'días'}`);

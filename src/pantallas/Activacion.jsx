@@ -8,15 +8,14 @@ import { Lineas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, dolares, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import { resumenTitulo, comparacionTexto } from '../textos/comun.js';
-import { plataformasLectura, pushPullLectura, plataformasObjetivoLectura } from '../textos/lecturas.js';
+import { plataformasLectura, pushPullLectura, plataformasObjetivoLectura, estadoObjetivo } from '../textos/lecturas.js';
 import { MARGEN_OBJETIVO } from '../calculo/plataformas.js';
 
 const SEMANAS_A_LA_VISTA = 12; // como el tablero del cliente: el trimestre que termina en el período
 const TONO = { bien: 'mejora', cerca: null, lejos: 'empeora' };
-const ESTADO = { bien: 'en objetivo', cerca: 'cerca', lejos: 'por encima' };
 const costo = (n) => dolares(n);
 const pct = (n) => (n == null ? 'sin dato' : porcentaje(n));
-const conTono = (texto, estado) => ({ texto, tono: TONO[estado] ?? null, sub: estado ? ESTADO[estado] : null });
+const conTono = (texto, estado) => ({ texto, tono: TONO[estado] ?? null, sub: estado ? estadoObjetivo(estado).toLowerCase() : null });
 const cambio = (a, b) => (a == null || !b ? null : ((a - b) / b) * 100);
 
 export default function Activacion({ capa, vista: v }) {
@@ -52,7 +51,7 @@ export default function Activacion({ capa, vista: v }) {
               { nombre: 'Las tres', clase: null, pasos: [{ valor: dolares(t.inversion) }, { valor: numero(t.leads), nota: `${costo(t.cpl)} por lead` }, { valor: numero(t.bookings), nota: `${costo(t.cpb)} por booking · ${pct(t.l2b)} de los leads` }] }]} />
         </Bloque>
         <Bloque universo="plataformas" titulo="Leads y bookings, día por día" ejemplo
-          pie={<span>Las tres plataformas juntas. El costo de cada día va en el detalle.</span>}>
+          pie={<span>Las tres plataformas juntas.</span>}>
           <Lineas etiqueta="Leads y bookings por día" formato={(n) => numero(n)} alto={220}
             series={[{ nombre: 'Leads', tono: 'tinta', serie: x.diaria.map((d) => ({ fecha: d.fecha, valor: d.leads })) }, { nombre: 'Bookings', tono: 'propia', serie: x.diaria.map((d) => ({ fecha: d.fecha, valor: d.bookings })) }]} />
         </Bloque>
@@ -83,15 +82,15 @@ export default function Activacion({ capa, vista: v }) {
 
       <SeccionDe def={s33} vista={v}>
         <Bloque universo="plataformas" {...plataformasObjetivoLectura(x)} ejemplo
-          ayuda={<p>Cada costo se compara con el objetivo de su plataforma: en objetivo si queda en él o por debajo, cerca hasta {porcentaje(MARGEN_OBJETIVO)} arriba, y por encima si pasa de ahí.</p>}
+          ayuda={<p>Cada costo se compara con el objetivo de su plataforma: en objetivo si queda en él o por debajo; si no, cuánto lo pasa: hasta {porcentaje(MARGEN_OBJETIVO)} o más.</p>}
           pie={<span>{x.fuente}.</span>}>
           <ul className="q-plataformas">
             {x.plataformas.map((p) => (
               <li key={p.id} className="q-plataforma">
                 <h4>{p.nombre}<span>{p.tipo === 'push' ? 'Push' : 'Pull'}</span></h4>
-                <div className="q-plataforma-cifra"><span>Costo por booking</span><b>{costo(p.cpb)}</b><Semaforo estado={p.estadoCpb} /><small>Objetivo: {costo(p.objetivo.cpb)}</small></div>
+                <div className="q-plataforma-cifra"><span>Costo por booking</span><b>{costo(p.cpb)}</b><Semaforo estado={p.estadoCpb} texto={estadoObjetivo(p.estadoCpb)} /><small>Objetivo: {costo(p.objetivo.cpb)}</small></div>
                 <dl className="q-ficha-datos">
-                  <div><dt>Costo por lead</dt><dd>{costo(p.cpl)} <Semaforo estado={p.estadoCpl} /></dd></div>
+                  <div><dt>Costo por lead</dt><dd>{costo(p.cpl)} <Semaforo estado={p.estadoCpl} texto={estadoObjetivo(p.estadoCpl)} /></dd></div>
                   <div><dt>Bookings</dt><dd>{numero(p.bookings)} de {numero(p.leads)} leads</dd></div>
                   <div><dt>L2B</dt><dd>{pct(p.l2b)}</dd></div>
                   <div><dt>Inversión</dt><dd>{dolares(p.inversion)}</dd></div>

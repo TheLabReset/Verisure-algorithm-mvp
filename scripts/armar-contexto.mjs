@@ -23,7 +23,8 @@ export function armarContexto(dir = DATA) {
       ...(Object.keys(m.medios).length ? { medios: Object.fromEntries(Object.entries(m.medios).map(([k, x]) => [MEDIOS[k] || k, r(x)])) } : {}),
       ...(m.impresiones ? { impresiones: r(m.impresiones) } : {}),
     }])));
-    const med = v.lee.medios ? Object.fromEntries(Object.entries(v.lee.medios).filter(([, x]) => x).map(([k, x]) => [CLIENTE.competencia.find((c) => c.marcaFuente === k)?.nombre ?? CLIENTE.nombre, {
+    // las emisiones del mes exacto (no la ventana de cuatro semanas del horario en pantalla)
+    const med = v.lee.mediosDelPeriodo ? Object.fromEntries(Object.entries(v.lee.mediosDelPeriodo).filter(([, x]) => x).map(([k, x]) => [CLIENTE.competencia.find((c) => c.marcaFuente === k)?.nombre ?? CLIENTE.nombre, {
       emisiones: x.emisiones, canales: x.canales.slice(0, 5), programas: x.programas.slice(0, 5), horasAltas: x.horasAltas,
     }])) : null;
     return {

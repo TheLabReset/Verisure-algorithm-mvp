@@ -8,7 +8,9 @@ const VENTANA = 12; // semanas: un trimestre, para que una semana rara no mueva 
 // Las últimas semanas completas (la parcial de Trends no cuenta) y las mismas semanas de un año antes
 // hasta: el último día del período elegido; las semanas que empiezan después no cuentan
 function ventanas(grupo, n, hasta) {
-  const completas = grupo.semanas.map((s, i) => i).filter((i) => !grupo.parcial[i] && (!hasta || grupo.semanas[i] <= hasta));
+  // una semana cuenta si termina dentro del período (domingo, seis días después de su inicio)
+  const finDe = (iso) => { const d = new Date(`${iso}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + 6); return d.toISOString().slice(0, 10); };
+  const completas = grupo.semanas.map((s, i) => i).filter((i) => !grupo.parcial[i] && (!hasta || finDe(grupo.semanas[i]) <= hasta));
   const ahora = completas.slice(-n);
   const antes = ahora.map((i) => i - 52).filter((i) => i >= 0);
   return { ahora, antes: antes.length === ahora.length ? antes : null };

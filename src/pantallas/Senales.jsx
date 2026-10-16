@@ -63,7 +63,7 @@ export default function Senales({ capa, vista: v }) {
   return (
     <MarcoCapa capa={capa} vista={v}>
       <Resumen titulo={resumenTitulo(P)}
-        pie={<span>Integrametrics. Lo de {CLIENTE.nombre} va en la capa de inteligencia de mercado, para comparar.</span>}
+        pie={<span>Integrametrics.</span>}
         items={[
           { rotulo: `Piezas digitales nuevas de ${COMPETENCIA.nombre}`, universo: 'digital', ir: s11.id, irTexto: s11.titulo, valor: d ? numero(enPeriodo(d) ? d.piezas : 0) : null, nota: d && enPeriodo(d) ? `${numero(d.mensajes.length)} ${d.mensajes.length === 1 ? 'mensaje' : 'mensajes'}` : d?.piezas ? `la última, del ${fechaCorta(d.semana.hasta)}` : null },
           { rotulo: `Emisiones en TV y cable de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s12.id, irTexto: s12.titulo, valor: tv ? numero(enPeriodo(tv) ? tv.emisiones.length : 0) : null, nota: tv && !enPeriodo(tv) && tv.emisiones.length ? `la última, del ${fechaCorta(tv.semana.hasta)}` : tv && enPeriodo(tv) ? `${numero(tv.canales)} ${tv.canales === 1 ? 'canal' : 'canales'}` : null },

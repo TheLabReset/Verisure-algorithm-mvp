@@ -5,6 +5,7 @@ import { numero, porcentaje, soles, solesCompacto, fechaCorta } from '../sistema
 import { CLIENTE } from '../cliente.js';
 import { tramoMeses, periodoTexto, comparacionTexto, puntosFrente, enLetras, segun, lista, capital, horasTexto, DIAS_SEMANA, version, mesTexto, medioEnFrase, tramoFechas, tipoAviso, tipoAvisoPlural, plataformasTexto } from './comun.js';
 import { dolares, fechaSinAnio } from '../sistema/formato.js';
+import { MARGEN_OBJETIVO } from '../calculo/plataformas.js';
 
 const propiaDe = (u) => u.marcas.find((m) => m.propia);
 const rivalDe = (u) => u.marcas.find((m) => !m.propia);
@@ -125,11 +126,12 @@ export function cronogramaLectura(c, marca, desde, hasta) {
 }
 export function estrenosLectura(v) {
   const e = v.lee.estrenos, P = v.periodo;
-  const titulo = 'Piezas que se estrenaron';
-  if (!e.length) return { titulo, lectura: `Ninguna pieza nueva en ${periodoTexto(P)}.` };
+  // los estrenos los marca Integrametrics en ATL (TV, radio, cable, OTT y vía pública); las piezas digitales nuevas van en la capa 1
+  const titulo = 'Piezas nuevas en ATL';
+  if (!e.length) return { titulo, lectura: `Ninguna pieza nueva en ATL en ${periodoTexto(P)}.` };
   const nombres = [...new Set(e.map((x) => x.nombre))].sort((a, b) => (a === CLIENTE.nombre) - (b === CLIENTE.nombre));
   const porMarca = nombres.map((n) => `${numero(e.filter((x) => x.nombre === n).length)} de ${n}`);
-  return { titulo, lectura: `${capital(enLetras(e.length, true))} ${segun(e.length, 'pieza nueva', 'piezas nuevas')} en ${periodoTexto(P)}: ${lista(porMarca)}.` };
+  return { titulo, lectura: `${capital(enLetras(e.length, true))} ${segun(e.length, 'pieza nueva', 'piezas nuevas')} en ATL en ${periodoTexto(P)}: ${lista(porMarca)}.` };
 }
 export const estrenoTitulo = (e) => cita(e.version);
 export function estrenoDato(e) {
@@ -315,8 +317,9 @@ const ALERTAS = {
     mirar: 'Si es una prueba puntual o el inicio de una presencia sostenida.',
   }),
   'paneles-competencia': (a) => ({
-    titulo: `${a.marca} tiene paneles en ${lista(a.zonas)}, donde no tenía en ${comp(a)}`,
-    dato: `${numero(a.cuantos)} ${segun(a.cuantos, 'panel detectado', 'paneles detectados')} en ${per(a)}, frente a ${numero(a.antes)} en ${comp(a)}.`,
+    // la base son los 90 días anteriores al período (Integrametrics detecta los paneles a saltos)
+    titulo: `${a.marca} tiene paneles en ${lista(a.zonas)}, donde no tenía en los 90 días anteriores`,
+    dato: `${numero(a.cuantos)} ${segun(a.cuantos, 'panel detectado', 'paneles detectados')} en ${per(a)}.`,
     mirar: `Qué versión lleva cada panel y si se cruza con las zonas de ${CLIENTE.nombre}.`,
   }),
   'digital-competencia': (a) => ({
@@ -376,17 +379,20 @@ const COMP = CLIENTE.competencia[0].nombre;
 
 export function digitalSemanaLectura(d) {
   if (!d.piezas) return { titulo: `${COMP} no tiene piezas digitales registradas`, lectura: `Integrametrics no registra piezas digitales de ${COMP} hasta el ${fechaCorta(d.semana.hasta)}.` };
-  const [m] = d.mensajes;
+  const [m, segundo] = d.mensajes;
   const k = d.mensajes.length, nuevos = d.mensajes.filter((x) => x.nuevo).length;
   const cuantas = `${numero(d.piezas)} ${segun(d.piezas, 'pieza digital', 'piezas digitales')}`;
   const titulo = d.reciente ? `${COMP} no estrenó piezas digitales en el período` : `${COMP} estrenó ${cuantas} con ${enLetras(k)} ${segun(k, 'mensaje', 'mensajes')}`;
   const donde = d.plataformas.length ? `, sobre todo en ${plataformasTexto(d.plataformas.slice(0, 2))}` : '';
-  const primero = d.reciente ? `Las más recientes son ${cuantas} ${semanaDe(d.semana)}.`
+  const primero = d.reciente ? `Lo más reciente son ${cuantas} ${semanaDe(d.semana)}.`
     : nuevos === k ? `${k === 1 ? 'El mensaje es nuevo' : `Los ${enLetras(k)} mensajes son nuevos`}.`
     : nuevos ? `${nuevos === 1 ? 'Uno' : capital(enLetras(nuevos))} de los ${enLetras(k)} mensajes ${nuevos === 1 ? 'es nuevo' : 'son nuevos'}.`
     : `${k === 1 ? 'Es un mensaje que ya venía usando' : `Los ${enLetras(k)} mensajes ya los venía usando`}.`;
-  const segundo = k > 1 ? ` El que más piezas tiene es ${cita(m.mensaje)}, con ${numero(m.piezas)}${donde}.` : ` Sale${donde.replace(', sobre todo', ' sobre todo') || ' en digital'}.`;
-  return { titulo, lectura: `${primero}${segundo}` };
+  // el mensaje con más piezas, si hay uno que destaca (con un empate no se elige ninguno)
+  const destaca = k > 1 && m.piezas > 1 && m.piezas > (segundo?.piezas ?? 0);
+  const cola = destaca ? ` El mensaje con más piezas es ${cita(m.mensaje)} (${numero(m.piezas)})${donde}.`
+    : donde ? ` ${d.piezas === 1 ? 'Sale' : 'Salen'}${donde.replace(', sobre todo', ' sobre todo')}.` : '';
+  return { titulo, lectura: `${primero}${cola}` };
 }
 
 export function atlSemanaLectura(a, medio) {
@@ -396,7 +402,7 @@ export function atlSemanaLectura(a, medio) {
   const tipos = a.porTipo.map((t) => `${numero(t.emisiones)} ${tipoAvisoPlural(t.nombre, t.emisiones)}`);
   const titulo = a.reciente ? `${COMP} no salió en ${medio} en el período` : `${COMP} tuvo ${numero(n)} ${segun(n, 'emisión', 'emisiones')} en ${medio}`;
   const primero = a.reciente
-    ? `Su última semana al aire fue ${semanaDe(a.semana)}, con ${numero(n)} ${segun(n, 'emisión', 'emisiones')} en ${enLetras(a.canales)} ${segun(a.canales, 'canal', 'canales')}.`
+    ? `Lo último al aire es ${semanaDe(a.semana)}: ${numero(n)} ${segun(n, 'emisión', 'emisiones')} en ${enLetras(a.canales)} ${segun(a.canales, 'canal', 'canales')}.`
     : `${a.porTipo.length === 1 ? `${n === 1 ? 'Es' : 'Todas son'} ${tipoAvisoPlural(a.porTipo[0].nombre, n)}` : capital(lista(tipos))}, en ${enLetras(a.canales)} ${segun(a.canales, 'canal', 'canales')}.`;
   const segundo = a.porMotivo.length > 1 ? ` El motivo que más sale es ${cita(motivo.nombre)}, con ${numero(motivo.emisiones)}.` : ` El motivo es ${cita(motivo.nombre)}.`;
   return { titulo, lectura: `${primero}${segundo}` };
@@ -433,15 +439,15 @@ export function digitalPlataformasLectura(u) {
   const [kp] = total(p) ? principal(p) : [null];
   return { titulo: `${r.nombre} concentra ${porcentaje(parteR)} de sus avisos digitales en ${u.nombreGrupo(kr)}`, lectura: kp ? `${p.nombre} pone la mayor parte en ${u.nombreGrupo(kp)}.` : `${p.nombre} no tiene avisos digitales registrados en el período.` };
 }
-// P: el período de la compra (con un período corto, las cuatro semanas que terminan en él)
-export function compraLectura(c, P) {
+// P: el período de la compra; ventana: con un período corto, «en cuatro semanas» (la compra se lee en las que terminan en él)
+export function compraLectura(c, P, ventana = null) {
   const r = c.totales[c.competencia], p = c.totales[c.propia];
   const rn = textosMarca.nombreMarca(c.competencia), pn = textosMarca.nombreMarca(c.propia);
-  if (!r.emisiones) return { titulo: `${rn} no compró medios ATL ${P.ampliada || !P.mes ? `del ${ventanaCorta(P)}` : `en ${periodoTexto(P)}`}`, lectura: `${pn} tiene ${numero(p.emisiones)} emisiones en ${numero(p.canales)} canales.` };
-  const coinciden = c.enComun ? `coinciden en ${enLetras(c.enComun)} ${segun(c.enComun, 'canal', 'canales')}` : 'no coinciden en ningún canal';
+  const canales = (n) => `${enLetras(n)} ${segun(n, 'canal', 'canales')}`;
+  if (!r.emisiones) return { titulo: `${rn} no tiene emisiones en TV, cable, radio ni OTT ${semanaDe(P)}`, lectura: `${pn} tiene ${numero(p.emisiones)} ${segun(p.emisiones, 'emisión', 'emisiones')} en ${canales(p.canales)}.` };
   return {
-    titulo: `${rn} compró ${numero(r.emisiones)} emisiones en ${enLetras(r.canales)} ${segun(r.canales, 'canal', 'canales')}`,
-    lectura: `${pn} compró ${numero(p.emisiones)} en ${numero(p.canales)}; ${coinciden}.`,
+    titulo: `${ventana ? `${capital(ventana)}, ` : ''}${rn} compró ${numero(r.emisiones)} ${segun(r.emisiones, 'emisión', 'emisiones')} en ${canales(r.canales)}`,
+    lectura: c.enComun ? `Coinciden con ${pn} en ${canales(c.enComun)}.` : `No coinciden con ${pn} en ningún canal.`,
   };
 }
 
@@ -460,8 +466,11 @@ export function pushPullLectura(x) {
   if (push.l2b == null || pull.l2b == null) return { titulo: 'Push y Pull', lectura: '' };
   const mas = push.l2b >= pull.l2b ? push : pull, menos = mas === push ? pull : push;
   const nombre = (t) => (t.tipo === 'push' ? 'Push' : 'Pull');
+  if (Math.round(push.l2b) === Math.round(pull.l2b)) return { titulo: `Push y Pull convierten parecido: ${porcentaje(push.l2b)} de sus leads llegan a booking`, lectura: '' };
   return { titulo: `${nombre(mas)} convierte más: ${porcentaje(mas.l2b)} de sus leads llegan a booking`, lectura: `${nombre(menos)}, ${porcentaje(menos.l2b)}.` };
 }
+// Un costo frente a su objetivo, en palabras: en objetivo, o cuánto lo pasa
+export const estadoObjetivo = (e) => ({ bien: 'En objetivo', cerca: `Hasta ${porcentaje(MARGEN_OBJETIVO)} por encima`, lejos: `Más de ${porcentaje(MARGEN_OBJETIVO)} por encima` }[e] ?? null);
 // las plataformas son de la marca propia y las maneja la agencia: lo que pasa el objetivo se dice sin juicio
 export function plataformasObjetivoLectura(x) {
   const encima = x.plataformas.filter((p) => p.estadoCpb === 'lejos'), bien = x.plataformas.filter((p) => p.estadoCpb === 'bien');
