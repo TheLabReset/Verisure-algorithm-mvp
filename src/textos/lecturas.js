@@ -20,20 +20,6 @@ export const textosMarca = {
   nombreMarca: (m) => (m === CLIENTE.marcaFuente ? CLIENTE.nombre : CLIENTE.competencia.find((c) => c.marcaFuente === m)?.nombre ?? m),
 };
 
-// ── Resumen de cada capa: una frase por universo, la competencia primero ──
-// El color de la variación es desde la marca propia: que la competencia gane share se lee como «empeora».
-export function fraseShare(u, universo, P) {
-  const r = rivalDe(u), p = propiaDe(u);
-  if (!r || r.share == null) return [{ t: `Sin inversión registrada en ${universo} en el período.` }];
-  const segs = [{ t: `En ${universo}, ${r.nombre} tiene ` }, { t: pct(r.share), cifra: true }, { t: ` de la inversión; ${p.nombre}, ` }, { t: pct(p.share), cifra: true }];
-  if (r.cambioPts != null && P.compararDesde) {
-    segs.push({ t: `. ${r.nombre} queda ` });
-    segs.push({ t: puntosFrente(r.cambioPts, P), tono: r.cambioPts > 0 ? 'empeora' : r.cambioPts < 0 ? 'mejora' : undefined });
-    segs.push({ t: '.' });
-  } else segs.push({ t: '.' });
-  return segs;
-}
-
 // ── 4.1 ──
 export function atlLectura(v) {
   const u = v.lee.atl, P = v.periodo, r = rivalDe(u), p = propiaDe(u);

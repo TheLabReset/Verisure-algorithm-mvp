@@ -8,7 +8,7 @@ import { Pesas, Lineas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, soles, solesCompacto, compacto } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import { periodoTexto, comparacionTexto, puntosFrente, capital } from '../textos/comun.js';
-import { fraseShare, atlLectura, digitalLectura, shareLectura, presionLectura, shareSemanalLectura } from '../textos/lecturas.js';
+import { atlLectura, digitalLectura, shareLectura, presionLectura, shareSemanalLectura } from '../textos/lecturas.js';
 
 const pts = (n) => (n == null ? 'sin comparación' : n === 0 ? 'igual' : `${n > 0 ? '+' : '−'}${numero(Math.abs(n))} pts`);
 
@@ -42,7 +42,6 @@ export default function Rendimiento({ capa, vista: v }) {
   return (
     <MarcoCapa capa={capa} vista={v}>
       <Resumen titulo={`Resumen de ${periodoTexto(P)}`}
-        frases={[...(ok(atl) ? [{ segmentos: fraseShare(atl, 'ATL', P) }] : []), ...(ok(dig) ? [{ segmentos: fraseShare(dig, 'digital', P) }] : [])]}
         pie={<span>Inversión estimada por Integrametrics a precio de tarifa.</span>}
         items={[
           { rotulo: `Share digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? porcentaje(rival(dig).share) : null, nota: ok(dig) ? capital(puntosFrente(rival(dig).cambioPts, P) || `de ${solesCompacto(dig.total)} en total`) : null },
