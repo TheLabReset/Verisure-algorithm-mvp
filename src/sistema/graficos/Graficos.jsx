@@ -522,6 +522,13 @@ export function Proyeccion({ historia, meses, formato = numero, etiqueta }) {
 
 // ─────────────── Columnas verticales: una medida por categoría ordenada (horas, días, tramos) ───────────────
 // rotulo: si se pasa, cada barra lleva su cifra encima (pocas barras); si no, solo la más alta de las resaltadas
+// Una cifra centrada sobre su marca, que se corre hacia adentro si en el borde no cabe
+function Rotulo({ texto, cx, y, ancho }) {
+  const medio = (String(texto).length * 7.8) / 2;
+  const [x, ancla] = cx + medio > ancho - 2 ? [ancho - 2, 'end'] : cx - medio < 2 ? [2, 'start'] : [cx, 'middle'];
+  return <text className="q-rotulo-valor" x={x} y={y} textAnchor={ancla}>{texto}</text>;
+}
+
 export function Histograma({ barras, formato = numero, rotulo, resaltar = [], etiqueta, alto: altoPedido = 180, tono }) {
   const tabla = { columnas: ['', 'Valor'], filas: barras.map((b) => [b.nombre, formato(b.valor)]) };
   return (
@@ -543,8 +550,8 @@ export function Histograma({ barras, formato = numero, rotulo, resaltar = [], et
                   <Zona x={m.l + i * paso} y={m.t} w={paso} h={alto - m.b - m.t} pista={`${b.nombre}\n${formato(b.valor)}`} />
                   {b.valor > 0 && <rect className={r ? (tono === 'propia' ? 'q-barra-propia' : tono === 'resto' ? 'q-barra-resto-fuerte' : 'q-barra-acento') : resaltar.length || tono === 'resto' ? 'q-barra-resto' : tono === 'propia' ? 'q-barra-propia' : 'q-barra'} x={x} y={y(b.valor)} width={w} height={y(0) - y(b.valor)} rx="2" data-valor={b.valor} />}
                   {/* rótulos a intervalo fijo; una barra resaltada fuera del intervalo se rotula solo si cabe */}
-                  {(i % cada === 0 || (r && cada === 1)) && <text className={`q-eje${r ? ' q-fuerte' : ''}`} x={x + w / 2} y={alto - 8} textAnchor="middle">{b.corto ?? b.nombre}</text>}
-                  {(rotulo || i === tope) && <text className="q-rotulo-valor" x={x + w / 2} y={y(b.valor ?? 0) - 6} textAnchor="middle">{rotulo ? rotulo(b) : formato(b.valor)}</text>}
+                  {(i % cada === 0 || (r && cada === 1)) && <text className={`q-eje${r ? ' q-fuerte' : ''}`} x={Math.max(x + w / 2, 12)} y={alto - 8} textAnchor="middle">{b.corto ?? b.nombre}</text>}
+                  {(rotulo || i === tope) && <Rotulo texto={rotulo ? rotulo(b) : formato(b.valor)} cx={x + w / 2} y={y(b.valor ?? 0) - 6} ancho={ancho} />}
                 </g>
               );
             })}
@@ -627,7 +634,12 @@ export function Dispersion({ puntos, elegido, onElegir, rotuloX, rotuloY, format
 // Rótulos del eje de tiempo: hasta 45 puntos, uno por semana; con más, el primer punto de cada mes (semanas que
 // empiezan cualquier día incluidas), sin pisarse: cada rótulo deja al menos 48 px con el anterior
 function rotulosX(base, x) {
-  if (base.length <= 45) return base.map((p, i) => ({ i, texto: fechaCorta(p.fecha) })).filter(({ i }) => i % 7 === 0);
+  if (base.length <= 45) {
+    // cada siete puntos, pero nunca más cerca de lo que ocupa un rótulo («31 may»): en un celular se saltan
+    const out = [];
+    base.forEach((p, i) => { if (i % 7 === 0 && (!out.length || x(i) - x(out.at(-1).i) >= 56)) out.push({ i, texto: fechaCorta(p.fecha) }); });
+    return out;
+  }
   const out = [];
   base.forEach((p, i) => {
     if (i > 0 && p.fecha.slice(0, 7) === base[i - 1].fecha.slice(0, 7)) return;
@@ -648,9 +660,10 @@ export function Lineas({ series, formato = numero, alto: altoPedido, etiqueta })
       {(ancho) => {
         const alto = altoPedido || Math.round(Math.min(280, Math.max(200, ancho * 0.36)));
         // el margen derecho a la medida del rótulo final más largo
-        const m = { t: 18, r: Math.max(92, 20 + Math.ceil(Math.max(...series.map((x) => x.nombre.length)) * 7.8)), b: 26, l: 52 };
         const vals = series.flatMap((s) => s.serie.map((p) => p.valor)).filter((v) => v != null);
         const ys = marcas(Math.max(...vals, 1));
+        // los márgenes a la medida de los rótulos: el del eje (S/ 1,0 M es más largo que S/ 50 mil) y el final más largo
+        const m = { t: 18, r: Math.max(92, 20 + Math.ceil(Math.max(...series.map((x) => x.nombre.length)) * 7.8)), b: 26, l: Math.max(52, 14 + Math.ceil(Math.max(...ys.map((v) => formato(v).length)) * 7.8)) };
         const x = lineal(0, base.length - 1, m.l, ancho - m.r), y = lineal(0, ys.at(-1), alto - m.b, m.t);
         const finales = series.map((s) => { const i = ultimoConValor(s.serie); return i >= 0 ? y(s.serie[i].valor) + 4 : null; });
         const separados = separar(finales.map((v) => v ?? 0), 14);
@@ -741,7 +754,7 @@ export function Cronograma({ filas, inicio, fin, periodo, formato = numero, onEl
         return (
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
             {periodo && <rect className="q-zona-periodo" x={x(t(periodo.desde))} y={m.t - 6} width={Math.max(2, x(t(periodo.hasta)) - x(t(periodo.desde)))} height={alto - m.t - m.b + 6} />}
-            {meses.map((d) => <g key={d}><line className="q-rejilla" x1={x(t(d))} x2={x(t(d))} y1={m.t - 6} y2={alto - m.b} /><text className="q-eje" x={x(t(d)) + 3} y={14}>{mesCorto(+d.slice(5, 7))}</text></g>)}
+            {meses.map((d) => <g key={d}><line className="q-rejilla" x1={x(t(d))} x2={x(t(d))} y1={m.t - 6} y2={alto - m.b} />{/* el mes que empieza pegado al borde (el mes en curso con pocos días) no lleva rótulo: no cabe */}{x(t(d)) + 30 <= ancho && <text className="q-eje" x={x(t(d)) + 3} y={14}>{mesCorto(+d.slice(5, 7))}</text>}</g>)}
             {filas.map((f, i) => {
               const cy = m.t + i * fila, x0 = x(t(f.desde)), x1 = Math.max(x0 + 4, x(t(f.hasta)) + 2);
               const pista = `${f.nombre}\n${f.universo === 'atl' ? 'ATL' : 'Digital'}${f.nota ? ` · ${f.nota}` : ''}\n${fechaCorta(f.desde)} a ${fechaCorta(f.hasta)}\n${formato(f.valor)}`;

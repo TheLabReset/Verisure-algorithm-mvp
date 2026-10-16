@@ -1,5 +1,5 @@
 // Componentes de Quincha. No calculan: reciben cifras ya armadas por src/calculo y textos por src/textos.
-import { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
+import { Component, createContext, useContext, useEffect, useId, useRef, useState } from 'react';
 import {
   ArrowDownRight, ArrowUpRight, ArrowRight, CircleHelp, Megaphone, Contact, Search, MessagesSquare, Globe,
   Sigma, CircleCheck, TriangleAlert, CloudOff, Inbox, CalendarX2, CircleDashed, Hourglass, FlaskConical,
@@ -116,6 +116,18 @@ export function Estado({ tipo, titulo, children }) {
   );
 }
 
+// ── Resguardo: si una parte no se puede pintar con la data de hoy, dice eso en su lugar y el resto del panel sigue.
+// La data se mueve: una forma que nadie previó no debe dejar la pantalla en blanco. El error queda en la consola.
+export class Resguardo extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error }; }
+  componentDidCatch(error) { console.error('Resguardo', this.props.donde, error); }
+  render() {
+    if (!this.state.error) return this.props.children;
+    return <Estado tipo="no-cargo" titulo={`${this.props.donde || 'Esta parte'} no se pudo armar con la data de hoy`}><p>El resto del panel sigue al día. Si se repite, la data trae una forma nueva que hay que revisar.</p></Estado>;
+  }
+}
+
 // ── Bloque: una tarjeta, una lectura, un universo (o dos lado a lado, como ATL y digital: se nombran, no se suman) ──
 // Misma estructura siempre (cabecera, cuerpo, pie con la fuente) para que las tarjetas vecinas se alineen fila por fila.
 // Cada tarjeta dice su ventana arriba a la derecha: con calendario si sigue el período elegido, con alfiler si no
@@ -148,7 +160,7 @@ export function Bloque({ titulo, lectura, universo, ancho = 'completo', alcance,
       </header>
       <div className="q-bloque-cuerpo">
         {estado && <Estado tipo={estado.tipo} titulo={estado.titulo}>{estado.texto && <p>{estado.texto}</p>}</Estado>}
-        {!estado?.reemplaza && children}
+        {!estado?.reemplaza && <Resguardo donde="El gráfico">{children}</Resguardo>}
       </div>
       <footer className="q-bloque-pie">
         {us.map((u) => <span key={u.nombre} className="q-pie-universo"><u.icono size={13} aria-hidden="true" />{u.nombre}</span>)}
@@ -437,7 +449,16 @@ export function IndiceCapa({ secciones, etiqueta, conResumen = true, capaId }) {
 }
 
 // ── Opciones excluyentes ──
+// Con más de MAX_GRUPO opciones (más ciudades, más marcas) los botones ya no caben en un celular: pasa a ser una lista
+const MAX_GRUPO = 4;
 export function Grupo({ etiqueta, opciones, valor, onCambiar }) {
+  if (opciones.length > MAX_GRUPO) {
+    return (
+      <select className="q-selector" aria-label={etiqueta} value={valor} onChange={(e) => onCambiar(e.target.value)}>
+        {opciones.map((o) => <option key={o.valor} value={o.valor} disabled={o.desactivada}>{o.texto}</option>)}
+      </select>
+    );
+  }
   return (
     <div className="q-grupo" role="group" aria-label={etiqueta}>
       {opciones.map((o) => (
@@ -535,11 +556,18 @@ export function BotonMonitoreo({ onClick }) {
 }
 
 // ── Barra de la demo: muestra en vivo cómo responde el panel cuando carga o cuando una fuente no llega ──
-export function BarraDemo({ opciones, valor, onCambiar }) {
+// escenarios (opcional): un selector más para ver la misma data movida para un lado o para el otro
+export function BarraDemo({ opciones, valor, onCambiar, escenarios, escenario, onEscenario }) {
   return (
     <div className="q-barra-demo" role="group" aria-label="Estados de la demo">
       <span><Layers size={14} aria-hidden="true" />Demo</span>
       {opciones.map((o) => <button key={o.valor} type="button" aria-pressed={o.valor === valor} onClick={() => onCambiar(o.valor)}>{o.texto}</button>)}
+      {escenarios && (
+        <select className="q-barra-demo-escenario" aria-label="Escenario de data" value={escenario || ''} onChange={(e) => onEscenario(e.target.value || null)}>
+          <option value="">Data real</option>
+          {escenarios.map((e) => <option key={e.id} value={e.id}>{e.titulo}</option>)}
+        </select>
+      )}
     </div>
   );
 }

@@ -9,7 +9,7 @@
 // Integrametrics con métodos distintos: se leen lado a lado y nunca se suman.
 
 import { CLIENTE } from '../cliente.js';
-import { rango, diasEntre, diaSemana, periodoDelMes, mesesDisponibles } from './periodo.js';
+import { rango, diasEntre, diaSemana, periodoDelMes, mesesDisponibles, DIAS_MINIMOS } from './periodo.js';
 import { agruparAnuncios, nombrePlataforma } from './anuncios.js';
 import { leerOoh } from './ooh.js';
 import { versionesDelAnio, cronograma, pautaDiaria, shareSemanal, pautaSemanal } from './competencia.js';
@@ -26,6 +26,8 @@ export const UMBRALES = {
   dominioAtl: 90,        // share ATL de la marca propia que se lee como dominio de la categoría
   atrasoFuente: 3,       // días sin datos nuevos para decir que la fuente está atrasada
   subidaCompetencia: 30, // % de subida de la inversión de la competencia frente a la comparación
+  bajadaCompetencia: 50, // % de caída de la inversión de la competencia frente a la comparación
+  diasMinimos: DIAS_MINIMOS, // días con data en el período para leer una variación: con menos, un día raro manda
   subidaDiy: 15,         // % de subida de las búsquedas de cámaras frente a las mismas semanas del año anterior
 };
 
@@ -259,7 +261,11 @@ function queMirar(v, P) {
       if (suyos.length) out.push({ id: 'estreno-competencia', nivel: 'atencion', sostiene: '1.1', fuente: 'Integrametrics', marca: c.nombre, cuantos: suyos.length, ultimo: suyos[0] });
     }
   }
-  if (v.lee.atl.estado === 'ok') {
+  // Con pocos días de data (el mes recién empieza) las variaciones no se leen: un día raro mandaría
+  const diasConData = (u) => (u.estado === 'ok' ? u.diaria.filter((d) => Object.values(d.valores).some((x) => x != null)).length : 0);
+  const pocos = v.lee.atl.estado === 'ok' && diasConData(v.lee.atl) < UMBRALES.diasMinimos;
+  if (pocos) out.push({ id: 'pocos-dias', nivel: 'revisar', sostiene: '4.1', fuente: 'Integrametrics', dias: diasConData(v.lee.atl), minimo: UMBRALES.diasMinimos });
+  if (v.lee.atl.estado === 'ok' && !pocos) {
     for (const m of comp(v.lee.atl)) {
       const valores = v.lee.atl.diaria.map((d) => d.valores[m.id]).filter((x) => x > 0);
       const med = mediana(valores);
@@ -275,12 +281,17 @@ function queMirar(v, P) {
     if (propia.share != null && propia.share >= UMBRALES.dominioAtl) out.push({ id: 'dominio-atl', nivel: 'bien', sostiene: '4.1', fuente: 'Integrametrics', share: propia.share });
     if (v.lee.atl.sinDato.length) out.push({ id: 'dias-sin-dato', nivel: 'revisar', sostiene: '4.1', fuente: 'Integrametrics', dias: v.lee.atl.sinDato });
   }
-  // La competencia sube su inversión frente a la comparación (ATL y digital por separado)
+  // La competencia sube, baja o se apaga frente a la comparación (ATL y digital por separado). Apagarse también es
+  // una señal: puede ser una pausa de temporada o la antesala de un lanzamiento
   for (const [u, fuente] of [[v.lee.atl, 'Integrametrics'], [v.lee.digital, 'Integrametrics digital']]) {
-    if (u.estado !== 'ok') continue;
+    if (u.estado !== 'ok' || diasConData(u) < UMBRALES.diasMinimos) continue;
+    const universo = u === v.lee.atl ? 'ATL' : 'digital';
     for (const m of comp(u)) {
-      const sube = m.inversionPrevia ? Math.round(((m.inversion - m.inversionPrevia) / m.inversionPrevia) * 100) : null;
-      if (sube != null && sube >= UMBRALES.subidaCompetencia) out.push({ id: 'sube-competencia', nivel: 'atencion', sostiene: '4.1', fuente, marca: m.nombre, universo: u === v.lee.atl ? 'ATL' : 'digital', sube, monto: m.inversion, antes: m.inversionPrevia });
+      if (!m.inversionPrevia) continue;
+      if (!m.inversion) { out.push({ id: 'competencia-sin-pauta', nivel: 'atencion', sostiene: '4.1', fuente, marca: m.nombre, universo, antes: m.inversionPrevia }); continue; }
+      const cambio = Math.round(((m.inversion - m.inversionPrevia) / m.inversionPrevia) * 100);
+      if (cambio >= UMBRALES.subidaCompetencia) out.push({ id: 'sube-competencia', nivel: 'atencion', sostiene: '4.1', fuente, marca: m.nombre, universo, sube: cambio, monto: m.inversion, antes: m.inversionPrevia });
+      if (cambio <= -UMBRALES.bajadaCompetencia) out.push({ id: 'baja-competencia', nivel: 'revisar', sostiene: '4.1', fuente, marca: m.nombre, universo, baja: -cambio, monto: m.inversion, antes: m.inversionPrevia });
     }
   }
   if (v.lee.ooh?.zonasNuevas) {
@@ -296,13 +307,13 @@ function queMirar(v, P) {
   }
   const b = v.analiza.busquedas;
   if (b?.camaras?.crecimiento != null && b.camaras.crecimiento >= UMBRALES.subidaDiy) out.push({ id: 'diy-sube', nivel: 'atencion', sostiene: '2.2', fuente: 'Google Trends', crecimiento: b.camaras.crecimiento, razon: b.razon, desde: b.desde, hasta: b.hasta });
-  if (v.lee.digital.estado === 'ok') {
+  if (v.lee.digital.estado === 'ok' && diasConData(v.lee.digital) >= UMBRALES.diasMinimos) {
     const propia = v.lee.digital.marcas.find((m) => m.propia);
     if (propia.cambioPts != null && propia.cambioPts <= -UMBRALES.caidaShareDigital) out.push({ id: 'share-digital', nivel: 'atencion', sostiene: '4.1', fuente: 'Integrametrics digital', share: propia.share, antes: propia.sharePrevio });
     if (propia.cambioPts != null && propia.cambioPts >= UMBRALES.subidaShareDigital) out.push({ id: 'share-digital-sube', nivel: 'bien', sostiene: '4.1', fuente: 'Integrametrics digital', share: propia.share, antes: propia.sharePrevio });
   }
   // Lo de la competencia va primero dentro de cada nivel: es lo principal del panel
-  const deCompetencia = (a) => ['estreno-competencia', 'sube-competencia', 'pico-competencia', 'medio-nuevo', 'paneles-competencia', 'digital-competencia'].includes(a.id);
+  const deCompetencia = (a) => ['estreno-competencia', 'sube-competencia', 'baja-competencia', 'competencia-sin-pauta', 'pico-competencia', 'medio-nuevo', 'paneles-competencia', 'digital-competencia'].includes(a.id);
   return out.map((a) => ({ ...a, competencia: deCompetencia(a) })).sort((a, z) => Number(z.competencia) - Number(a.competencia));
 }
 

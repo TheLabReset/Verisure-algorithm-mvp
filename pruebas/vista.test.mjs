@@ -17,6 +17,7 @@ import { consultar } from '../src/fuentes/trends.js';
 import { armarMensajes, responder } from '../src/fuentes/maia.js';
 import { preguntarMaia } from '../src/fuentes/maia-navegador.js';
 import { MEDIOS, FRANJAS } from '../src/calculo/vista.js';
+import { numerosRotos, revisarTextos } from './revisar.mjs';
 
 const leer = (f) => readFileSync(new URL(`../public/data/${f}`, import.meta.url), 'utf8');
 const contrato = JSON.parse(leer('algorithm.json'));
@@ -25,13 +26,6 @@ const mapa = JSON.parse(leer('mapa-lima.json'));
 const busquedas = JSON.parse(leer('busquedas.json'));
 const MESES = mesesDisponibles(contrato.meta);
 const vistaDe = (mes, estado) => armarVista(contrato, medios, { mes }, estado, { mapa, busquedas });
-
-// Recorre la vista buscando NaN o Infinity: un cálculo roto se ve así antes de llegar a la pantalla
-function numerosRotos(x, ruta = 'vista', out = []) {
-  if (typeof x === 'number' && !Number.isFinite(x)) out.push(ruta);
-  else if (x && typeof x === 'object') for (const [k, y] of Object.entries(x)) numerosRotos(y, `${ruta}.${k}`, out);
-  return out;
-}
 
 test('el período: mes cerrado contra el mes anterior entero, mes en curso contra los mismos días, enero sin comparación', () => {
   const junio = periodoDelMes(contrato.meta, '2026-06');
@@ -65,30 +59,7 @@ for (const mes of MESES) {
   });
 
   test(`${mes}: las lecturas no dicen undefined ni NaN y no pasan de dos frases`, () => {
-    const v = vistaDe(mes);
-    const P = v.periodo;
-    const lecturas = [
-      L.estrenosLectura(v), L.abanicoAtlLectura(v.lee.abanicoAtl, P), L.abanicoDigitalLectura(v.lee.abanicoDigital, P),
-      L.oohLectura(v.lee.ooh, P), L.distritosLectura(v.lee.ooh), L.cronogramaLectura(v.lee.cronograma, 'la competencia'),
-      L.atlLectura(v), L.digitalLectura(v), L.presionLectura(v, 'atl'), L.presionLectura(v, 'digital'), L.shareSemanalLectura(v.analiza.shareSemanal),
-      L.mediosLectura(v, MEDIOS), L.franjasLectura(v, FRANJAS), L.temporadaLectura(v.analiza.temporada), L.pautaLectura(v.analiza.pauta), ...Object.entries(v.analiza.pautaSemanal).map(([u, f]) => L.pautaSemanalLectura(f, u)),
-      L.busquedasLectura(v.analiza.busquedas), L.marcasDiyLectura(v.analiza.busquedas),
-      ...Object.entries(v.lee.medios || {}).flatMap(([m, d]) => [L.canalesLectura(d, m), L.horarioLectura(d, m), L.programasLectura(d, m)]),
-    ];
-    const alertas = [...v.sugiere.queMirar, ...v.sugiere.queVaBien].map(L.alerta);
-    assert.ok(alertas.every(Boolean), 'una alerta no tiene texto');
-    const hechos = (v.sugiere.semana?.hechos || []).map(hechoTexto);
-    assert.ok(hechos.every((h) => h?.titulo && h.dato), 'un hecho de la semana no tiene texto');
-    alertas.push(...hechos.map((h) => ({ ...h, mirar: '' })));
-    for (const t of [...lecturas.flatMap((x) => [x.titulo, x.lectura]), ...alertas.flatMap((a) => [a.titulo, a.dato, a.mirar])]) {
-      assert.equal(typeof t, 'string');
-      assert.doesNotMatch(t, /undefined|NaN|null|\[object/, t);
-      assert.doesNotMatch(t, /—/, `raya larga en «${t}»`);
-    }
-    for (const x of lecturas) {
-      const frases = x.lectura.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ«¿])/u).filter(Boolean);
-      assert.ok(frases.length <= 2, `más de dos frases: «${x.lectura}»`);
-    }
+    revisarTextos(vistaDe(mes));
   });
 }
 

@@ -1,6 +1,7 @@
 // Piezas de texto comunes. Puras: reciben datos ya calculados y devuelven frases en español peruano.
 import { mesLargo, numero } from '../sistema/formato.js';
 import { CLIENTE } from '../cliente.js';
+import { diasEntre, DIAS_MINIMOS } from '../calculo/periodo.js';
 
 export const mesTexto = (aaaamm) => `${mesLargo(+aaaamm.slice(5, 7))} de ${aaaamm.slice(0, 4)}`;
 export const capital = (t) => (t ? t[0].toUpperCase() + t.slice(1) : t);
@@ -22,9 +23,10 @@ const LETRAS_M = ['cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siet
 export const enLetras = (n, femenino = false) => (n >= 0 && n <= 10 && Number.isInteger(n) ? (n === 1 ? (femenino ? 'una' : 'un') : LETRAS_M[n]) : numero(n));
 export const segun = (n, uno, varios) => (n === 1 ? uno : varios);
 
-// Puntos de share: «3 puntos más que en mayo de 2026», «igual que en mayo de 2026»
+// Puntos de share: «3 puntos más que en mayo de 2026», «igual que en mayo de 2026». Con menos de DIAS_MINIMOS días
+// en el período (el mes recién empieza) no se compara: las alertas tampoco lo hacen
 export function puntosFrente(pts, P) {
-  if (pts == null || !P.compararDesde) return null;
+  if (pts == null || !P.compararDesde || diasEntre(P.desde, P.hasta) + 1 < DIAS_MINIMOS) return null;
   const en = `en ${comparacionTexto(P)}`;
   if (pts === 0) return `igual que ${en}`;
   return `${numero(Math.abs(pts))} ${segun(Math.abs(pts), 'punto', 'puntos')} ${pts > 0 ? 'más' : 'menos'} que ${en}`;

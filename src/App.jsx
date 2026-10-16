@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Moon, Sun, Presentation, Download } from 'lucide-react';
 import { armarVista, mesesDisponibles } from './calculo/vista.js';
+import { ESCENARIOS, aplicarEscenario } from './calculo/escenarios.js';
 import { CAPAS } from './capas/estructura.js';
 import { fecha } from './sistema/formato.js';
 import { mesTexto } from './textos/comun.js';
-import { NavegacionCapas, Selector, BarraDemo, CargandoContexto, Estado } from './sistema/Componentes.jsx';
+import { NavegacionCapas, Selector, BarraDemo, CargandoContexto, Estado, Resguardo } from './sistema/Componentes.jsx';
 import Senales from './pantallas/Senales.jsx';
 import Inteligencia from './pantallas/Inteligencia.jsx';
 import Activacion from './pantallas/Activacion.jsx';
@@ -30,6 +31,8 @@ const capaDeAncla = (h) => {
 };
 const ancla = () => (typeof location !== 'undefined' ? location.hash.slice(1) : '');
 const capaDeLaUrl = () => capaDeAncla(ancla()) || INICIO;
+// ?escenario=… abre la demo con la data movida (src/calculo/escenarios.js); sirve también para las fotos
+const escenarioDeLaUrl = () => (typeof location !== 'undefined' ? new URLSearchParams(location.search).get('escenario') : null);
 const hoyIso = () => new Date().toISOString().slice(0, 10); // solo para medir el atraso de la fuente
 
 // La data publicada por el pipeline (public/data). Solo el contrato es obligatorio: si otra fuente no carga, sus
@@ -53,7 +56,9 @@ function useData() {
 }
 
 export default function App() {
-  const data = useData();
+  const cargada = useData();
+  const [escenario, setEscenario] = useState(escenarioDeLaUrl);
+  const data = useMemo(() => (cargada.estado === 'ok' && escenario ? aplicarEscenario(escenario, cargada) : cargada), [cargada, escenario]);
   const meses = useMemo(() => (data.contrato ? mesesDisponibles(data.contrato.meta) : []), [data.contrato]);
   const [mes, setMes] = useState(null);
   const mesActivo = mes || meses.at(-1);
@@ -143,14 +148,14 @@ export default function App() {
           </div>
         ) : (
           <CargandoContexto.Provider value={cargando}>
-            {vista ? <Pantalla key={capa} capa={actual} vista={vista} irACapa={irACapa} /> : <div className="q-envoltura q-capa-vacia"><Estado tipo="cargando" titulo="Cargando la data" /></div>}
+            {vista ? <Resguardo key={`${capa}-${escenario}-${mesActivo}`} donde="Esta capa"><Pantalla capa={actual} vista={vista} irACapa={irACapa} /></Resguardo> : <div className="q-envoltura q-capa-vacia"><Estado tipo="cargando" titulo="Cargando la data" /></div>}
           </CargandoContexto.Provider>
         )}
       </main>
       <BarraDemo valor={demo} onCambiar={setDemo} opciones={[
         { valor: 'datos', texto: 'Datos' }, { valor: 'cargando', texto: 'Cargando' },
         { valor: 'atl', texto: 'ATL no cargó' }, { valor: 'digital', texto: 'Digital no cargó' }, { valor: 'trends', texto: 'Trends no cargó' },
-      ]} />
+      ]} escenarios={ESCENARIOS} escenario={escenario} onEscenario={setEscenario} />
       {vista && <Maia abierta={maiaAbierta} onCerrar={() => setMaiaAbierta(false)} vista={vista} reporte={data.maia} />}
 
       <footer className="q-envoltura q-pie">

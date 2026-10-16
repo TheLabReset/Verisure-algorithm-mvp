@@ -97,6 +97,18 @@ Antes de cualquier decisión, la pregunta es la misma: **¿esto lo vamos a poder
 - **Alertas.** Cada una sale de una regla con un umbral fijo y trae su dato. Incluye el calendario: una campaña del CRM que cierra dentro del mes siguiente avisa, para que la pauta que la empuja llegue hasta el cierre. La acción queda dentro de lo que maneja la agencia (pujas, palabras, páginas, reparto) o se plantea como conversación con el cliente. Nunca se presiona al personal del cliente.
 - **Textos.** En español peruano, sin rayas largas ni «gente». Las cifras chicas al inicio de una frase van en letras. Observan, no ordenan. Antes de entregar, todo texto pasa por vickyfy.
 
+### Data en movimiento
+
+Cada vista se diseña para la data que va a llegar, no solo para la de hoy. La data se estira, se apaga, se acorta y trae nombres que nadie previó; la vista tiene que seguir leyéndose.
+
+- **Escenarios.** `src/calculo/escenarios.js` mueve la data real para un lado y para el otro: la competencia fuerte o apagada, la marca propia apagada, montos mil veces mayores, un mes con un solo día, sin paneles o con diez veces más, ocho veces más estrenos, nombres largos, un pico en las búsquedas y búsquedas sin un año de historia. `pruebas/escenarios.test.mjs` arma cada escenario en cada mes y revisa números y textos. En la demo están en la barra, y también con `?escenario=<id>` en la dirección.
+- **Pocos días no comparan.** Con menos de siete días con data en el período (`DIAS_MINIMOS`), ninguna lectura ni alerta habla de subidas, bajadas o puntos de share: un solo día raro mandaría. Una alerta lo dice y los estrenos y paneles nuevos siguen saliendo.
+- **Apagarse también es señal.** Si la competencia tenía inversión en la comparación y en el período no tiene, avisa; si baja a la mitad o menos, también.
+- **Los extremos se escriben.** 0 % y 100 % no se dicen como «tiene 0 %» o «pone el resto (0 %)»: se dice quién no tiene inversión. «0 de 13 días» se dice «en ninguno».
+- **Lo que no cabe se adapta.** Los márgenes de los gráficos se miden con sus rótulos; una cifra en el borde se corre hacia adentro; un grupo de más de cuatro opciones pasa a ser una lista; un nombre de más de sesenta letras se corta en las lecturas y queda entero en la tarjeta.
+- **Nada deja la pantalla en blanco.** Cada gráfico y cada capa van dentro de un `Resguardo`: si una forma nueva de la data no se puede pintar, esa parte lo dice y el resto sigue.
+- **Antes de entregar,** el barrido: cada escenario en cada capa, a 1440 y a 390, sin desbordes, sin rótulos encimados, sin `NaN` y sin errores.
+
 ## 8. Lo que dice el modelo
 
 - **Qué mirar:** una sola tarjeta con una lista numerada por nivel (piden atención, para revisar, oportunidades, lo que va bien). Cada fila tiene el dato en el título y la acción debajo; al abrirla, el detalle y el enlace a la tarjeta que lo sostiene. [`ListaAlertas`]
@@ -114,6 +126,7 @@ Antes de cualquier decisión, la pregunta es la misma: **¿esto lo vamos a poder
 - `npm run prueba`: las reglas de cálculo y las anclas de las alertas.
 - `npm run sistema`: tokens, contraste y espacios.
 - Captura de cada capa a 1440 y a 390 de ancho, en claro y en oscuro, revisada a ojo.
+- El barrido de escenarios (ver «Data en movimiento»).
 - Ninguna cifra ni nombre de clientes reales en el repositorio.
 - El nombre de la marca solo en `src/cliente.js` (lo revisa `npm run prueba`).
 - `npm run artefacto -- <salida.html>` para publicar la página autocontenida.

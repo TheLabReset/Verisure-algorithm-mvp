@@ -384,11 +384,14 @@
 
 /* ── Barra de la demo: abajo a la izquierda, fuera del flujo ── */
 .q-barra-demo { position: fixed; z-index: 30; left: max(var(--e-4), env(safe-area-inset-left, 0px)); bottom: max(var(--e-4), env(safe-area-inset-bottom, 0px));
-  display: flex; align-items: center; gap: var(--e-1); padding: var(--e-1); border-radius: var(--r-bloque); background: var(--barra); color: var(--sobre-barra-2); font-size: var(--t-13); box-shadow: var(--sombra-flota); }
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-1); padding: var(--e-1); border-radius: var(--r-bloque); background: var(--barra); color: var(--sobre-barra-2); font-size: var(--t-13); box-shadow: var(--sombra-flota);
+  max-width: calc(100vw - 2 * var(--e-4)); box-sizing: border-box; }
 .q-barra-demo > span { display: inline-flex; align-items: center; gap: var(--e-1); padding: 0 var(--e-2); }
 .q-barra-demo button { border: 0; background: transparent; color: var(--sobre-barra); padding: var(--e-1) var(--e-2); border-radius: var(--r-control); font: inherit; cursor: pointer; }
 .q-barra-demo button[aria-pressed="true"] { background: var(--sobre-barra); color: var(--barra); }
 :root[data-presentar] .q-barra-demo { display: none; }
+.q-barra-demo-escenario { font: inherit; color: var(--sobre-barra); background: transparent; border: 1px solid color-mix(in oklab, var(--sobre-barra) 40%, transparent); border-radius: var(--r-control); padding: var(--e-1) var(--e-2); max-width: 14rem; }
+.q-barra-demo-escenario option { color: var(--texto-1); background: var(--superficie); }
 /* en el celular no flota: va al final de la página, sin tapar el contenido */
 @media (max-width: 640px) { .q-barra-demo { position: static; width: fit-content; margin: 0 max(var(--e-4), env(safe-area-inset-left, 0px)) var(--e-6); box-shadow: none; } }
 

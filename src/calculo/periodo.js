@@ -3,6 +3,8 @@
 // Sin fechas del sistema: todo sale del contrato.
 
 export const DIA = 86400000;
+// días del período desde los que una variación frente a la comparación se lee: con menos, un día raro manda
+export const DIAS_MINIMOS = 7;
 export const aFecha = (iso) => new Date(`${iso}T00:00:00Z`);
 export const aIso = (d) => d.toISOString().slice(0, 10);
 export const sumarDias = (iso, n) => aIso(new Date(aFecha(iso).getTime() + n * DIA));
