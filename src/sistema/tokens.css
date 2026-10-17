@@ -129,6 +129,7 @@
   --qf1: var(--p-am-2);
   --qf2: var(--p-am-3);
   --mezcla-atl: color-mix(in oklab, var(--resalte) 30%, var(--superficie)); /* la parte ATL de la mezcla de la competencia: su amarillo, pálido, para separarse del digital */
+  --sobre-mezcla-atl: var(--p-tinta);   /* el porcentaje sobre la parte ATL: tinta sobre el amarillo pálido */
   --qf3: var(--p-am-4);
   --qf4: var(--p-am-5);
   --qf5: var(--p-am-6);
@@ -223,6 +224,7 @@
     --qf1: var(--p-amo-2);
     --qf2: var(--p-amo-3);
     --mezcla-atl: var(--qf2);
+    --sobre-mezcla-atl: var(--p-cal);
     --qf3: var(--p-amo-4);
     --qf4: var(--p-amo-5);
     --qf5: var(--p-amo-6);
@@ -287,6 +289,7 @@
   --qf1: var(--p-amo-2);
   --qf2: var(--p-amo-3);
   --mezcla-atl: var(--qf2);
+  --sobre-mezcla-atl: var(--p-cal);
   --qf3: var(--p-amo-4);
   --qf4: var(--p-amo-5);
   --qf5: var(--p-amo-6);

@@ -116,7 +116,8 @@ function leerUniverso(serie, P) {
   const cuenta = {};
   for (const m of marcas) for (const [k, x] of Object.entries(m.plataformas || {})) cuenta[k] = (cuenta[k] || 0) + x;
   const plataformas = Object.entries(cuenta).sort((a, b) => b[1] - a[1]).map(([k]) => k);
-  return { estado: 'ok', marcas, total: ahora.total, totalPrevio: antes ? antes.total : null, diaria, sinDato, plataformas, conHuecos };
+  // sin un solo día con registros en el período no hay inversión que leer: es un hueco de la fuente, no un cero
+  return { estado: ahora.diasConData.size ? 'ok' : 'sin-registros', marcas, total: ahora.total, totalPrevio: antes ? antes.total : null, diaria, sinDato, plataformas, conHuecos };
 }
 
 // Las plataformas digitales del año, de más a menos piezas: lo que de verdad entra al universo digital
@@ -256,7 +257,7 @@ function horarioYCanales(medios, P, diasConData) {
     const conInversion = Object.entries(b.canales).filter(([k, v]) => v > 0 && k !== 'DESCONOCIDO').length;
     const sinCanal = (b.canales.DESCONOCIDO || 0) > 0;
     return [marca, {
-      emisiones: b.emisiones, porHora, porDiaSemana, matriz, horasAltas, diaMayor: max > 0 ? porDiaSemana.indexOf(max) : null,
+      emisiones: b.emisiones, porHora, porDiaSemana, matriz, horasAltas, diaMayor: max > 0 && !(porDiaSemana.filter((x) => x != null).sort((a, b) => b - a)[1] >= max * 0.9) ? porDiaSemana.indexOf(max) : null, // con otro día a menos de 10 %, se parecen: no se nombra uno
       canales: top(b.canales, 8), programas: top(b.programas, 8), zonas: top(b.zonas, 8), totalCanales: conInversion, sinCanal, totalProgramas: Object.keys(b.programas).length,
     }];
   }));
@@ -324,6 +325,8 @@ function queMirar(v, P) {
   // Con pocos días de data (el mes recién empieza) las variaciones no se leen: un día raro mandaría
   const diasConData = (u) => (u.estado === 'ok' ? u.diaria.filter((d) => Object.values(d.valores).some((x) => x != null)).length : 0);
   const pocos = v.lee.atl.estado === 'ok' && diasConData(v.lee.atl) < UMBRALES.diasMinimos;
+  // un período entero sin registros de la fuente también se avisa: es un hueco, no una inversión en cero
+  if (v.lee.atl.estado === 'sin-registros') out.push({ id: 'dias-sin-dato', nivel: 'revisar', tarjeta: 'diaria', fuente: 'Integrametrics', dias: v.lee.atl.sinDato });
   if (pocos) out.push({ id: 'pocos-dias', nivel: 'revisar', tarjeta: 'share', fuente: 'Integrametrics', dias: diasConData(v.lee.atl), minimo: UMBRALES.diasMinimos });
   if (v.lee.atl.estado === 'ok' && !pocos) {
     for (const m of comp(v.lee.atl)) {
@@ -404,7 +407,17 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
   const ok = (id) => !caidas.has(id);
   const atl = ok('atl') ? leerUniverso(contrato.daily, P) : { estado: 'no-cargo' };
   const digital = ok('digital') ? leerUniverso(contrato.digital?.daily || [], P) : { estado: 'no-cargo' };
-  if (atl.estado === 'ok') fuentes[0].sinDato = atl.sinDato;
+  if (atl.estado !== 'no-cargo') fuentes[0].sinDato = atl.sinDato;
+  // digital también avisa sus días sin registros en su chip (un hueco no es un día sin avisos)
+  const fuenteDigital = fuentes.find((f) => f.id === 'digital');
+  if (digital.estado !== 'no-cargo' && fuenteDigital) fuenteDigital.sinDato = digital.sinDato;
+  // las franjas cuentan emisiones al aire (TV, radio, cable y OTT) del período, emisión por emisión: un panel de vía
+  // pública no es una emisión. Sin emisiones, la marca queda sin franjas (hueco en el gráfico, no 0 %)
+  if (atl.estado === 'ok' && medios?.emisiones) for (const m of atl.marcas) {
+    const f = {};
+    for (const e of emisionesDe(medios, m.id, P.desde, P.hasta)) if (e.grupo !== 'VIA PUBLICA' && e.franja) f[e.franja] = (f[e.franja] || 0) + 1;
+    m.franjas = f; m.mezclaFranjas = reparto(f);
+  }
   // digital por grupo de plataforma (Facebook, Instagram, YouTube, TikTok y sitios): avisos registrados, no inversión
   if (digital.estado === 'ok') for (const m of digital.marcas) {
     m.grupos = Object.fromEntries(GRUPOS_DIGITALES.map((g) => [g, 0]));

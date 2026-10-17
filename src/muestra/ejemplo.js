@@ -21,7 +21,8 @@ const etiqueta = (t) => `#${sinTildes(t).toLowerCase().replace(/[^a-z0-9]/g, '')
 
 /** TikTok: los hashtags del rubro y de las marcas, con vistas, interacción y publicaciones de las últimas semanas. */
 export function tiktokDeEjemplo(hasta) {
-  const r = azar(semillaDe(`tiktok|${hasta}`));
+  // semilla fija: la data de ejemplo no cambia con el período, para que nadie la lea como si respondiera a él
+  const r = azar(semillaDe('tiktok'));
   const marcas = [...CLIENTE.competencia.map((c) => c.nombre), CLIENTE.nombre];
   const temas = ['seguridad en casa', 'cámaras de seguridad', 'alarmas', 'robos en Lima', 'cámara wifi', 'casa segura', 'tips de seguridad'];
   const hashtags = [...temas, ...marcas].map((t) => {
@@ -30,12 +31,12 @@ export function tiktokDeEjemplo(hasta) {
     const publicaciones = redondo(vistas / entre(r, 9000, 26000), 1);
     return { hashtag: etiqueta(t), vistas, interaccion: Math.round(vistas * entre(r, 0.03, 0.09)), publicaciones, deMarca, crecimiento: Math.round(entre(r, -35, 60)) };
   }).sort((a, b) => b.interaccion - a.interaccion);
-  return { ejemplo: true, fuente: 'TikTok vía Apify, búsqueda por hashtag', hasta, hashtags };
+  return { ejemplo: true, fuente: 'TikTok vía Apify, búsqueda por hashtag', hasta, desde: masDias(hasta, -27), hashtags };
 }
 
 /** Facebook: los temas de la conversación en las páginas de las marcas y del rubro, con menciones y tono. */
 export function facebookDeEjemplo(hasta) {
-  const r = azar(semillaDe(`facebook|${hasta}`));
+  const r = azar(semillaDe('facebook'));
   const temas = ['Robos en el barrio', 'Precio y cuota mensual', 'Instalación y visita técnica', 'Atención al cliente', 'Cámaras que se ven desde el celular', 'Respuesta ante una alarma', 'Promociones'];
   const lista = temas.map((t) => {
     const menciones = Math.round(entre(r, 40, 520));

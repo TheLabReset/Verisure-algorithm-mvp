@@ -8,7 +8,7 @@ Sigue el estándar de The Algorithm: cuatro capas, el sistema de diseño Quincha
 
 Cada capítulo tiene una vista general y un detalle que se abre a la derecha («Ver el detalle»), para que el panel no crezca hacia abajo cuando llegue más data.
 
-1. **Captura de señales:** qué hizo Prosegur. Sus versiones del año en un cronograma con los estrenos del período, lo que tiene al aire en ATL o digital (en abanico, con su video, audio o imagen) y el OOH en un mapa: cada panel se puede elegir y abre su foto o video. En el detalle: todos los estrenos, los paneles por distrito y la pieza de cada panel.
+1. **Captura de señales:** lo nuevo de Prosegur en el período: digital primero (sus piezas por mensaje), TV y cable, radio (emisión por emisión, con su digitalizado), OOH en un mapa y las tendencias. Las versiones del año, en un cronograma sin montos, van en Históricos.
 2. **Inteligencia de mercado:** qué mirar (alertas con umbral fijo, la competencia primero), las cámaras DIY frente a la marca (Google Trends) y la pauta del año semana a semana, con las dos marcas en la misma escala. En el detalle: las marcas de cámaras que más se buscan y la inversión de cada mes.
 3. **Activación estratégica:** cómo reparte cada marca su inversión por medio y cuándo emite (día × hora, en el color de la marca). En el detalle: la inversión por medio en soles, las franjas, los canales y los programas.
 4. **Rendimiento y optimización:** el share of investment en digital y en ATL frente al período anterior, y el share de Prosegur semana a semana. En el detalle: las cifras en soles y la inversión día por día.

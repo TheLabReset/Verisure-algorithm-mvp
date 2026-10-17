@@ -263,3 +263,23 @@ test('el último mes con la fuente atrasada no se lee como en curso', () => {
   assert.doesNotMatch(L.estrenosLectura(v).lectura + L.atlLectura(v).lectura, /lo que va de/);
   assert.equal(armarVista(contrato, medios, { mes: ultimo }, { hoy: contrato.meta.lastDay }, { mapa, busquedas }).periodo.enCurso, undefined);
 });
+
+test('un período sin un solo día con registros ATL es un hueco, no una inversión en cero', () => {
+  // los días sin registros de la fuente salen del propio contrato: el primero que falte dentro de la serie
+  const fechas = new Set(contrato.daily.map((d) => d.fecha));
+  const hueco = contrato.daily.map((d) => d.fecha).find((f, i, xs) => i && !fechas.has(new Date(Date.parse(`${f}T00:00:00Z`) - 864e5).toISOString().slice(0, 10)));
+  const dia = hueco && new Date(Date.parse(`${hueco}T00:00:00Z`) - 864e5).toISOString().slice(0, 10);
+  if (!dia) return; // la data no tiene huecos: nada que probar
+  const v = armarVista(contrato, medios, { desde: dia, hasta: dia }, {}, { mapa, busquedas: JSON.parse(leer('busquedas.json')) });
+  assert.equal(v.lee.atl.estado, 'sin-registros');
+  assert.match(L.atlLectura(v).lectura, /no tiene registros/);
+  assert.doesNotMatch(L.atlLectura(v).lectura, /Ninguna marca tiene inversión/);
+  assert.ok(v.sugiere.queMirar.some((a) => a.id === 'dias-sin-dato'), 'el hueco no se avisa');
+});
+
+test('el cronograma cuenta versiones, no filas: las que entran más las que no suman todas', () => {
+  const c = armarVista(contrato, medios, { mes: mesesDisponibles(contrato.meta).at(-1) }, {}, { mapa }).lee.cronograma;
+  assert.ok(c);
+  assert.equal(c.mostradas + c.resto, c.distintas);
+  assert.equal(c.mostradas, new Set(c.filas.map((f) => f.version)).size);
+});

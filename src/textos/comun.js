@@ -1,10 +1,16 @@
 // Piezas de texto comunes. Puras: reciben datos ya calculados y devuelven frases en español peruano.
-import { mesLargo, mesCorto, numero } from '../sistema/formato.js';
+import { mesLargo, mesCorto, numero, porcentaje } from '../sistema/formato.js';
 import { CLIENTE } from '../cliente.js';
 import { diasEntre, DIAS_MINIMOS } from '../calculo/periodo.js';
 
 export const mesTexto = (aaaamm) => `${mesLargo(+aaaamm.slice(5, 7))} de ${aaaamm.slice(0, 4)}`;
 export const capital = (t) => (t ? t[0].toUpperCase() + t.slice(1) : t);
+// Un share redondeado: con inversión pero en 0, «menos de 1 %»; en 100 mientras otra marca invierte, «más de 99 %»
+export const shareTexto = (share, inversion, total) => (share == null ? 'sin dato' : inversion > 0 && share === 0 ? `menos de ${porcentaje(1)}` : share === 100 && total > inversion ? `más de ${porcentaje(99)}` : porcentaje(share));
+// el share de una marca en su universo, este período o el de comparación
+export const shareDeMarca = (m, u, previo = false) => (previo
+  ? shareTexto(m.sharePrevio, m.inversionPrevia, u.totalPrevio)
+  : shareTexto(m.share, m.inversion, u.total));
 export const lista = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} y ${xs.at(-1)}`);
 
 // «del 24 al 30 de junio» si es el mismo mes; si no, cada fecha completa
@@ -38,6 +44,8 @@ export const periodoTexto = (P) => (P.tramo ? (P.desde === P.hasta ? `el día ${
 // La comparación: el mes anterior, el mismo tramo del mes anterior o los mismos días justo antes
 export const comparacionTexto = (P) => (!P.compararDesde ? null : P.tramo ? (P.dias === 1 ? 'el día anterior' : `los ${numero(P.dias)} días anteriores`)
   : P.parcial ? `el mismo tramo de ${mesLargo(+P.compararDesde.slice(5, 7))}` : mesTexto(P.compararDesde.slice(0, 7)));
+// «frente al mismo tramo de setiembre», «frente a los 7 días anteriores»: la contracción del artículo
+export const frenteATexto = (P) => { const c = comparacionTexto(P); return !c ? null : c.startsWith('el ') ? `al ${c.slice(3)}` : `a ${c}`; };
 // El título del resumen de cada capa: «Resumen de julio de 2026», «Resumen del 7 al 13 de julio»
 export const resumenTitulo = (P) => (P.tramo ? `Resumen ${tramoFechas(P.desde, P.hasta).replace(/^el /, 'del ')}` : `Resumen de ${periodoTexto(P)}`);
 // El rótulo de cada barra, corto: «Julio» y «Junio» si es un mes; si es un tramo, sus fechas («7 al 13 jul»)

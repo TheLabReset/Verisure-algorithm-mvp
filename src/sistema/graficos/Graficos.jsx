@@ -306,7 +306,7 @@ export function Barras({ filas, formato = numero, max: maxComun, margen, margenD
 // de cada marca, para que el cambio se lea comparando largos. Cada barra lleva su mes al inicio, en la misma línea.
 // partes: [{ nombre, valor (0 a 100), clase, claseAntes }]
 export function Reparto({ ahora, antes, rotuloAhora, rotuloAntes, etiqueta, formato = (p) => porcentaje(p) }) {
-  const tabla = { columnas: ['Marca', rotuloAhora, ...(antes ? [rotuloAntes] : [])], filas: ahora.map((p, i) => [p.nombre, formato(p.valor), ...(antes ? [formato(antes[i]?.valor)] : [])]) };
+  const tabla = { columnas: ['Marca', rotuloAhora, ...(antes ? [rotuloAntes] : [])], filas: ahora.map((p, i) => [p.nombre, p.texto ?? formato(p.valor), ...(antes ? [antes[i]?.texto ?? formato(antes[i]?.valor)] : [])]) };
   const barra = (partes, x, y, alto, ancho, clave) => {
     const total = partes.reduce((s, p) => s + (p.valor || 0), 0) || 1;
     let x0 = x;
@@ -327,13 +327,13 @@ export function Reparto({ ahora, antes, rotuloAhora, rotuloAntes, etiqueta, form
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
             <text className="q-rotulo-valor" x={0} y={19}>{rotuloAhora}</text>
             {barra(ahora, l, 0, 28, w, 'ahora')}
-            <text className="q-rotulo-valor" x={l} y={46}>{a.nombre} {formato(a.valor)}</text>
-            <text className="q-rotulo-valor" x={ancho} y={46} textAnchor="end">{formato(b.valor)} {b.nombre}</text>
+            <text className="q-rotulo-valor" x={l} y={46}>{a.nombre} {a.texto ?? formato(a.valor)}</text>
+            <text className="q-rotulo-valor" x={ancho} y={46} textAnchor="end">{b.texto ?? formato(b.valor)} {b.nombre}</text>
             {antes && <>
               <text className="q-eje" x={0} y={73}>{rotuloAntes}</text>
               {barra(antes, l, 62, 14, w, 'antes')}
-              <text className="q-eje" x={l} y={94}>{formato(antes[0].valor)}</text>
-              <text className="q-eje" x={ancho} y={94} textAnchor="end">{formato(antes[1].valor)}</text>
+              <text className="q-eje" x={l} y={94}>{antes[0].texto ?? formato(antes[0].valor)}</text>
+              <text className="q-eje" x={ancho} y={94} textAnchor="end">{antes[1].texto ?? formato(antes[1].valor)}</text>
             </>}
           </Svg>
         );
@@ -415,7 +415,7 @@ export function Reticula({ partes, cuadros, etiqueta }) {
 
 // ─────────────── Mapa de calor hora × día, con escala visible ───────────────
 // tono: 'foco' o 'propia' pinta la rampa en el color de la marca; sin tono, en tinta
-export function MapaCalor({ matriz, formato = numero, etiqueta, tono }) {
+export function MapaCalor({ matriz, formato = numero, etiqueta, tono, unidad }) {
   const max = Math.max(...matriz.flat().filter((v) => v != null));
   const tabla = { columnas: ['Día', ...Array.from({ length: 24 }, (_, h) => `${h} h`)], filas: matriz.map((f, i) => [DIAS[i], ...f.map((v) => formato(v))]) };
   return (
@@ -434,7 +434,7 @@ export function MapaCalor({ matriz, formato = numero, etiqueta, tono }) {
                 </g>
               ))}
             </Svg>
-            <div className="q-escala" aria-hidden="true"><span>{formato(0)}</span>{[0, 1, 2, 3, 4, 5, 6].map((k) => <i key={k} className={`q-q${k}`} />)}<span>{formato(max)}</span></div>
+            <div className="q-escala" aria-hidden="true"><span>{formato(0)}</span>{[0, 1, 2, 3, 4, 5, 6].map((k) => <i key={k} className={`q-q${k}`} />)}<span>{formato(max)}{unidad ? ` ${unidad}` : ''}</span></div>
           </>
         );
       }}
@@ -645,7 +645,9 @@ export function Apiladas({ columnas, partes, formato = (p) => porcentaje(p), eti
                 const vacia = partes.every((p) => c.valores[p.clave] == null);
                 let y0 = alto - m.b;
                 return (
-                  <g key={c.clave} className={c.apagada ? 'q-columna-apagada' : undefined}>
+                  <g key={c.clave} className={`q-columna${c.apagada ? ' q-columna-apagada' : ''}`}>
+                    {/* al pasar el mouse, el gris va detrás de la columna: la columna se sigue viendo */}
+                    <rect className="q-columna-fondo" x={i * paso + 2} y={m.t - 4} width={paso - 4} height={h + 8} rx="4" />
                     {vacia ? <rect className="q-hueco" x={x} y={m.t} width={w} height={h} rx="2" />
                       : partes.map((p, k) => {
                         const v = c.valores[p.clave] || 0, hp = (v / 100) * h, gap = k && hp > 0 ? 2 : 0;
@@ -655,12 +657,12 @@ export function Apiladas({ columnas, partes, formato = (p) => porcentaje(p), eti
                         return (
                           <g key={p.clave}>
                             <rect className={`q-parte ${p.clase}`} x={x} y={y + gap} width={w} height={Math.max(0, hp - gap)} rx="2" data-valor={v} />
-                            {hp >= 20 && w >= 34 && <text className="q-rotulo-sobre" x={x + w / 2} y={y + gap + Math.min(hp - gap, 40) / 2 + 4} textAnchor="middle">{formato(v)}</text>}
+                            {hp >= 20 && w >= 34 && <text className={`q-rotulo-sobre q-rotulo-sobre-${p.clave}`} x={x + w / 2} y={y + gap + Math.min(hp - gap, 40) / 2 + 4} textAnchor="middle">{formato(v)}</text>}
                           </g>
                         );
                       })}
                     <text className={`q-eje${c.apagada ? '' : ''}`} x={x + w / 2} y={alto - 8} textAnchor="middle">{c.corto}</text>
-                    <Zona x={i * paso} y={m.t} w={paso} h={h} pista={c.pista} />
+                    <rect className="q-zona q-zona-quieta" x={i * paso} y={m.t} width={paso} height={h} data-pista={c.pista} />
                   </g>
                 );
               })}
@@ -907,7 +909,10 @@ export function Cronograma({ filas, inicio, fin, periodo, formato = numero, onEl
         return (
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
             {periodo && <rect className="q-zona-periodo" x={x(t(periodo.desde))} y={m.t - 6} width={Math.max(2, x(t(periodo.hasta)) - x(t(periodo.desde)))} height={alto - m.t - m.b + 6} />}
-            {meses.map((d) => <g key={d}><line className="q-rejilla" x1={x(t(d))} x2={x(t(d))} y1={m.t - 6} y2={alto - m.b} />{/* el mes que empieza pegado al borde (el mes en curso con pocos días) no lleva rótulo: no cabe */}{x(t(d)) + 30 <= ancho && <text className="q-eje" x={x(t(d)) + 3} y={14}>{mesCorto(+d.slice(5, 7))}</text>}</g>)}
+            {/* el mes que empieza pegado al borde (el mes en curso con pocos días) no lleva rótulo: no cabe; si los meses
+                quedan a menos de 30 px (el celular), se rotula uno de cada dos para que no se encimen */}
+            {meses.map((d, k) => { const paso = meses.length > 1 ? x(t(meses[1])) - x(t(meses[0])) : ancho, cada = paso < 30 ? 2 : 1;
+              return <g key={d}><line className="q-rejilla" x1={x(t(d))} x2={x(t(d))} y1={m.t - 6} y2={alto - m.b} />{k % cada === 0 && x(t(d)) + 30 <= ancho && <text className="q-eje" x={x(t(d)) + 3} y={14}>{mesCorto(+d.slice(5, 7))}</text>}</g>; })}
             {filas.map((f, i) => {
               const cy = m.t + i * fila, x0 = x(t(f.desde)), x1 = Math.max(x0 + 4, x(t(f.hasta)) + 2);
               const pista = `${f.nombre}\n${f.universo === 'atl' ? 'ATL' : 'Digital'}${f.nota ? ` · ${f.nota}` : ''}\n${fechaCorta(f.desde)} a ${fechaCorta(f.hasta)}${conMonto ? `\n${formato(f.valor)}` : ''}`;

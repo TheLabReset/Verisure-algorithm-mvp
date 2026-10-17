@@ -89,6 +89,8 @@
 .q-resumen-cifras { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 168px), 1fr)); gap: var(--e-5) 0; }
 .q-resumen-cifras li { display: grid; grid-template-rows: auto auto auto 1fr; gap: var(--e-1); align-content: start; padding-inline: var(--e-5); border-left: 1px solid var(--borde); min-width: 0; }
 .q-resumen-cifras li:first-child { padding-left: 0; border-left: 0; }
+/* las cuatro filas (rótulo, cifra, nota, enlace) se alinean entre tarjetas aunque un rótulo ocupe dos líneas */
+@supports (grid-template-rows: subgrid) { .q-resumen-cifras li { grid-row: span 4; grid-template-rows: subgrid; } }
 .q-resumen-rotulo { font-size: var(--t-14); color: var(--texto-2); }
 .q-resumen .q-cifra-valor { font-size: var(--c-32); }
 .q-resumen-ir { align-self: end; display: inline-flex; align-items: center; gap: var(--e-1); margin-top: var(--e-2); font-size: var(--t-13); color: var(--texto-3); text-decoration: none; width: fit-content; }
@@ -177,6 +179,11 @@
 /* ── Ayuda: se abre con un clic, se cierra con Esc o fuera ── */
 .q-ayuda { position: relative; flex: none; }
 .q-ayuda-boton { display: inline-grid; place-items: center; width: 28px; height: 28px; margin: calc(-1 * var(--e-1)) calc(-1 * var(--e-1)) 0 0; border-radius: 50%; border: 0; background: transparent; color: var(--texto-3); cursor: pointer; }
+/* en el celular, los controles que se tocan miden al menos 40 px de alto (el del dedo), sin cambiar cómo se ven */
+@media (max-width: 640px) {
+  .q-grupo button { min-height: 40px; }
+  .q-ayuda-boton { width: 40px; height: 40px; margin: calc(-1 * var(--e-2)) calc(-1 * var(--e-2)) 0 0; }
+}
 .q-ayuda-boton:hover, .q-ayuda-boton[aria-expanded="true"] { color: var(--texto-1); background: var(--superficie-capitulo); }
 .q-ayuda-globo {
   /* ancho y alto que caben en la pantalla; el componente lo corre hacia adentro si se sale por un costado */
@@ -287,7 +294,7 @@
 }
 
 /* ── Ventana de cada tarjeta, arriba a la derecha: calendario si sigue el período, alfiler si no ── */
-.q-bloque-marcas { display: flex; align-items: center; gap: var(--e-2); flex-shrink: 0; }
+.q-bloque-marcas { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); flex-shrink: 0; min-width: 0; max-width: 100%; }
 .q-ventana { display: inline-flex; align-items: center; gap: var(--e-1); padding: 2px var(--e-2); border: 1px solid var(--borde); border-radius: var(--r-control); font-size: var(--t-13); color: var(--texto-2); white-space: nowrap; }
 /* los chips bajan debajo del título cuando la tarjeta es angosta (el celular o media fila), no según la pantalla */
 .q-bloque-cab { container-type: inline-size; }
@@ -574,7 +581,8 @@
 .q-ficha-datos dd { margin: 0; color: var(--texto-1); text-align: right; font-variant-numeric: tabular-nums; }
 .q-ficha-caras { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-1); font-size: var(--t-13); color: var(--texto-3); }
 .q-ficha-caras > span { margin-right: var(--e-1); }
-.q-ficha-todos { justify-self: start; margin-top: var(--e-2); }
+.q-ficha-todos { justify-self: start; margin-top: var(--e-2); padding-inline: 0; text-decoration: underline; text-underline-offset: 3px; }
+.q-ficha-todos:hover { background: transparent; }
 
 /* ── Reparto por medio: una franja por marca ── */
 .q-mezclas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-6); margin-bottom: var(--e-4); }

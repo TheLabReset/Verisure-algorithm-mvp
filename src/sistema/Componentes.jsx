@@ -453,7 +453,7 @@ export function Resumen({ titulo, items, pie, frases = [], ejemplo = false }) {
             <li key={i.rotulo}>
               <span className="q-resumen-rotulo">{i.serie != null && <span className={`q-punto q-p${i.serie}`} aria-hidden="true" />}{i.rotulo}</span>
               <span className={`q-cifra-valor${i.valor == null ? ' q-cifra-sin-dato' : ''}`} data-clave={i.dataClave}>{i.valor ?? NO_MEDIDO}</span>
-              {i.delta ? <Delta {...i.delta} /> : i.nota ? <span className="q-delta">{i.nota}</span> : null}
+              {i.delta ? <Delta {...i.delta} /> : i.nota ? <span className="q-delta">{i.nota}</span> : <span aria-hidden="true" />}
               {i.ir && <a className="q-resumen-ir" href={'#' + i.ir}>{u && <u.icono size={13} aria-hidden="true" />}{i.irTexto}</a>}
             </li>
           );
@@ -482,8 +482,16 @@ export function FuentesCapa({ fuentes }) {
 
 // ── Navegación entre las tres capas: pestañas de texto, sin peso de tarjeta ──
 export function NavegacionCapas({ capas, activa, onCambiar }) {
+  // en el celular la barra se desliza: la capa activa se trae a la vista al cargar y al cambiar (solo en horizontal)
+  const nav = useRef(null);
+  useEffect(() => {
+    const n = nav.current, a = n?.querySelector('[aria-current="page"]');
+    if (!n || !a || n.scrollWidth <= n.clientWidth) return;
+    const rn = n.getBoundingClientRect(), ra = a.getBoundingClientRect();
+    n.scrollLeft += ra.left - rn.left - (rn.width - ra.width) / 2;
+  }, [activa]);
   return (
-    <nav className="q-capas" aria-label="Capas del algoritmo">
+    <nav ref={nav} className="q-capas" aria-label="Capas del algoritmo">
       <ol>
         {capas.map((c) => (
           <li key={c.id}>

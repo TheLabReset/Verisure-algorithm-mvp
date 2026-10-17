@@ -1,52 +1,24 @@
 // Capa 4 · Históricos: cómo viene el share de la competencia (digital primero), cómo se movió la pauta de cada marca
 // en el año y qué versiones tuvo. El share sigue al período elegido; el año va completo, con las semanas del período
-// resaltadas. En el detalle: las cifras en soles, la inversión día por día, mes a mes y los estrenos.
+// resaltadas. En el detalle: las cifras en soles y la inversión día por día.
 // No calcula: pinta la vista.
 import { useState } from 'react';
-import { Play, AudioLines, Image as ImagenIcono } from 'lucide-react';
-import { Bloque, Tabla, Resumen, Grupo, Detalle, VentanaAnuncios, Ventana, vigente } from '../sistema/Componentes.jsx';
+import { Bloque, Tabla, Resumen, Grupo, Detalle, VentanaAnuncios, vigente } from '../sistema/Componentes.jsx';
 import { Reparto, Lineas, Histograma, Cronograma, Apiladas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, soles, solesCompacto, compacto, mesCorto, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato, avisosDe } from './comun.jsx';
-import { periodoTexto, comparacionTexto, puntosFrente, capital, plataformasTexto, mesPeriodo, mesComparacion, resumenTitulo, mesTexto, tramoFechas, tramoMeses, version, ventanaTexto } from '../textos/comun.js';
+import { periodoTexto, comparacionTexto, puntosFrente, capital, plataformasTexto, mesPeriodo, mesComparacion, resumenTitulo, mesTexto, tramoFechas, tramoMeses, version, shareDeMarca } from '../textos/comun.js';
 import { diasEntre, DIAS_MINIMOS } from '../calculo/periodo.js';
-import { atlLectura, digitalLectura, shareLectura, presionLectura, mezclaLectura, mezclaPista, pautaSemanalLectura, temporadaLectura, textosMarca, cronogramaLectura, estrenosLectura, estrenoTitulo, estrenoDato, textosDelAbanico } from '../textos/lecturas.js';
+import { atlLectura, digitalLectura, shareLectura, presionLectura, mezclaLectura, mezclaPista, pautaSemanalLectura, temporadaLectura, textosMarca, cronogramaLectura, textosDelAbanico } from '../textos/lecturas.js';
 import { CLIENTE } from '../cliente.js';
 
-const ICONO = { video: Play, audio: AudioLines, image: ImagenIcono };
 const COMPETENCIA = CLIENTE.competencia[0];
 const MARCAS = [...CLIENTE.competencia.map((c) => c.marcaFuente), CLIENTE.marcaFuente];
 const UNIVERSOS_PAUTA = [{ valor: 'atl', texto: 'ATL' }, { valor: 'digital', texto: 'Digital' }, { valor: 'todo', texto: 'Todo' }];
-const MAX_ESTRENOS = 3; // estrenos de la competencia a la vista; el resto, en el detalle
 
-// Una pieza suelta en la ventana de anuncios: para un estreno o una fila del cronograma
+// Una pieza suelta en la ventana de anuncios: una fila del cronograma
 const unaPieza = (nombre, x) => ({ nombre, anuncios: [{ id: x.id, titulo: x.titulo, texto: '', pie: '', plataformas: x.plataformas, desde: x.desde, hasta: x.hasta, activo: true, enlace: null, imagen: x.asset?.kind === 'image' ? x.asset.url : null, medio: x.asset && x.asset.kind !== 'image' ? x.asset : null, formato: null, arte: null }] });
 
-// Las piezas que se estrenaron: una fila por estreno, la competencia primero; «Ver la pieza» la abre
-function Estrenos({ lista, t }) {
-  const [abierta, setAbierta] = useState(null);
-  const e = lista.find((x) => x.id === abierta);
-  const grupo = e ? unaPieza(e.nombre, { id: e.id, titulo: e.version, plataformas: [e.canal, e.franja && `franja ${e.franja.toLowerCase()}`].filter(Boolean), desde: e.fecha.slice(0, 10), asset: e.asset }) : null;
-  const orden = [...lista].sort((a, b) => Number(a.propia) - Number(b.propia));
-  return (
-    <>
-      <ol className="q-estrenos">
-        {orden.map((x) => {
-          const I = ICONO[x.asset?.kind];
-          return (
-            <li key={x.id} className={x.propia ? 'q-estreno-propio' : 'q-estreno-foco'}>
-              <span className="q-estreno-marca">{x.nombre}</span>
-              <span className="q-estreno-cuerpo"><b>{estrenoTitulo(x)}</b><span>{estrenoDato(x)}</span></span>
-              {x.asset && <button type="button" className="q-boton q-boton-quieto" data-ver-estreno={x.id} aria-haspopup="dialog" onClick={() => setAbierta(x.id)}>{I && <I size={14} aria-hidden="true" />}Ver la pieza</button>}
-            </li>
-          );
-        })}
-      </ol>
-      <VentanaAnuncios grupo={grupo} onCerrar={() => setAbierta(null)} t={{ ...t, bajada: () => 'Estreno del período' }}
-        volver={() => document.querySelector(`[data-ver-estreno="${window.CSS.escape(abierta ?? '')}"]`)?.focus()} />
-    </>
-  );
-}
 
 // La pauta semana a semana: un panel por marca (la competencia primero), las dos en la misma escala (una barra más
 // alta es más inversión, sin importar de quién). El año va completo; las semanas que caen en el período elegido van
@@ -92,7 +64,7 @@ function TablaShare({ u, P, etiqueta, conImpresiones }) {
   return (
     <Tabla etiqueta={etiqueta} numericas={conImpresiones ? [1, 2, 3, 4, 5] : [1, 2, 3, 4]} destacada={orden.findIndex((m) => m.foco)}
       columnas={['Marca', 'Inversión estimada', ...(conImpresiones ? ['Impresiones'] : []), 'Share', 'Share antes', 'Cambio']}
-      filas={orden.map((m) => [m.nombre, soles(m.inversion), ...(conImpresiones ? [compacto(m.impresiones)] : []), porcentaje(m.share), m.sharePrevio == null ? 'sin dato' : porcentaje(m.sharePrevio),
+      filas={orden.map((m) => [m.nombre, soles(m.inversion), ...(conImpresiones ? [compacto(m.impresiones)] : []), shareDeMarca(m, u), shareDeMarca(m, u, true),
         corto ? 'sin comparación' : { texto: pts(m.cambioPts), tono: !m.foco || !m.cambioPts ? null : m.cambioPts > 0 ? 'empeora' : 'mejora' }])} />
   );
 }
@@ -101,8 +73,9 @@ function TablaShare({ u, P, etiqueta, conImpresiones }) {
 // El reparto del universo entre la competencia y la marca propia: este período y, debajo, la comparación
 function ShareMarcas({ u, etiqueta, rotuloAhora, rotuloA, conAntes }) {
   const orden = [...u.marcas].sort((a, b) => Number(a.propia) - Number(b.propia));
-  const parte = (m, k) => ({ nombre: m.nombre, valor: m[k], clase: m.propia ? 'q-parte-propia' : 'q-parte-foco', claseAntes: m.propia ? 'q-parte-propia-antes' : 'q-parte-foco-antes' });
-  const formato = (n) => (n == null ? 'sin dato' : n > 0 && n < 1 ? 'menos de 1 %' : porcentaje(n));
+  const parte = (m, k) => ({ nombre: m.nombre, valor: m[k], texto: shareDeMarca(m, u, k === 'sharePrevio'), clase: m.propia ? 'q-parte-propia' : 'q-parte-foco', claseAntes: m.propia ? 'q-parte-propia-antes' : 'q-parte-foco-antes' });
+  // el texto de cada parte con el redondeo dicho: «menos de 1 %» o «más de 99 %», nunca un 0 o un 100 con inversión de por medio
+  const formato = (n) => (n == null ? 'sin dato' : porcentaje(n));
   return <Reparto etiqueta={etiqueta} formato={formato} ahora={orden.map((m) => parte(m, 'share'))}
     antes={conAntes && orden.every((m) => m.sharePrevio != null) ? orden.map((m) => parte(m, 'sharePrevio')) : null} rotuloAhora={rotuloAhora} rotuloAntes={rotuloA} />;
 }
@@ -128,9 +101,6 @@ export default function Rendimiento({ capa, vista: v }) {
   const c = v.lee.cronograma;
   const filaCrono = c?.filas.find((f) => f.id === version_);
   const grupoCrono = filaCrono ? unaPieza(COMPETENCIA.nombre, { id: filaCrono.id, titulo: filaCrono.version, plataformas: filaCrono.canales, desde: filaCrono.desde, hasta: filaCrono.hasta, asset: filaCrono.asset }) : null;
-  const estrenosComp = (v.lee.estrenos || []).filter((e) => !e.propia).length;
-  const nuevas = new Set((v.lee.estrenos || []).filter((e) => !e.propia).map((e) => e.version));
-  const estrenos = v.lee.estrenos ? estrenosLectura(v) : null;
   const inicio = v.analiza.pauta[0]?.serie[0]?.fecha ?? P.desde;
   const u = v.lee[diario];
   return (
@@ -138,10 +108,10 @@ export default function Rendimiento({ capa, vista: v }) {
       <Resumen titulo={resumenTitulo(P)}
         pie={<span>Inversión estimada por Integrametrics a precio de tarifa.</span>}
         items={[
-          { rotulo: `Share digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? porcentaje(rival(dig).share) : null, nota: ok(dig) ? capital(puntosFrente(rival(dig).cambioPts, P) || `de ${solesCompacto(dig.total)} en total`) : null },
+          { rotulo: `Share digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? shareDeMarca(rival(dig), dig) : null, nota: ok(dig) ? capital(puntosFrente(rival(dig).cambioPts, P) || `de ${solesCompacto(dig.total)} en total`) : null },
           { rotulo: `Inversión digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? solesCompacto(rival(dig).inversion) : null, nota: ok(dig) ? `${compacto(rival(dig).impresiones)} impresiones` : null },
-          { rotulo: `Share ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? porcentaje(rival(atl).share) : null, nota: ok(atl) ? capital(puntosFrente(rival(atl).cambioPts, P) || `de ${solesCompacto(atl.total)} en total`) : null },
-          { rotulo: `Inversión ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? solesCompacto(rival(atl).inversion) : null, nota: v.lee.mediosDelPeriodo?.[rivalId] ? `${numero(v.lee.mediosDelPeriodo[rivalId].emisiones)} ${v.lee.mediosDelPeriodo[rivalId].emisiones === 1 ? 'emisión' : 'emisiones'} al aire` : null },
+          { rotulo: `Share ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? shareDeMarca(rival(atl), atl) : null, nota: ok(atl) ? capital(puntosFrente(rival(atl).cambioPts, P) || `de ${solesCompacto(atl.total)} en total`) : null },
+          { rotulo: `Inversión ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? solesCompacto(rival(atl).inversion) : null, nota: ok(atl) && v.lee.mediosDelPeriodo?.[rivalId] ? `${numero(v.lee.mediosDelPeriodo[rivalId].emisiones)} ${v.lee.mediosDelPeriodo[rivalId].emisiones === 1 ? 'emisión' : 'emisiones'} al aire` : null },
         ]} />
 
       <SeccionDe def={s41} vista={v}>
@@ -210,29 +180,12 @@ export default function Rendimiento({ capa, vista: v }) {
         {!c ? <Bloque titulo={`Las versiones de ${COMPETENCIA.nombre} en el año`} universo="atl" estado={sinDato('no-cargo')} /> : (
           <Bloque universo={['atl', 'digital']} {...cronogramaLectura(c, COMPETENCIA.nombre, inicio, v.fuentes[0].corte)} alcance={tramoMeses(inicio, v.fuentes[0].corte, 'de')}
             ayuda={<p>ATL va llena, de su primera a su última emisión registrada. Digital va en contorno, de la primera a la última variante vista. Detrás, el período elegido.</p>}
-            pie={<span>Las {numero(c.filas.length)} versiones con más inversión estimada en el año{c.resto ? `; ${numero(c.resto)} ${c.resto === 1 ? 'versión' : 'versiones'} más con menos inversión no entran` : ''}. Los estrenos son de TV, radio, cable, OTT y vía pública.</span>}>
+            pie={<span>{c.mostradas === 1 ? 'La versión' : `Las ${numero(c.mostradas)} versiones`} con más inversión estimada en el año{c.resto ? `; ${numero(c.resto)} ${c.resto === 1 ? 'versión más con menos inversión no entra' : 'versiones más con menos inversión no entran'}` : ''}.</span>}>
             <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true"><li><span className="q-muestra q-muestra-tramo" />ATL</li><li><span className="q-muestra q-muestra-contorno" />Digital</li></ul>
             <Cronograma etiqueta={`Versiones de ${COMPETENCIA.nombre} en el año`} inicio={inicio} fin={v.fuentes[0].corte} periodo={P} formato={null}
-              onElegir={setVersion} filas={c.filas.map((f) => ({ id: f.id, nombre: version(f.version), universo: f.universo, desde: f.desde, hasta: f.hasta, valor: f.inversion, nota: [nuevas.has(f.version) && 'nueva en el período', ...f.canales.slice(0, 2)].filter(Boolean).join(', ') }))} />
+              onElegir={setVersion} filas={c.filas.map((f) => ({ id: f.id, nombre: version(f.version), universo: f.universo, desde: f.desde, hasta: f.hasta, valor: f.inversion, nota: f.canales.slice(0, 2).join(', ') }))} />
             <VentanaAnuncios grupo={grupoCrono} onCerrar={() => setVersion(null)} t={{ ...tVersiones, bajada: () => `Versión de ${COMPETENCIA.nombre}` }} />
-            {estrenos && (
-              <div className="q-subbloque">
-                {/* la tarjeta es del año (alfiler); los estrenos son del período elegido y lo dicen con su calendario */}
-                <h4>{estrenos.titulo}<Ventana texto={ventanaTexto(P.desde, P.hasta)} /></h4>
-                <p>{estrenos.lectura}</p>
-                {estrenosComp > 0 && <Estrenos lista={v.lee.estrenos.filter((e) => !e.propia).slice(0, MAX_ESTRENOS)} t={tVersiones} />}
-              </div>
-            )}
           </Bloque>
-        )}
-        {v.lee.estrenos?.length > Math.min(estrenosComp, MAX_ESTRENOS) && (
-          <Detalle id={`detalle-${s43.id}`} titulo="Estrenos del período" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['todos los estrenos, de las dos marcas']}>
-            <Bloque universo="atl" {...estrenos}
-              ayuda={<p>Una pieza es nueva el día en que su versión se emite por primera vez.</p>}
-              pie={<span>TV, radio, cable, OTT y vía pública.</span>}>
-              <Estrenos lista={v.lee.estrenos} t={tVersiones} />
-            </Bloque>
-          </Detalle>
         )}
       </SeccionDe>
     </MarcoCapa>

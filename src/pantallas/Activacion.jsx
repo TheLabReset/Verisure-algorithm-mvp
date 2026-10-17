@@ -7,7 +7,7 @@ import { Bloque, Tabla, Resumen, Grupo, Detalle, Semaforo, Flujo, vigente } from
 import { Lineas } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, dolares, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
-import { resumenTitulo, comparacionTexto } from '../textos/comun.js';
+import { resumenTitulo, frenteATexto } from '../textos/comun.js';
 import { plataformasLectura, pushPullLectura, plataformasObjetivoLectura, estadoObjetivo, extremoTexto, extremosAyuda, semanaRotulo } from '../textos/lecturas.js';
 import { MARGEN_OBJETIVO, extremos } from '../calculo/plataformas.js';
 
@@ -26,8 +26,8 @@ export default function Activacion({ capa, vista: v }) {
   const opciones = x.plataformas.map((p) => ({ valor: p.id, texto: p.nombre }));
   const plat = x.plataformas.find((p) => p.id === vigente(elegida, opciones));
   const t = x.total, a = x.totalPrevio;
-  const frente = comparacionTexto(P);
-  const delta = (k, mejorSi) => (a ? { cambio: cambio(t[k], a[k]), mejorSi, referencia: `frente a ${frente}` } : null);
+  const frente = frenteATexto(P);
+  const delta = (k, mejorSi) => (a ? { cambio: cambio(t[k], a[k]), mejorSi, referencia: `frente ${frente}` } : null);
   const ultimas = (semanas) => semanas.slice(-SEMANAS_A_LA_VISTA).reverse();
   // las filas de mejor y peor desempeño de una tabla, en el orden en que se pintan
   const marcas = (lista, unidad) => {
@@ -71,9 +71,9 @@ export default function Activacion({ capa, vista: v }) {
       </SeccionDe>
 
       <SeccionDe def={s32} vista={v}>
-        <Bloque universo="plataformas" {...pushPullLectura(x)} alcance={`${SEMANAS_A_LA_VISTA} semanas al ${fechaCorta(P.hasta)}`} ejemplo
-          ayuda={<p>Push son las redes, donde el anuncio busca a la persona (Meta y TikTok). Pull es la búsqueda, donde la persona busca la marca o el servicio (Google Ads). Semanas de lunes a domingo; la última puede estar en curso.</p>}
-          pie={<span>{x.fuente}.</span>}>
+        <Bloque universo="plataformas" {...pushPullLectura(x)} ejemplo
+          ayuda={<p>Push son las redes, donde el anuncio busca a la persona (Meta y TikTok). Pull es la búsqueda, donde la persona busca la marca o el servicio (Google Ads). El título lee el período; el gráfico, las semanas de lunes a domingo, y la última puede estar en curso.</p>}
+          pie={<span>{x.fuente} · el gráfico, {numero(SEMANAS_A_LA_VISTA)} semanas al {fechaCorta(P.hasta)}.</span>}>
           <Lineas etiqueta="L2B semanal de Push y Pull" formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} alto={220}
             series={x.tipos.map((g) => ({ nombre: g.tipo === 'push' ? 'Push' : 'Pull', tono: g.tipo === 'push' ? 'tinta' : 'propia', discontinua: g.tipo === 'push', serie: g.semanas.slice(-SEMANAS_A_LA_VISTA).map((s) => ({ fecha: s.desde, valor: s.l2b })) }))} />
         </Bloque>
