@@ -68,13 +68,15 @@ export default function Inteligencia({ capa, vista: v }) {
   const orden = ok ? [...atl.marcas].sort((a, b) => Number(a.propia) - Number(b.propia)) : [];
   const ordenDig = dig.estado === 'ok' ? [...dig.marcas].sort((a, b) => Number(a.propia) - Number(b.propia)) : [];
   const [r, p] = orden;
-  const opcionesMarca = MARCAS.map((m) => ({ valor: m, texto: textosMarca.nombreMarca(m), desactivada: !med?.[m] }));
+  // una marca sin emisiones en el período queda desactivada: la vista arranca en la que sí emitió, no en una tarjeta vacía
+  const opcionesMarca = MARCAS.map((m) => ({ valor: m, texto: textosMarca.nombreMarca(m), desactivada: !med?.[m]?.emisiones }));
   const marca = vigente(elegida, opcionesMarca);
   const deMarca = med?.[marca];
   const compMed = med?.[COMPETENCIA.marcaFuente];
   const principal = (m) => Object.entries(m.medios).map(([k, x]) => [k, m.inversion ? (x / m.inversion) * 100 : 0]).sort((a, b) => b[1] - a[1])[0];
   const control = <div className="q-control q-control-tarjeta"><span>Marca</span><Grupo etiqueta="Marca" valor={marca} onCambiar={setMarca} opciones={opcionesMarca} /></div>;
   const [C, Pr] = [COMPETENCIA.marcaFuente, CLIENTE.marcaFuente];
+  const conFranjas = (m) => Boolean(m && Object.values(m.franjas || {}).some((x) => x > 0));
   const mv = v.lee.mediosVentana;
   // los canales de las dos marcas en la misma escala: una barra más larga siempre es más emisiones
   const maxCanal = compra ? Math.max(1, ...[C, Pr].flatMap((m) => compra.porMarca[m].canales.map((c) => c.emisiones))) : 1;
@@ -112,12 +114,12 @@ export default function Inteligencia({ capa, vista: v }) {
                 filas={ORDEN_MEDIOS.map((k) => [MEDIOS[k], soles(r.medios[k] || 0), r.inversion ? parte(((r.medios[k] || 0) / r.inversion) * 100) : 'sin inversión', p ? soles(p.medios[k] || 0) : 'sin dato', p ? (p.inversion ? parte(((p.medios[k] || 0) / p.inversion) * 100) : 'sin inversión') : 'sin dato'])} />
             </Bloque>
             <Bloque universo="atl" {...franjasLectura(v, FRANJAS)}
-              pie={<span>Emisiones de TV y radio por franja horaria.</span>}>
+              pie={<span>Emisiones de TV, radio, cable y OTT por franja horaria.</span>}>
               <Pesas etiqueta="Parte de las emisiones de cada marca por franja" formato={(n) => (n == null ? 'sin dato' : porcentaje(n))} max={100} rotuloA={p?.nombre} rotuloB={r.nombre} tonoA="propia"
-                filas={v.analiza.franjas.map((k) => ({ nombre: FRANJAS[k], a: p?.mezclaFranjas[k] ?? 0, b: r.mezclaFranjas[k] ?? 0 }))} />
+                filas={v.analiza.franjas.map((k) => ({ nombre: FRANJAS[k], a: conFranjas(p) ? p.mezclaFranjas[k] ?? 0 : null, b: conFranjas(r) ? r.mezclaFranjas[k] ?? 0 : null }))} />
             </Bloque>
-            <Bloque universo="atl" {...canalesLectura(deMarca, marca)}
-              pie={<span>Los canales con más inversión estimada, hasta ocho.</span>}>
+            <Bloque universo="atl" {...canalesLectura(deMarca, marca)} ventana={mv.ampliada ? ventanaTexto(mv.desde, mv.hasta) : undefined}
+              pie={<span>Los canales con más inversión estimada, hasta ocho{mv.ampliada ? `, ${ventanaPatron(mv)} al ${fechaCorta(mv.hasta)}` : ''}.</span>}>
               {control}
               {deMarca?.canales.length ? <Barras etiqueta={`Inversión de ${textosMarca.nombreMarca(marca)} por canal`} tono={marca === Pr ? 'propia' : undefined} formato={solesCompacto} filas={deMarca.canales.map((c) => ({ nombre: c.nombre, valor: c.valor }))} />
                 : <p className="q-nota-bloque">Sin emisiones en el período.</p>}
@@ -161,12 +163,12 @@ export default function Inteligencia({ capa, vista: v }) {
               const canal = (x) => ({ texto: x.canal === 'DESCONOCIDO' ? 'Canal sin registrar' : version(x.canal), sub: GRUPO_MEDIO[x.grupo] ?? version(x.grupo) });
               return <>
                 {/* si todos los avisos son del mismo tipo, la columna repetiría lo mismo en cada fila: va una vez, en el pie */}
-                <Bloque universo="atl" titulo={`Los programas de ${textosMarca.nombreMarca(marca)}`}
-                  pie={compra.programasTop[marca]?.length ? <span>{recorteTexto(compra.programasTop[marca].length, compra.detalle[marca].length, 'programas')}{unTipo ? ` ${todosTipoTexto(unTipo)}` : ''}</span> : null}>
+                <Bloque universo="atl" titulo={`Los programas de ${textosMarca.nombreMarca(marca)}`} ventana={mv.ampliada ? ventanaTexto(mv.desde, mv.hasta) : undefined}
+                  pie={compra.programasTop[marca]?.length ? <span>{recorteTexto(compra.programasTop[marca].length, compra.totalProgramas[marca], 'programas', 'programa')}{unTipo ? ` ${todosTipoTexto(unTipo, compra.programasTop[marca].length)}` : ''}</span> : null}>
                   {control}
                   {compra.programasTop[marca]?.length ? <Tabla etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por programa`} numericas={unTipo ? [1] : [2]}
                     columnas={['Programa', ...(unTipo ? [] : ['Tipo de aviso']), 'Emisiones']}
-                    filas={compra.programasTop[marca].map((x) => [{ texto: x.programa ? version(x.programa) : 'Sin programa', sub: canal(x).texto }, ...(unTipo ? [] : [tipoAviso(x.tipo)]), numero(x.emisiones)])} />
+                    filas={compra.programasTop[marca].map((x) => [{ texto: version(x.programa), sub: `${canal(x).texto}${x.otrosCanales ? ` y ${enLetras(x.otrosCanales)} ${x.otrosCanales === 1 ? 'canal' : 'canales'} más` : ''}` }, ...(unTipo ? [] : [tipoAviso(x.tipo)]), numero(x.emisiones)])} />
                     : <p className="q-nota-bloque">{sinCompraTexto(textosMarca.nombreMarca(marca), quien)}</p>}
                 </Bloque>
               </>;
@@ -181,7 +183,7 @@ export default function Inteligencia({ capa, vista: v }) {
             ayuda={<p>Cada celda es el promedio de emisiones en esa hora y ese día de la semana. Un horario es un patrón: con un período de menos de cuatro semanas, se leen las cuatro que terminan en su último día.</p>}
             pie={<span>Emisiones de TV, radio, cable y OTT con hora registrada.</span>}>
             {control}
-            {deMarca?.matriz?.length && deMarca.emisiones ? <MapaCalor etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por día de la semana y hora`} tono={marca === Pr ? 'propia' : 'foco'} matriz={deMarca.matriz} formato={(n) => (n == null ? 'sin dato' : numero(n, n > 0 && n < 10 ? 1 : 0))} />
+            {deMarca?.matriz?.length && deMarca.emisiones ? <MapaCalor etiqueta={`Emisiones de ${textosMarca.nombreMarca(marca)} por día de la semana y hora`} tono={marca === Pr ? 'propia' : 'foco'} matriz={deMarca.matriz} unidad="emisiones por hora, en promedio" formato={(n) => (n == null ? 'sin dato' : numero(n, n > 0 && n < 10 ? 1 : 0))} />
               : <p className="q-nota-bloque">Sin emisiones con hora en el período.</p>}
           </Bloque>
           <Bloque universo="atl" {...programasLectura(deMarca, marca)} ventana={mv.ampliada ? ventanaTexto(mv.desde, mv.hasta) : undefined}

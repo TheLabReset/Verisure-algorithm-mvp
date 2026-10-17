@@ -25,7 +25,10 @@ export function armarContexto(dir = DATA) {
     }])));
     // las emisiones del mes exacto (no la ventana de cuatro semanas del horario en pantalla)
     const med = v.lee.mediosDelPeriodo ? Object.fromEntries(Object.entries(v.lee.mediosDelPeriodo).filter(([, x]) => x).map(([k, x]) => [CLIENTE.competencia.find((c) => c.marcaFuente === k)?.nombre ?? CLIENTE.nombre, {
-      emisiones: x.emisiones, canales: x.canales.slice(0, 5), programas: x.programas.slice(0, 5), horasAltas: x.horasAltas,
+      // cada lista dice qué mide y de cuántos es el recorte: los canales por inversión, los programas por emisiones
+      emisiones: x.emisiones, horasAltas: x.horasAltas,
+      canales: x.canales.slice(0, 5).map((c) => ({ nombre: c.nombre, inversion: r(c.valor) })), totalCanales: x.totalCanales,
+      programas: x.programas.slice(0, 5).map((c) => ({ nombre: c.nombre, emisiones: c.valor })), totalProgramas: x.totalProgramas,
     }])) : null;
     return {
       mes, parcial: v.periodo.parcial, desde: v.periodo.desde, hasta: v.periodo.hasta,
@@ -42,6 +45,8 @@ export function armarContexto(dir = DATA) {
     corte: { integrametrics: contrato.meta.lastDay, trends: ultimo.fuentes.find((f) => f.id === 'trends')?.corte ?? null },
     marcas: { propia: CLIENTE.nombre, competencia: CLIENTE.competencia.map((c) => c.nombre) },
     meses,
+    // las versiones con más inversión del año; totalVersiones dice cuántas hubo (una versión en ATL y digital cuenta una vez)
+    totalVersionesCompetencia: ultimo.lee.cronograma?.distintas ?? null,
     versionesCompetencia: (ultimo.lee.cronograma?.filas || []).map((f) => ({ version: f.version, universo: f.universo, desde: f.desde, hasta: f.hasta, inversion: r(f.inversion), canales: f.canales.slice(0, 4) })),
     shareSemanalCompetencia: ultimo.analiza.shareSemanal,
     busquedas: b ? {

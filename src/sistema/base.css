@@ -69,6 +69,18 @@ a { color: var(--texto-1); text-underline-offset: 3px; }
 .q-tabla tbody th { font-weight: var(--peso-lectura); color: var(--texto-1); }
 .q-tabla td { color: var(--texto-2); }
 .q-tabla tbody tr:hover > * { background: var(--superficie-capitulo); }
+/* en el celular la tabla se aprieta, el nombre de cada fila queda fijo al deslizar (nunca se pierde de qué fila es una
+   cifra) y una sombra en el borde derecho avisa que hay más columnas; la sombra se va al llegar al final */
+@media (max-width: 520px) {
+  .q-tabla { font-size: var(--t-13); }
+  .q-tabla th, .q-tabla td { padding-right: var(--e-2); }
+  .q-tabla tbody th, .q-tabla thead th:first-child { position: sticky; left: 0; z-index: 1; background: var(--superficie); }
+  .q-tabla-marco {
+    background:
+      linear-gradient(to left, var(--superficie) 40%, transparent) right center / 28px 100% no-repeat local,
+      linear-gradient(to left, color-mix(in oklab, var(--texto-1) 14%, transparent), transparent) right center / 14px 100% no-repeat scroll;
+  }
+}
 
 /* El atributo hidden siempre gana, aunque el componente declare su display */
 [hidden] { display: none !important; }

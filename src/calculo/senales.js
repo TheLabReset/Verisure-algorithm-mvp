@@ -8,6 +8,15 @@ import { CLIENTE } from '../cliente.js';
 import { agruparAnuncios, htmlDe } from './anuncios.js';
 import { plataformaEnFrase } from '../textos/comun.js';
 import { emisionesDe } from '../fuentes/medios.js';
+import { mismaCadena } from '../fuentes/cadenas.js';
+
+// Una repetidora regional sin su propia compra («RITMO ROMANTICA (TRU)») es la misma emisora de Lima: para contar
+// canales y nombrarlos va con su principal. El streaming del canal (app, web, YouTube) sí es otro canal
+const STREAMING = /\((APP|WEB|YOUTUBE)\)\s*$/i;
+export function canalPrincipal(canales) {
+  const principales = [...new Set(canales.filter((c) => c && !/\([^)]*\)\s*$/.test(c)))];
+  return (c) => (!c || STREAMING.test(c) ? c : principales.find((p) => mismaCadena(c, p)) ?? c);
+}
 
 const COMPETENCIA = CLIENTE.competencia.map((c) => c.marcaFuente);
 const PROPIA = CLIENTE.marcaFuente;
@@ -76,7 +85,7 @@ export function digitalDeLaSemana(contrato, S) {
   const cuenta = new Map();
   for (const p of enLaSemana) if (p.plataforma) cuenta.set(p.plataforma, (cuenta.get(p.plataforma) || 0) + 1);
   const plataformas = [...cuenta.entries()].sort((a, b) => b[1] - a[1]).map(([k]) => k);
-  return { semana: { desde: W.desde, hasta: W.hasta }, reciente: W.reciente, piezas: enLaSemana.length, mensajes, abanico, plataformas, sinHistoria: Boolean(primerDia && W.desde <= primerDia) };
+  return { semana: { desde: W.desde, hasta: W.hasta }, reciente: W.reciente, piezas: enLaSemana.length, mensajes, abanico, plataformas, sinHistoria: Boolean(primerDia && W.desde <= primerDia), inicio: primerDia };
 }
 
 /**
@@ -96,7 +105,8 @@ export function atlDeLaSemana(contrato, medios, S, apartado) {
     return { ...e, id: `${apartado}-${e.fecha}-${e.hora}-${i}`, nombre: nombreDe(e.marca), asset: archivos.get(k) || null, nueva: Boolean(estreno.get(k) && estreno.get(k) >= W.desde && estreno.get(k) <= W.hasta) };
   });
   const contar = (clave) => { const c = new Map(); for (const e of lista) c.set(e[clave], (c.get(e[clave]) || 0) + 1); return [...c.entries()].map(([nombre, emisiones]) => ({ nombre, emisiones })).sort((a, b) => b.emisiones - a.emisiones || a.nombre.localeCompare(b.nombre)); };
-  return { semana: { desde: W.desde, hasta: W.hasta }, reciente: W.reciente, emisiones: lista, porTipo: contar('tipo'), porMotivo: contar('version'), canales: new Set(lista.map((e) => e.canal)).size, sinRegistros: false };
+  const principal = canalPrincipal(lista.map((e) => e.canal));
+  return { semana: { desde: W.desde, hasta: W.hasta }, reciente: W.reciente, emisiones: lista, porTipo: contar('tipo'), porMotivo: contar('version'), canales: new Set(lista.map((e) => principal(e.canal))).size, sinRegistros: false };
 }
 
 /**
@@ -108,9 +118,11 @@ export function compraDeMedios(medios, P) {
   const MARCAS = [...COMPETENCIA, PROPIA];
   const porCanal = new Map();
   const detalle = Object.fromEntries(MARCAS.map((m) => [m, new Map()]));
+  const todas = Object.fromEntries(MARCAS.map((m) => [m, emisionesDe(medios, m, P.desde, P.hasta).filter((e) => e.grupo !== 'VIA PUBLICA')]));
+  const principal = canalPrincipal(MARCAS.flatMap((m) => todas[m].map((x) => x.canal)));
   for (const m of MARCAS) {
-    for (const e of emisionesDe(medios, m, P.desde, P.hasta)) {
-      if (e.grupo === 'VIA PUBLICA') continue;
+    for (const e0 of todas[m]) {
+      const e = { ...e0, canal: principal(e0.canal) };
       const k = `${e.grupo}|${e.canal}`;
       if (!porCanal.has(k)) porCanal.set(k, { id: k, grupo: e.grupo, canal: e.canal, marcas: Object.fromEntries(MARCAS.map((x) => [x, { emisiones: 0, inversion: 0, programas: new Set(), tipos: new Set() }])) });
       const b = porCanal.get(k).marcas[m];
@@ -149,9 +161,26 @@ export function compraDeMedios(medios, P) {
       tipos: [...tipos.entries()].map(([tipo, emisiones]) => ({ tipo, emisiones })).sort((a, b) => b.emisiones - a.emisiones),
     }];
   }));
-  // el detalle se lee en diez filas: los programas con más emisiones de cada marca. Cuántos hay en total va al pie,
-  // para que el recorte se diga
-  const programasTop = Object.fromEntries(MARCAS.map((m) => [m, [...filas[m]].sort((a, b) => b.emisiones - a.emisiones).slice(0, TOPE_DETALLE)]));
-  return { canales, totales, enComun, grupos, detalle: filas, porMarca, programasTop, competencia: comp, propia: PROPIA };
+  // el detalle se lee en diez filas: los programas con más emisiones de cada marca, cada programa una vez aunque salga
+  // en varios canales (sus emisiones se suman; el canal que se nombra es el de más emisiones, y el tipo, el más
+  // frecuente). Lo que llega sin programa (el streaming) no es un programa. Cuántos hay en total va al pie
+  const porPrograma = (m) => {
+    const g = new Map();
+    for (const c of filas[m]) {
+      if (!c.programa) continue;
+      if (!g.has(c.programa)) g.set(c.programa, { programa: c.programa, emisiones: 0, canales: new Map(), tipos: new Map() });
+      const x = g.get(c.programa);
+      x.emisiones += c.emisiones;
+      x.canales.set(c.canal, (x.canales.get(c.canal) || 0) + c.emisiones);
+      x.tipos.set(c.tipo, (x.tipos.get(c.tipo) || 0) + c.emisiones);
+    }
+    const mayor = (mapa) => [...mapa.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    return [...g.values()].map((x) => ({ programa: x.programa, emisiones: x.emisiones, canal: mayor(x.canales), otrosCanales: x.canales.size - 1, tipo: mayor(x.tipos) }))
+      .sort((a, b) => b.emisiones - a.emisiones);
+  };
+  const programas = Object.fromEntries(MARCAS.map((m) => [m, porPrograma(m)]));
+  const programasTop = Object.fromEntries(MARCAS.map((m) => [m, programas[m].slice(0, TOPE_DETALLE)]));
+  const totalProgramas = Object.fromEntries(MARCAS.map((m) => [m, programas[m].length]));
+  return { canales, totales, enComun, grupos, detalle: filas, porMarca, programasTop, totalProgramas, competencia: comp, propia: PROPIA };
 }
 export const TOPE_DETALLE = 10;

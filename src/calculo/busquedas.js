@@ -7,9 +7,9 @@ const VENTANA = 12; // semanas: un trimestre, para que una semana rara no mueva 
 
 // Las últimas semanas completas (la parcial de Trends no cuenta) y las mismas semanas de un año antes
 // hasta: el último día del período elegido; las semanas que empiezan después no cuentan
+const finDe = (iso) => { const d = new Date(`${iso}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + 6); return d.toISOString().slice(0, 10); };
 function ventanas(grupo, n, hasta) {
   // una semana cuenta si termina dentro del período (domingo, seis días después de su inicio)
-  const finDe = (iso) => { const d = new Date(`${iso}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + 6); return d.toISOString().slice(0, 10); };
   const completas = grupo.semanas.map((s, i) => i).filter((i) => !grupo.parcial[i] && (!hasta || finDe(grupo.semanas[i]) <= hasta));
   const ahora = completas.slice(-n);
   const antes = ahora.map((i) => i - 52).filter((i) => i >= 0);
@@ -38,8 +38,9 @@ export function leerBusquedas(datos, { semanas = VENTANA, hasta = null } = {}) {
   const semanaDe = (i) => cat.semanas[i];
   return {
     consultado: datos.consultado,
-    desde: semanaDe(v.ahora[0]), hasta: semanaDe(v.ahora.at(-1)), semanas: v.ahora.length,
-    antesDesde: v.antes ? semanaDe(v.antes[0]) : null, antesHasta: v.antes ? semanaDe(v.antes.at(-1)) : null,
+    // del primer día de la primera semana al último día de la última (Trends fecha cada semana por su domingo de inicio)
+    desde: semanaDe(v.ahora[0]), hasta: finDe(semanaDe(v.ahora.at(-1))), semanas: v.ahora.length,
+    antesDesde: v.antes ? semanaDe(v.antes[0]) : null, antesHasta: v.antes ? finDe(semanaDe(v.antes.at(-1))) : null,
     series,
     // por cada búsqueda de la marca, cuántas de cámaras de seguridad (mismo grupo, misma escala)
     razon: camaras && marca && marca.ahora ? camaras.ahora / marca.ahora : null,

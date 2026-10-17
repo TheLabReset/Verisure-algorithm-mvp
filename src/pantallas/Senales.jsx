@@ -35,7 +35,7 @@ function DigitalSemana({ d, anio, avisos }) {
         <Abanico lista={lista} abierta={abierta} onAbrir={setAbierta} t={t} nota={`vistas por primera vez ${ventanaTexto(d.semana.desde, d.semana.hasta)}`} />
         <Tabla etiqueta={`Mensajes digitales de ${COMPETENCIA.nombre}`} numericas={[1]}
           columnas={['Mensaje', 'Piezas', 'Plataformas', 'Visto por primera vez']}
-          filas={d.mensajes.map((m) => [version(m.mensaje), numero(m.piezas), m.plataformas.map(plataformaEnFrase).join(', ') || 'sin dato', m.nuevo ? `${fechaCorta(m.primeraVez)}, nuevo` : fechaCorta(m.primeraVez)])} />
+          filas={d.mensajes.map((m) => [version(m.mensaje), numero(m.piezas), m.plataformas.map(plataformaEnFrase).join(', ') || 'sin dato', m.nuevo && !d.sinHistoria ? `${fechaCorta(m.primeraVez)}, nuevo` : fechaCorta(m.primeraVez)])} />
       </> : <p className="q-nota-bloque">Sin piezas digitales de {COMPETENCIA.nombre} registradas.</p>}
     </Bloque>
   );
@@ -46,7 +46,7 @@ function AtlSemana({ a, medio, universo, avisos, titulo }) {
   return (
     <Bloque universo={universo} {...atlSemanaLectura(a, medio)} ventana={ventanaDe(a)} avisos={avisos}
       ayuda={<p>Cada fila es una emisión. Una emisión de cadena nacional repetida en sus señales regionales cuenta una sola vez. El digitalizado es el de la versión que Integrametrics guardó.</p>}
-      pie={<span>Integrametrics, emisión por emisión.</span>}>
+      pie={<span>Integrametrics, emisión por emisión{a.emisiones.length > 1 ? ` · las ${numero(a.emisiones.length)} están en la lista` : ''}.</span>}>
       {a.emisiones.length ? <Emisiones a={a} etiqueta={`Emisiones de ${COMPETENCIA.nombre} en ${medio}`} /> : <p className="q-nota-bloque">Sin emisiones registradas.</p>}
     </Bloque>
   );
@@ -117,14 +117,14 @@ export default function Senales({ capa, vista: v }) {
               series={b.marcas.map((m) => ({ nombre: m.nombre, leyenda: m.crecimiento == null ? m.nombre : `${m.nombre} ${signo(m.crecimiento)}`, serie: desdeUnAnio(b.serieMarcas.find((x) => x.id === m.id)?.serie || []) }))} />
           </Bloque>
         )}
-        <Bloque universo="conversacion" {...tiktokLectura(E.tiktok)} ejemplo ancho="mitad"
-          ayuda={<p>La interacción es la parte de las vistas que dio me gusta, comentó o compartió. Hashtags de las últimas semanas. Se conectará con Apify.</p>}
-          pie={<span>{E.tiktok.fuente}.</span>}>
+        <Bloque universo="conversacion" {...tiktokLectura(E.tiktok)} ejemplo ancho="mitad" ventana={ventanaTexto(E.tiktok.desde, E.tiktok.hasta)}
+          ayuda={<p>La tasa de interacción es la parte de las vistas que dio me gusta, comentó o compartió. Se conectará con Apify.</p>}
+          pie={<span>{E.tiktok.fuente}, del {fechaCorta(E.tiktok.desde)} al {fechaCorta(E.tiktok.hasta)}.</span>}>
           <Tabla etiqueta="Hashtags en TikTok" numericas={[1, 2, 3]} barra={{ columna: 1, valores: E.tiktok.hashtags.map((h) => h.tasa) }}
-            columnas={['Hashtag', 'Interacción', 'Vistas', 'Publicaciones']}
+            columnas={['Hashtag', 'Tasa de interacción', 'Vistas', 'Publicaciones']}
             filas={E.tiktok.hashtags.map((h) => [h.hashtag, porcentaje(h.tasa, 1), compacto(h.vistas), numero(h.publicaciones)])} />
         </Bloque>
-        <Bloque universo="conversacion" {...facebookLectura(E.facebook)} ejemplo ancho="mitad"
+        <Bloque universo="conversacion" {...facebookLectura(E.facebook)} ejemplo ancho="mitad" ventana={ventanaTexto(E.facebook.desde, E.facebook.hasta)}
           ayuda={<p>Los temas de los comentarios en las páginas de las marcas y del rubro. El tono resta las menciones negativas a las positivas: {numero(UMBRALES_TONO.muy)} puntos o más es muy positivo; {numero(UMBRALES_TONO.tono)} o más, positivo; entre −{numero(UMBRALES_TONO.tono)} y {numero(UMBRALES_TONO.tono)}, neutro (y lo mismo hacia lo negativo). Se conectará con Apify.</p>}
           pie={<span>{E.facebook.fuente}, del {fechaCorta(E.facebook.desde)} al {fechaCorta(E.facebook.hasta)}.</span>}>
           <Tabla etiqueta="Temas de la conversación en Facebook" numericas={[1]} barra={{ columna: 1, valores: E.facebook.temas.map((t) => t.menciones) }}
@@ -142,7 +142,7 @@ export default function Senales({ capa, vista: v }) {
           )}
           <Bloque universo="conversacion" titulo="Las páginas de cada marca" ejemplo pie={<span>{E.facebook.fuente}.</span>}>
             <Tabla etiqueta="Páginas de Facebook de cada marca" numericas={[1, 2, 3]}
-              columnas={['Página', 'Publicaciones', 'Interacción', 'Comentarios']}
+              columnas={['Página', 'Publicaciones', 'Interacciones', 'Comentarios']}
               filas={E.facebook.paginas.map((x) => [x.nombre, numero(x.publicaciones), numero(x.interaccion), numero(x.comentarios)])} />
           </Bloque>
           <Bloque universo="conversacion" titulo="El tono de cada tema" ejemplo pie={<span>Parte de las menciones de cada tema.</span>}>

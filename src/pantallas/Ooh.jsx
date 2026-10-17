@@ -2,7 +2,7 @@
 // Lo de la competencia se elige primero. La ficha abre la ventana con todos los paneles de esa marca.
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { MapPin, Maximize2 } from 'lucide-react';
-import { Grupo, VentanaAnuncios, VisorFoto } from '../sistema/Componentes.jsx';
+import { Grupo, VentanaAnuncios, VisorFoto, Reproductor } from '../sistema/Componentes.jsx';
 import { numero, soles, fechaCorta } from '../sistema/formato.js';
 import { segun, version } from '../textos/comun.js';
 import { panelTitulo, grupoPanelesTexto, ubicacionEnLista } from '../textos/lecturas.js';
@@ -26,7 +26,7 @@ function Ficha({ ubicacion, paneles, onVerTodos }) {
             <img src={a.url} alt={alt} loading="lazy" referrerPolicy="no-referrer" onError={() => setFallo(p.id)} />
             <button type="button" className="q-ficha-ampliar" onClick={() => setAmpliada(true)} aria-label="Ampliar la foto del panel"><span className="q-ficha-ampliar-icono" aria-hidden="true"><Maximize2 size={16} /></span></button>
           </>
-          : a?.kind === 'video' ? <video src={a.url} controls preload="metadata" aria-label={`Video del panel de ${p.nombre}`} onError={() => setFallo(p.id)} />
+          : a?.kind === 'video' ? <Reproductor tipo="video" src={a.url} etiqueta={`Video del panel de ${p.nombre}`} onError={() => setFallo(p.id)} />
           : <span className="q-ficha-sin-arte">Integrametrics no captó la foto de este panel</span>}
       </div>
       <div className="q-ficha-cuerpo">

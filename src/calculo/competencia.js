@@ -31,8 +31,9 @@ export function versionesDelAnio(contrato, marca) {
 // Cronograma: las versiones con más inversión, ordenadas por cuándo empezaron
 export function cronograma(versiones, { max = 12 } = {}) {
   const filas = versiones.slice(0, max).sort((a, b) => (a.desde < b.desde ? -1 : a.desde > b.desde ? 1 : b.inversion - a.inversion));
-  // distintas: una versión que sale en ATL y en digital es una sola versión
-  return { filas, resto: Math.max(0, versiones.length - max), total: versiones.length, distintas: new Set(versiones.map((v) => v.version)).size, atl: versiones.filter((v) => v.universo === 'atl').length, digital: versiones.filter((v) => v.universo === 'digital').length };
+  // distintas: una versión que sale en ATL y en digital es una sola versión; el resto cuenta versiones, no filas
+  const distintas = new Set(versiones.map((v) => v.version)).size, mostradas = new Set(filas.map((v) => v.version)).size;
+  return { filas, mostradas, resto: distintas - mostradas, total: versiones.length, distintas, atl: versiones.filter((v) => v.universo === 'atl').length, digital: versiones.filter((v) => v.universo === 'digital').length };
 }
 
 // Pauta del año: inversión diaria de una marca en un universo, de enero al último día con data. Un día sin

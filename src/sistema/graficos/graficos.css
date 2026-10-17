@@ -87,6 +87,7 @@
 /* el porcentaje dentro de una columna apilada: tinta, porque las partes de la competencia son amarillas en los dos temas */
 .q-svg .q-rotulo-sobre { fill: var(--sobre-resalte); font-size: var(--t-13); font-weight: var(--peso-rotulo); font-variant-numeric: tabular-nums; }
 .q-svg .q-columna-apagada .q-parte { opacity: 0.55; }
+.q-svg .q-rotulo-sobre-atl { fill: var(--sobre-mezcla-atl); }
 .q-svg .q-parte-propia-antes { fill: var(--qp2); }
 .q-p-tinta { fill: var(--texto-1); background: var(--texto-1); }
 /* partes de una retícula: la resaltada en menta, dos en color de categoría (azul y naranja, validados para
