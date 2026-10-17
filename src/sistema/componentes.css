@@ -570,6 +570,7 @@
 .q-visor-lienzo.q-visor-ampliado:active { cursor: grabbing; }
 .q-visor-lienzo img { max-width: 100%; max-height: 70vh; object-fit: contain; user-select: none; transform-origin: center; transition: transform var(--d-110) var(--curva-productiva); }
 .q-ficha-sin-arte { padding: var(--e-4); font-size: var(--t-14); color: var(--texto-3); text-align: center; }
+.q-ficha-sin-arte .q-ficha-reintentar { display: flex; margin: var(--e-2) auto 0; }
 .q-ficha-cuerpo { display: grid; gap: var(--e-2); min-width: 0; }
 .q-ficha-cuerpo h4 { font-family: var(--f-titulo); font-size: var(--t-19); font-weight: var(--peso-titulo); color: var(--texto-1); line-height: 1.2; }
 .q-ficha-marca { font-size: var(--t-13); font-weight: var(--peso-rotulo); text-transform: uppercase; letter-spacing: 0.04em; color: var(--texto-3); }
@@ -656,6 +657,10 @@
 /* Reproductor: el botón y la barra de avance con un área de toque de 44 px; la barra se ve fina pero se agarra entera */
 .q-reproductor { display: grid; background: var(--superficie-capitulo); border-radius: var(--r-control); overflow: hidden; container-type: inline-size; }
 .q-reproductor video { display: block; width: 100%; aspect-ratio: 16 / 9; background: var(--barra); cursor: pointer; }
+.q-reproductor-pantalla { display: grid; min-height: 0; }
+.q-reproductor-pantalla > * { grid-area: 1 / 1; }
+.q-reproductor-aviso { align-self: center; justify-self: center; display: grid; gap: var(--e-2); max-width: 32ch; margin: var(--e-4); padding: var(--e-3) var(--e-4); border-radius: var(--r-control); background: var(--superficie); color: var(--texto-1); font-size: var(--t-14); text-align: center; }
+.q-reproductor-aviso a { color: var(--texto-1); font-weight: var(--peso-rotulo); }
 .q-reproductor-onda { display: grid; place-items: center; min-height: 72px; color: var(--texto-3); }
 .q-reproductor-barra { display: flex; align-items: center; gap: var(--e-1); padding: var(--e-2) var(--e-3); }
 .q-reproductor-boton { flex: none; display: inline-grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: var(--texto-1); cursor: pointer; }
@@ -683,6 +688,7 @@
 /* pantalla completa: el video ocupa todo lo que deja la barra */
 .q-reproductor:fullscreen { grid-template-rows: minmax(0, 1fr) auto; width: 100vw; height: 100vh; border-radius: 0; background: var(--barra); }
 .q-reproductor:fullscreen video { height: 100%; aspect-ratio: auto; object-fit: contain; }
+.q-reproductor:fullscreen .q-reproductor-pantalla { min-height: 0; height: 100%; }
 .q-reproductor:fullscreen .q-reproductor-salto { display: inline-grid; }
 .q-reproductor:fullscreen .q-reproductor-barra { background: var(--superficie-capitulo); }
 .q-anuncio-reproductor { border-bottom: 1px solid var(--borde); }

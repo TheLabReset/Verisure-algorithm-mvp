@@ -12,6 +12,7 @@ const MapaPaneles = lazy(() => import('../sistema/graficos/MapaPaneles.jsx'));
 function Ficha({ ubicacion, paneles, onVerTodos }) {
   const [i, setI] = useState(0);
   const [fallo, setFallo] = useState(null); // la cara cuya foto o video no cargó
+  const [intento, setIntento] = useState(0); // al reintentar, la foto o el video se piden de nuevo
   const [ampliada, setAmpliada] = useState(false);
   const p = paneles[Math.min(i, paneles.length - 1)];
   if (!p) return <p className="q-nota-bloque">Elige un punto del mapa para ver su panel.</p>;
@@ -21,12 +22,12 @@ function Ficha({ ubicacion, paneles, onVerTodos }) {
     <div className="q-ficha-panel" aria-live="polite">
       {a?.kind === 'image' && <VisorFoto abierto={ampliada} onCerrar={() => setAmpliada(false)} src={a.url} alt={alt} titulo={panelTitulo(p)} bajada={p.nombre} />}
       <div className="q-ficha-arte">
-        {fallo === p.id ? <span className="q-ficha-sin-arte">{a.kind === 'video' ? 'El video' : 'La foto'} de este panel no cargó</span>
+        {fallo === p.id ? <span className="q-ficha-sin-arte">{a.kind === 'video' ? 'El video' : 'La foto'} de este panel no cargó.<button type="button" className="q-boton q-boton-chico q-ficha-reintentar" onClick={() => { setFallo(null); setIntento((n) => n + 1); }}>Reintentar</button></span>
           : a?.kind === 'image' ? <>
-            <img src={a.url} alt={alt} loading="lazy" referrerPolicy="no-referrer" onError={() => setFallo(p.id)} />
+            <img key={intento} src={a.url} alt={alt} referrerPolicy="no-referrer" onError={() => setFallo(p.id)} />
             <button type="button" className="q-ficha-ampliar" onClick={() => setAmpliada(true)} aria-label="Ampliar la foto del panel"><span className="q-ficha-ampliar-icono" aria-hidden="true"><Maximize2 size={16} /></span></button>
           </>
-          : a?.kind === 'video' ? <Reproductor tipo="video" src={a.url} etiqueta={`Video del panel de ${p.nombre}`} onError={() => setFallo(p.id)} />
+          : a?.kind === 'video' ? <Reproductor key={`${p.id}-${intento}`} tipo="video" src={a.url} etiqueta={`Video del panel de ${p.nombre}`} onError={() => setFallo(p.id)} />
           : <span className="q-ficha-sin-arte">Integrametrics no captó la foto de este panel</span>}
       </div>
       <div className="q-ficha-cuerpo">
