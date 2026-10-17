@@ -1,15 +1,17 @@
 # Pipeline de datos de The Algorithm: baja lo nuevo de Integrametrics y commitea public/data.
 # Incremental por omisión: los últimos 7 días, incluido hoy, con merge idempotente (la fuente llega con ~1 día de
 # rezago y a veces corrige la semana). Backfill: workflow_dispatch con start_date, o el cron del domingo.
-# Cron 10:52 UTC = 05:52 de Lima (minuto corrido para no caer en la hora en punto, cuando GitHub atrasa los crones).
+# Cron 10:47 UTC = 05:47 de Lima (minuto corrido para no caer en la hora en punto, cuando GitHub atrasa los crones).
+# El minuto pasó de 52 a 47 el 17 oct 2026: tras reactivar el workflow, GitHub no volvió a disparar el horario, y se
+# cambia este archivo para que lo registre de nuevo. Si un día no corre, ver README («GitHub apaga los crones»).
 # Cada día arma también el contexto de MAIA. Los lunes baja Google Trends y MAIA escribe su lectura de la semana.
 # Presupuesto de minutos y por qué falla en rojo sin token: docs/produccion-actions.md y README.
 name: Pipeline de datos
 
 on:
   schedule:
-    - cron: '52 10 * * *'   # diario → incremental de 7 días
-    - cron: '52 9 * * 0'    # domingo → backfill desde enero (recuadra los acumulados)
+    - cron: '47 10 * * *'   # diario → incremental de 7 días
+    - cron: '47 9 * * 0'    # domingo → backfill desde enero (recuadra los acumulados)
   workflow_dispatch:
     inputs:
       start_date:
@@ -65,7 +67,7 @@ jobs:
           export PIPELINE_STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           if [ -n "$MANUAL_START" ]; then
             export PIPELINE_START="$MANUAL_START"
-          elif [ "$SCHEDULE" = "52 9 * * 0" ]; then
+          elif [ "$SCHEDULE" = "47 9 * * 0" ]; then
             # el backfill vuelve a bajar el año en curso y lo reemplaza; lo de años anteriores se queda (merge)
             export PIPELINE_START="$(date -u +%Y)-01-01"
           fi
@@ -77,7 +79,7 @@ jobs:
         id: lunes
         # si Trends o Anthropic fallan, la data de Integrametrics del día igual se publica; la corrida queda en rojo al final
         continue-on-error: true
-        if: ${{ github.event.inputs.semanal == 'true' || (github.event.schedule == '52 10 * * *' && github.event_name == 'schedule') }}
+        if: ${{ github.event.inputs.semanal == 'true' || (github.event.schedule == '47 10 * * *' && github.event_name == 'schedule') }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
