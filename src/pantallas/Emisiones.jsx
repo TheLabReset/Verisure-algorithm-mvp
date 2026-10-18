@@ -8,12 +8,14 @@ import { version, tipoAviso } from '../textos/comun.js';
 import { FRANJAS } from '../calculo/vista.js';
 
 function Ficha({ e }) {
-  const [fallo, setFallo] = useState(false);
+  const [fallo, setFallo] = useState(false), [intento, setIntento] = useState(0);
   const a = e.asset;
+  // un digitalizado que no cargó se puede pedir de nuevo: el reproductor se arma otra vez
+  const reintentar = () => { setFallo(false); setIntento((n) => n + 1); };
   return (
     <div className="q-ficha-panel" aria-live="polite">
-      {a && !fallo ? <Reproductor key={e.id} tipo={a.kind === 'video' ? 'video' : 'audio'} src={a.url} etiqueta={`${a.kind === 'video' ? 'Video' : 'Audio'} de «${version(e.version)}»`} onError={() => setFallo(true)} />
-        : <div className="q-ficha-arte q-ficha-arte-corta"><span className="q-ficha-sin-arte">{a ? 'El digitalizado de esta emisión no cargó' : 'Integrametrics no tiene el digitalizado de esta versión'}</span></div>}
+      {a && !fallo ? <Reproductor key={`${e.id}-${intento}`} tipo={a.kind === 'video' ? 'video' : 'audio'} src={a.url} etiqueta={`${a.kind === 'video' ? 'Video' : 'Audio'} de «${version(e.version)}»`} onError={() => setFallo(true)} />
+        : <div className="q-ficha-arte q-ficha-arte-corta"><span className="q-ficha-sin-arte">{a ? <>El digitalizado de esta emisión no cargó.<button type="button" className="q-boton q-boton-chico q-ficha-reintentar" onClick={reintentar}>Reintentar</button></> : 'Integrametrics no tiene el digitalizado de esta versión'}</span></div>}
       <div className="q-ficha-cuerpo">
         <span className="q-ficha-marca q-ficha-foco">{e.nombre}{e.nueva ? ' · versión nueva' : ''}</span>
         <h4>«{version(e.version)}»</h4>

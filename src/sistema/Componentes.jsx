@@ -863,19 +863,45 @@ function usePantallaCompleta(marco, video) {
   };
   return [completa, alternar];
 }
+// Segundos de reproducción sin un cuadro nuevo de video para dar por hecho que el equipo no puede mostrar la imagen
+const SIN_CUADROS_S = 2;
 export function Reproductor({ src, tipo, etiqueta, onError }) {
   const ref = useRef(null), marco = useRef(null);
   const [completa, pantalla] = usePantallaCompleta(marco, ref);
   useEffect(() => { unSoloMedio(); const m = ref.current; return () => m?.pause(); }, []);
   const [sonando, setSonando] = useState(false), [t, setT] = useState(0), [total, setTotal] = useState(0);
+  // un video que el equipo no puede decodificar (algunos digitalizados pasan los límites de su propio formato) suena
+  // sin imagen: se detecta porque el audio avanza y no llegan cuadros, y se ofrece abrirlo aparte
+  const [sinImagen, setSinImagen] = useState(false);
+  const cuadros = useRef({ n: -1, t: 0 });
+  const vigilar = (m) => {
+    if (tipo !== 'video' || m.paused || m.seeking || sinImagen) return;
+    if (m.readyState >= 1 && m.videoWidth === 0) { setSinImagen(true); return; }
+    const q = m.getVideoPlaybackQuality?.();
+    if (!q) return;
+    const vistos = q.totalVideoFrames - q.droppedVideoFrames;
+    if (vistos !== cuadros.current.n) cuadros.current = { n: vistos, t: m.currentTime };
+    else if (m.currentTime - cuadros.current.t > SIN_CUADROS_S) setSinImagen(true);
+  };
   const el = () => ref.current;
   const alternar = () => { const m = el(); if (!m) return; if (m.paused) m.play().catch(() => {}); else m.pause(); };
   const saltar = (n) => { const m = el(); if (m) m.currentTime = Math.max(0, Math.min(m.duration || 0, m.currentTime + n)); };
-  const eventos = { ref, src, preload: 'metadata', onPlay: () => setSonando(true), onPause: () => setSonando(false), onEnded: () => setSonando(false),
-    onTimeUpdate: (e) => setT(e.currentTarget.currentTime), onLoadedMetadata: (e) => setTotal(e.currentTarget.duration), onDurationChange: (e) => setTotal(e.currentTarget.duration), onError };
+  // en el video, «#t=0.1» hace que el teléfono dibuje un cuadro antes del play (sin él, el iPhone deja el recuadro vacío)
+  const fuente = tipo === 'video' && src && !src.includes('#') ? `${src}#t=0.1` : src;
+  const eventos = { ref, src: fuente, preload: 'metadata', onPlay: () => setSonando(true), onPause: () => setSonando(false), onEnded: () => setSonando(false),
+    onTimeUpdate: (e) => { setT(e.currentTarget.currentTime); vigilar(e.currentTarget); }, onSeeked: () => { cuadros.current = { n: -1, t: 0 }; },
+    onLoadedMetadata: (e) => setTotal(e.currentTarget.duration), onDurationChange: (e) => setTotal(e.currentTarget.duration), onError };
   return (
     <div ref={marco} className={`q-reproductor q-reproductor-${tipo}`}>
-      {tipo === 'video' ? <video {...eventos} playsInline aria-label={etiqueta} onClick={alternar} /> : <><audio {...eventos} aria-label={etiqueta} /><span className="q-reproductor-onda" aria-hidden="true"><AudioLines size={28} /></span></>}
+      {tipo === 'video' ? (
+        <div className="q-reproductor-pantalla">
+          <video {...eventos} playsInline aria-label={etiqueta} onClick={alternar} />
+          {sinImagen && (
+            <p className="q-reproductor-aviso" role="status">Este equipo no puede mostrar la imagen de este video; el audio sigue.
+              <a href={src} target="_blank" rel="noopener noreferrer">Abrir el video aparte</a></p>
+          )}
+        </div>
+      ) : <><audio {...eventos} aria-label={etiqueta} /><span className="q-reproductor-onda" aria-hidden="true"><AudioLines size={28} /></span></>}
       <div className="q-reproductor-barra">
         <button type="button" className="q-reproductor-boton q-reproductor-play" onClick={alternar} aria-label={sonando ? 'Pausar' : 'Reproducir'}>{sonando ? <Pause size={20} aria-hidden="true" /> : <Play size={20} aria-hidden="true" />}</button>
         <button type="button" className="q-reproductor-boton q-reproductor-salto" onClick={() => saltar(-10)} aria-label="Retroceder 10 segundos"><RotateCcw size={18} aria-hidden="true" /></button>
