@@ -865,6 +865,9 @@ function usePantallaCompleta(marco, video) {
 }
 // Segundos de reproducción sin un cuadro nuevo de video para dar por hecho que el equipo no puede mostrar la imagen
 const SIN_CUADROS_S = 2;
+// Un digitalizado anómalo pesa mucho más de lo que pide su imagen: bits por píxel a 30 cuadros. Entre los 510 videos de
+// la fuente (octubre de 2026) el más alto normal llega a 0,27 y el que el iPhone no muestra, a 1,58
+const BITS_POR_PIXEL_RARO = 0.8;
 export function Reproductor({ src, tipo, etiqueta, onError }) {
   const ref = useRef(null), marco = useRef(null);
   const [completa, pantalla] = usePantallaCompleta(marco, ref);
@@ -872,16 +875,35 @@ export function Reproductor({ src, tipo, etiqueta, onError }) {
   const [sonando, setSonando] = useState(false), [t, setT] = useState(0), [total, setTotal] = useState(0);
   // un video que el equipo no puede decodificar (algunos digitalizados pasan los límites de su propio formato) suena
   // sin imagen: se detecta porque el audio avanza y no llegan cuadros, y se ofrece abrirlo aparte
-  const [sinImagen, setSinImagen] = useState(false);
-  const cuadros = useRef({ n: -1, t: 0 });
+  const [sinImagen, setSinImagen] = useState(false), [pesado, setPesado] = useState(false);
+  const cuadros = useRef({ n: -1, t: 0 }), mostrados = useRef(null);
+  // los cuadros que el equipo de verdad pone en pantalla (requestVideoFrameCallback); si no lo tiene, los decodificados
+  useEffect(() => {
+    const m = ref.current;
+    if (tipo !== 'video' || !m?.requestVideoFrameCallback) return undefined;
+    let id;
+    const cuadro = (_, meta) => { mostrados.current = meta.presentedFrames; id = m.requestVideoFrameCallback(cuadro); };
+    mostrados.current = 0;
+    id = m.requestVideoFrameCallback(cuadro);
+    return () => m.cancelVideoFrameCallback?.(id);
+  }, [tipo, src]);
   const vigilar = (m) => {
     if (tipo !== 'video' || m.paused || m.seeking || sinImagen) return;
     if (m.readyState >= 1 && m.videoWidth === 0) { setSinImagen(true); return; }
     const q = m.getVideoPlaybackQuality?.();
-    if (!q) return;
-    const vistos = q.totalVideoFrames - q.droppedVideoFrames;
+    const vistos = mostrados.current ?? (q ? q.totalVideoFrames - q.droppedVideoFrames : null);
+    if (vistos == null) return;
     if (vistos !== cuadros.current.n) cuadros.current = { n: vistos, t: m.currentTime };
     else if (m.currentTime - cuadros.current.t > SIN_CUADROS_S) setSinImagen(true);
+  };
+  // antes del play: con su peso (lo dice el almacenamiento de la fuente) y su duración, un video anómalo se avisa
+  const medirPeso = async (m) => {
+    if (tipo !== 'video' || !src || !m.duration || !m.videoWidth) return;
+    try {
+      // sin caché: la respuesta guardada del propio video viene sin el permiso CORS y el navegador la reusaría
+      const bytes = Number((await fetch(src, { method: 'HEAD', cache: 'no-store' })).headers.get('content-length'));
+      if (bytes && (bytes * 8) / m.duration / (m.videoWidth * m.videoHeight * 30) > BITS_POR_PIXEL_RARO) setPesado(true);
+    } catch { /* sin el peso no se avisa: el video sigue igual */ }
   };
   const el = () => ref.current;
   const alternar = () => { const m = el(); if (!m) return; if (m.paused) m.play().catch(() => {}); else m.pause(); };
@@ -890,7 +912,7 @@ export function Reproductor({ src, tipo, etiqueta, onError }) {
   const fuente = tipo === 'video' && src && !src.includes('#') ? `${src}#t=0.1` : src;
   const eventos = { ref, src: fuente, preload: 'metadata', onPlay: () => setSonando(true), onPause: () => setSonando(false), onEnded: () => setSonando(false),
     onTimeUpdate: (e) => { setT(e.currentTarget.currentTime); vigilar(e.currentTarget); }, onSeeked: () => { cuadros.current = { n: -1, t: 0 }; },
-    onLoadedMetadata: (e) => setTotal(e.currentTarget.duration), onDurationChange: (e) => setTotal(e.currentTarget.duration), onError };
+    onLoadedMetadata: (e) => { setTotal(e.currentTarget.duration); medirPeso(e.currentTarget); }, onDurationChange: (e) => setTotal(e.currentTarget.duration), onError };
   return (
     <div ref={marco} className={`q-reproductor q-reproductor-${tipo}`}>
       {tipo === 'video' ? (
@@ -902,6 +924,9 @@ export function Reproductor({ src, tipo, etiqueta, onError }) {
           )}
         </div>
       ) : <><audio {...eventos} aria-label={etiqueta} /><span className="q-reproductor-onda" aria-hidden="true"><AudioLines size={28} /></span></>}
+      {pesado && !sinImagen && (
+        <p className="q-reproductor-nota">Integrametrics guardó este video en un formato que algunos celulares no pueden mostrar: puede sonar sin imagen. <a href={src} target="_blank" rel="noopener noreferrer">Abrir el video aparte</a></p>
+      )}
       <div className="q-reproductor-barra">
         <button type="button" className="q-reproductor-boton q-reproductor-play" onClick={alternar} aria-label={sonando ? 'Pausar' : 'Reproducir'}>{sonando ? <Pause size={20} aria-hidden="true" /> : <Play size={20} aria-hidden="true" />}</button>
         <button type="button" className="q-reproductor-boton q-reproductor-salto" onClick={() => saltar(-10)} aria-label="Retroceder 10 segundos"><RotateCcw size={18} aria-hidden="true" /></button>
