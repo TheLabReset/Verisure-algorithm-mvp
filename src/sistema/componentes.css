@@ -784,7 +784,31 @@
 .q-frente-objetivo { font-size: var(--t-13); font-weight: var(--peso-rotulo); }
 .q-frente-bien { color: var(--mejora); }
 .q-frente-cerca, .q-frente-lejos { color: var(--empeora); }
-.q-bala { display: block; }
-.q-bala-fondo { fill: var(--superficie-capitulo); }
-.q-bala-valor { fill: var(--texto-1); }
-.q-bala-objetivo { stroke: var(--texto-1); stroke-width: 2; }
+
+/* Ancha, la tabla; angosta (menos de 760 px de tarjeta), una ficha por plataforma: el costo por booking arriba con su
+   distancia al objetivo y el resto en dos columnas. Se decide por el ancho de la tarjeta, no de la pantalla */
+.q-plataformas-vista { container-type: inline-size; }
+.q-plataformas-angosta { display: none; }
+@container (max-width: 760px) {
+  .q-plataformas-ancha { display: none; }
+  .q-plataformas-angosta { display: grid; gap: var(--e-4); }
+}
+.q-fichas-grupo { display: grid; gap: var(--e-3); }
+.q-fichas-grupo-nombre { margin: 0; font-size: var(--t-13); font-weight: var(--peso-rotulo); letter-spacing: 0.04em; text-transform: uppercase; color: var(--texto-3); }
+.q-ficha-plataforma { display: grid; gap: var(--e-3); padding: var(--e-4); border: 1px solid var(--borde); border-radius: var(--r-bloque); }
+.q-ficha-plataforma-total { background: var(--superficie-capitulo); border-color: transparent; }
+.q-ficha-plataforma-cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--e-2) var(--e-4); }
+.q-ficha-plataforma-cab h4 { margin: 0; font-size: var(--t-16); font-weight: var(--peso-cifra); }
+.q-ficha-plataforma-cpb { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: var(--e-1) var(--e-2); }
+.q-ficha-plataforma-cpb > span:first-child { font-size: var(--t-13); color: var(--texto-3); }
+.q-ficha-plataforma-cpb b { font-family: var(--f-titulo); font-size: var(--c-24); font-weight: var(--peso-cifra); line-height: 1; }
+.q-ficha-plataforma-datos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3) var(--e-4); margin: 0; padding-top: var(--e-3); border-top: 1px solid var(--borde); }
+.q-ficha-plataforma-datos > div { display: grid; gap: 2px; min-width: 0; }
+.q-ficha-plataforma-ancho { grid-column: 1 / -1; }
+.q-ficha-plataforma-datos dt { font-size: var(--t-13); color: var(--texto-3); }
+.q-ficha-plataforma-datos dd { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--e-1) var(--e-2); color: var(--texto-1); font-variant-numeric: tabular-nums; }
+/* echado o en una tablet chica: la ficha es ancha y los cinco datos caben en una fila */
+@container (min-width: 520px) and (max-width: 760px) {
+  .q-ficha-plataforma-datos { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .q-ficha-plataforma-ancho { grid-column: auto; }
+}
