@@ -788,6 +788,3 @@
 .q-bala-fondo { fill: var(--superficie-capitulo); }
 .q-bala-valor { fill: var(--texto-1); }
 .q-bala-objetivo { stroke: var(--texto-1); stroke-width: 2; }
-.q-muestra-pone { background: var(--serie-resto); }
-.q-muestra-trae { background: var(--propia); }
-.q-muestra-objetivo { width: 2px; height: 12px; border-radius: 0; background: var(--texto-1); }

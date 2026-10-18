@@ -37,7 +37,7 @@ function TablaPlataformas({ x }) {
         <thead><tr><th scope="col">Plataforma</th><th scope="col" className="q-num">Inversión</th><th scope="col" className="q-num">Leads</th><th scope="col" className="q-num">Bookings</th><th scope="col" className="q-num">L2B</th><th scope="col">Costo por lead</th><th scope="col">Costo por booking</th></tr></thead>
         {grupos.map((g) => (
           <tbody key={g.tipo}>
-            <tr className="q-fila-grupo"><th scope="rowgroup" colSpan={7}>{g.tipo === 'push' ? 'Push' : 'Pull'}</th></tr>
+            <tr className="q-fila-grupo"><th scope="rowgroup" colSpan={7}><span>{g.tipo === 'push' ? 'Push' : 'Pull'}</span></th></tr>
             {g.filas.map((p) => (
               <tr key={p.id}>
                 <th scope="row">{p.nombre}</th>
@@ -143,13 +143,8 @@ export default function Activacion({ capa, vista: v }) {
 
       <SeccionDe def={s33} vista={v}>
         <Bloque universo="plataformas" {...plataformasTablaLectura(x)} ejemplo
-          ayuda={<p>Cada costo se compara con el objetivo de su plataforma: en objetivo si queda en él o por debajo; si no, cuánto lo pasa: hasta {porcentaje(MARGEN_OBJETIVO)} o más. La barra del costo por booking va de cero a una vez y media el objetivo; la marca vertical es el objetivo. Las semanas por encima se cuentan en las últimas {numero(SEMANAS_OBJETIVO)} semanas completas.</p>}
+          ayuda={<p>Bajo la inversión y los bookings, la parte de cada plataforma en el total: en gris lo que pone, en rojo lo que trae. Cada costo se compara con el objetivo de su plataforma: en objetivo si queda en él o por debajo; si no, cuánto lo pasa: hasta {porcentaje(MARGEN_OBJETIVO)} o más. La barra del costo por booking va de cero a una vez y media el objetivo; la marca vertical es el objetivo. Las semanas por encima se cuentan en las últimas {numero(SEMANAS_OBJETIVO)} semanas completas.</p>}
           pie={<span>{x.fuente}.</span>}>
-          <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true">
-            <li><span className="q-muestra q-muestra-pone" />Parte de la inversión</li>
-            <li><span className="q-muestra q-muestra-trae" />Parte de los bookings</li>
-            <li><span className="q-muestra q-muestra-objetivo" />Objetivo de costo por booking</li>
-          </ul>
           <TablaPlataformas x={x} />
         </Bloque>
         <Detalle id={`detalle-${s33.id}`} titulo="Detalle de cada plataforma" bajada="Data de ejemplo, por conectar." vistas={['el costo por booking de cada una, semana a semana', 'cada plataforma semana a semana', 'sus campañas']}>
