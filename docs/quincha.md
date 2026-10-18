@@ -76,7 +76,10 @@ Están en `src/sistema/Componentes.jsx`. No calculan: reciben cifras ya armadas 
 | `NavegacionCapas` | Las cuatro pestañas; la activa con fondo teñido y una marca redonda abajo |
 | `IndiceCapa` | «En esta capa», al costado, marca el capítulo que se está leyendo |
 | `FuentesCapa`, `ChipFuente` | Cada fuente con su fecha de corte y su estado (punto y texto) |
-| `Resumen`, `Frase` | Las cifras de la capa y, debajo, una frase por plataforma contra su objetivo |
+| `Resumen`, `Frase` | Las cifras de la capa y, debajo, una frase por plataforma contra su objetivo. `lectura` va bajo el título; `comparado`, al pie, dice contra qué fechas se miden los cambios |
+| `Delta` | El cambio de una cifra: solo % o puntos (`unidad: 'pts'`), con flecha y color; `mejorSi`: `sube`, `baja` o `neutro` (gris) |
+| `Chispa` | La línea chica de una cifra del resumen: las últimas semanas enteras, sin ejes |
+| `BarrasYLinea` | Dos medidas en el tiempo en dos paneles con el mismo eje de fechas: barras arriba (la principal), línea abajo con su promedio; nunca dos escalas en un panel |
 | `Seccion` | El capítulo: número, título, pregunta y las fuentes con problema |
 | `AvisosTarjeta` | Los avisos de una tarjeta, debajo de su lectura: nivel (ícono y palabra) y frase, sin enlace |
 | `Bloque`, `Ventana`, `Ayuda`, `Estado` | La tarjeta: título, ventana, ayuda, lectura, avisos, cuerpo y pie; y lo que muestra cuando falta el dato o está cargando. Con `ejemplo`, el sello «Data de ejemplo» arriba |

@@ -623,6 +623,58 @@ export function Histograma({ barras, formato = numero, rotulo, resaltar = [], et
   );
 }
 
+// ─────────────── BarrasYLinea: dos medidas en el tiempo, en dos paneles con el mismo eje de fechas ───────────────
+// Nunca dos escalas en un mismo panel: arriba las barras (la medida principal, en el color de la marca), abajo la línea
+// (en tinta, con su promedio punteado). Un tramo a medias (la semana en curso) va más claro y su tramo de línea, punteado.
+export function BarrasYLinea({ puntos, rotuloBarras, rotuloLinea, formatoBarras = numero, formatoLinea = numero, etiqueta, tono = 'propia' }) {
+  const tabla = { columnas: ['', rotuloBarras, rotuloLinea], filas: puntos.map((p) => [p.nombre, formatoBarras(p.barra), formatoLinea(p.linea)]) };
+  return (
+    <Grafico etiqueta={etiqueta} tabla={tabla}>
+      {(ancho) => {
+        const m = { l: 4, r: 4 }, altoB = 150, sep = 44, altoL = 96, abajo = 26;
+        const alto = 18 + altoB + sep + altoL + abajo;
+        const paso = (ancho - m.l - m.r) / Math.max(1, puntos.length), w = Math.max(2, Math.min(44, paso - Math.min(10, paso * 0.3)));
+        const cx = (i) => m.l + i * paso + paso / 2;
+        const maxB = Math.max(1, ...puntos.map((p) => p.barra ?? 0));
+        const yB = lineal(0, maxB, 18 + altoB, 30);
+        const ls = puntos.map((p) => p.linea).filter((v) => v != null), enteras = puntos.filter((p) => !p.parcial && p.linea != null).map((p) => p.linea);
+        const lo = Math.min(...ls), hi = Math.max(...ls), holgura = (hi - lo) * 0.15 || 1;
+        const topL = 18 + altoB + sep + 18, baseL = topL + altoL - 18;
+        const yL = lineal(lo - holgura, hi + holgura, baseL, topL);
+        const promedio = enteras.length ? enteras.reduce((a, b) => a + b, 0) / enteras.length : null;
+        const completos = puntos.map((p, i) => [i, p]).filter(([, p]) => !p.parcial && p.linea != null);
+        const parcial = puntos.findIndex((p) => p.parcial);
+        const cada = Math.ceil(56 / paso);
+        // la cifra va solo sobre la barra más alta y la más baja entre las enteras: el resto, al pasar el puntero
+        const conB = puntos.map((p, i) => [i, p]).filter(([, p]) => !p.parcial && p.barra != null);
+        const iMax = conB.length ? conB.reduce((a, b) => (b[1].barra > a[1].barra ? b : a))[0] : -1;
+        const iMin = conB.length ? conB.reduce((a, b) => (b[1].barra < a[1].barra ? b : a))[0] : -1;
+        return (
+          <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
+            <text className="q-eje" x={m.l} y={12}>{rotuloBarras}</text>
+            <line className="q-rejilla" x1={m.l} x2={ancho - m.r} y1={yB(0)} y2={yB(0)} />
+            {puntos.map((p, i) => (
+              <g key={p.fecha}>
+                <Zona x={m.l + i * paso} y={18} w={paso} h={alto - abajo - 18} pista={`${p.nombre}${p.parcial ? ' (en curso)' : ''}\n${rotuloBarras}: ${formatoBarras(p.barra)}\n${rotuloLinea}: ${formatoLinea(p.linea)}`} />
+                {p.barra > 0 && <rect className={`q-barra-${tono}${p.parcial ? ' q-barra-parcial' : ''}`} x={cx(i) - w / 2} y={yB(p.barra)} width={w} height={yB(0) - yB(p.barra)} rx="3" data-valor={p.barra} />}
+                {(i === iMax || i === iMin) && <text className="q-rotulo-valor" x={cx(i)} y={yB(p.barra) - 6} textAnchor="middle">{formatoBarras(p.barra)}</text>}
+              </g>
+            ))}
+            <text className="q-eje" x={m.l} y={18 + altoB + sep}>{rotuloLinea}</text>
+            {promedio != null && <><line className="q-linea-promedio" x1={m.l} x2={ancho - m.r} y1={yL(promedio)} y2={yL(promedio)} /><text className="q-eje" x={ancho - m.r} y={yL(promedio) - 6} textAnchor="end">promedio {formatoLinea(promedio)}</text></>}
+            {completos.length > 1 && <path className="q-linea-tinta" d={'M' + completos.map(([i, p]) => `${cx(i).toFixed(1)},${yL(p.linea).toFixed(1)}`).join(' L')} />}
+            {parcial > 0 && puntos[parcial - 1]?.linea != null && puntos[parcial].linea != null && <path className="q-linea-tinta q-linea-punteada" d={`M${cx(parcial - 1)},${yL(puntos[parcial - 1].linea)} L${cx(parcial)},${yL(puntos[parcial].linea)}`} />}
+            {completos.map(([i, p]) => <circle key={'p' + i} className="q-punto-tinta" cx={cx(i)} cy={yL(p.linea)} r="3" data-valor={p.linea} />)}
+            {parcial >= 0 && puntos[parcial].linea != null && <circle className="q-punto-hueco" cx={cx(parcial)} cy={yL(puntos[parcial].linea)} r="3.5" />}
+            <line className="q-rejilla" x1={m.l} x2={ancho - m.r} y1={alto - abajo + 4} y2={alto - abajo + 4} />
+            {puntos.map((p, i) => (i % cada === 0 || i === puntos.length - 1) && (i === puntos.length - 1 || puntos.length - 1 - i >= cada) && <text key={'x' + p.fecha} className="q-eje" x={Math.min(Math.max(cx(i), 18), ancho - 18)} y={alto - 6} textAnchor="middle">{p.corto ?? p.nombre}</text>)}
+          </Svg>
+        );
+      }}
+    </Grafico>
+  );
+}
+
 // ─────────────── Apiladas: columnas al 100 %, una por mes, partida en partes ───────────────
 // Para ver cómo se mueve una mezcla en el tiempo (la parte digital y la ATL de una marca, mes a mes). Cada columna
 // suma 100 %: se lee la proporción, no el monto. La primera parte va abajo. Cada parte lleva su porcentaje adentro si

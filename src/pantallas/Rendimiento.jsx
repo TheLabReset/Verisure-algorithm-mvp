@@ -9,7 +9,7 @@ import { numero, porcentaje, soles, solesCompacto, compacto, mesCorto, fechaCort
 import { MarcoCapa, SeccionDe, sinDato, avisosDe } from './comun.jsx';
 import { periodoTexto, comparacionTexto, puntosFrente, capital, plataformasTexto, mesPeriodo, mesComparacion, resumenTitulo, mesTexto, tramoFechas, tramoMeses, version, shareDeMarca } from '../textos/comun.js';
 import { diasEntre, DIAS_MINIMOS } from '../calculo/periodo.js';
-import { atlLectura, digitalLectura, shareLectura, presionLectura, mezclaLectura, mezclaPista, pautaSemanalLectura, temporadaLectura, textosMarca, cronogramaLectura, textosDelAbanico } from '../textos/lecturas.js';
+import { atlLectura, digitalLectura, shareLectura, presionLectura, mezclaLectura, mezclaPista, pautaSemanalLectura, temporadaLectura, textosMarca, cronogramaLectura, textosDelAbanico, comparadoTexto } from '../textos/lecturas.js';
 import { CLIENTE } from '../cliente.js';
 
 const COMPETENCIA = CLIENTE.competencia[0];
@@ -103,14 +103,17 @@ export default function Rendimiento({ capa, vista: v }) {
   const grupoCrono = filaCrono ? unaPieza(COMPETENCIA.nombre, { id: filaCrono.id, titulo: filaCrono.version, plataformas: filaCrono.canales, desde: filaCrono.desde, hasta: filaCrono.hasta, asset: filaCrono.asset }) : null;
   const inicio = v.analiza.pauta[0]?.serie[0]?.fecha ?? P.desde;
   const u = v.lee[diario];
+  // el cambio del share de la competencia, en puntos y con su color (sube = empeora para la marca propia); contra qué
+  // fechas, al pie del resumen. Con pocos días no hay cambio, como en las lecturas (puntosFrente decide)
+  const cambioShare = (u) => (ok(u) && puntosFrente(rival(u).cambioPts, P) ? { cambio: rival(u).cambioPts, unidad: 'pts', mejorSi: 'baja' } : null);
   return (
     <MarcoCapa capa={capa} vista={v}>
-      <Resumen titulo={resumenTitulo(P)}
+      <Resumen titulo={resumenTitulo(P)} comparado={[dig, atl].some(cambioShare) ? comparadoTexto(P) : null}
         pie={<span>Inversión estimada por Integrametrics a precio de tarifa.</span>}
         items={[
-          { rotulo: `Share digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? shareDeMarca(rival(dig), dig) : null, nota: ok(dig) ? capital(puntosFrente(rival(dig).cambioPts, P) || `de ${solesCompacto(dig.total)} en total`) : null },
+          { rotulo: `Share digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? shareDeMarca(rival(dig), dig) : null, delta: cambioShare(dig), nota: ok(dig) && !cambioShare(dig) ? `de ${solesCompacto(dig.total)} en total` : null },
           { rotulo: `Inversión digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? solesCompacto(rival(dig).inversion) : null, nota: ok(dig) ? `${compacto(rival(dig).impresiones)} impresiones` : null },
-          { rotulo: `Share ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? shareDeMarca(rival(atl), atl) : null, nota: ok(atl) ? capital(puntosFrente(rival(atl).cambioPts, P) || `de ${solesCompacto(atl.total)} en total`) : null },
+          { rotulo: `Share ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? shareDeMarca(rival(atl), atl) : null, delta: cambioShare(atl), nota: ok(atl) && !cambioShare(atl) ? `de ${solesCompacto(atl.total)} en total` : null },
           { rotulo: `Inversión ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? solesCompacto(rival(atl).inversion) : null, nota: ok(atl) && v.lee.mediosDelPeriodo?.[rivalId] ? `${numero(v.lee.mediosDelPeriodo[rivalId].emisiones)} ${v.lee.mediosDelPeriodo[rivalId].emisiones === 1 ? 'emisión' : 'emisiones'} al aire` : null },
         ]} />
 

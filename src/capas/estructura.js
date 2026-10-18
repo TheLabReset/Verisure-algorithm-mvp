@@ -32,9 +32,9 @@ export const CAPAS = [
     id: 'activacion', numero: '3', nombre: 'Activación estratégica', descripcion: `Las plataformas de ${CLIENTE.nombre} cruzadas con su CRM`,
     titulo: 'Activación estratégica', bajada: `Meta Ads, Google Ads y TikTok Ads de ${CLIENTE.nombre}, cruzadas con los leads y bookings de su CRM.`,
     secciones: [
-      { id: 's-3-1', numero: '3.1', titulo: 'Cómo vienen las plataformas', pregunta: '¿Cuánto se invierte, cuántos leads y bookings llegan y a qué costo?', universos: ['plataformas'], fuentes: ['plataformas'] },
+      { id: 's-3-1', numero: '3.1', titulo: 'Leads y bookings en el tiempo', pregunta: '¿Cuántos leads y bookings llegan cada semana o cada día?', universos: ['plataformas'], fuentes: ['plataformas'] },
       { id: 's-3-2', numero: '3.2', titulo: 'Push y Pull', pregunta: '¿Cómo convierten las redes frente a la búsqueda, semana a semana?', universos: ['plataformas'], fuentes: ['plataformas'] },
-      { id: 's-3-3', numero: '3.3', titulo: 'Cada plataforma frente a su objetivo', pregunta: '¿Cuánto cuesta cada lead y cada booking en Meta, Google y TikTok, frente al objetivo de cada una?', universos: ['plataformas'], fuentes: ['plataformas'] },
+      { id: 's-3-3', numero: '3.3', titulo: 'Cada plataforma frente a su objetivo', pregunta: '¿Cuánto invierte, cuántos leads y bookings trae y a qué costo cada plataforma, frente a su objetivo?', universos: ['plataformas'], fuentes: ['plataformas'] },
     ],
   },
   {

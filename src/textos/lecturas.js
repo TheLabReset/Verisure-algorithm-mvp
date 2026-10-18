@@ -532,14 +532,62 @@ export function compraLectura(c, P, ventana = null) {
 
 // ── Capa 3: plataformas y CRM (hoy con data de ejemplo) ──
 const usd = (n) => dolares(n);
-export function plataformasLectura(x) {
-  const t = x.total;
-  const mejor = [...x.plataformas].filter((p) => p.cpb != null).sort((a, b) => a.cpb - b.cpb)[0];
+// El resumen de la capa: cómo se movieron los bookings frente a la inversión, y el costo por booking
+const cambioPct = (a, b) => (a == null || !b ? null : ((a - b) / b) * 100);
+export function plataformasResumenLectura(x) {
+  const t = x.total, a = x.totalPrevio;
+  if (!a) return '';
+  const b = cambioPct(t.bookings, a.bookings), i = cambioPct(t.inversion, a.inversion), c = cambioPct(t.cpb, a.cpb);
+  if (b == null || i == null) return '';
+  // un cambio de menos de medio punto se lee como «igual»; bajo 10 %, con un decimal
+  const cifra = (n) => porcentaje(Math.abs(n), Math.abs(n) < 10 ? 1 : 0);
+  const quieto = (n) => Math.abs(n) < 0.5;
+  const conInv = quieto(i) ? 'con la misma inversión' : `con ${cifra(i)} ${i > 0 ? 'más' : 'menos'} de inversión`;
+  const primera = quieto(b) ? `Los bookings se mantienen ${conInv}.` : `Los bookings ${b > 0 ? 'suben' : 'bajan'} ${cifra(b)} ${conInv}.`;
+  const segunda = c == null ? '' : Math.abs(c) < 1 ? ' El costo por booking queda casi igual.' : ` El costo por booking ${c > 0 ? 'sube' : 'baja'} ${cifra(c)}.`;
+  return `${primera}${segunda}`;
+}
+// La comparación del resumen se dice con sus fechas, al pie: frente a qué tramo se mide cada cambio
+export const comparadoTexto = (P) => (!P.compararDesde ? null : `Comparado con ${P.compararDesde === P.compararHasta ? tramoFechas(P.compararDesde, P.compararHasta) : `los días ${tramoFechas(P.compararDesde, P.compararHasta)}`}.`);
+
+// 3.1 · Leads y bookings en el tiempo: el rango de bookings, el L2B y el tramo más flojo, por semana o por día (las semanas,
+// solo las enteras: la en curso no se compara con semanas completas)
+export function plataformasTiempoLectura(tramos, unidad = 'semana') {
+  const enteros = tramos.filter((s) => (unidad === 'dia' || s.dias >= 7) && s.bookings != null);
+  const porTramo = unidad === 'dia' ? 'por día' : 'por semana';
+  const titulo = `Leads y bookings ${porTramo}`;
+  if (enteros.length < 2) return { titulo, lectura: '' };
+  const bs = enteros.map((s) => s.bookings), min = Math.min(...bs), max = Math.max(...bs);
+  const l2b = enteros.map((s) => s.l2b).filter((n) => n != null).map(Math.round), lmin = Math.min(...l2b), lmax = Math.max(...l2b);
+  const flojo = enteros.reduce((a, s) => (s.bookings < a.bookings ? s : a));
+  const cual = unidad === 'dia' ? `El día más flojo fue el ${fechaCorta(flojo.fecha)}` : `La semana más floja fue la del ${fechaCorta(flojo.desde)}`;
   return {
-    titulo: `${numero(t.bookings)} bookings de ${numero(t.leads)} leads, a ${usd(t.cpb)} cada booking`,
-    lectura: mejor ? `${mejor.nombre} tiene el menor costo por booking: ${usd(mejor.cpb)}.` : '',
+    titulo: min === max ? `Los bookings se mantienen en ${numero(min)} ${porTramo}` : `Los bookings van entre ${numero(min)} y ${numero(max)} ${porTramo}`,
+    lectura: `De cada 100 leads llegan a booking ${lmin === lmax ? numero(lmin) : `entre ${numero(lmin)} y ${numero(lmax)}`}. ${cual}, con ${numero(flojo.leads)} leads y ${numero(flojo.bookings)} bookings.`,
   };
 }
+
+// 3.3 · La tabla de plataformas: la que más rinde frente a lo que pone, y el objetivo de costo por booking
+export function plataformasTablaLectura(x) {
+  const conParte = x.plataformas.filter((p) => p.parteInversion != null && p.parteBookings != null);
+  const rinde = [...conParte].sort((a, b) => (b.parteBookings - b.parteInversion) - (a.parteBookings - a.parteInversion))[0];
+  const encima = x.plataformas.filter((p) => p.estadoCpb === 'lejos' || p.estadoCpb === 'cerca');
+  const titulo = rinde && rinde.parteBookings > rinde.parteInversion
+    ? `${rinde.nombre} pone el ${porcentaje(rinde.parteInversion)} de la inversión y trae el ${porcentaje(rinde.parteBookings)} de los bookings`
+    : 'Cada plataforma frente a su objetivo';
+  const objetivo = encima.length ? `${lista(encima.map((p) => p.nombre))} ${encima.length === 1 ? 'queda' : 'quedan'} por encima de su objetivo de costo por booking.`
+    : 'Todas quedan dentro de su objetivo de costo por booking.';
+  // de las que hoy están en objetivo, la que más semanas lo pasó
+  const semanas = x.plataformas.filter((p) => !encima.includes(p) && p.semanasSobreObjetivo?.encima > 0).sort((a, b) => b.semanasSobreObjetivo.encima - a.semanasSobreObjetivo.encima)[0];
+  const cola = semanas ? ` ${semanas.nombre} lo pasó en ${numero(semanas.semanasSobreObjetivo.encima)} de las últimas ${numero(semanas.semanasSobreObjetivo.de)} semanas.` : '';
+  return { titulo, lectura: `${objetivo}${cola}` };
+}
+// Un costo frente a su objetivo, en la tabla: «12 % bajo $380» o «8 % sobre $380»
+export const frenteObjetivoTexto = (costo, objetivo) => {
+  if (costo == null || !objetivo) return null;
+  const d = Math.round(((costo - objetivo) / objetivo) * 100);
+  return d === 0 ? `en ${usd(objetivo)}` : `${porcentaje(Math.abs(d))} ${d < 0 ? 'bajo' : 'sobre'} ${usd(objetivo)}`;
+};
 const PARECIDO_L2B = 0.1;
 export function pushPullLectura(x) {
   const [push, pull] = x.tipos;
@@ -562,12 +610,4 @@ export const extremosAyuda = (unidad) => {
 };
 
 export const estadoObjetivo = (e) => ({ bien: 'En objetivo', cerca: `Hasta ${porcentaje(MARGEN_OBJETIVO)} por encima`, lejos: `Más de ${porcentaje(MARGEN_OBJETIVO)} por encima` }[e] ?? null);
-// las plataformas son de la marca propia y las maneja la agencia: lo que pasa el objetivo se dice sin juicio
-export function plataformasObjetivoLectura(x) {
-  const encima = x.plataformas.filter((p) => p.estadoCpb === 'lejos'), bien = x.plataformas.filter((p) => p.estadoCpb === 'bien');
-  const titulo = encima.length ? `${lista(encima.map((p) => p.nombre))} ${encima.length === 1 ? 'está' : 'están'} por encima de su objetivo de costo por booking`
-    : bien.length === x.plataformas.length ? 'Las tres plataformas están en su objetivo de costo por booking' : `${lista(bien.map((p) => p.nombre))} ${bien.length === 1 ? 'está' : 'están'} en su objetivo de costo por booking`;
-  const p = encima[0];
-  return { titulo, lectura: p ? `En ${p.nombre}, cada booking cuesta ${usd(p.cpb)}, con un objetivo de ${usd(p.objetivo.cpb)}.` : '' };
-}
 export { fechaSinAnio };

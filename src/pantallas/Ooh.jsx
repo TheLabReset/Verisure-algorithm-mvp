@@ -21,7 +21,8 @@ function Ficha({ ubicacion, paneles, onVerTodos }) {
   return (
     <div className="q-ficha-panel" aria-live="polite">
       {a?.kind === 'image' && <VisorFoto abierto={ampliada} onCerrar={() => setAmpliada(false)} src={a.url} alt={alt} titulo={panelTitulo(p)} bajada={p.nombre} />}
-      <div className="q-ficha-arte">
+      {/* un video lleva su barra de controles debajo: el recuadro crece para que el video no la tape */}
+      <div className={`q-ficha-arte${a?.kind === 'video' && fallo !== p.id ? ' q-ficha-arte-video' : ''}`}>
         {fallo === p.id ? <span className="q-ficha-sin-arte">{a.kind === 'video' ? 'El video' : 'La foto'} de este panel no cargó.<button type="button" className="q-boton q-boton-chico q-ficha-reintentar" onClick={() => { setFallo(null); setIntento((n) => n + 1); }}>Reintentar</button></span>
           : a?.kind === 'image' ? <>
             <img key={intento} src={a.url} alt={alt} referrerPolicy="no-referrer" onError={() => setFallo(p.id)} />

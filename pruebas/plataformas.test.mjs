@@ -48,3 +48,16 @@ test('extremos sobre la data de ejemplo: coinciden con el máximo y el mínimo d
   assert.equal(e.mejor.bookings, Math.max(...x.diaria.map((d) => d.bookings)));
   assert.equal(e.peor.bookings, Math.min(...x.diaria.map((d) => d.bookings)));
 });
+
+test('la tabla de plataformas: las partes suman 100, Push y Pull suman lo suyo y las semanas cuentan días, no filas', () => {
+  const datos = plataformasDeEjemplo('2026-01-01', '2026-10-16');
+  const x = leerPlataformas(datos, { desde: '2026-09-17', hasta: '2026-10-16', compararDesde: '2026-08-18', compararHasta: '2026-09-16' });
+  const suma = (k) => x.plataformas.reduce((s, p) => s + p[k], 0);
+  assert.equal(suma('parteInversion'), 100);
+  assert.equal(suma('parteBookings'), 100);
+  assert.equal(x.tipos.reduce((s, g) => s + g.parteBookings, 0), 100);
+  // el total semana a semana: siete días como máximo aunque cada día traiga una fila por plataforma
+  assert.ok(x.semanas.every((s) => s.dias <= 7), 'una semana del total cuenta filas en vez de días');
+  assert.ok(x.tipos.every((g) => g.semanas.every((s) => s.dias <= 7)), 'una semana de Push o Pull cuenta filas en vez de días');
+  for (const p of x.plataformas) assert.ok(p.semanasSobreObjetivo.de > 0 && p.semanasSobreObjetivo.encima <= p.semanasSobreObjetivo.de);
+});

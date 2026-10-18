@@ -6,7 +6,7 @@ import {
   Eye, TrendingUp, Bot, Calendar, Pin, ChevronDown, CornerDownRight, ListChecks, X, Layers, ArrowUpRight as Ir,
   ExternalLink, Check, Play, Pause, RotateCcw, RotateCw, Tv, MonitorSmartphone, AudioLines, Image as ImagenIcono, PanelRightOpen, ZoomIn, ZoomOut, Maximize2, Minimize2, ThumbsUp, ThumbsDown, Minus,
 } from 'lucide-react';
-import { NO_MEDIDO, variacion } from './formato.js';
+import { NO_MEDIDO, variacion, numero } from './formato.js';
 
 // ── Universos: qué se cuenta y de dónde. El icono ayuda a reconocerlo sin leer; el color no se usa ──
 export const UNIVERSOS = {
@@ -57,14 +57,16 @@ export function Cifra({ valor, rotulo, tamano = 'grande', delta, dataClave }) {
   );
 }
 
-export function Delta({ cambio, mejorSi = 'sube', referencia, motivo, decimales = 0 }) {
+// mejorSi: 'sube', 'baja' o 'neutro' (la inversión: ni mejora ni empeora, va en gris); unidad 'pts' para puntos
+export function Delta({ cambio, mejorSi = 'sube', referencia, motivo, decimales = 0, unidad = '%' }) {
   if (cambio == null) return <span className="q-delta">{motivo || 'sin comparación'}</span>;
   const redondo = +cambio.toFixed(decimales);
-  const tono = redondo === 0 ? 'igual' : (redondo > 0) === (mejorSi === 'sube') ? 'mejora' : 'empeora';
+  const tono = redondo === 0 || mejorSi === 'neutro' ? 'igual' : (redondo > 0) === (mejorSi === 'sube') ? 'mejora' : 'empeora';
   const Flecha = redondo === 0 ? ArrowRight : redondo > 0 ? ArrowUpRight : ArrowDownRight;
+  const texto = unidad === 'pts' ? `${redondo > 0 ? '+' : redondo < 0 ? '−' : ''}${numero(Math.abs(cambio), decimales)} ${Math.abs(redondo) === 1 ? 'pt' : 'pts'}` : variacion(cambio, decimales);
   return (
     <span className={`q-delta q-delta-${tono}`}>
-      <span className="q-delta-valor"><Flecha size={15} aria-hidden="true" strokeWidth={2.4} />{variacion(cambio, decimales)}</span>
+      <span className="q-delta-valor"><Flecha size={15} aria-hidden="true" strokeWidth={2.4} />{texto}</span>
       {referencia && <span>{referencia}</span>}
     </span>
   );
@@ -440,13 +442,30 @@ export function Frase({ segmentos }) {
 // ── Resumen de la capa: pocas cifras, cada una lleva a su capítulo ──
 // frases: una línea por plataforma debajo de las cifras (cuánto pagó y qué tan lejos quedó de su objetivo).
 // Se eligió la frase y no una barra: se lee sin aprender a leer nada y no compite con las cifras de arriba.
-export function Resumen({ titulo, items, pie, frases = [], ejemplo = false }) {
+// Una línea chica de una serie (las últimas semanas de una cifra del resumen): sin ejes, solo la forma y el último punto
+export function Chispa({ valores, etiqueta, tono }) {
+  const vs = (valores || []).filter((v) => v != null);
+  if (vs.length < 2) return null;
+  const w = 120, h = 28, p = 3, min = Math.min(...vs), max = Math.max(...vs), r = max - min || 1;
+  const pts = vs.map((v, i) => [p + (i * (w - 2 * p)) / (vs.length - 1), p + ((max - v) / r) * (h - 2 * p)]);
+  return (
+    <svg className={`q-chispa${tono ? ` q-chispa-${tono}` : ''}`} width={w} height={h} viewBox={`0 0 ${w} ${h}`} role="img" aria-label={etiqueta}>
+      <polyline points={pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ')} />
+      <circle cx={pts.at(-1)[0]} cy={pts.at(-1)[1]} r="2.5" />
+    </svg>
+  );
+}
+
+// comparado: contra qué fechas se miden los cambios de las cifras; va al pie, dentro de la tarjeta (los cambios solo dicen
+// cuánto y hacia dónde, nunca repiten la cifra anterior)
+export function Resumen({ titulo, items, pie, frases = [], ejemplo = false, lectura, comparado }) {
   const cargando = useContext(CargandoContexto);
   if (cargando) return <section className="q-resumen" id="resumen"><h2 className="q-resumen-titulo">{titulo}</h2><Estado tipo="cargando" /></section>;
   return (
     <section className="q-resumen" aria-labelledby="resumen-t" id="resumen" data-ejemplo={ejemplo || undefined}>
       <div className="q-resumen-cab"><h2 id="resumen-t" className="q-resumen-titulo">{titulo}</h2>{ejemplo && <span className="q-ejemplo"><FlaskConical size={13} aria-hidden="true" />Data de ejemplo</span>}</div>
-      <ul className="q-resumen-cifras">
+      {lectura && <p className="q-resumen-lectura">{lectura}</p>}
+      <ul className={`q-resumen-cifras${items.some((i) => i.chispa) ? ' q-resumen-con-chispa' : ''}`}>
         {items.map((i) => {
           const u = UNIVERSOS[i.universo];
           return (
@@ -454,6 +473,7 @@ export function Resumen({ titulo, items, pie, frases = [], ejemplo = false }) {
               <span className="q-resumen-rotulo">{i.serie != null && <span className={`q-punto q-p${i.serie}`} aria-hidden="true" />}{i.rotulo}</span>
               <span className={`q-cifra-valor${i.valor == null ? ' q-cifra-sin-dato' : ''}`} data-clave={i.dataClave}>{i.valor ?? NO_MEDIDO}</span>
               {i.delta ? <Delta {...i.delta} /> : i.nota ? <span className="q-delta">{i.nota}</span> : <span aria-hidden="true" />}
+              {i.chispa && <Chispa valores={i.chispa} etiqueta={i.chispaEtiqueta} tono={i.chispaTono} />}
               {i.ir && <a className="q-resumen-ir" href={'#' + i.ir}>{u && <u.icono size={13} aria-hidden="true" />}{i.irTexto}</a>}
             </li>
           );
@@ -464,7 +484,7 @@ export function Resumen({ titulo, items, pie, frases = [], ejemplo = false }) {
           {frases.map((f, k) => <li key={k}><span className={`q-punto q-p${f.serie}`} aria-hidden="true" /><span><Frase segmentos={f.segmentos} /></span></li>)}
         </ul>
       )}
-      {pie && <footer className="q-bloque-pie">{pie}</footer>}
+      {(pie || comparado) && <footer className="q-bloque-pie">{comparado && <span className="q-resumen-comparado">{comparado}</span>}{pie}</footer>}
     </section>
   );
 }
@@ -865,6 +885,9 @@ function usePantallaCompleta(marco, video) {
 }
 // Segundos de reproducción sin un cuadro nuevo de video para dar por hecho que el equipo no puede mostrar la imagen
 const SIN_CUADROS_S = 2;
+// Un digitalizado anómalo pesa mucho más de lo que pide su imagen: bits por píxel a 30 cuadros. Entre los 510 videos de
+// la fuente (octubre de 2026) el más alto normal llega a 0,27 y el que el iPhone no muestra, a 1,58
+const BITS_POR_PIXEL_RARO = 0.8;
 export function Reproductor({ src, tipo, etiqueta, onError }) {
   const ref = useRef(null), marco = useRef(null);
   const [completa, pantalla] = usePantallaCompleta(marco, ref);
@@ -872,16 +895,35 @@ export function Reproductor({ src, tipo, etiqueta, onError }) {
   const [sonando, setSonando] = useState(false), [t, setT] = useState(0), [total, setTotal] = useState(0);
   // un video que el equipo no puede decodificar (algunos digitalizados pasan los límites de su propio formato) suena
   // sin imagen: se detecta porque el audio avanza y no llegan cuadros, y se ofrece abrirlo aparte
-  const [sinImagen, setSinImagen] = useState(false);
-  const cuadros = useRef({ n: -1, t: 0 });
+  const [sinImagen, setSinImagen] = useState(false), [pesado, setPesado] = useState(false);
+  const cuadros = useRef({ n: -1, t: 0 }), mostrados = useRef(null);
+  // los cuadros que el equipo de verdad pone en pantalla (requestVideoFrameCallback); si no lo tiene, los decodificados
+  useEffect(() => {
+    const m = ref.current;
+    if (tipo !== 'video' || !m?.requestVideoFrameCallback) return undefined;
+    let id;
+    const cuadro = (_, meta) => { mostrados.current = meta.presentedFrames; id = m.requestVideoFrameCallback(cuadro); };
+    mostrados.current = 0;
+    id = m.requestVideoFrameCallback(cuadro);
+    return () => m.cancelVideoFrameCallback?.(id);
+  }, [tipo, src]);
   const vigilar = (m) => {
     if (tipo !== 'video' || m.paused || m.seeking || sinImagen) return;
     if (m.readyState >= 1 && m.videoWidth === 0) { setSinImagen(true); return; }
     const q = m.getVideoPlaybackQuality?.();
-    if (!q) return;
-    const vistos = q.totalVideoFrames - q.droppedVideoFrames;
+    const vistos = mostrados.current ?? (q ? q.totalVideoFrames - q.droppedVideoFrames : null);
+    if (vistos == null) return;
     if (vistos !== cuadros.current.n) cuadros.current = { n: vistos, t: m.currentTime };
     else if (m.currentTime - cuadros.current.t > SIN_CUADROS_S) setSinImagen(true);
+  };
+  // antes del play: con su peso (lo dice el almacenamiento de la fuente) y su duración, un video anómalo se avisa
+  const medirPeso = async (m) => {
+    if (tipo !== 'video' || !src || !m.duration || !m.videoWidth) return;
+    try {
+      // sin caché: la respuesta guardada del propio video viene sin el permiso CORS y el navegador la reusaría
+      const bytes = Number((await fetch(src, { method: 'HEAD', cache: 'no-store' })).headers.get('content-length'));
+      if (bytes && (bytes * 8) / m.duration / (m.videoWidth * m.videoHeight * 30) > BITS_POR_PIXEL_RARO) setPesado(true);
+    } catch { /* sin el peso no se avisa: el video sigue igual */ }
   };
   const el = () => ref.current;
   const alternar = () => { const m = el(); if (!m) return; if (m.paused) m.play().catch(() => {}); else m.pause(); };
@@ -890,7 +932,7 @@ export function Reproductor({ src, tipo, etiqueta, onError }) {
   const fuente = tipo === 'video' && src && !src.includes('#') ? `${src}#t=0.1` : src;
   const eventos = { ref, src: fuente, preload: 'metadata', onPlay: () => setSonando(true), onPause: () => setSonando(false), onEnded: () => setSonando(false),
     onTimeUpdate: (e) => { setT(e.currentTarget.currentTime); vigilar(e.currentTarget); }, onSeeked: () => { cuadros.current = { n: -1, t: 0 }; },
-    onLoadedMetadata: (e) => setTotal(e.currentTarget.duration), onDurationChange: (e) => setTotal(e.currentTarget.duration), onError };
+    onLoadedMetadata: (e) => { setTotal(e.currentTarget.duration); medirPeso(e.currentTarget); }, onDurationChange: (e) => setTotal(e.currentTarget.duration), onError };
   return (
     <div ref={marco} className={`q-reproductor q-reproductor-${tipo}`}>
       {tipo === 'video' ? (
@@ -902,6 +944,9 @@ export function Reproductor({ src, tipo, etiqueta, onError }) {
           )}
         </div>
       ) : <><audio {...eventos} aria-label={etiqueta} /><span className="q-reproductor-onda" aria-hidden="true"><AudioLines size={28} /></span></>}
+      {pesado && !sinImagen && (
+        <p className="q-reproductor-nota">Integrametrics guardó este video en un formato que algunos celulares no pueden mostrar: puede sonar sin imagen. <a href={src} target="_blank" rel="noopener noreferrer">Abrir el video aparte</a></p>
+      )}
       <div className="q-reproductor-barra">
         <button type="button" className="q-reproductor-boton q-reproductor-play" onClick={alternar} aria-label={sonando ? 'Pausar' : 'Reproducir'}>{sonando ? <Pause size={20} aria-hidden="true" /> : <Play size={20} aria-hidden="true" />}</button>
         <button type="button" className="q-reproductor-boton q-reproductor-salto" onClick={() => saltar(-10)} aria-label="Retroceder 10 segundos"><RotateCcw size={18} aria-hidden="true" /></button>
