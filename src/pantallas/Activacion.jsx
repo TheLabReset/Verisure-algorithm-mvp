@@ -4,7 +4,7 @@
 // plataforma frente a su objetivo (3.3); por día, por semana y las campañas, al detalle. Hoy con data de ejemplo,
 // rotulada. No calcula: pinta la vista.
 import { useState } from 'react';
-import { Bloque, Tabla, Resumen, Grupo, Detalle, Semaforo, vigente } from '../sistema/Componentes.jsx';
+import { Bloque, Tabla, Resumen, Grupo, Detalle, vigente } from '../sistema/Componentes.jsx';
 import { Lineas, BarrasYLinea } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, dolares, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
@@ -19,51 +19,81 @@ const pct = (n) => (n == null ? 'sin dato' : porcentaje(n));
 const conTono = (texto, estado) => ({ texto, tono: TONO[estado] ?? null, sub: estado ? estadoObjetivo(estado).toLowerCase() : null });
 const cambio = (a, b) => (a == null || !b ? null : ((a - b) / b) * 100);
 
-// La tabla de cada plataforma frente a su objetivo: las columnas de su tablero, agrupadas en Push y Pull, con el total.
-// Debajo de la inversión y de los bookings, la parte de cada plataforma (gris lo que pone, rojo lo que trae); cada costo,
-// frente a su objetivo, y el de booking con su barra (de cero a una vez y media el objetivo, la marca es el objetivo)
-const ESCALA_OBJETIVO = 1.5;
+// Cada plataforma frente a su objetivo: las columnas de su tablero, agrupadas en Push y Pull, con el Total. Bajo la
+// inversión y los bookings, la parte de cada plataforma (gris lo que pone, rojo lo que trae); cada costo con su distancia
+// al objetivo en una línea, en verde o rojo. En una tarjeta ancha va como tabla; en una angosta (el celular, de pie o
+// echado), cada plataforma es una ficha que se lee de arriba abajo: con tres filas, comparar no pide deslizar
 function Parte({ valor, tono }) {
   if (valor == null) return null;
   return <span className="q-parte-fila"><span>{porcentaje(valor)}</span><span className={`q-parte-barra q-parte-barra-${tono}`} style={{ width: `${Math.max(2, valor * 0.64)}px` }} /></span>;
 }
+const Frente = ({ costo: c, objetivo, estado }) => {
+  const t = frenteObjetivoTexto(c, objetivo);
+  return t ? <span className={`q-frente-objetivo q-frente-${estado ?? 'nada'}`}>{t}</span> : null;
+};
+const Costo = ({ valor, objetivo, estado, fuerte }) => (
+  <span className="q-celda-costo">{fuerte ? <b>{costo(valor)}</b> : <span>{costo(valor)}</span>}<Frente costo={valor} objetivo={objetivo} estado={estado} /></span>
+);
 function TablaPlataformas({ x }) {
-  const grupos = ['push', 'pull'].map((tipo) => ({ tipo, filas: x.plataformas.filter((p) => p.tipo === tipo) })).filter((g) => g.filas.length);
+  const grupos = ['push', 'pull'].map((tipo) => ({ tipo, nombre: tipo === 'push' ? 'Push' : 'Pull', filas: x.plataformas.filter((p) => p.tipo === tipo) })).filter((g) => g.filas.length);
   const t = x.total;
   return (
-    <div className="q-tabla-marco">
-      <table className="q-tabla q-tabla-plataformas">
-        <caption className="solo-lector">Cada plataforma frente a su objetivo</caption>
-        <thead><tr><th scope="col">Plataforma</th><th scope="col" className="q-num">Inversión</th><th scope="col" className="q-num">Leads</th><th scope="col" className="q-num">Bookings</th><th scope="col" className="q-num">L2B</th><th scope="col">Costo por lead</th><th scope="col">Costo por booking</th></tr></thead>
+    <div className="q-plataformas-vista">
+      <div className="q-tabla-marco q-plataformas-ancha">
+        <table className="q-tabla q-tabla-plataformas">
+          <caption className="solo-lector">Cada plataforma frente a su objetivo</caption>
+          <thead><tr><th scope="col">Plataforma</th><th scope="col" className="q-num">Inversión</th><th scope="col" className="q-num">Leads</th><th scope="col" className="q-num">Bookings</th><th scope="col" className="q-num">L2B</th><th scope="col">Costo por lead</th><th scope="col">Costo por booking</th></tr></thead>
+          {grupos.map((g) => (
+            <tbody key={g.tipo}>
+              <tr className="q-fila-grupo"><th scope="rowgroup" colSpan={7}><span>{g.nombre}</span></th></tr>
+              {g.filas.map((p) => (
+                <tr key={p.id}>
+                  <th scope="row">{p.nombre}</th>
+                  <td className="q-num"><span className="q-celda-cifra">{dolares(p.inversion)}<Parte valor={p.parteInversion} tono="pone" /></span></td>
+                  <td className="q-num">{numero(p.leads)}</td>
+                  <td className="q-num"><span className="q-celda-cifra">{numero(p.bookings)}<Parte valor={p.parteBookings} tono="trae" /></span></td>
+                  <td className="q-num">{pct(p.l2b)}</td>
+                  <td><Costo valor={p.cpl} objetivo={p.objetivo.cpl} estado={p.estadoCpl} /></td>
+                  <td><Costo valor={p.cpb} objetivo={p.objetivo.cpb} estado={p.estadoCpb} fuerte /></td>
+                </tr>
+              ))}
+            </tbody>
+          ))}
+          <tfoot><tr><th scope="row">Total</th><td className="q-num">{dolares(t.inversion)}</td><td className="q-num">{numero(t.leads)}</td><td className="q-num">{numero(t.bookings)}</td><td className="q-num">{pct(t.l2b)}</td><td>{costo(t.cpl)}</td><td><b>{costo(t.cpb)}</b></td></tr></tfoot>
+        </table>
+      </div>
+      <div className="q-plataformas-angosta">
         {grupos.map((g) => (
-          <tbody key={g.tipo}>
-            <tr className="q-fila-grupo"><th scope="rowgroup" colSpan={7}>{g.tipo === 'push' ? 'Push' : 'Pull'}</th></tr>
+          <section key={g.tipo} className="q-fichas-grupo" aria-label={g.nombre}>
+            <p className="q-fichas-grupo-nombre">{g.nombre}</p>
             {g.filas.map((p) => (
-              <tr key={p.id}>
-                <th scope="row">{p.nombre}</th>
-                <td className="q-num"><span className="q-celda-cifra">{dolares(p.inversion)}<Parte valor={p.parteInversion} tono="pone" /></span></td>
-                <td className="q-num">{numero(p.leads)}</td>
-                <td className="q-num"><span className="q-celda-cifra">{numero(p.bookings)}<Parte valor={p.parteBookings} tono="trae" /></span></td>
-                <td className="q-num">{pct(p.l2b)}</td>
-                <td><span className="q-celda-costo"><span>{costo(p.cpl)} <Semaforo estado={p.estadoCpl} texto={estadoObjetivo(p.estadoCpl)} /></span><small>objetivo {costo(p.objetivo.cpl)}</small></span></td>
-                <td>
-                  <span className="q-celda-costo">
-                    <span><b>{costo(p.cpb)}</b> <span className={`q-frente-objetivo q-frente-${p.estadoCpb ?? 'nada'}`}>{frenteObjetivoTexto(p.cpb, p.objetivo.cpb)}</span></span>
-                    {p.cpb != null && p.objetivo.cpb > 0 && (
-                      <svg className="q-bala" width="150" height="12" viewBox="0 0 150 12" aria-hidden="true">
-                        <rect className="q-bala-fondo" x="0" y="2" width="150" height="8" rx="4" />
-                        <rect className={`q-bala-valor q-bala-${p.estadoCpb}`} x="0" y="2" width={Math.min(150, (p.cpb / (p.objetivo.cpb * ESCALA_OBJETIVO)) * 150)} height="8" rx="4" />
-                        <line className="q-bala-objetivo" x1={150 / ESCALA_OBJETIVO} x2={150 / ESCALA_OBJETIVO} y1="0" y2="12" />
-                      </svg>
-                    )}
-                  </span>
-                </td>
-              </tr>
+              <article key={p.id} className="q-ficha-plataforma">
+                <div className="q-ficha-plataforma-cab">
+                  <h4>{p.nombre}</h4>
+                  <span className="q-ficha-plataforma-cpb"><span>Costo por booking</span><b>{costo(p.cpb)}</b><Frente costo={p.cpb} objetivo={p.objetivo.cpb} estado={p.estadoCpb} /></span>
+                </div>
+                <dl className="q-ficha-plataforma-datos">
+                  <div><dt>Inversión</dt><dd>{dolares(p.inversion)}<Parte valor={p.parteInversion} tono="pone" /></dd></div>
+                  <div><dt>Bookings</dt><dd>{numero(p.bookings)}<Parte valor={p.parteBookings} tono="trae" /></dd></div>
+                  <div><dt>Leads</dt><dd>{numero(p.leads)}</dd></div>
+                  <div><dt>L2B</dt><dd>{pct(p.l2b)}</dd></div>
+                  <div className="q-ficha-plataforma-ancho"><dt>Costo por lead</dt><dd>{costo(p.cpl)} <Frente costo={p.cpl} objetivo={p.objetivo.cpl} estado={p.estadoCpl} /></dd></div>
+                </dl>
+              </article>
             ))}
-          </tbody>
+          </section>
         ))}
-        <tfoot><tr><th scope="row">Total</th><td className="q-num">{dolares(t.inversion)}</td><td className="q-num">{numero(t.leads)}</td><td className="q-num">{numero(t.bookings)}</td><td className="q-num">{pct(t.l2b)}</td><td>{costo(t.cpl)}</td><td>{costo(t.cpb)}</td></tr></tfoot>
-      </table>
+        <article className="q-ficha-plataforma q-ficha-plataforma-total">
+          <div className="q-ficha-plataforma-cab"><h4>Total</h4><span className="q-ficha-plataforma-cpb"><span>Costo por booking</span><b>{costo(t.cpb)}</b></span></div>
+          <dl className="q-ficha-plataforma-datos">
+            <div><dt>Inversión</dt><dd>{dolares(t.inversion)}</dd></div>
+            <div><dt>Bookings</dt><dd>{numero(t.bookings)}</dd></div>
+            <div><dt>Leads</dt><dd>{numero(t.leads)}</dd></div>
+            <div><dt>L2B</dt><dd>{pct(t.l2b)}</dd></div>
+            <div className="q-ficha-plataforma-ancho"><dt>Costo por lead</dt><dd>{costo(t.cpl)}</dd></div>
+          </dl>
+        </article>
+      </div>
     </div>
   );
 }
@@ -143,13 +173,8 @@ export default function Activacion({ capa, vista: v }) {
 
       <SeccionDe def={s33} vista={v}>
         <Bloque universo="plataformas" {...plataformasTablaLectura(x)} ejemplo
-          ayuda={<p>Cada costo se compara con el objetivo de su plataforma: en objetivo si queda en él o por debajo; si no, cuánto lo pasa: hasta {porcentaje(MARGEN_OBJETIVO)} o más. La barra del costo por booking va de cero a una vez y media el objetivo; la marca vertical es el objetivo. Las semanas por encima se cuentan en las últimas {numero(SEMANAS_OBJETIVO)} semanas completas.</p>}
+          ayuda={<p>Bajo la inversión y los bookings, la parte de cada plataforma en el total: en gris lo que pone, en rojo lo que trae. Cada costo se compara con el objetivo de su plataforma: en objetivo si queda en él o por debajo; si no, cuánto lo pasa: hasta {porcentaje(MARGEN_OBJETIVO)} o más. Las semanas por encima se cuentan en las últimas {numero(SEMANAS_OBJETIVO)} semanas completas.</p>}
           pie={<span>{x.fuente}.</span>}>
-          <ul className="q-leyenda q-leyenda-arriba" aria-hidden="true">
-            <li><span className="q-muestra q-muestra-pone" />Parte de la inversión</li>
-            <li><span className="q-muestra q-muestra-trae" />Parte de los bookings</li>
-            <li><span className="q-muestra q-muestra-objetivo" />Objetivo de costo por booking</li>
-          </ul>
           <TablaPlataformas x={x} />
         </Bloque>
         <Detalle id={`detalle-${s33.id}`} titulo="Detalle de cada plataforma" bajada="Data de ejemplo, por conectar." vistas={['el costo por booking de cada una, semana a semana', 'cada plataforma semana a semana', 'sus campañas']}>

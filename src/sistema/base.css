@@ -74,8 +74,13 @@ a { color: var(--texto-1); text-underline-offset: 3px; }
 @media (max-width: 520px) {
   .q-tabla { font-size: var(--t-13); }
   .q-tabla th, .q-tabla td { padding-right: var(--e-2); }
-  .q-tabla tbody th, .q-tabla thead th:first-child { position: sticky; left: 0; z-index: 1; background: var(--superficie); }
+  .q-tabla tbody th, .q-tabla thead th:first-child, .q-tabla tfoot th { position: sticky; left: 0; z-index: 1; background: var(--superficie); }
+  /* una fila de grupo ocupa todo el ancho: no se fija la celda (se iría entera), se fija su rótulo */
+  .q-tabla tbody th[colspan] { position: static; }
+  .q-tabla tbody th[colspan] > span { position: sticky; left: 0; }
+  /* sin relleno a la izquierda: la columna fija se ancla al borde mismo y nada se ve pasar por debajo */
   .q-tabla-marco {
+    margin-left: 0; padding-left: 0;
     background:
       linear-gradient(to left, var(--superficie) 40%, transparent) right center / 28px 100% no-repeat local,
       linear-gradient(to left, color-mix(in oklab, var(--texto-1) 14%, transparent), transparent) right center / 14px 100% no-repeat scroll;
