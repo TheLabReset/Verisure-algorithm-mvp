@@ -251,3 +251,9 @@
 .q-svg .q-leyenda-elegible:hover text, .q-svg .q-leyenda-elegible:focus-visible text { text-decoration: underline; }
 .q-svg .q-leyenda-elegible:focus { outline: none; }
 .q-svg .q-leyenda-elegible:focus-visible .q-leyenda-toque { stroke: var(--foco); stroke-width: 2; }
+
+/* BarrasYLinea: el tramo a medias va más claro; el promedio de la línea, punteado */
+.q-svg .q-barra-parcial { fill-opacity: 0.4; }
+.q-svg .q-linea-promedio { stroke: var(--texto-3); stroke-width: 1; stroke-dasharray: 4 4; }
+.q-svg .q-linea-punteada { stroke-dasharray: 3 4; }
+.q-svg .q-punto-hueco { fill: var(--superficie); stroke: var(--texto-1); stroke-width: 2; }

@@ -10,7 +10,7 @@ Cada capítulo tiene una vista general y un detalle que se abre a la derecha («
 
 1. **Captura de señales:** lo nuevo de Prosegur en el período: digital primero (sus piezas por mensaje), TV y cable, radio (emisión por emisión, con su digitalizado), OOH en un mapa y las tendencias. Las versiones del año, en un cronograma sin montos, van en Históricos.
 2. **Inteligencia de mercado:** qué mirar (alertas con umbral fijo, la competencia primero), las cámaras DIY frente a la marca (Google Trends) y la pauta del año semana a semana, con las dos marcas en la misma escala. En el detalle: las marcas de cámaras que más se buscan y la inversión de cada mes.
-3. **Activación estratégica:** cómo reparte cada marca su inversión por medio y cuándo emite (día × hora, en el color de la marca). En el detalle: la inversión por medio en soles, las franjas, los canales y los programas.
+3. **Activación estratégica:** las plataformas de Verisure cruzadas con su CRM, con lo mismo que su tablero de Looker y en su orden: los indicadores, leads y bookings en el tiempo, Push y Pull y la tabla de cada plataforma frente a su objetivo. Por día, por semana y las campañas, en el detalle. Hoy con data de ejemplo.
 4. **Rendimiento y optimización:** el share of investment en digital y en ATL frente al período anterior, y el share de Prosegur semana a semana. En el detalle: las cifras en soles y la inversión día por día.
 
 **MAIA** (Media Analyst IA), en el botón de la barra: el reporte de cada semana (los hechos, calculados con reglas, y su lectura, escrita por el modelo cada lunes) y consultas sobre la data del panel.

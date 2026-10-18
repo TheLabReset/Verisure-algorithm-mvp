@@ -91,6 +91,15 @@
 .q-resumen-cifras li:first-child { padding-left: 0; border-left: 0; }
 /* las cuatro filas (rótulo, cifra, nota, enlace) se alinean entre tarjetas aunque un rótulo ocupe dos líneas */
 @supports (grid-template-rows: subgrid) { .q-resumen-cifras li { grid-row: span 4; grid-template-rows: subgrid; } }
+@supports (grid-template-rows: subgrid) { .q-resumen-con-chispa li { grid-row: span 5; } }
+.q-resumen-con-chispa li { grid-template-rows: auto auto auto auto 1fr; }
+.q-resumen-lectura { margin: calc(-1 * var(--e-2)) 0 var(--e-2); max-width: 64ch; color: var(--texto-2); }
+.q-chispa { display: block; overflow: visible; }
+.q-resumen-comparado { flex-basis: 100%; color: var(--texto-2); }
+.q-chispa polyline { fill: none; stroke: var(--texto-1); stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; }
+.q-chispa circle { fill: var(--texto-1); }
+.q-chispa-propia polyline { stroke: var(--propia); }
+.q-chispa-propia circle { fill: var(--propia); }
 .q-resumen-rotulo { font-size: var(--t-14); color: var(--texto-2); }
 .q-resumen .q-cifra-valor { font-size: var(--c-32); }
 .q-resumen-ir { align-self: end; display: inline-flex; align-items: center; gap: var(--e-1); margin-top: var(--e-2); font-size: var(--t-13); color: var(--texto-3); text-decoration: none; width: fit-content; }
@@ -756,3 +765,29 @@
 .q-plataforma-cifra small { font-size: var(--t-13); color: var(--texto-3); }
 .q-plataforma .q-ficha-datos dt { flex: none; white-space: nowrap; }
 .q-plataforma .q-ficha-datos dd { display: inline-flex; align-items: center; gap: var(--e-2); flex-wrap: wrap; justify-content: flex-end; }
+
+/* La tabla de cada plataforma frente a su objetivo (capa 3): grupos Push y Pull, la parte de la inversión (gris) y de
+   los bookings (rojo, la marca propia) bajo cada cifra, y el costo por booking con su barra hasta el objetivo */
+.q-tabla-plataformas { font-size: var(--t-14); }
+.q-tabla-plataformas td, .q-tabla-plataformas th { vertical-align: middle; padding-top: var(--e-3); padding-bottom: var(--e-3); }
+.q-tabla-plataformas tbody th { font-weight: var(--peso-rotulo); color: var(--texto-1); padding-left: var(--e-4); white-space: nowrap; }
+.q-tabla-plataformas .q-fila-grupo th { padding: var(--e-2) var(--e-2); background: var(--superficie-capitulo); color: var(--texto-2); font-size: var(--t-13); font-weight: var(--peso-rotulo); letter-spacing: 0.04em; text-transform: uppercase; }
+.q-tabla-plataformas tfoot th, .q-tabla-plataformas tfoot td { border-top: 1px solid var(--texto-1); border-bottom: 0; color: var(--texto-1); font-weight: var(--peso-rotulo); }
+.q-celda-cifra { display: inline-flex; flex-direction: column; align-items: flex-end; gap: var(--e-1); color: var(--texto-1); }
+.q-parte-fila { display: inline-flex; align-items: center; gap: var(--e-2); font-size: var(--t-13); color: var(--texto-3); }
+.q-parte-barra { display: inline-block; height: 6px; border-radius: 2px; }
+.q-parte-barra-pone { background: var(--serie-resto); }
+.q-parte-barra-trae { background: var(--propia); }
+.q-celda-costo { display: inline-flex; flex-direction: column; gap: var(--e-1); color: var(--texto-1); white-space: nowrap; }
+.q-celda-costo small { font-size: var(--t-13); color: var(--texto-3); }
+.q-celda-costo b { font-weight: var(--peso-cifra); }
+.q-frente-objetivo { font-size: var(--t-13); font-weight: var(--peso-rotulo); }
+.q-frente-bien { color: var(--mejora); }
+.q-frente-cerca, .q-frente-lejos { color: var(--empeora); }
+.q-bala { display: block; }
+.q-bala-fondo { fill: var(--superficie-capitulo); }
+.q-bala-valor { fill: var(--texto-1); }
+.q-bala-objetivo { stroke: var(--texto-1); stroke-width: 2; }
+.q-muestra-pone { background: var(--serie-resto); }
+.q-muestra-trae { background: var(--propia); }
+.q-muestra-objetivo { width: 2px; height: 12px; border-radius: 0; background: var(--texto-1); }

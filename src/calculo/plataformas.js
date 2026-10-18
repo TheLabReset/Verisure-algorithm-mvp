@@ -40,6 +40,18 @@ export function extremos(filas) {
   return { mejor, peor };
 }
 
+// Partes de un total que suman 100: se redondea hacia abajo y lo que falta va a los restos más grandes
+function partes(valores) {
+  const t = suma(valores);
+  if (!t) return valores.map(() => null);
+  const crudos = valores.map((v) => ((v || 0) / t) * 100), base = crudos.map(Math.floor);
+  let falta = 100 - suma(base);
+  for (const [, i] of crudos.map((c, i) => [c - base[i], i]).sort((a, b) => b[0] - a[0])) { if (falta-- <= 0) break; base[i] += 1; }
+  return base;
+}
+// Las semanas que se miran para decir cuántas pasaron el objetivo, como el gráfico semanal del tablero
+export const SEMANAS_OBJETIVO = 12;
+
 export function leerPlataformas(datos, P) {
   if (!datos?.dias?.length) return null;
   const enTramo = (a, b) => datos.dias.filter((d) => d.fecha >= a && d.fecha <= b);
@@ -59,7 +71,8 @@ export function leerPlataformas(datos, P) {
     const ultimo = datos.dias.filter((x) => x.fecha <= P.hasta).at(-1)?.fecha, final = datos.dias.at(-1).fecha;
     return [...porSemana.entries()].map(([desde, filas]) => {
       const fechas = datos.dias.filter((x) => x.fecha <= P.hasta && lunesDe(x.fecha) === desde).map((x) => x.fecha);
-      return { desde, primero: fechas[0], hasta: fechas.at(-1), dias: filas.length, enCurso: fechas.at(-1) === ultimo && ultimo === final && fechas.length < 7, ...cifras(filas) };
+      // los días son fechas, no filas: en Push o en el total cada día trae una fila por plataforma
+      return { desde, primero: fechas[0], hasta: fechas.at(-1), dias: fechas.length, enCurso: fechas.at(-1) === ultimo && ultimo === final && fechas.length < 7, ...cifras(filas) };
     });
   };
   const plataformas = datos.plataformas.map((p) => {
@@ -77,11 +90,26 @@ export function leerPlataformas(datos, P) {
   const todas = (lista) => lista.flatMap((d) => datos.plataformas.map((p) => d[p.id]));
   const delTipo = (tipo) => (d) => datos.plataformas.filter((p) => p.tipo === tipo).map((p) => d[p.id]);
   const total = cifras(todas(dias));
+  // la parte de cada plataforma en la inversión y en los bookings del período, redondeadas para sumar 100
+  const parteInv = partes(plataformas.map((p) => p.inversion)), parteBook = partes(plataformas.map((p) => p.bookings));
+  plataformas.forEach((p, i) => {
+    p.parteInversion = parteInv[i]; p.parteBookings = parteBook[i];
+    // de las últimas semanas completas, cuántas pasaron el objetivo de costo por booking
+    const completas = p.semanas.filter((s) => s.dias >= 7).slice(-SEMANAS_OBJETIVO);
+    p.semanasSobreObjetivo = { encima: completas.filter((s) => s.cpb != null && s.cpb > p.objetivo.cpb).length, de: completas.length };
+  });
+  const tipos = ['push', 'pull'].map((tipo) => ({ tipo, ...cifras(dias.flatMap(delTipo(tipo))), semanas: semanasDe(delTipo(tipo)) }));
+  tipos.forEach((g) => {
+    const de = plataformas.filter((p) => p.tipo === g.tipo);
+    g.parteInversion = suma(de.map((p) => p.parteInversion)); g.parteBookings = suma(de.map((p) => p.parteBookings));
+  });
   return {
     ejemplo: Boolean(datos.ejemplo), moneda: datos.moneda, fuente: datos.fuente,
     total, totalPrevio: antes.length ? cifras(todas(antes)) : null,
     plataformas,
     diaria: dias.map((d) => ({ fecha: d.fecha, ...cifras(todas([d])), porPlataforma: Object.fromEntries(datos.plataformas.map((p) => [p.id, d[p.id]])) })),
-    tipos: ['push', 'pull'].map((tipo) => ({ tipo, ...cifras(dias.flatMap(delTipo(tipo))), semanas: semanasDe(delTipo(tipo)) })),
+    tipos,
+    // el total semana a semana (lunes a domingo), hasta el último día del período
+    semanas: semanasDe((d) => datos.plataformas.map((p) => d[p.id])),
   };
 }
