@@ -264,6 +264,13 @@
 .q-avisos-tarjeta { list-style: none; margin: var(--e-3) 0 0; padding: 0; display: grid; gap: var(--e-2); }
 .q-avisos-tarjeta li { display: flex; align-items: baseline; gap: var(--e-3); font-size: var(--t-14); color: var(--texto-1); max-width: 72ch; }
 .q-avisos-tarjeta .q-nivel { flex: none; min-width: 8.5em; }
+.q-aviso-accion { font: inherit; color: var(--texto-1); background: none; border: 0; padding: 0; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.q-aviso-accion:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+/* El filtro «Marca» de la capa 1: hasta cuatro marcas que se parten en filas en el celular, sin cortar un nombre */
+.q-filtro-marca, .q-filtro-marca .q-grupo { flex-wrap: wrap; }
+.q-filtro-marca .q-grupo button { white-space: nowrap; }
+/* la muestra de color de la marca elegida lleva un anillo: sobre el fondo del botón marcado no se vería */
+.q-grupo button[aria-pressed="true"] .q-muestra { box-shadow: 0 0 0 1.5px var(--sobre-seleccion); }
 @media (max-width: 640px) { .q-avisos-tarjeta li { flex-direction: column; gap: 0; } .q-avisos-tarjeta .q-nivel { min-width: 0; } }
 /* Data de ejemplo: la tarjeta lo dice arriba, junto a su ventana */
 .q-ejemplo { display: inline-flex; align-items: center; gap: var(--e-1); padding: 2px var(--e-2); border: 1px dashed var(--borde-control); border-radius: var(--r-control); font-size: var(--t-13); color: var(--texto-2); white-space: nowrap; }

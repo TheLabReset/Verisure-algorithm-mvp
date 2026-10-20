@@ -103,3 +103,43 @@ test('la data de ejemplo lleva su sello y no entra a los avisos', () => {
     assert.ok(avisos.every((a) => ['digital', 'tv', 'radio', 'ooh', 'medios', 'share', 'diaria'].includes(a.tarjeta)), 'un aviso apunta a una tarjeta que no tiene data real');
   }
 });
+
+// Las marcas vigiladas en la capa 1. Una vigilada de prueba con la historia de la competencia (sus mismas piezas,
+// paneles y emisiones con otro nombre): así tiene algo en todos los meses. Se pinta con la competencia elegida y con
+// la vigilada elegida, en cada mes y atajo: el filtro aparece, su color va en el mapa y la ficha, y no hay texto roto
+import { CLIENTE } from '../src/cliente.js';
+const [RIVAL] = CLIENTE.competencia, [VIG] = CLIENTE.vigiladas;
+const comoVigilada = (xs) => xs.filter((x) => x.maname === RIVAL.marcaFuente).map((x) => ({ ...x, maname: VIG.marcaFuente, key: `v-${x.key}` }));
+const VIGILADAS_PRUEBA = {
+  meta: { marcas: [VIG.marcaFuente], historia: { [VIG.marcaFuente]: DATOS.contrato.meta.firstDay } }, daily: [], pieces: comoVigilada(DATOS.contrato.pieces), events: comoVigilada(DATOS.contrato.events), ooh: comoVigilada(DATOS.contrato.ooh),
+  digital: { daily: [], pieces: comoVigilada(DATOS.contrato.digital.pieces) },
+  medios: { ...DATOS.medios, emisiones: { [VIG.marcaFuente]: DATOS.medios.emisiones[RIVAL.marcaFuente] } },
+};
+
+test('render: las marcas vigiladas, con la competencia elegida y con la vigilada elegida, sin texto roto', () => {
+  const malos = new Set();
+  let conFiltro = 0, conColor = 0, conAviso = 0;
+  const periodos = [...mesesDisponibles(DATOS.contrato.meta).map((mes) => ({ mes })), { atajo: '7d' }, { atajo: '30d' }, { desde: '2026-03-05', hasta: '2026-03-05' }];
+  for (const filtros of periodos) {
+    const v = armarVista(DATOS.contrato, DATOS.medios, filtros, {}, { mapa: DATOS.mapa, busquedas: DATOS.busquedas, vigiladas: VIGILADAS_PRUEBA });
+    const nombres = nombresDeLaFuente(v);
+    for (const marca of [null, VIG.marcaFuente]) {
+      const html = pintar('senales', v, { marca });
+      for (const m of textoRoto(texto(html), nombres)) malos.add(`${JSON.stringify(filtros)} ${marca ?? 'competencia'}: ${m}`);
+      if (/aria-label="Marca"/.test(html)) conFiltro += 1;
+      // su color en la leyenda del mapa y en la ficha de la emisión o del panel (no solo en el botón del filtro)
+      if (marca && /q-leyenda[^]*?q-muestra-vigilada-1/.test(html) && /q-ficha-marca q-ficha-foco"><span class="q-muestra q-muestra-vigilada-1"/.test(html)) conColor += 1;
+      if (!marca && html.includes('q-aviso-accion')) conAviso += 1;
+    }
+    // el resumen dice cuántas primeras apariciones tuvo, siempre con su número
+    assert.match(pintar('senales', v), /Primeras apariciones de otras marcas/);
+  }
+  assert.deepEqual([...malos].slice(0, 12), []);
+  assert.ok(conFiltro > 0 && conColor > 0 && conAviso > 0, `filtro ${conFiltro}, color ${conColor}, aviso con botón ${conAviso}: la vigilada no se pintó`);
+});
+
+test('render: sin el archivo de vigiladas, la capa 1 queda como antes', () => {
+  const v = armarVista(DATOS.contrato, DATOS.medios, { atajo: '30d' }, {}, { mapa: DATOS.mapa, busquedas: DATOS.busquedas });
+  const html = pintar('senales', v);
+  assert.doesNotMatch(html, /aria-label="Marca"|Primeras apariciones de otras marcas|q-muestra-vigilada/);
+});

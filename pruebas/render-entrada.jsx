@@ -3,7 +3,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { DetallesAbiertos, CargandoContexto } from '../src/sistema/Componentes.jsx';
 import { CAPAS } from '../src/capas/estructura.js';
-import Senales from '../src/pantallas/Senales.jsx';
+import Senales, { MarcaInicial } from '../src/pantallas/Senales.jsx';
 import Inteligencia from '../src/pantallas/Inteligencia.jsx';
 import Activacion from '../src/pantallas/Activacion.jsx';
 import Rendimiento from '../src/pantallas/Rendimiento.jsx';
@@ -12,8 +12,8 @@ import Maia from '../src/pantallas/Maia.jsx';
 const PANTALLAS = { senales: Senales, inteligencia: Inteligencia, activacion: Activacion, rendimiento: Rendimiento };
 export const IDS = CAPAS.map((c) => c.id).filter((id) => PANTALLAS[id]);
 
-export function pintar(id, vista, { cargando = false } = {}) {
+export function pintar(id, vista, { cargando = false, marca = null } = {}) {
   const Pantalla = PANTALLAS[id];
-  return renderToStaticMarkup(<CargandoContexto.Provider value={cargando}><DetallesAbiertos.Provider value={true}><Pantalla capa={CAPAS.find((c) => c.id === id)} vista={vista} irACapa={() => {}} /></DetallesAbiertos.Provider></CargandoContexto.Provider>);
+  return renderToStaticMarkup(<MarcaInicial.Provider value={marca}><CargandoContexto.Provider value={cargando}><DetallesAbiertos.Provider value={true}><Pantalla capa={CAPAS.find((c) => c.id === id)} vista={vista} irACapa={() => {}} /></DetallesAbiertos.Provider></CargandoContexto.Provider></MarcaInicial.Provider>);
 }
 export const pintarMaia = (vista, reporte) => renderToStaticMarkup(<Maia abierta onCerrar={() => {}} vista={vista} reporte={reporte} />);

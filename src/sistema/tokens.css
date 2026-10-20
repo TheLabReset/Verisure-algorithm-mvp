@@ -70,6 +70,14 @@
   --p-prosegur: #ffc800;    /* el amarillo de Prosegur, medido en sus piezas digitales: los rellenos de la competencia en foco */
   --p-prosegur-ocre: #a67c00; /* el mismo tono, oscurecido: las líneas finas de la competencia en claro (un amarillo de 2 px no se ve sobre blanco) */
 
+  /* ── Primitivos: las marcas vigiladas de la capa 1 (src/cliente.js, en su orden), una por color ──
+     Violetas: lo único libre que no se confunde con el amarillo de la competencia, el rojo de la marca, el verde de
+     «mejora», los colores de medios y plataformas ni los grises. Medidos en OKLab (×100) contra todos ellos: 14 o más
+     con visión normal y 9 o más con daltonismo frente a las dos marcas; entre ellas, 15 en claro y 10 en oscuro, que
+     alcanza porque el panel muestra una vigilada a la vez y siempre con su nombre (lo vigila npm run sistema) */
+  --p-vig-1: #3414a1;  --p-vig-2: #7a0969;  --p-vig-3: #c16cf0;  --p-vig-4: #bb3398;
+  --p-vigo-1: #b1c6fc; --p-vigo-2: #d265dc; --p-vigo-3: #ca9cfb; --p-vigo-4: #b9509a;
+
   /* ── Primitivos: categorías, orden fijo, validadas para daltonismo en las dos superficies ── */
   --p-cat-menta: #0c8a66;
   --p-cat-naranja: #c2601a;
@@ -112,6 +120,10 @@
   --propia: var(--p-rojo);               /* la marca propia en los gráficos y el mapa: Verisure en su rojo, solo en marcas, nunca en texto */
   --propia-linea: var(--p-rojo-texto);   /* sus líneas, más oscuras: el rojo puro y el ocre de la competencia se confunden con deuteranopía */
   --resalte-suave: color-mix(in oklab, var(--resalte) 10%, var(--superficie));
+  --vigilada-1: var(--p-vig-1);          /* las marcas vigiladas, solo en la capa 1: cada una su color, en el orden de cliente.js */
+  --vigilada-2: var(--p-vig-2);
+  --vigilada-3: var(--p-vig-3);
+  --vigilada-4: var(--p-vig-4);
   --s2: var(--p-cat-menta);              /* categorías en orden fijo */
   --s3: var(--p-cat-naranja);
   --s4: var(--p-cat-azul);
@@ -208,6 +220,10 @@
     --propia: var(--p-rojo-vivo);
     --propia-linea: var(--propia);
     --resalte-suave: color-mix(in oklab, var(--resalte) 18%, var(--superficie));
+    --vigilada-1: var(--p-vigo-1);
+    --vigilada-2: var(--p-vigo-2);
+    --vigilada-3: var(--p-vigo-3);
+    --vigilada-4: var(--p-vigo-4);
     --s2: var(--p-cat-menta-o);
     --s3: var(--p-cat-naranja-o);
     --s4: var(--p-cat-azul-o);
@@ -273,6 +289,10 @@
   --propia: var(--p-rojo-vivo);
   --propia-linea: var(--propia);
   --resalte-suave: color-mix(in oklab, var(--resalte) 18%, var(--superficie));
+  --vigilada-1: var(--p-vigo-1);
+  --vigilada-2: var(--p-vigo-2);
+  --vigilada-3: var(--p-vigo-3);
+  --vigilada-4: var(--p-vigo-4);
   --s2: var(--p-cat-menta-o);
   --s3: var(--p-cat-naranja-o);
   --s4: var(--p-cat-azul-o);

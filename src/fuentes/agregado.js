@@ -129,7 +129,7 @@ function buildEvents(registros) {
     if (seen.has(key)) continue
     seen.add(key)
     out.push({
-      key: String(key), fecha: r.fecha, maname: r.maname, vname: r.vname,
+      key: String(key), fecha: r.fecha, maname: r.maname, vname: r.vname, grupo: medioOf(r),
       tname: r.tname || null, mname: r.mname || null, franja: r.franja || null,
       duraseg: r.duraseg ?? null, asset: assetOf(r.rfile),
     })

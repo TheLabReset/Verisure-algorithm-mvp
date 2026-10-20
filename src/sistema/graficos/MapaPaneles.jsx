@@ -86,7 +86,8 @@ export default function MapaPaneles({ ubicaciones, elegida, onElegir, encuadre, 
     const grupos = agrupar(m, ubicaciones, zoom, max)
       .map((us) => ({ us, inversion: us.reduce((s, u) => s + u.inversion, 0), sel: us.some((u) => u.id === elegida) }))
       .sort((a, b) => b.inversion - a.inversion || Number(a.sel) - Number(b.sel));
-    const clase = (u) => (u.foco ? 'q-mapa-foco' : u.propia ? 'q-mapa-propia' : 'q-mapa-resto');
+    // una marca vigilada (capa 1) va en su propio color, el de su lugar en cliente.js
+    const clase = (u) => (u.vigilada ? `q-mapa-vigilada-${u.vigilada}` : u.foco ? 'q-mapa-foco' : u.propia ? 'q-mapa-propia' : 'q-mapa-resto');
     for (const grupo of grupos) {
       const [u] = grupo.us;
       if (grupo.us.length === 1) {
@@ -103,7 +104,7 @@ export default function MapaPaneles({ ubicaciones, elegida, onElegir, encuadre, 
       const d = 2 * radioGrupo(grupo.inversion, max);
       const texto = textoGrupo(grupo.us);
       // el aro lleva el color de cada marca en proporción a sus ubicaciones; el número va al centro, en tinta
-      const aro = [['q-mapa-foco', 'var(--resalte)'], ['q-mapa-propia', 'var(--propia)'], ['q-mapa-resto', 'var(--borde-control)']]
+      const aro = [['q-mapa-foco', 'var(--resalte)'], ['q-mapa-vigilada-1', 'var(--vigilada-1)'], ['q-mapa-vigilada-2', 'var(--vigilada-2)'], ['q-mapa-vigilada-3', 'var(--vigilada-3)'], ['q-mapa-vigilada-4', 'var(--vigilada-4)'], ['q-mapa-propia', 'var(--propia)'], ['q-mapa-resto', 'var(--borde-control)']]
         .map(([c, color]) => [color, grupo.us.filter((x) => clase(x) === c).length]).filter(([, n]) => n);
       let acum = 0;
       const tramos = aro.map(([color, n]) => { const a = acum; acum += (n / grupo.us.length) * 100; return `${color} ${a}% ${acum}%`; }).join(', ');
@@ -170,7 +171,7 @@ export default function MapaPaneles({ ubicaciones, elegida, onElegir, encuadre, 
           <ul>
             {lista.us.map((u) => (
               <li key={u.id}><button type="button" aria-pressed={u.id === elegida} onClick={() => { onElegir(u.id); setLista(null); }}>
-                <span className={`q-muestra ${u.foco ? 'q-muestra-mapa-foco' : u.propia ? 'q-muestra-mapa-propia' : 'q-muestra-mapa-resto'}`} aria-hidden="true" /><span>{rotulo(u)}</span>
+                <span className={`q-muestra ${u.vigilada ? `q-muestra-vigilada-${u.vigilada}` : u.foco ? 'q-muestra-mapa-foco' : u.propia ? 'q-muestra-mapa-propia' : 'q-muestra-mapa-resto'}`} aria-hidden="true" /><span>{rotulo(u)}</span>
               </button></li>
             ))}
           </ul>

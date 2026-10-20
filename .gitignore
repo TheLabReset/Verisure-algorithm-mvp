@@ -140,3 +140,4 @@ vite.config.ts.timestamp-*
 
 # Builds alternativos (verificación multi-modo)
 dist-*
+.vigiladas-error

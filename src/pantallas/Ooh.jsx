@@ -32,7 +32,7 @@ function Ficha({ ubicacion, paneles, onVerTodos }) {
           : <span className="q-ficha-sin-arte">Integrametrics no captó la foto de este panel</span>}
       </div>
       <div className="q-ficha-cuerpo">
-        <span className={`q-ficha-marca${ubicacion.foco ? ' q-ficha-foco' : ''}`}>{p.nombre}</span>
+        <span className={`q-ficha-marca${ubicacion.foco || ubicacion.vigilada ? ' q-ficha-foco' : ''}`}>{ubicacion.vigilada && <span className={`q-muestra q-muestra-vigilada-${ubicacion.vigilada}`} aria-hidden="true" />}{p.nombre}</span>
         <h4>{panelTitulo(p)}</h4>
         {p.version && <p className="q-ficha-version">«{version(p.version)}»</p>}
         <dl className="q-ficha-datos">
@@ -54,7 +54,8 @@ function Ficha({ ubicacion, paneles, onVerTodos }) {
 }
 
 export default function Ooh({ o, t, nota }) {
-  const [zona, setZona] = useState(o.zonas[0]?.nombre ?? 'Lima');
+  // abre en la zona donde está la marca en foco (la competencia o la vigilada elegida), no siempre en la primera
+  const [zona, setZona] = useState((o.zonas.find((z) => o.ubicaciones.some((u) => u.zona === z.nombre && (u.foco || u.vigilada))) ?? o.zonas[0])?.nombre ?? 'Lima');
   const [elegida, setElegida] = useState(null);
   const [ventana, setVentana] = useState(null);
   const actual = o.zonas.find((z) => z.nombre === zona) ?? o.zonas[0];
@@ -64,7 +65,7 @@ export default function Ooh({ o, t, nota }) {
   // el encuadre solo cambia cuando cambia la zona: elegir un punto no mueve el mapa
   const encuadre = useMemo(() => actual?.encuadre ?? [], [actual?.nombre, o.ubicaciones]); // eslint-disable-line react-hooks/exhaustive-deps
   const delaZona = ubicaciones.filter((u) => u.zona === actual?.nombre);
-  const id = elegida && ubicaciones.some((u) => u.id === elegida) ? elegida : (delaZona.find((u) => u.foco) ?? delaZona[0])?.id;
+  const id = elegida && ubicaciones.some((u) => u.id === elegida) ? elegida : (delaZona.find((u) => u.foco || u.vigilada) ?? delaZona[0])?.id;
   const u = ubicaciones.find((x) => x.id === id);
   const paneles = o.paneles.filter((p) => p.ubicacion === id);
   const grupos = [...o.abanico.grupos, o.abanico.propio].filter(Boolean);
@@ -85,7 +86,7 @@ export default function Ooh({ o, t, nota }) {
             etiqueta={`Mapa de paneles OOH en ${actual?.nombre ?? 'Lima'}`} textoGrupo={grupoPanelesTexto} rotulo={rotulo} />
         </Suspense>
         <ul className="q-leyenda" aria-hidden="true">
-          {[...new Map(o.ubicaciones.map((x) => [x.nombre, x])).values()].sort((a, b) => Number(b.foco) - Number(a.foco)).map((x) => <li key={x.nombre}><span className={`q-muestra ${x.foco ? 'q-muestra-mapa-foco' : x.propia ? 'q-muestra-mapa-propia' : 'q-muestra-mapa-resto'}`} />{x.nombre}</li>)}
+          {[...new Map(o.ubicaciones.map((x) => [x.nombre, x])).values()].sort((a, b) => Number(Boolean(b.foco || b.vigilada)) - Number(Boolean(a.foco || a.vigilada))).map((x) => <li key={x.nombre}><span className={`q-muestra ${x.vigilada ? `q-muestra-vigilada-${x.vigilada}` : x.foco ? 'q-muestra-mapa-foco' : x.propia ? 'q-muestra-mapa-propia' : 'q-muestra-mapa-resto'}`} />{x.nombre}</li>)}
           <li className="q-nota">El tamaño de cada círculo sigue a su inversión estimada.</li>
         </ul>
       </div>

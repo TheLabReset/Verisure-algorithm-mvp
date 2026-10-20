@@ -16,7 +16,7 @@ import { plataformaEnFrase, grupoDigital, GRUPOS_DIGITALES } from '../textos/com
 import { versionesDelAnio, cronograma, pautaDiaria, shareSemanal, pautaSemanal, mezclaMensual } from './competencia.js';
 import { leerBusquedas } from './busquedas.js';
 import { hechosDeLaSemana } from './semana.js';
-import { digitalDeLaSemana, atlDeLaSemana, compraDeMedios } from './senales.js';
+import { digitalDeLaSemana, atlDeLaSemana, compraDeMedios, APARTADOS_ATL } from './senales.js';
 import { emisionesDe } from '../fuentes/medios.js';
 import { tiktokDeEjemplo, facebookDeEjemplo, plataformasDeEjemplo } from '../muestra/ejemplo.js';
 import { leerTiktok, leerFacebook } from './conversacion.js';
@@ -40,8 +40,12 @@ export const UMBRALES = {
 
 const PROPIA = CLIENTE.marcaFuente;
 const COMPETENCIA = CLIENTE.competencia.map((c) => c.marcaFuente);
-export const nombreMarca = (m) => (m === PROPIA ? CLIENTE.nombre : CLIENTE.competencia.find((c) => c.marcaFuente === m)?.nombre ?? m);
+// Las marcas vigiladas (solo capa 1): cada una con su número de color, en el orden de cliente.js (--vigilada-N)
+export const VIGILADAS = (CLIENTE.vigiladas || []).map((v, i) => ({ id: v.marcaFuente, nombre: v.nombre, color: i + 1 }));
+const colorVigilada = (m) => VIGILADAS.find((v) => v.id === m)?.color ?? null;
+export const nombreMarca = (m) => (m === PROPIA ? CLIENTE.nombre : [...CLIENTE.competencia, ...(CLIENTE.vigiladas || [])].find((c) => c.marcaFuente === m)?.nombre ?? m);
 const MARCAS = [PROPIA, ...COMPETENCIA];
+const MARCAS_SEGUIDAS = MARCAS;
 const dia = (f) => (f || '').slice(0, 10);
 const enRango = (f, a, b) => { const d = dia(f); return d >= a && d <= b; };
 const suma = (xs) => xs.reduce((t, x) => t + (x || 0), 0);
@@ -134,10 +138,10 @@ const pieza = (p, extra = {}) => ({
   activo: true, enlace: null, imagen: p.asset?.kind === 'image' ? p.asset.url : null,
   medio: p.asset && p.asset.kind !== 'image' && p.asset.kind !== 'link' ? p.asset : null, html: htmlDe(p.asset), formato: formatoDe(p.asset), arte: null, ...extra,
 });
-function abanico(items, marcaDe) {
-  const porMarca = new Map(MARCAS.map((m) => [m, []]));
+function abanico(items, marcaDe, marcas = MARCAS) {
+  const porMarca = new Map(marcas.map((m) => [m, []]));
   for (const it of items) if (porMarca.has(marcaDe(it))) porMarca.get(marcaDe(it)).push(it);
-  return agruparAnuncios(MARCAS.map((m) => ({ nombre: nombreMarca(m), propia: m === PROPIA, anuncios: porMarca.get(m).map((x) => x.pieza) })));
+  return agruparAnuncios(marcas.map((m) => ({ nombre: nombreMarca(m), propia: m === PROPIA, anuncios: porMarca.get(m).map((x) => x.pieza) })));
 }
 
 // ATL: las versiones al aire en el período (su vida se cruza con el período)
@@ -177,7 +181,7 @@ function abanicoDigital(contrato, P) {
 }
 
 // OOH: los paneles detectados en el período, con su foto o video, sobre el mapa y por distrito
-function ooh(contrato, mapa, P) {
+function ooh(contrato, mapa, P, MARCAS = MARCAS_SEGUIDAS) {
   const paneles = (contrato.ooh || []).filter((p) => MARCAS.includes(p.maname) && dia(p.firstFecha || p.lastFecha) <= P.hasta && dia(p.lastFecha || p.firstFecha) >= P.desde)
     .map((p) => ({ ...p, marca: p.maname }));
   const mapaLeido = leerOoh(paneles, mapa, MARCAS);
@@ -190,7 +194,7 @@ function ooh(contrato, mapa, P) {
   const leidoAntes = previos ? leerOoh(previos, mapa, MARCAS) : null;
   const zonasDe = (leido, m) => new Set([...leido.porDistrito, ...leido.fueraDeLima].filter((d) => d[m] > 0).map((d) => d.nombre));
   const conPieza = (p) => ({
-    id: String(p.key), marca: p.maname, nombre: nombreMarca(p.maname), propia: p.maname === PROPIA, lat: p.lat, lng: p.lng,
+    id: String(p.key), marca: p.maname, nombre: nombreMarca(p.maname), propia: p.maname === PROPIA, vigilada: colorVigilada(p.maname), lat: p.lat, lng: p.lng,
     version: p.vname || null, direccion: p.direccion || null, localidad: p.localidad || null, tipo: p.tipo || null,
     desde: dia(p.firstFecha), hasta: dia(p.lastFecha || p.firstFecha), inversion: p.spend || 0, asset: p.asset || null,
     pieza: pieza({ ...p, firstEmission: p.firstFecha }, { titulo: p.direccion || p.localidad || 'Panel sin dirección', texto: p.vname ? `«${p.vname}»` : '', plataformas: [p.tipo, p.localidad].filter(Boolean) }),
@@ -200,7 +204,7 @@ function ooh(contrato, mapa, P) {
   const ubicacion = new Map();
   for (const q of mapaLeido.puntos) for (const x of q.paneles) ubicacion.set(String(x.key), { distrito: q.distrito, ubicacion: q.id });
   return {
-    ubicaciones: mapaLeido.puntos.map((u) => ({ id: u.id, marca: u.marca, nombre: nombreMarca(u.marca), foco: u.marca !== PROPIA, propia: u.marca === PROPIA, lat: u.lat, lng: u.lng, zona: u.zona, distrito: u.distrito, inversion: u.inversion, paneles: u.paneles.map((x) => String(x.key)) })),
+    ubicaciones: mapaLeido.puntos.map((u) => ({ id: u.id, marca: u.marca, nombre: nombreMarca(u.marca), foco: u.marca !== PROPIA && !colorVigilada(u.marca), propia: u.marca === PROPIA, vigilada: colorVigilada(u.marca), lat: u.lat, lng: u.lng, zona: u.zona, distrito: u.distrito, inversion: u.inversion, paneles: u.paneles.map((x) => String(x.key)) })),
     zonas: mapaLeido.zonas,
     paneles: lista.map((p) => ({ ...p, distrito: ubicacion.get(p.id)?.distrito ?? null, ubicacion: ubicacion.get(p.id)?.ubicacion ?? null })).sort((a, b) => Number(a.propia) - Number(b.propia) || b.inversion - a.inversion),
     porMarca: Object.fromEntries(MARCAS.map((m) => [m, paneles.filter((p) => p.maname === m).length])),
@@ -209,19 +213,19 @@ function ooh(contrato, mapa, P) {
     zonasNuevas: leidoAntes ? Object.fromEntries(MARCAS.map((m) => { const antes = zonasDe(leidoAntes, m); return [m, [...zonasDe(mapaLeido, m)].filter((z) => !antes.has(z) && z !== 'Sin coordenadas')]; })) : null,
     porDistrito: mapaLeido.porDistrito, fueraDeLima: mapaLeido.fueraDeLima, enLima: mapaLeido.enLima, fuera: mapaLeido.fuera,
     contornos: contornos(mapa),
-    abanico: abanico(lista.map((p) => ({ marca: p.marca, pieza: p.pieza })), (x) => x.marca),
+    abanico: abanico(lista.map((p) => ({ marca: p.marca, pieza: p.pieza })), (x) => x.marca, MARCAS),
   };
 }
 
 // Estrenos: primera emisión de una versión nueva, con su arte
 // Integrametrics marca un estreno por versión, canal y día: la misma versión sale «nueva» en varios canales o fechas.
 // Un estreno es la versión, el día de su primera marca en toda la data; las demás marcas no la vuelven a contar.
-function estrenos(contrato, P) {
+function estrenos(contrato, P, marcas = MARCAS) {
   const primero = new Map();
   for (const e of contrato.events || []) { const k = `${e.maname}|${e.vname}`; if (!primero.has(k) || e.fecha < primero.get(k).fecha) primero.set(k, e); }
-  return [...primero.values()].filter((e) => enRango(e.fecha, P.desde, P.hasta) && MARCAS.includes(e.maname))
+  return [...primero.values()].filter((e) => enRango(e.fecha, P.desde, P.hasta) && marcas.includes(e.maname))
     .sort((a, b) => (a.fecha < b.fecha ? 1 : -1))
-    .map((e) => ({ id: String(e.key), fecha: e.fecha, marca: e.maname, nombre: nombreMarca(e.maname), propia: e.maname === PROPIA, version: e.vname, tipo: e.tname, canal: e.mname, franja: e.franja, duracion: Number(e.duraseg) || null, asset: e.asset || null }));
+    .map((e) => ({ id: String(e.key), fecha: e.fecha, marca: e.maname, nombre: nombreMarca(e.maname), propia: e.maname === PROPIA, version: e.vname, tipo: e.tname, grupo: e.grupo ?? null, canal: e.mname, franja: e.franja, duracion: Number(e.duraseg) || null, asset: e.asset || null }));
 }
 
 // Medios del período (hora, día, canal, programa, zona) en TV, radio, cable y OTT: de cada emisión de medios.json
@@ -307,6 +311,61 @@ function shareDelAnio(contrato, ok) {
   };
 }
 
+// ── Marcas vigiladas: solo la capa 1. Lo de cada una en el período, tarjeta por tarjeta, sin respaldo (lo que no
+// salió en el período no se muestra), sus primeras apariciones y los avisos de cada tarjeta. No entran a queMirar:
+// ni las alertas generales ni MAIA las leen.
+// Una primera aparición es una versión que se ve por primera vez en el período: en TV, cable y radio, el estreno que
+// marca Integrametrics; en digital y en vía pública (que la fuente no marca), el primer día que se ve. El período que
+// tiene el primer día de data no puede decir qué es nuevo: ahí no hay apariciones.
+// La tarjeta de un estreno sale de su grupo de medio (un BANNER de TV es TV); un estreno anterior al campo, de su tipo
+export const tarjetaDe = (e) => (e.grupo ? (e.grupo === 'OOH' ? 'ooh' : e.grupo === 'RADIO' ? 'radio' : 'tv') : /RADIO/.test(e.tipo || '') ? 'radio' : APARTADO_OOH.test(e.tipo || '') ? 'ooh' : 'tv');
+function leerVigiladas(vig, contrato, mapa, P, ok) {
+  if (!VIGILADAS.length || !vig) return null;
+  const S = { desde: P.desde, hasta: P.hasta };
+  const mayor = (a, b) => (a && b ? (a > b ? a : b) : a || b);
+  // desde cuándo hay data de cada vigilada: lo más tarde entre el contrato y su propia historia (una vigilada agregada
+  // después, o un archivo rearmado, empieza en su primera ventana). Sin historia en el archivo, no se sabe: nada es nuevo
+  const historia = (m) => vig.meta?.historia?.[m] ?? '9999-12-31';
+  const inicioDigital = (m) => mayor(contrato.digital?.daily?.[0]?.fecha ?? null, historia(m)), inicioAtl = (m) => mayor(contrato.meta.firstDay, historia(m));
+  const porMarca = (f) => Object.fromEntries(VIGILADAS.map((v) => [v.id, f(v)]));
+  const digital = ok('digital') ? porMarca((v) => digitalDeLaSemana(vig, S, { marcas: [v.id], respaldo: false, primerDia: inicioDigital(v.id) })) : null;
+  // TV, cable y radio: una emisión es «nueva» solo si su estreno cae después del primer día de la historia
+  const atl = (apartado) => (ok('atl') ? porMarca((v) => {
+    const r = atlDeLaSemana({ ...vig, meta: { ...vig.meta, firstDay: contrato.meta.firstDay } }, vig.medios, S, apartado, { marcas: [v.id], respaldo: false, primerDia: contrato.meta.firstDay });
+    return P.desde > inicioAtl(v.id) ? r : { ...r, emisiones: r.emisiones.map((e) => ({ ...e, nueva: false })) };
+  }) : null);
+  // OOH: los paneles de cada vigilada con los de la marca propia como referencia, igual que la competencia en su mapa
+  const oohDe = (v) => ooh({ ...contrato, ooh: [...(vig.ooh || []).filter((p) => p.maname === v.id), ...(contrato.ooh || []).filter((p) => p.maname === PROPIA)] }, mapa, P, [PROPIA, v.id]);
+  const oohs = ok('atl') ? porMarca(oohDe) : null;
+  const apariciones = [];
+  for (const v of VIGILADAS) {
+    if (digital && !digital[v.id].sinHistoria && P.desde > (inicioDigital(v.id) || '9999-12-31')) for (const m of digital[v.id].mensajes.filter((x) => x.nuevo)) apariciones.push({ marca: v.id, nombre: v.nombre, color: v.color, tarjeta: 'digital', version: m.mensaje, fecha: m.primeraVez });
+    if (ok('atl') && P.desde > inicioAtl(v.id)) {
+      for (const e of estrenos(vig, P, [v.id])) apariciones.push({ marca: v.id, nombre: v.nombre, color: v.color, tarjeta: tarjetaDe(e), version: e.version, fecha: dia(e.fecha) });
+      // vía pública: la versión cuyo primer panel detectado cae en el período (sin estreno marcado por la fuente). Los
+      // paneles se detectan a saltos: hace falta la misma base de 90 días que las zonas nuevas de la competencia
+      if (P.desde > sumarDias(inicioAtl(v.id), 90)) {
+        const primera = new Map();
+        for (const p of (vig.ooh || []).filter((x) => x.maname === v.id)) { const f = dia(p.firstFecha); if (!primera.has(p.vname) || f < primera.get(p.vname)) primera.set(p.vname, f); }
+        for (const [version, fecha] of primera) if (enRango(fecha, P.desde, P.hasta) && !apariciones.some((a) => a.marca === v.id && a.tarjeta === 'ooh' && a.version === version)) apariciones.push({ marca: v.id, nombre: v.nombre, color: v.color, tarjeta: 'ooh', version, fecha });
+      }
+    }
+  }
+  apariciones.sort((a, b) => (a.fecha < b.fecha ? 1 : -1));
+  // qué se pudo contar: una fuente caída o un período sin historia antes no dicen «cero apariciones», dicen «sin dato»
+  const contadas = {
+    digital: Boolean(digital) && VIGILADAS.some((v) => P.desde > (inicioDigital(v.id) || '9999-12-31')),
+    atl: ok('atl') && VIGILADAS.some((v) => P.desde > inicioAtl(v.id)),
+  };
+  // un aviso por marca y tarjeta, con la aparición más reciente
+  const avisos = [];
+  for (const v of VIGILADAS) for (const tarjeta of ['digital', 'tv', 'radio', 'ooh']) {
+    const suyas = apariciones.filter((a) => a.marca === v.id && a.tarjeta === tarjeta);
+    if (suyas.length) avisos.push({ id: 'aparicion-vigilada', nivel: 'atencion', tarjeta, fuente: tarjeta === 'digital' ? 'Integrametrics digital' : 'Integrametrics', marca: v.nombre, marcaId: v.id, color: v.color, cuantos: suyas.length, ultima: suyas[0], periodo: P });
+  }
+  return { marcas: VIGILADAS, digital, tv: atl('tv'), radio: atl('radio'), ooh: oohs, apariciones, avisos, contadas };
+}
+
 // ── Qué mirar: cada alerta sale de una regla con umbral fijo y trae su dato ──
 function queMirar(v, P) {
   const out = [];
@@ -315,9 +374,8 @@ function queMirar(v, P) {
     for (const c of CLIENTE.competencia) {
       const suyos = v.lee.estrenos.filter((e) => e.marca === c.marcaFuente);
       // cada estreno va en la tarjeta de su medio: radio, vía pública o TV y cable
-      const apartado = (e) => (/RADIO/.test(e.tipo || '') ? 'radio' : APARTADO_OOH.test(e.tipo || '') ? 'ooh' : 'tv');
       for (const tarjeta of ['tv', 'radio', 'ooh']) {
-        const deAca = suyos.filter((e) => apartado(e) === tarjeta);
+        const deAca = suyos.filter((e) => tarjetaDe(e) === tarjeta);
         if (deAca.length) out.push({ id: 'estreno-competencia', nivel: 'atencion', tarjeta, fuente: 'Integrametrics', marca: c.nombre, cuantos: deAca.length, ultimo: deAca[0] });
       }
     }
@@ -382,9 +440,11 @@ function queMirar(v, P) {
   return out.map((a) => ({ ...a, competencia: deCompetencia(a), periodo: P })).sort((a, z) => Number(z.competencia) - Number(a.competencia));
 }
 
-export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaLeido = null, busquedas: busquedasLeidas = null } = {}) {
+export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaLeido = null, busquedas: busquedasLeidas = null, vigiladas: vigiladasLeidas = null } = {}) {
   // un archivo opcional con otra forma (vacío, de otra versión) cuenta como que no llegó
   const mapa = mapaLeido?.proyeccion && Array.isArray(mapaLeido.distritos) ? mapaLeido : null;
+  const vig = vigiladasLeidas?.meta && Array.isArray(vigiladasLeidas.pieces) && Array.isArray(vigiladasLeidas.events) && Array.isArray(vigiladasLeidas.ooh)
+    && Array.isArray(vigiladasLeidas.digital?.pieces) && vigiladasLeidas.medios?.emisiones && vigiladasLeidas.medios?.dic ? vigiladasLeidas : null;
   const busquedas = busquedasLeidas?.categoria?.semanas?.length && Array.isArray(busquedasLeidas.categoria.series) ? busquedasLeidas : null;
   const meta = contrato.meta;
   const caidas = new Set(estado.fuentesCaidas || []);
@@ -436,6 +496,7 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
     periodo: P, fuentes, umbrales: UMBRALES,
     monitoreo: [
       { titulo: 'Marcas que se siguen', items: MARCAS.map(nombreMarca) },
+      ...(VIGILADAS.length ? [{ titulo: 'Otras marcas, solo en lo nuevo de la capa 1', items: VIGILADAS.map((v) => v.nombre) }] : []),
       { titulo: 'Subsectores de Integrametrics', items: CLIENTE.subsectores },
       { titulo: 'Medios ATL', items: ['TV abierta', 'Cable', 'Radio', 'OTT y streaming', 'Vía pública'] },
       { titulo: 'Plataformas digitales', items: plataformasDelAnio(contrato) },
@@ -462,6 +523,8 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
       radioSemana: ok('atl') && medios?.emisiones ? atlDeLaSemana(contrato, medios, S, 'radio') : null,
       // la compra de medios también es un patrón: la misma ventana mínima de cuatro semanas que el horario
       compra: ok('atl') ? compraDeMedios(medios, PM) : null,
+      // las marcas vigiladas, solo para la capa 1 (null si su archivo no llegó)
+      vigiladas: leerVigiladas(vig, contrato, mapa, P, ok),
     },
     // Data de ejemplo (src/muestra/ejemplo.js): fuentes por conectar. Va rotulada y no entra a los avisos ni a MAIA
     ejemplo: {

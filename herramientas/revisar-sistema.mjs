@@ -5,11 +5,13 @@
 //     y ningún componente usa un primitivo ni un token que no existe.
 //  4. Los dos bloques del tema alterno (preferencia del sistema y botón) son idénticos.
 //  5. Contraste WCAG medido de cada token de texto y de gráfico sobre cada superficie, en los dos temas.
+//  6. Los colores de las marcas vigiladas no se confunden con ningún color que significa otra cosa (marcas, medios,
+//     mejora, empeora, grises), con visión normal ni con daltonismo, en los dos temas.
 // La función revisar() es pura: recibe { ruta: contenido } y devuelve errores. La prueba negativa la usa con archivos sembrados.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { quitarComentarios, bloquesDeTokens, contraste } from '../src/sistema/leerTokens.js';
+import { quitarComentarios, bloquesDeTokens, contraste, distanciaColor } from '../src/sistema/leerTokens.js';
 
 export { contraste };
 
@@ -22,7 +24,14 @@ const TEXTO = ['texto-1', 'texto-2', 'texto-3', 'acento-texto', 'mejora', 'empeo
 // marcas de interfaz que hay que ver: 3:1 sobre toda superficie (WCAG 1.4.11)
 const INTERFAZ = ['borde-control', 'acento', 'foco'];
 // marcas de datos: 3:1 sobre las superficies donde hay gráficos
-const GRAFICO = ['s1', 'resalte', 'propia', 'propia-linea', 's2', 's3', 's4', 'previa'];
+const GRAFICO = ['s1', 'resalte', 'propia', 'propia-linea', 's2', 's3', 's4', 'previa', 'vigilada-1', 'vigilada-2', 'vigilada-3', 'vigilada-4'];
+// Las marcas vigiladas (capa 1): cada color, lejos de todo color con otro significado (distancia OKLab ×100).
+// 14 con visión normal frente a todos; 9 con daltonismo frente a las dos marcas, que comparten el mapa con ellas;
+// entre vigiladas, 10 con visión normal (el panel muestra una a la vez y siempre con su nombre)
+export const VIGILADAS = ['vigilada-1', 'vigilada-2', 'vigilada-3', 'vigilada-4'];
+const OTRO_SIGNIFICADO = ['resalte', 'serie-1', 'propia', 'propia-linea', 's2', 's3', 's4', 'mejora', 'empeora', 'previa', 'serie-resto', 'texto-1', 'acento'];
+const COMPARTEN_MAPA = ['resalte', 'propia'];
+export const DISTANCIAS = { otros: 14, daltonismo: 9, entreVigiladas: 10 };
 // Un relleno con borde: si un color de datos tiene su --X-borde (o lo hereda de un alias), lo que se ve contra el
 // fondo es el borde. Así entra un color de marca claro (un amarillo) sin perder contraste: relleno de marca y borde
 // de tinta. Un borde «transparent» (en el tema donde el relleno ya contrasta solo) vuelve a medir el relleno.
@@ -170,6 +179,19 @@ export function revisar(archivos) {
     for (const g of GRAFICO) for (const s of SUPERFICIES_GRAFICO) medir(g, s, 3, 'gráfico');
     for (const [a, b, min] of PARES) medir(a, b, min, 'par');
     for (const [a, b, min] of CONVIVEN) medir(a, b, min, 'conviven');
+    // 6 · distancia de color de las marcas vigiladas
+    const lejos = (a, b, campo, minimo) => {
+      const ca = resolver(tema, a), cb = resolver(tema, b);
+      if (!ca || !cb) { err(TOKENS, `no se pudo resolver --${a} o --${b} en el tema ${nombre}`); return; }
+      const d = distanciaColor(ca, cb)[campo];
+      informe.push({ tema: nombre, token: a, sobre: b, contraste: +d.toFixed(1), minimo, tipo: campo === 'normal' ? 'distancia' : 'daltonismo' });
+      if (d < minimo) err(TOKENS, `--${a} y --${b} se confunden en ${nombre}${campo === 'daltonismo' ? ' con daltonismo' : ''}: distancia ${d.toFixed(1)}, mínimo ${minimo}`);
+    };
+    for (const v of VIGILADAS) {
+      for (const o of OTRO_SIGNIFICADO) lejos(v, o, 'normal', DISTANCIAS.otros);
+      for (const o of COMPARTEN_MAPA) lejos(v, o, 'daltonismo', DISTANCIAS.daltonismo);
+    }
+    for (let i = 0; i < VIGILADAS.length; i++) for (let j = i + 1; j < VIGILADAS.length; j++) lejos(VIGILADAS[i], VIGILADAS[j], 'normal', DISTANCIAS.entreVigiladas);
   }
   return { errores, informe, primitivos: primitivos.length, semanticos: semanticos.length };
 }
@@ -193,7 +215,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const { errores, informe, primitivos, semanticos } = revisar(leerSrc(raiz));
   const peor = (tipo) => informe.filter((f) => f.tipo === tipo).sort((a, b) => a.contraste - b.contraste)[0];
   console.log(`Quincha · ${primitivos} primitivos, ${semanticos} semánticos, ${informe.length} pares de contraste medidos`);
-  for (const t of ['texto', 'interfaz', 'gráfico', 'par', 'conviven']) { const p = peor(t); if (p) console.log(`  peor ${t}: --${p.token} sobre --${p.sobre} (${p.tema}) ${p.contraste}:1, mínimo ${p.minimo}:1`); }
+  for (const t of ['texto', 'interfaz', 'gráfico', 'par', 'conviven', 'distancia', 'daltonismo']) { const p = peor(t); if (p) console.log(`  peor ${t}: --${p.token} sobre --${p.sobre} (${p.tema}) ${p.contraste}:1, mínimo ${p.minimo}:1`); }
   if (errores.length) { console.error(`\n${errores.length} problema(s):\n` + errores.map((e) => '  · ' + e).join('\n')); process.exit(1); }
   console.log('Sin problemas.');
 }

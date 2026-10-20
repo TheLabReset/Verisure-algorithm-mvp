@@ -20,7 +20,7 @@ export function canalPrincipal(canales) {
 
 const COMPETENCIA = CLIENTE.competencia.map((c) => c.marcaFuente);
 const PROPIA = CLIENTE.marcaFuente;
-const nombreDe = (m) => (m === PROPIA ? CLIENTE.nombre : CLIENTE.competencia.find((c) => c.marcaFuente === m)?.nombre ?? m);
+const nombreDe = (m) => (m === PROPIA ? CLIENTE.nombre : [...CLIENTE.competencia, ...(CLIENTE.vigiladas || [])].find((c) => c.marcaFuente === m)?.nombre ?? m);
 const dia = (f) => (f || '').slice(0, 10);
 const masDias = (iso, n) => { const d = new Date(`${iso}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 
@@ -31,8 +31,10 @@ export const APARTADOS_ATL = { tv: ['TV ABIERTA', 'CABLE', 'OTT STREAMING/LIVE']
 // El último tramo con algo: si el período no tiene nada, el tramo del mismo largo que termina en el último día con
 // algo antes (con un período largo, como mucho una semana: lo más reciente, no medio año atrás)
 const diasDe = (S) => Math.round((new Date(`${S.hasta}T00:00:00Z`) - new Date(`${S.desde}T00:00:00Z`)) / 86400000) + 1;
-function semanaConAlgo(fechas, S, primerDia) {
+// Sin respaldo (las marcas vigiladas) no hay último tramo: lo que no salió en el período no se muestra
+function semanaConAlgo(fechas, S, primerDia, respaldo = true) {
   if (fechas.some((f) => f >= S.desde && f <= S.hasta)) return { desde: S.desde, hasta: S.hasta, reciente: false };
+  if (!respaldo) return null;
   const ultimo = fechas.filter((f) => f < S.desde).sort().at(-1);
   if (!ultimo) return null;
   const desde = masDias(ultimo, -(Math.min(diasDe(S), DIAS_SEMANA) - 1));
@@ -52,11 +54,13 @@ function archivosPorVersion(contrato) {
 /**
  * Digital, lo nuevo de la semana de la competencia: las piezas que Integrametrics vio por primera vez en la semana,
  * agrupadas por mensaje (la versión). La marca propia no va: su equipo ya sabe qué tiene.
+ * Con `marcas` lo mismo para otras marcas (las vigiladas, una por vez, sin respaldo); `primerDia` es el primer día
+ * de data digital del contrato principal: desde ahí se bajan todas las marcas.
  */
-export function digitalDeLaSemana(contrato, S) {
-  const todas = (contrato.digital?.pieces || []).filter((p) => COMPETENCIA.includes(p.maname));
-  const primerDia = contrato.digital?.daily?.[0]?.fecha ?? null;
-  const W = semanaConAlgo(todas.map((p) => dia(p.firstEmission)), S, primerDia);
+export function digitalDeLaSemana(contrato, S, { marcas = COMPETENCIA, respaldo = true, primerDia: inicio } = {}) {
+  const todas = (contrato.digital?.pieces || []).filter((p) => marcas.includes(p.maname));
+  const primerDia = inicio !== undefined ? inicio : contrato.digital?.daily?.[0]?.fecha ?? null;
+  const W = semanaConAlgo(todas.map((p) => dia(p.firstEmission)), S, primerDia, respaldo);
   // la primera vez que se vio cada mensaje, en toda la data: dice si el mensaje es nuevo o ya venía
   const primera = new Map();
   for (const p of todas) { const k = `${p.maname}|${p.vname}`, d = dia(p.firstEmission); if (!primera.has(k) || d < primera.get(k)) primera.set(k, d); }
@@ -92,13 +96,13 @@ export function digitalDeLaSemana(contrato, S) {
  * TV y cable, o radio, de la competencia en la semana: cada emisión con su digitalizado, programa, motivo (la
  * versión), fecha, hora y tipo de aviso. Una versión es nueva si su estreno cae en la semana.
  */
-export function atlDeLaSemana(contrato, medios, S, apartado) {
+export function atlDeLaSemana(contrato, medios, S, apartado, { marcas = COMPETENCIA, respaldo = true, primerDia = contrato.meta.firstDay } = {}) {
   const grupos = APARTADOS_ATL[apartado];
   const archivos = archivosPorVersion(contrato);
   const estreno = new Map();
   for (const e of contrato.events || []) { const k = `${e.maname}|${e.vname}`; if (!estreno.has(k) || e.fecha < estreno.get(k)) estreno.set(k, dia(e.fecha)); }
-  const filas = COMPETENCIA.flatMap((m) => emisionesDe(medios, m, contrato.meta.firstDay, S.hasta).map((e) => ({ marca: m, ...e }))).filter((e) => grupos.includes(e.grupo));
-  const W = semanaConAlgo(filas.map((e) => e.fecha), S, contrato.meta.firstDay);
+  const filas = marcas.flatMap((m) => emisionesDe(medios, m, primerDia, S.hasta).map((e) => ({ marca: m, ...e }))).filter((e) => grupos.includes(e.grupo));
+  const W = semanaConAlgo(filas.map((e) => e.fecha), S, primerDia, respaldo);
   if (!W) return { semana: S, reciente: false, emisiones: [], porTipo: [], porMotivo: [], canales: 0, sinRegistros: true };
   const lista = filas.filter((e) => e.fecha >= W.desde && e.fecha <= W.hasta).map((e, i) => {
     const k = `${e.marca}|${e.version}`;

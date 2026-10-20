@@ -109,6 +109,15 @@ jobs:
             git push
           fi
 
+      # vigiladas.json es secundario: si no se pudo actualizar, la data principal igual se publicó; la corrida queda en
+      # rojo para que se note (el pipeline deja .vigiladas-error con el motivo, fuera de public/data)
+      - name: Avisar si fallaron las marcas vigiladas
+        run: |
+          if [ -f .vigiladas-error ]; then
+            echo "::error::vigiladas.json no se actualizó: $(cat .vigiladas-error). La data principal sí se publicó."
+            exit 1
+          fi
+
       - name: Avisar si falló el paso de los lunes
         if: ${{ steps.lunes.outcome == 'failure' }}
         run: |

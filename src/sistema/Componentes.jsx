@@ -421,13 +421,18 @@ export function Semaforo({ estado, texto }) {
   return <span className={`q-nivel q-alerta-${x.nivel}`}><x.icono size={14} aria-hidden="true" strokeWidth={2.4} />{texto}</span>;
 }
 
-// Los avisos de una tarjeta: el nivel (icono y palabra, el color nunca va solo) y la frase, sin enlace a otro lado
+// Los avisos de una tarjeta: el nivel (icono y palabra, el color nunca va solo) y la frase, sin enlace a otro lado.
+// accion: un botón que cambia lo que muestra la misma tarjeta (el aviso de una marca vigilada la elige en el filtro)
 export function AvisosTarjeta({ avisos }) {
   return (
     <ul className="q-avisos-tarjeta" aria-label="Avisos de esta tarjeta">
       {avisos.map((a) => {
         const n = NIVELES[a.nivel];
-        return <li key={a.id} className={`q-alerta-${a.nivel}`}><span className="q-nivel"><n.icono size={14} aria-hidden="true" strokeWidth={2.4} />{n.nombre}</span><span>{a.titulo}</span></li>;
+        return (
+          <li key={a.id} className={`q-alerta-${a.nivel}`}><span className="q-nivel"><n.icono size={14} aria-hidden="true" strokeWidth={2.4} />{n.nombre}</span>
+            <span>{a.titulo}{a.accion && <> <button type="button" className="q-aviso-accion" onClick={a.accion.alHacer} aria-label={a.accion.etiqueta}>{a.accion.texto}</button></>}</span>
+          </li>
+        );
       })}
     </ul>
   );
@@ -589,7 +594,7 @@ export function Grupo({ etiqueta, opciones, valor, onCambiar }) {
   return (
     <div className="q-grupo" role="group" aria-label={etiqueta}>
       {opciones.map((o) => (
-        <button key={o.valor} type="button" aria-pressed={o.valor === valor} onClick={() => onCambiar(o.valor)} disabled={o.desactivada} title={o.titulo}>{o.texto}</button>
+        <button key={o.valor} type="button" aria-pressed={o.valor === valor} onClick={() => onCambiar(o.valor)} disabled={o.desactivada} title={o.titulo}>{o.muestra && <span className={`q-muestra ${o.muestra}`} aria-hidden="true" />}{o.texto}</button>
       ))}
     </div>
   );

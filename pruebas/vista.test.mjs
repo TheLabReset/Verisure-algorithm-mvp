@@ -235,7 +235,7 @@ test('la marca, su competencia y su rubro solo se escriben en src/cliente.js', (
   // tokens.css es la paleta del cliente: se reescribe entera con cada marca, así que puede nombrarla
   const permitidos = new Set(['src/cliente.js', 'src/sistema/tokens.css']);
   const archivos = (d) => readdirSync(d).flatMap((n) => { const p = join(d, n); return statSync(p).isDirectory() ? archivos(p) : /\.(jsx?|mjs|css)$/.test(n) ? [p] : []; });
-  const palabras = [CLIENTE.nombre, CLIENTE.nombreLargo, CLIENTE.marcaFuente, ...CLIENTE.competencia.flatMap((c) => [c.nombre, c.marcaFuente]), CLIENTE.rubroPlural];
+  const palabras = [CLIENTE.nombre, CLIENTE.nombreLargo, CLIENTE.marcaFuente, ...CLIENTE.competencia.flatMap((c) => [c.nombre, c.marcaFuente]), ...(CLIENTE.vigiladas || []).flatMap((c) => [c.nombre, c.marcaFuente]), CLIENTE.rubroPlural];
   const fugas = [...archivos('src'), ...archivos('scripts')].filter((p) => !permitidos.has(p)).flatMap((p) => {
     const texto = readFileSync(p, 'utf8');
     return palabras.filter((w) => new RegExp(`(?<![\\w-])${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w-])`).test(texto)).map((w) => `${p}: ${w}`);

@@ -213,6 +213,10 @@
 .q-mapa .leaflet-interactive.q-mapa-foco { fill: var(--resalte); stroke: var(--resalte-anillo); }
 .q-mapa .leaflet-interactive.q-mapa-resto { fill: var(--borde-control); }
 .q-mapa .leaflet-interactive.q-mapa-propia { fill: var(--propia); }
+.q-mapa .leaflet-interactive.q-mapa-vigilada-1 { fill: var(--vigilada-1); }
+.q-mapa .leaflet-interactive.q-mapa-vigilada-2 { fill: var(--vigilada-2); }
+.q-mapa .leaflet-interactive.q-mapa-vigilada-3 { fill: var(--vigilada-3); }
+.q-mapa .leaflet-interactive.q-mapa-vigilada-4 { fill: var(--vigilada-4); }
 .q-mapa .leaflet-interactive.q-mapa-punto:hover { fill-opacity: 1; }
 .q-mapa .q-mapa-anillo { stroke: var(--texto-1); fill: none; }
 .q-mapa .q-mapa-grupo { display: grid; place-items: center; box-sizing: border-box; padding: var(--e-1); border-radius: 50%; border: 2px solid var(--resalte-borde); cursor: pointer; }
@@ -241,6 +245,11 @@
 .q-muestra-mapa-foco { border-radius: 50%; background: var(--resalte); border: 1px solid var(--resalte-anillo); }
 .q-muestra-mapa-resto { border-radius: 50%; background: var(--borde-control); }
 .q-muestra-mapa-propia, .q-muestra-propia { border-radius: 50%; background: var(--propia); }
+/* las marcas vigiladas (capa 1): su color en el mapa, la leyenda, la lista y la ficha */
+.q-muestra-vigilada-1 { border-radius: 50%; background: var(--vigilada-1); }
+.q-muestra-vigilada-2 { border-radius: 50%; background: var(--vigilada-2); }
+.q-muestra-vigilada-3 { border-radius: 50%; background: var(--vigilada-3); }
+.q-muestra-vigilada-4 { border-radius: 50%; background: var(--vigilada-4); }
 .q-muestra-propia-cuadro { background: var(--propia); margin-left: calc(-1 * var(--e-1)); }
 .q-muestra-resto { background: var(--serie-resto); }
 
