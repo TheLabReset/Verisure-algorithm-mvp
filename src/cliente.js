@@ -12,12 +12,11 @@ export const CLIENTE = {
   // no compiten en residencial (docs/INTEGRAMETRICS-HALLAZGOS.md)
   competencia: [{ nombre: 'Prosegur', marcaFuente: 'PROSEGUR' }],
   // Otras marcas que se vigilan solo en la capa 1: sus primeras apariciones y sus digitalizados. Se siguen por su
-  // nombre exacto en Integrametrics, no por subsector (Hikvision está en «tiendas de tecnología»). No entran a la
+  // nombre exacto en Integrametrics, no por subsector (una marca de cámaras puede estar en «tiendas de tecnología»). No entran a la
   // inversión, al share, a las capas 2 a 4, al export.csv del BI ni a MAIA: van en public/data/vigiladas.json.
   // Su color sigue el orden de esta lista (--vigilada-1 a --vigilada-4 en tokens.css): se agrega al final.
+  // Liderman y Hikvision salieron: sus piezas eran de revendedores, retail y empleo, no campañas de la marca.
   vigiladas: [
-    { nombre: 'Liderman', marcaFuente: 'LIDERMAN' },
-    { nombre: 'Hikvision', marcaFuente: 'HIKVISION' },
     { nombre: 'Portero Seguro', marcaFuente: 'PORTERO SEGURO' },
   ],
   subsectores: ['SEGURIDAD Y ALARMAS', 'SEGURIDAD PRIVADA'],

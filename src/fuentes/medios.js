@@ -61,7 +61,7 @@ export function emisionesDe(medios, marca, desde, hasta) {
 }
 
 // Arma el formato de medios.json desde emisiones ya decodificadas, por marca
-function codificar(porMarca) {
+export function codificar(porMarca) {
   const dic = Object.fromEntries(DICCIONARIOS.map((k) => [k, []]));
   const pos = Object.fromEntries(DICCIONARIOS.map((k) => [k, new Map()]));
   const codigo = (k, v) => { const t = v || ''; if (!pos[k].has(t)) { pos[k].set(t, dic[k].length); dic[k].push(t); } return pos[k].get(t); };

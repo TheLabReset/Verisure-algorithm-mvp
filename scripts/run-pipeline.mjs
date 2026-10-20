@@ -19,7 +19,7 @@ import { buildAlgorithm, mergeAlgorithm } from '../src/fuentes/agregado.js'
 import { registrosToCSV } from '../src/fuentes/exportCsv.js'
 import { fetchRegistros, fetchRegistrosDigital } from '../src/fuentes/integrametrics.js'
 import { armarMedios } from './armar-medios.mjs'
-import { mediosDesdeCsv, mezclarMedios } from '../src/fuentes/medios.js'
+import { mediosDesdeCsv, mezclarMedios, emisionesDe, codificar } from '../src/fuentes/medios.js'
 import { CLIENTE } from '../src/cliente.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -40,6 +40,16 @@ const esVigilada = (r) => VIGILADAS.has(String(r.maname || '').trim())
 // vigiladas.json con la forma que lee la vista; uno viejo o roto se rearma desde la ventana, sin frenar lo principal
 const vigiladasValido = (v) => Boolean(v?.meta && Array.isArray(v.daily) && Array.isArray(v.pieces) && Array.isArray(v.events) && Array.isArray(v.ooh)
   && Array.isArray(v.digital?.pieces) && Array.isArray(v.digital?.daily) && v.medios?.emisiones && v.medios?.dic)
+// Una marca que sale de CLIENTE.vigiladas sale también del archivo: el merge no arrastra sus filas viejas
+const soloLista = (filas) => filas.filter((x) => VIGILADAS.has(x.maname))
+const soloLista1 = (dias) => dias.map((d) => ({ ...d, brands: Object.fromEntries(Object.entries(d.brands || {}).filter(([m]) => VIGILADAS.has(m))) }))
+  .filter((d) => Object.keys(d.brands).length)
+export const soloVigiladas = (v) => ({
+  ...v, daily: soloLista1(v.daily), pieces: soloLista(v.pieces), events: soloLista(v.events), ooh: soloLista(v.ooh),
+  digital: { ...v.digital, daily: soloLista1(v.digital.daily), pieces: soloLista(v.digital.pieces) },
+  medios: codificar(Object.fromEntries([...VIGILADAS].map((m) => [m, emisionesDe(v.medios, m, '0000-00-00', '9999-99-99')]))),
+  meta: { ...v.meta, historia: Object.fromEntries(Object.entries(v.meta.historia || {}).filter(([m]) => VIGILADAS.has(m))) },
+})
 
 // ATL: cada registro trae ~150 campos (decenas de audiencia vacíos). Guardamos SOLO
 // los que consumen la agregación/export → el año pasa de ~150 MB a lo justo.
@@ -154,6 +164,7 @@ export async function correrPipeline({ token, fetchImpl = fetch, out = OUT, hoy,
     let baseVig = null
     try { baseVig = leerDe(out, 'vigiladas.json') } catch { baseVig = null }
     if (baseVig && !vigiladasValido(baseVig)) { log('   vigiladas.json con otra forma: se rearma desde esta ventana'); baseVig = null }
+    if (baseVig) baseVig = soloVigiladas(baseVig)
     const freshVig = buildAlgorithm(vigiladas.registros, vigiladas.digital, { source, generated: stamp })
     vig = baseVig ? mergeAlgorithm(baseVig, freshVig) : freshVig
     const historia = Object.fromEntries([...VIGILADAS].map((m) => { const b = baseVig?.meta?.historia?.[m]; return [m, b && b < start ? b : start] }))
