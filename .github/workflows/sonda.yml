@@ -1,0 +1,37 @@
+# Sonda de solo lectura (temporal): otras marcas de seguridad en Integrametrics. No escribe en el repo ni en
+# producción: permisos de solo lectura, sin commit, resultados en el log y en un artefacto de 3 días.
+# Corre solo cuando cambia la sonda en la rama de trabajo; se borra al leer los resultados.
+name: Sonda de marcas (solo lectura)
+
+on:
+  push:
+    branches: [claude/modest-tesla-a7501f]
+    paths: ['.github/workflows/sonda.yml', 'scripts/sonda-marcas.mjs']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sonda
+  cancel-in-progress: true
+
+jobs:
+  sonda:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      INTEGRAMETRICS_TOKEN: ${{ secrets.INTEGRAMETRICS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Sonda
+        run: node scripts/sonda-marcas.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sonda-marcas
+          path: sonda-marcas.json
+          retention-days: 3
+          if-no-files-found: ignore
