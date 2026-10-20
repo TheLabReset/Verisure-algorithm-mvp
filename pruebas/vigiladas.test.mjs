@@ -14,20 +14,22 @@ const masDias = (iso, n) => { const d = new Date(`${iso}T00:00:00Z`); d.setUTCDa
 const ULTIMO = JSON.parse(readFileSync(join(DATA, 'algorithm.json'), 'utf8')).meta.lastDay;
 const DIA = masDias(ULTIMO, 1);
 const [RIVAL] = CLIENTE.competencia;
-const [V1, V2, V3] = CLIENTE.vigiladas;
+const [V1] = CLIENTE.vigiladas;
+// una marca que estuvo en la lista y salió: lo commiteado de ella no se arrastra
+const SALIO = 'MARCA QUE SALIO';
 
 const ATL = [
   { id_unico: 991001, maname: RIVAL.marcaFuente, fecha: `${DIA} 07:15:00`, rinversion: 1200, hour: 7, minute: 15, gname: 'RADIO', mname: 'RPP FM', tname: 'SPOT', vname: 'VERSION DE PRUEBA', id_versiones_unica: 991001, franja: 'DIA', progname: 'PROGRAMA DE PRUEBA', ciuname: 'LIMA' },
 ];
 const ATL_VIG = [
   { id_unico: 992001, maname: V1.marcaFuente, fecha: `${DIA} 08:20:00`, rinversion: 400, hour: 8, minute: 20, gname: 'RADIO', mname: 'OXIGENO FM', tname: 'SPOT RADIO', vname: 'VIGILADA EN RADIO', id_versiones_unica: 992001, franja: 'DIA', progname: 'LA MAÑANA', ciuname: 'LIMA', nuevas_versiones: 'NUEVO', rfile: 'https://ejemplo.invalid/a.mp3' },
-  { id_unico: 992002, maname: V2.marcaFuente, fecha: `${DIA} 00:00:00`, rinversion: 3000, gname: 'VIA PUBLICA', tname: 'TORRE UNIPOLAR', vname: 'VIGILADA EN LA CALLE', id_versiones_unica: 992002, latitud: -12.09, longitud: -77.02, direccion: 'AV. DE PRUEBA SIN NUMERO', ciuname: 'LIMA', rfile: 'https://ejemplo.invalid/p.jpg' },
+  { id_unico: 992002, maname: V1.marcaFuente, fecha: `${DIA} 00:00:00`, rinversion: 3000, gname: 'VIA PUBLICA', tname: 'TORRE UNIPOLAR', vname: 'VIGILADA EN LA CALLE', id_versiones_unica: 992002, latitud: -12.09, longitud: -77.02, direccion: 'AV. DE PRUEBA SIN NUMERO', ciuname: 'LIMA', rfile: 'https://ejemplo.invalid/p.jpg' },
 ];
 const DIGITAL = [{ fecha: DIA, maname: RIVAL.marcaFuente, ssname: CLIENTE.subsectores[0], inversion_moneda_local: 900, impresiones: 50000, medio_digital: 'FACEBOOK', version: 'PIEZA DIGITAL DE PRUEBA', advertisement: 'https://ejemplo.invalid/d.jpg' }];
 const DIGITAL_VIG = [
   // una vigilada en otro subsector entra igual: se sigue por su nombre, no por subsector
-  { fecha: DIA, maname: V2.marcaFuente, ssname: 'TIENDAS DE TECNOLOGIA', inversion_moneda_local: 300, impresiones: 9000, medio_digital: 'INSTAGRAM', version: 'CAMARAS DE PRUEBA', advertisement: 'https://ejemplo.invalid/v2.jpg' },
-  { fecha: DIA, maname: V3.marcaFuente, ssname: 'SEGURIDAD PRIVADA', inversion_moneda_local: 200, impresiones: 4000, medio_digital: 'FACEBOOK', version: 'PORTERIA DE PRUEBA', advertisement: 'https://ejemplo.invalid/v3.jpg' },
+  { fecha: DIA, maname: V1.marcaFuente, ssname: 'TIENDAS DE TECNOLOGIA', inversion_moneda_local: 300, impresiones: 9000, medio_digital: 'INSTAGRAM', version: 'CAMARAS DE PRUEBA', advertisement: 'https://ejemplo.invalid/v2.jpg' },
+  { fecha: DIA, maname: V1.marcaFuente, ssname: 'SEGURIDAD PRIVADA', inversion_moneda_local: 200, impresiones: 4000, medio_digital: 'FACEBOOK', version: 'PORTERIA DE PRUEBA', advertisement: 'https://ejemplo.invalid/v3.jpg' },
   // una marca que no se sigue, en otro subsector, no entra a ningún lado
   { fecha: DIA, maname: 'MARCA AJENA', ssname: 'TIENDAS DE TECNOLOGIA', inversion_moneda_local: 100, impresiones: 1, medio_digital: 'FACEBOOK', version: 'NO', advertisement: null },
 ];
@@ -65,9 +67,9 @@ test('vigiladas: van a vigiladas.json con sus estrenos, paneles, piezas digitale
       const v = JSON.parse(leer(dir, 'vigiladas.json'));
       assert.deepEqual(v.meta.marcas, CLIENTE.vigiladas.map((x) => x.marcaFuente));
       assert.equal(v.events.length, 1); assert.equal(v.events[0].maname, V1.marcaFuente);
-      assert.equal(v.ooh.length, 1); assert.equal(v.ooh[0].maname, V2.marcaFuente);
-      assert.deepEqual(v.digital.pieces.map((p) => p.maname).sort(), [V2.marcaFuente, V3.marcaFuente].sort(), 'por nombre, en cualquier subsector; la marca ajena no entra');
-      const radio = emisionesDe(v.medios, V1.marcaFuente, DIA, DIA);
+      assert.equal(v.ooh.length, 1); assert.equal(v.ooh[0].maname, V1.marcaFuente);
+      assert.deepEqual(v.digital.pieces.map((p) => p.maname), [V1.marcaFuente, V1.marcaFuente], 'por nombre, en cualquier subsector; la marca ajena no entra');
+      const radio = emisionesDe(v.medios, V1.marcaFuente, DIA, DIA).filter((e) => e.grupo === 'RADIO');
       assert.equal(radio.length, 1); assert.equal(radio[0].programa, 'LA MAÑANA');
       assert.ok(!JSON.stringify(v).includes(RIVAL.marcaFuente) && !JSON.stringify(v).includes('MARCA AJENA'), 'ni la competencia ni otras marcas');
     };
@@ -92,7 +94,7 @@ test('vigiladas: lo commiteado fuera de la ventana se queda', async () => {
     assert.equal(JSON.parse(leer(dir, 'algorithm.json')).meta.lastDay, DIA2, 'la corrida nueva sí escribió');
     const v = JSON.parse(leer(dir, 'vigiladas.json'));
     assert.equal(v.meta.ventana.desde > DIA, true, 'la ventana nueva ya no incluye el día de las vigiladas');
-    assert.equal(emisionesDe(v.medios, V1.marcaFuente, DIA, DIA).length, 1);
+    assert.equal(emisionesDe(v.medios, V1.marcaFuente, DIA, DIA).length, 2, 'su radio y su panel');
     assert.equal(v.ooh.length, 1);
     assert.equal(v.digital.pieces.length, 2);
   } finally { rmSync(dir, { recursive: true, force: true }); }
@@ -119,19 +121,20 @@ test('vigiladas en la vista: apariciones por tarjeta, avisos propios y nada en l
     const g = v.lee.vigiladas;
     assert.ok(g, 'con su archivo, la vista trae las vigiladas');
     const de = (tarjeta) => g.apariciones.filter((a) => a.tarjeta === tarjeta).map((a) => a.marca).sort();
-    assert.deepEqual(de('digital'), [V2.marcaFuente, V3.marcaFuente].sort());
+    assert.deepEqual(de('digital'), [V1.marcaFuente, V1.marcaFuente], 'una por mensaje nuevo');
     assert.deepEqual(de('radio'), [V1.marcaFuente]);
-    assert.deepEqual(de('ooh'), [V2.marcaFuente]);
+    assert.deepEqual(de('ooh'), [V1.marcaFuente]);
     assert.deepEqual(de('tv'), []);
-    assert.equal(g.avisos.length, 4, 'un aviso por marca y tarjeta');
-    assert.equal(g.digital[V2.marcaFuente].piezas, 1);
+    assert.equal(g.avisos.length, 3, 'un aviso por marca y tarjeta');
+    assert.equal(g.digital[V1.marcaFuente].piezas, 2);
     assert.equal(g.radio[V1.marcaFuente].emisiones.length, 1);
     assert.equal(g.radio[V1.marcaFuente].emisiones[0].nueva, true);
-    assert.equal(g.ooh[V2.marcaFuente].porMarca[V2.marcaFuente], 1);
-    assert.ok(g.ooh[V2.marcaFuente].ubicaciones.some((u) => u.vigilada === 2 && !u.foco), 'su punto lleva su color, no el de la competencia');
-    assert.ok(g.ooh[V2.marcaFuente].abanico.grupos.some((x) => x.nombre === V2.nombre), 'la ventana con todos sus paneles existe («Ver todos los paneles»)');
+    assert.equal(g.ooh[V1.marcaFuente].porMarca[V1.marcaFuente], 1);
+    assert.ok(g.ooh[V1.marcaFuente].ubicaciones.some((u) => u.vigilada === 1 && !u.foco), 'su punto lleva su color, no el de la competencia');
+    assert.ok(g.ooh[V1.marcaFuente].abanico.grupos.some((x) => x.nombre === V1.nombre), 'la ventana con todos sus paneles existe («Ver todos los paneles»)');
     // sin respaldo: una vigilada sin nada en el período no muestra lo último que tuvo
-    assert.equal(g.digital[V1.marcaFuente].piezas, 0);
+    const antes = armarVista(contrato, medios, { desde: masDias(DIA, -13), hasta: masDias(DIA, -7) }, { hoy: masDias(DIA, 1) }, { mapa, vigiladas }).lee.vigiladas;
+    assert.equal(antes.digital[V1.marcaFuente].piezas, 0);
     // las alertas generales (y con ellas MAIA) no las leen; la competencia sigue igual
     const sin = armarVista(contrato, medios, filtros, { hoy: masDias(DIA, 1) }, { mapa });
     assert.equal(sin.lee.vigiladas, null, 'sin su archivo no hay vigiladas');
@@ -161,20 +164,42 @@ test('vigiladas: lista blanca en ATL; una variante del nombre no entra al contra
   try {
     const conVariante = async (url) => {
       const u = new URL(url), dia = (u.searchParams.get('startDate') || '').slice(0, 10);
-      const variantes = [{ ...ATL_VIG[0], id_unico: 994001, maname: `${V1.marcaFuente} SERVICIOS` }, { ...ATL_VIG[1], id_unico: 994002, maname: V2.nombre }, { ...ATL_VIG[0], id_unico: 994003, maname: `${V3.marcaFuente} ` }];
+      const variantes = [{ ...ATL_VIG[0], id_unico: 994001, maname: `${V1.marcaFuente} SERVICIOS` }, { ...ATL_VIG[1], id_unico: 994002, maname: `${V1.marcaFuente} SAC` }, { ...ATL_VIG[0], id_unico: 994003, maname: `${V1.marcaFuente} ` }];
       const cuerpo = dia !== DIA ? [] : u.pathname.endsWith('/registros-digital') ? DIGITAL : [...ATL, ...variantes];
       return new Response(JSON.stringify(cuerpo), { status: 200 });
     };
     await correrPipeline({ token: 'prueba', fetchImpl: conVariante, out: dir, hoy: masDias(DIA, 1), ventana: 3, log: () => {} });
     const a = JSON.parse(leer(dir, 'algorithm.json'));
     assert.deepEqual(a.meta.brands, [RIVAL.marcaFuente], 'solo la competencia de la ventana');
-    assert.ok(!leer(dir, 'export.csv').includes('SERVICIOS') && !leer(dir, 'export.csv').includes(V2.nombre));
+    assert.ok(!leer(dir, 'export.csv').includes('SERVICIOS') && !leer(dir, 'export.csv').includes(`${V1.marcaFuente} SAC`));
     // con espacio al final es la vigilada: se guarda con su nombre limpio
-    assert.equal(emisionesDe(JSON.parse(leer(dir, 'vigiladas.json')).medios, V3.marcaFuente, DIA, DIA).length, 1);
+    assert.equal(emisionesDe(JSON.parse(leer(dir, 'vigiladas.json')).medios, V1.marcaFuente, DIA, DIA).length, 1);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 import { tarjetaDe } from '../src/calculo/vista.js';
+test('vigiladas: una marca que sale de la lista sale también de vigiladas.json', async () => {
+  const dir = copia();
+  try {
+    await correr(dir, true);
+    // lo commiteado trae una marca que ya no está en CLIENTE.vigiladas, en cada parte del archivo
+    const v = JSON.parse(leer(dir, 'vigiladas.json'));
+    const otra = (x) => ({ ...x, maname: SALIO, key: `${SALIO}:${x.key}` });
+    const dia = masDias(DIA, -30);
+    v.daily.push({ fecha: dia, brands: { [SALIO]: { spend: 1, spots: 1, byMedium: { OOH: 1 }, byFranja: {} } } });
+    v.digital.daily.push({ fecha: dia, brands: { [SALIO]: { spend: 1, impresiones: 1, plat: {} } } });
+    v.pieces.push(otra(v.pieces[0])); v.events.push(otra(v.events[0])); v.ooh.push(otra(v.ooh[0])); v.digital.pieces.push(otra(v.digital.pieces[0]));
+    v.medios.emisiones[SALIO] = v.medios.emisiones[V1.marcaFuente];
+    v.meta.historia[SALIO] = v.meta.historia[V1.marcaFuente];
+    writeFileSync(join(dir, 'vigiladas.json'), JSON.stringify(v));
+    await correr(dir, true);
+    const despues = leer(dir, 'vigiladas.json');
+    assert.ok(!despues.includes(SALIO), 'no queda ni una fila de la marca que salió');
+    const d = JSON.parse(despues);
+    assert.equal(d.ooh.length, 1); assert.equal(d.digital.pieces.length, 2); assert.equal(emisionesDe(d.medios, V1.marcaFuente, DIA, DIA).length, 2);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('un estreno va a la tarjeta de su medio, no de su tipo de aviso', () => {
   assert.equal(tarjetaDe({ grupo: 'TV ABIERTA', tipo: 'BANNER' }), 'tv', 'un banner en TV es TV');
   assert.equal(tarjetaDe({ grupo: 'OOH', tipo: 'PARADERO' }), 'ooh', 'un paradero es vía pública');
