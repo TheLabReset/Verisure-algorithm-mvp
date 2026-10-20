@@ -54,7 +54,8 @@ function Ficha({ ubicacion, paneles, onVerTodos }) {
 }
 
 export default function Ooh({ o, t, nota }) {
-  const [zona, setZona] = useState(o.zonas[0]?.nombre ?? 'Lima');
+  // abre en la zona donde está la marca en foco (la competencia o la vigilada elegida), no siempre en la primera
+  const [zona, setZona] = useState((o.zonas.find((z) => o.ubicaciones.some((u) => u.zona === z.nombre && (u.foco || u.vigilada))) ?? o.zonas[0])?.nombre ?? 'Lima');
   const [elegida, setElegida] = useState(null);
   const [ventana, setVentana] = useState(null);
   const actual = o.zonas.find((z) => z.nombre === zona) ?? o.zonas[0];

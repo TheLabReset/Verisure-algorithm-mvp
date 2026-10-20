@@ -389,10 +389,11 @@ const ALERTAS = {
   }),
   // una marca vigilada (solo capa 1) con una versión que se ve por primera vez en el período, en su tarjeta
   'aparicion-vigilada': (a) => ({
-    // en digital cuenta mensajes nuevos, como el de la competencia; en ATL, versiones estrenadas
+    // en digital cuenta mensajes nuevos, como el de la competencia; en ATL, versiones estrenadas. El período ya está
+    // en la ventana de la tarjeta: no se repite
     titulo: a.tarjeta === 'digital'
-      ? `${a.marca} usa ${enLetras(a.cuantos)} ${segun(a.cuantos, 'mensaje digital nuevo', 'mensajes digitales nuevos')} en ${per(a)}`
-      : `${a.marca} estrenó ${enLetras(a.cuantos, true)} ${segun(a.cuantos, 'versión', 'versiones')}${MEDIO_TARJETA[a.tarjeta]} en ${per(a)}`,
+      ? `${a.marca} usa ${enLetras(a.cuantos)} ${segun(a.cuantos, 'mensaje digital nuevo', 'mensajes digitales nuevos')} en el período`
+      : `${a.marca} estrenó ${enLetras(a.cuantos, true)} ${segun(a.cuantos, 'versión', 'versiones')}${MEDIO_TARJETA[a.tarjeta]} en el período`,
   }),
   'digital-competencia': (a) => ({
     titulo: `${a.marca} usa ${enLetras(a.cuantas)} ${segun(a.cuantas, 'mensaje digital nuevo', 'mensajes digitales nuevos')} en el período`,
