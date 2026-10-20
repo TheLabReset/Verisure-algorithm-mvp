@@ -2,7 +2,7 @@
 // vigiladas.json. El contrato, el CSV del BI y medios.json quedan idénticos a una corrida sin ellas.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, copyFileSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, copyFileSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { correrPipeline } from '../scripts/run-pipeline.mjs';
@@ -104,7 +104,15 @@ test('vigiladas en la vista: apariciones por tarjeta, avisos propios y nada en l
   const dir = copia();
   try {
     await correr(dir, true);
-    const contrato = JSON.parse(leer(dir, 'algorithm.json')), medios = JSON.parse(leer(dir, 'medios.json')), vigiladas = JSON.parse(leer(dir, 'vigiladas.json'));
+    const contrato = JSON.parse(leer(dir, 'algorithm.json')), medios = JSON.parse(leer(dir, 'medios.json')), corta = JSON.parse(leer(dir, 'vigiladas.json'));
+    // una corrida incremental deja la historia en su ventana: lo que se ve ahí no es una primera aparición
+    const filtros0 = { desde: masDias(DIA, -6), hasta: DIA };
+    const v0 = armarVista(contrato, medios, filtros0, { hoy: masDias(DIA, 1) }, { mapa: JSON.parse(readFileSync(join(DATA, 'mapa-lima.json'), 'utf8')), vigiladas: corta });
+    assert.equal(v0.lee.vigiladas.apariciones.length, 0, 'con la historia recién empezada nada es «primera aparición»');
+    assert.equal(v0.lee.vigiladas.radio[V1.marcaFuente].emisiones[0].nueva, false, 'ni la emisión se marca nueva');
+    assert.deepEqual(v0.lee.vigiladas.contadas, { digital: false, atl: false }, 'el resumen lo dice como sin dato');
+    // con la historia de un backfill desde el primer día del contrato, sí
+    const vigiladas = { ...corta, meta: { ...corta.meta, historia: Object.fromEntries(Object.keys(corta.meta.historia).map((m) => [m, contrato.meta.firstDay])) } };
     const mapa = JSON.parse(readFileSync(join(DATA, 'mapa-lima.json'), 'utf8'));
     const filtros = { desde: masDias(DIA, -6), hasta: DIA };
     const v = armarVista(contrato, medios, filtros, { hoy: masDias(DIA, 1) }, { mapa, vigiladas });
@@ -121,6 +129,7 @@ test('vigiladas en la vista: apariciones por tarjeta, avisos propios y nada en l
     assert.equal(g.radio[V1.marcaFuente].emisiones[0].nueva, true);
     assert.equal(g.ooh[V2.marcaFuente].porMarca[V2.marcaFuente], 1);
     assert.ok(g.ooh[V2.marcaFuente].ubicaciones.some((u) => u.vigilada === 2 && !u.foco), 'su punto lleva su color, no el de la competencia');
+    assert.ok(g.ooh[V2.marcaFuente].abanico.grupos.some((x) => x.nombre === V2.nombre), 'la ventana con todos sus paneles existe («Ver todos los paneles»)');
     // sin respaldo: una vigilada sin nada en el período no muestra lo último que tuvo
     assert.equal(g.digital[V1.marcaFuente].piezas, 0);
     // las alertas generales (y con ellas MAIA) no las leen; la competencia sigue igual
@@ -132,4 +141,45 @@ test('vigiladas en la vista: apariciones por tarjeta, avisos propios y nada en l
     // un archivo con otra forma cuenta como que no llegó
     assert.equal(armarVista(contrato, medios, filtros, { hoy: masDias(DIA, 1) }, { mapa, vigiladas: { meta: {}, pieces: [] } }).lee.vigiladas, null);
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('vigiladas: un vigiladas.json roto no frena la data principal y se rearma', async () => {
+  for (const roto of ['', '[]', '{"meta":{},"pieces":[]}']) {
+    const dir = copia();
+    try {
+      writeFileSync(join(dir, 'vigiladas.json'), roto);
+      const r = await correr(dir, true);
+      assert.equal(r.vigiladasError, null, `${JSON.stringify(roto)}: se rearma sin error`);
+      assert.equal(JSON.parse(leer(dir, 'meta.json')).lastDay, DIA, 'la data principal se publicó entera');
+      assert.equal(JSON.parse(leer(dir, 'vigiladas.json')).ooh.length, 1);
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  }
+});
+
+test('vigiladas: lista blanca en ATL; una variante del nombre no entra al contrato ni al CSV', async () => {
+  const dir = copia();
+  try {
+    const conVariante = async (url) => {
+      const u = new URL(url), dia = (u.searchParams.get('startDate') || '').slice(0, 10);
+      const variantes = [{ ...ATL_VIG[0], id_unico: 994001, maname: `${V1.marcaFuente} SERVICIOS` }, { ...ATL_VIG[1], id_unico: 994002, maname: V2.nombre }, { ...ATL_VIG[0], id_unico: 994003, maname: `${V3.marcaFuente} ` }];
+      const cuerpo = dia !== DIA ? [] : u.pathname.endsWith('/registros-digital') ? DIGITAL : [...ATL, ...variantes];
+      return new Response(JSON.stringify(cuerpo), { status: 200 });
+    };
+    await correrPipeline({ token: 'prueba', fetchImpl: conVariante, out: dir, hoy: masDias(DIA, 1), ventana: 3, log: () => {} });
+    const a = JSON.parse(leer(dir, 'algorithm.json'));
+    assert.deepEqual(a.meta.brands, [RIVAL.marcaFuente], 'solo la competencia de la ventana');
+    assert.ok(!leer(dir, 'export.csv').includes('SERVICIOS') && !leer(dir, 'export.csv').includes(V2.nombre));
+    // con espacio al final es la vigilada: se guarda con su nombre limpio
+    assert.equal(emisionesDe(JSON.parse(leer(dir, 'vigiladas.json')).medios, V3.marcaFuente, DIA, DIA).length, 1);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+import { tarjetaDe } from '../src/calculo/vista.js';
+test('un estreno va a la tarjeta de su medio, no de su tipo de aviso', () => {
+  assert.equal(tarjetaDe({ grupo: 'TV ABIERTA', tipo: 'BANNER' }), 'tv', 'un banner en TV es TV');
+  assert.equal(tarjetaDe({ grupo: 'OOH', tipo: 'PARADERO' }), 'ooh', 'un paradero es vía pública');
+  assert.equal(tarjetaDe({ grupo: 'RADIO', tipo: 'MENCION' }), 'radio');
+  // un estreno anterior al campo de grupo cae a su tipo, como antes
+  assert.equal(tarjetaDe({ tipo: 'SPOT RADIO' }), 'radio');
+  assert.equal(tarjetaDe({ tipo: 'TORRE UNIPOLAR' }), 'ooh');
 });

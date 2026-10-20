@@ -5,7 +5,7 @@
 // Las marcas vigiladas (src/cliente.js) aparecen solo acá: cada tarjeta trae el filtro «Marca» cuando alguna salió en
 // el período, y su aviso la elige en el filtro. Cada una va en su color (--vigilada-N), siempre con su nombre.
 // No calcula: pinta la vista y las lecturas de src/textos.
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useRef, useState } from 'react';
 import { Bloque, Tabla, Resumen, Abanico, Detalle, Tono, Grupo, vigente } from '../sistema/Componentes.jsx';
 import { Lineas, Pendiente } from '../sistema/graficos/Graficos.jsx';
 import { numero, compacto, fechaCorta, porcentaje, variacion } from '../sistema/formato.js';
@@ -13,7 +13,7 @@ import { MarcoCapa, SeccionDe, sinDato, avisosDe } from './comun.jsx';
 import Ooh from './Ooh.jsx';
 import Emisiones from './Emisiones.jsx';
 import { periodoTexto, version, ventanaTexto, resumenTitulo, plataformasTexto, plataformaEnFrase, capital } from '../textos/comun.js';
-import { digitalSemanaLectura, atlSemanaLectura, oohLectura, distritosLectura, textosDelAbanico, textosMarca, trendsMarcasLectura, tiktokLectura, facebookLectura, TONOS, alerta, aparicionesNota, ACCION_VIGILADA } from '../textos/lecturas.js';
+import { digitalSemanaLectura, atlSemanaLectura, oohLectura, distritosLectura, textosDelAbanico, textosMarca, trendsMarcasLectura, tiktokLectura, facebookLectura, TONOS, alerta, aparicionesNota, ACCION_VIGILADA, accionVigiladaEtiqueta } from '../textos/lecturas.js';
 import { UMBRALES_TONO } from '../calculo/conversacion.js';
 import { CLIENTE } from '../cliente.js';
 
@@ -32,26 +32,30 @@ function opcionesMarca(vig, cuenta, cuentaCompetencia) {
   if (!extras.length) return null;
   return [{ valor: COMPETENCIA.marcaFuente, texto: cuentaCompetencia ? `${COMPETENCIA.nombre} · ${numero(cuentaCompetencia)}` : COMPETENCIA.nombre }, ...extras];
 }
-function FiltroMarca({ opciones, valor, onCambiar }) {
+function FiltroMarca({ opciones, valor, onCambiar, contenedor }) {
   if (!opciones) return null;
-  return <div className="q-control q-filtro-marca"><span>Marca</span><Grupo etiqueta="Marca" valor={valor} onCambiar={onCambiar} opciones={opciones} /></div>;
+  return <div className="q-control q-filtro-marca" ref={contenedor}><span>Marca</span><Grupo etiqueta="Marca" valor={valor} onCambiar={onCambiar} opciones={opciones} /></div>;
 }
 // Los avisos de la tarjeta según la marca elegida: los de la competencia con ella; los de las vigiladas siempre, con
-// el botón que la elige (menos el de la que ya está a la vista)
-function avisosConMarca(v, tarjeta, elegida, elegir) {
+// el botón que la elige (menos el de la que ya está a la vista, y si su marca no está en el filtro no hay botón)
+function avisosConMarca(v, tarjeta, elegida, elegir, opciones) {
   const deCompetencia = elegida === COMPETENCIA.marcaFuente ? avisosDe(v, tarjeta) : [];
   const deVigiladas = (v.lee.vigiladas?.avisos || []).filter((a) => a.tarjeta === tarjeta).map((a) => {
     const t = alerta(a);
-    return t && { ...t, id: `aviso-vigilada-${a.marcaId}-${tarjeta}`, accion: a.marcaId === elegida ? null : { texto: ACCION_VIGILADA[tarjeta], alHacer: () => elegir(a.marcaId) } };
+    const puede = a.marcaId !== elegida && opciones?.some((o) => o.valor === a.marcaId);
+    return t && { ...t, id: `aviso-vigilada-${a.marcaId}-${tarjeta}`, accion: puede ? { texto: ACCION_VIGILADA[tarjeta], etiqueta: accionVigiladaEtiqueta(tarjeta, a.marca), alHacer: () => elegir(a.marcaId) } : null };
   }).filter(Boolean);
   return [...deCompetencia, ...deVigiladas];
 }
 // La marca elegida de una tarjeta: si deja de tener algo (otro período), vuelve a la competencia.
-// MarcaInicial abre las tarjetas con otra marca elegida (la prueba de render la usa para pintar cada vigilada)
+// MarcaInicial abre las tarjetas con otra marca elegida (la prueba de render la usa para pintar cada vigilada).
+// Elegir desde un aviso lleva el foco al botón de esa marca en el filtro: el botón del aviso desaparece al elegir
 export const MarcaInicial = createContext(null);
 function useMarca(opciones) {
   const [m, setM] = useState(useContext(MarcaInicial) ?? COMPETENCIA.marcaFuente);
-  return [opciones ? vigente(m, opciones) : COMPETENCIA.marcaFuente, setM];
+  const contenedor = useRef(null);
+  const elegirDesdeAviso = (id) => { setM(id); requestAnimationFrame(() => contenedor.current?.querySelector('[aria-pressed="true"]')?.focus()); };
+  return [opciones ? vigente(m, opciones) : COMPETENCIA.marcaFuente, setM, elegirDesdeAviso, contenedor];
 }
 
 // Digital: un mazo por mensaje con sus piezas nuevas, y la lista de mensajes con sus plataformas
@@ -90,20 +94,20 @@ function AtlSemana({ a, medio, universo, avisos, titulo, nombre = COMPETENCIA.no
 function DigitalConMarca({ v, d, anio }) {
   const g = v.lee.vigiladas;
   const opciones = opcionesMarca(g, (id) => g?.digital?.[id]?.piezas || 0, d && !d.reciente ? d.piezas : 0);
-  const [marca, setMarca] = useMarca(opciones);
+  const [marca, setMarca, desdeAviso, contenedor] = useMarca(opciones);
   const m = g?.marcas.find((x) => x.id === marca);
-  const filtro = <FiltroMarca opciones={opciones} valor={marca} onCambiar={setMarca} />;
-  const avisos = avisosConMarca(v, 'digital', marca, setMarca);
+  const filtro = <FiltroMarca opciones={opciones} valor={marca} onCambiar={setMarca} contenedor={contenedor} />;
+  const avisos = avisosConMarca(v, 'digital', marca, desdeAviso, opciones);
   if (m) return <DigitalSemana d={g.digital[m.id]} anio={anio} avisos={avisos} nombre={m.nombre} filtro={filtro} />;
   return !d ? <Bloque titulo="Lo nuevo en digital" universo="digital" estado={sinDato('no-cargo')} /> : <DigitalSemana d={d} anio={anio} avisos={avisos} filtro={filtro} />;
 }
 function AtlConMarca({ v, a, apartado, medio, titulo }) {
   const g = v.lee.vigiladas;
   const opciones = opcionesMarca(g, (id) => g?.[apartado]?.[id]?.emisiones.length || 0, a && !a.reciente ? a.emisiones.length : 0);
-  const [marca, setMarca] = useMarca(opciones);
+  const [marca, setMarca, desdeAviso, contenedor] = useMarca(opciones);
   const m = g?.marcas.find((x) => x.id === marca);
-  const filtro = <FiltroMarca opciones={opciones} valor={marca} onCambiar={setMarca} />;
-  const avisos = avisosConMarca(v, apartado, marca, setMarca);
+  const filtro = <FiltroMarca opciones={opciones} valor={marca} onCambiar={setMarca} contenedor={contenedor} />;
+  const avisos = avisosConMarca(v, apartado, marca, desdeAviso, opciones);
   if (m) return <AtlSemana a={{ ...g[apartado][m.id], muestra: muestraDe(m) }} medio={medio} universo="atl" titulo={titulo} avisos={avisos} nombre={m.nombre} filtro={filtro} />;
   return <AtlSemana a={a} medio={medio} universo="atl" titulo={titulo} avisos={avisos} filtro={filtro} />;
 }
@@ -111,15 +115,15 @@ function AtlConMarca({ v, a, apartado, medio, titulo }) {
 function OohConMarca({ v, P, tPaneles }) {
   const g = v.lee.vigiladas, o0 = v.lee.ooh;
   const opciones = opcionesMarca(g, (id) => g?.ooh?.[id]?.porMarca[id] || 0, o0.porMarca[COMPETENCIA.marcaFuente]);
-  const [marca, setMarca] = useMarca(opciones);
+  const [marca, setMarca, desdeAviso, contenedor] = useMarca(opciones);
   const m = g?.marcas.find((x) => x.id === marca);
   // con una vigilada elegida, el mapa trae sus paneles y los de la marca propia, como el de la competencia
   const o = m ? g.ooh[m.id] : o0;
   return (
-    <Bloque universo="atl" {...oohLectura(o, P, m ? { nombre: m.nombre, marcaFuente: m.id } : undefined)} avisos={avisosConMarca(v, 'ooh', marca, setMarca)}
+    <Bloque universo="atl" {...oohLectura(o, P, m ? { nombre: m.nombre, marcaFuente: m.id } : undefined)} avisos={avisosConMarca(v, 'ooh', marca, desdeAviso, opciones)}
       ayuda={<p>Cada círculo es una ubicación: las caras de una misma torre van juntas. El distrito sale de las coordenadas de Integrametrics y los límites de OpenStreetMap.</p>}
       pie={<span>Paneles detectados en el período · mapa base © colaboradores de OpenStreetMap.</span>}>
-      <FiltroMarca opciones={opciones} valor={marca} onCambiar={setMarca} />
+      <FiltroMarca opciones={opciones} valor={marca} onCambiar={setMarca} contenedor={contenedor} />
       {o.paneles.length > 0 ? <Ooh key={marca} o={o} t={tPaneles} nota={`detectados en ${periodoTexto(P)}`} /> : <p className="q-nota-bloque">Sin paneles detectados en el período.</p>}
     </Bloque>
   );
@@ -146,8 +150,9 @@ export default function Senales({ capa, vista: v }) {
           { rotulo: `Paneles de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s14.id, irTexto: s14.titulo, valor: L.ooh ? numero(L.ooh.porMarca[COMPETENCIA.marcaFuente]) : null, nota: L.ooh ? `${numero(L.ooh.porMarca[CLIENTE.marcaFuente])} de ${CLIENTE.nombre}` : null },
           // las marcas vigiladas: cuántas versiones se vieron por primera vez en el período, y a qué tarjeta ir
           ...(L.vigiladas ? [(() => {
-            const ap = L.vigiladas.apariciones, s = { digital: s11, tv: s12, radio: s13, ooh: s14 }[ap[0]?.tarjeta];
-            return { rotulo: 'Primeras apariciones de otras marcas', valor: numero(ap.length), nota: aparicionesNota(ap, L.vigiladas.marcas), ir: s?.id, irTexto: s?.titulo };
+            const ap = L.vigiladas.apariciones, c = L.vigiladas.contadas, s = { digital: s11, tv: s12, radio: s13, ooh: s14 }[ap[0]?.tarjeta];
+            // sin ninguna fuente contada (caída o sin historia antes del período) es un hueco, no un cero
+            return { rotulo: 'Primeras apariciones de otras marcas', valor: c.digital || c.atl ? numero(ap.length) : null, nota: c.digital || c.atl ? aparicionesNota(ap, L.vigiladas.marcas, c) : null, ir: s?.id, irTexto: s?.titulo };
           })()] : []),
         ]} />
 
@@ -167,7 +172,7 @@ export default function Senales({ capa, vista: v }) {
         {!L.ooh ? <Bloque titulo="Dónde están los paneles" universo="atl" estado={sinDato('no-cargo')} /> : <>
           <OohConMarca v={v} P={P} tPaneles={tPaneles} />
           {L.ooh.paneles.length > 0 && (
-            <Detalle id={`detalle-${s14.id}`} titulo="Detalle de OOH" bajada={`Paneles detectados en ${periodoTexto(P)}.`} vistas={['paneles por distrito', 'la pieza de cada panel']}>
+            <Detalle id={`detalle-${s14.id}`} titulo="Detalle de OOH" bajada={`Paneles de ${COMPETENCIA.nombre} y ${CLIENTE.nombre} detectados en ${periodoTexto(P)}.`} vistas={['paneles por distrito', 'la pieza de cada panel']}>
               <Bloque universo="atl" {...distritosLectura(L.ooh)}
                 pie={<span>Lima y el Callao por distrito; fuera de Lima, por ciudad.</span>}>
                 <Tabla etiqueta="Paneles por distrito y marca" numericas={[1, 2, 3]} barra={{ columna: 3, valores: [...L.ooh.porDistrito, ...L.ooh.fueraDeLima].map((x) => x.total) }}

@@ -343,7 +343,7 @@ export function queMirarLectura(v) {
 // frente a qué compara cada alerta («el mismo tramo de junio», «mayo de 2026») y de qué período habla
 const comp = (a) => (a.periodo && comparacionTexto(a.periodo)) || 'la comparación';
 const per = (a) => (a.periodo ? periodoTexto(a.periodo) : 'el período');
-const MEDIO_TARJETA = { digital: ' digital', tv: ' en TV y cable', radio: ' en radio', ooh: ' en vía pública' };
+const MEDIO_TARJETA = { tv: ' en TV y cable', radio: ' en radio', ooh: ' en vía pública' };
 const ALERTAS = {
   'estreno-competencia': (a) => ({
     titulo: `${a.marca} estrenó ${enLetras(a.cuantos, true)} ${segun(a.cuantos, 'pieza', 'piezas')} en ${per(a)}`,
@@ -389,9 +389,10 @@ const ALERTAS = {
   }),
   // una marca vigilada (solo capa 1) con una versión que se ve por primera vez en el período, en su tarjeta
   'aparicion-vigilada': (a) => ({
-    titulo: `${a.marca} estrenó ${enLetras(a.cuantos, true)} ${segun(a.cuantos, 'pieza', 'piezas')}${MEDIO_TARJETA[a.tarjeta]} en ${per(a)}`,
-    dato: `${a.cuantos > 1 ? 'La más reciente: ' : ''}${cita(a.ultima.version)}, del ${fechaCorta(a.ultima.fecha)}.`,
-    mirar: `El mensaje y si se cruza con lo que tiene al aire ${CLIENTE.nombre}.`,
+    // en digital cuenta mensajes nuevos, como el de la competencia; en ATL, versiones estrenadas
+    titulo: a.tarjeta === 'digital'
+      ? `${a.marca} usa ${enLetras(a.cuantos)} ${segun(a.cuantos, 'mensaje digital nuevo', 'mensajes digitales nuevos')} en ${per(a)}`
+      : `${a.marca} estrenó ${enLetras(a.cuantos, true)} ${segun(a.cuantos, 'versión', 'versiones')}${MEDIO_TARJETA[a.tarjeta]} en ${per(a)}`,
   }),
   'digital-competencia': (a) => ({
     titulo: `${a.marca} usa ${enLetras(a.cuantas)} ${segun(a.cuantas, 'mensaje digital nuevo', 'mensajes digitales nuevos')} en el período`,
@@ -451,13 +452,15 @@ const COMP = CLIENTE.competencia[0].nombre;
 const COMP_PRINCIPAL = COMP;
 
 // Las marcas vigiladas en el resumen de la capa 1: de quién son las apariciones, o de quiénes no hubo
-export function aparicionesNota(apariciones, marcas) {
-  if (!apariciones.length) return lista(marcas.map((m) => m.nombre));
-  const quienes = [...new Set(apariciones.map((a) => a.nombre))];
-  return `de ${lista(quienes)}`;
+export function aparicionesNota(apariciones, marcas, contadas) {
+  const parcial = contadas && contadas.digital !== contadas.atl ? ` · solo ${contadas.digital ? 'digital' : 'ATL'}` : '';
+  const n = marcas.map((m) => m.nombre);
+  if (!apariciones.length) return `ninguna de ${n.length > 1 ? `${n.slice(0, -1).join(', ')} ni ${n.at(-1)}` : n.join('')}${parcial}`;
+  return `de ${lista([...new Set(apariciones.map((a) => a.nombre))])}${parcial}`;
 }
-// el botón del aviso de una vigilada: elige su marca en el filtro de la tarjeta
+// el botón del aviso de una vigilada: elige su marca en el filtro de la tarjeta (con su nombre para el lector de pantalla)
 export const ACCION_VIGILADA = { digital: 'Ver sus piezas', tv: 'Ver sus emisiones', radio: 'Ver sus emisiones', ooh: 'Ver sus paneles' };
+export const accionVigiladaEtiqueta = (tarjeta, nombre) => `${ACCION_VIGILADA[tarjeta].replace('sus', 'las')} de ${nombre}`;
 
 export function digitalSemanaLectura(d, COMP = COMP_PRINCIPAL) {
   if (!d.piezas) return { titulo: `${COMP} no tiene piezas digitales registradas`, lectura: `Integrametrics no registra piezas digitales de ${COMP} hasta el ${fechaCorta(d.semana.hasta)}.` };

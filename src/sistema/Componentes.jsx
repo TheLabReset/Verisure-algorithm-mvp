@@ -430,7 +430,7 @@ export function AvisosTarjeta({ avisos }) {
         const n = NIVELES[a.nivel];
         return (
           <li key={a.id} className={`q-alerta-${a.nivel}`}><span className="q-nivel"><n.icono size={14} aria-hidden="true" strokeWidth={2.4} />{n.nombre}</span>
-            <span>{a.titulo}{a.accion && <> <button type="button" className="q-aviso-accion" onClick={a.accion.alHacer}>{a.accion.texto}</button></>}</span>
+            <span>{a.titulo}{a.accion && <> <button type="button" className="q-aviso-accion" onClick={a.accion.alHacer} aria-label={a.accion.etiqueta}>{a.accion.texto}</button></>}</span>
           </li>
         );
       })}

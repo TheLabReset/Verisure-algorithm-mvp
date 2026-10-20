@@ -111,7 +111,7 @@ import { CLIENTE } from '../src/cliente.js';
 const [RIVAL] = CLIENTE.competencia, [VIG] = CLIENTE.vigiladas;
 const comoVigilada = (xs) => xs.filter((x) => x.maname === RIVAL.marcaFuente).map((x) => ({ ...x, maname: VIG.marcaFuente, key: `v-${x.key}` }));
 const VIGILADAS_PRUEBA = {
-  meta: { marcas: [VIG.marcaFuente] }, daily: [], pieces: comoVigilada(DATOS.contrato.pieces), events: comoVigilada(DATOS.contrato.events), ooh: comoVigilada(DATOS.contrato.ooh),
+  meta: { marcas: [VIG.marcaFuente], historia: { [VIG.marcaFuente]: DATOS.contrato.meta.firstDay } }, daily: [], pieces: comoVigilada(DATOS.contrato.pieces), events: comoVigilada(DATOS.contrato.events), ooh: comoVigilada(DATOS.contrato.ooh),
   digital: { daily: [], pieces: comoVigilada(DATOS.contrato.digital.pieces) },
   medios: { ...DATOS.medios, emisiones: { [VIG.marcaFuente]: DATOS.medios.emisiones[RIVAL.marcaFuente] } },
 };

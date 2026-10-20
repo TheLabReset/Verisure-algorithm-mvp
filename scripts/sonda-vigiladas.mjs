@@ -19,6 +19,7 @@ console.log('contrato de la sonda', JSON.stringify(resumen(algorithm)));
 const nombres = vigiladas.meta.marcas;
 const cuenta = (xs) => Object.fromEntries(nombres.map((m) => [m, xs.filter((x) => x.maname === m).length]));
 console.log('vigiladas: piezas ATL', JSON.stringify(cuenta(vigiladas.pieces)), '· paneles', JSON.stringify(cuenta(vigiladas.ooh)), '· estrenos', JSON.stringify(cuenta(vigiladas.events)), '· piezas digitales', JSON.stringify(cuenta(vigiladas.digital.pieces)));
+console.log('vigiladas: historia', JSON.stringify(vigiladas.meta.historia), '· estrenos con grupo', vigiladas.events.filter((e) => e.grupo).length, 'de', vigiladas.events.length);
 console.log('vigiladas: emisiones', JSON.stringify(Object.fromEntries(Object.entries(vigiladas.medios.emisiones).map(([m, e]) => [m, e.length]))));
 console.log('¿alguna vigilada en el contrato?', nombres.some((m) => JSON.stringify(algorithm).includes(`"${m}"`)) ? 'SÍ, REVISAR' : 'no');
 mkdirSync('sonda', { recursive: true });
