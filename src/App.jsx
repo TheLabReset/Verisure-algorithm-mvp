@@ -46,13 +46,13 @@ function useData() {
     let vivo = true;
     const base = import.meta.env.BASE_URL;
     const opcional = (f) => fetch(`${base}data/${f}`).then((x) => (x.ok ? x.json() : null)).catch(() => null);
-    Promise.all([fetch(`${base}data/algorithm.json`), opcional('medios.json'), opcional('mapa-lima.json'), opcional('busquedas.json'), opcional('maia.json')])
-      .then(async ([a, medios, mapa, busquedas, maia]) => {
+    Promise.all([fetch(`${base}data/algorithm.json`), opcional('medios.json'), opcional('mapa-lima.json'), opcional('busquedas.json'), opcional('maia.json'), opcional('vigiladas.json')])
+      .then(async ([a, medios, mapa, busquedas, maia, vigiladas]) => {
         if (!a.ok) throw new Error(`contrato ${a.status}`);
         const contrato = await a.json();
         // un contrato sin su forma (sin meta o sin días) es una data que no cargó, no una pantalla en blanco
         if (!contrato?.meta?.lastDay || !Array.isArray(contrato.daily)) throw new Error('contrato sin meta');
-        return { contrato, medios, mapa, busquedas, maia };
+        return { contrato, medios, mapa, busquedas, maia, vigiladas };
       })
       .then((d) => vivo && setR({ estado: 'ok', ...d }))
       .catch((e) => vivo && setR({ estado: 'no-cargo', error: e.message }));
@@ -108,7 +108,7 @@ export default function App() {
     if (data.estado !== 'ok') return null;
     const caidas = ['atl', 'digital', 'trends'].includes(demo) ? [demo] : [];
     try {
-      return { vista: armarVista(data.contrato, data.medios, filtros, { fuentesCaidas: caidas, hoy: hoyIso() }, { mapa: data.mapa, busquedas: data.busquedas }) };
+      return { vista: armarVista(data.contrato, data.medios, filtros, { fuentesCaidas: caidas, hoy: hoyIso() }, { mapa: data.mapa, busquedas: data.busquedas, vigiladas: data.vigiladas }) };
     } catch (e) {
       console.error('armarVista', e);
       return { fallo: true };

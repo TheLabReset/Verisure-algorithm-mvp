@@ -59,3 +59,31 @@ export function emisionesDe(medios, marca, desde, hasta) {
   }
   return out;
 }
+
+// Arma el formato de medios.json desde emisiones ya decodificadas, por marca
+function codificar(porMarca) {
+  const dic = Object.fromEntries(DICCIONARIOS.map((k) => [k, []]));
+  const pos = Object.fromEntries(DICCIONARIOS.map((k) => [k, new Map()]));
+  const codigo = (k, v) => { const t = v || ''; if (!pos[k].has(t)) { pos[k].set(t, dic[k].length); dic[k].push(t); } return pos[k].get(t); };
+  const emisiones = {};
+  for (const [marca, filas] of Object.entries(porMarca)) {
+    if (!filas.length) continue;
+    emisiones[marca] = filas.map((e) => [codigo('fecha', e.fecha), e.hora || '', codigo('grupo', e.grupo), codigo('canal', e.canal), codigo('programa', e.programa),
+      codigo('version', e.version), codigo('tipo', e.tipo), codigo('franja', e.franja), codigo('zona', e.zona), e.inversion]);
+  }
+  return { campos: CAMPOS_EMISION, dic, emisiones };
+}
+
+/**
+ * Une las emisiones commiteadas con las recién bajadas: las fechas de la ventana [desde, hasta] se reemplazan por
+ * las frescas y lo de antes se queda. Idempotente, como el merge del CSV. Lo usa vigiladas.json, que no tiene CSV.
+ */
+export function mezclarMedios(base, fresca, desde, hasta) {
+  const marcas = new Set([...Object.keys(base?.emisiones || {}), ...Object.keys(fresca?.emisiones || {})]);
+  const porMarca = {};
+  for (const m of marcas) {
+    const viejas = emisionesDe(base, m, '0000-00-00', '9999-99-99').filter((e) => e.fecha < desde || e.fecha > hasta);
+    porMarca[m] = [...viejas, ...emisionesDe(fresca, m, desde, hasta)].sort((a, b) => (a.fecha + a.hora < b.fecha + b.hora ? -1 : 1));
+  }
+  return codificar(porMarca);
+}

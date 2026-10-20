@@ -79,3 +79,17 @@ test('el chequeo atrapa las franjas en cualquier unidad, en calc, en sombras y e
   for (const c of ['border: 1px solid var(--borde)', 'border-left: 2px solid var(--borde)', 'box-shadow: var(--sombra-flota), 0 0 0 1px var(--borde)', 'box-shadow: none'])
     assert.deepEqual(revisar({ [TOKENS]: tokens, 'src/a.css': `.a { ${c}; }` }).errores.filter((e) => e.startsWith('src/a.css')), [], `marcó «${c}», que no es franja`);
 });
+
+test('atrapa un color de marca vigilada que se confunde con otro significado', () => {
+  // la vigilada 1 en el azul de los medios: con visión normal ya no se distingue
+  const azul = tokens.replace('--p-vig-1: #3414a1;', '--p-vig-1: #4b63c4;');
+  assert.notEqual(azul, tokens);
+  assert.ok(revisar({ [TOKENS]: azul, 'src/ok.css': usaTodo }).errores.some((e) => e.includes('--vigilada-1 y --s4 se confunden en claro')));
+  // en oscuro, una vigilada que con daltonismo se vuelve el rojo de la marca
+  const rojiza = tokens.replace('--p-vigo-2: #d265dc;', '--p-vigo-2: #ff5c9e;');
+  assert.notEqual(rojiza, tokens);
+  assert.ok(revisar({ [TOKENS]: rojiza, 'src/ok.css': usaTodo }).errores.some((e) => /--vigilada-2 y --propia se confunden en oscuro/.test(e)));
+  // dos vigiladas casi iguales entre sí
+  const gemelas = tokens.replace('--p-vig-4: #bb3398;', '--p-vig-4: #7f0e6e;');
+  assert.ok(revisar({ [TOKENS]: gemelas, 'src/ok.css': usaTodo }).errores.some((e) => e.includes('--vigilada-2 y --vigilada-4 se confunden en claro')));
+});

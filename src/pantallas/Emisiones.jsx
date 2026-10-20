@@ -7,7 +7,7 @@ import { numero, soles, fechaCorta } from '../sistema/formato.js';
 import { version, tipoAviso } from '../textos/comun.js';
 import { FRANJAS } from '../calculo/vista.js';
 
-function Ficha({ e }) {
+function Ficha({ e, muestra }) {
   const [fallo, setFallo] = useState(false), [intento, setIntento] = useState(0);
   const a = e.asset;
   // un digitalizado que no cargó se puede pedir de nuevo: el reproductor se arma otra vez
@@ -17,7 +17,7 @@ function Ficha({ e }) {
       {a && !fallo ? <Reproductor key={`${e.id}-${intento}`} tipo={a.kind === 'video' ? 'video' : 'audio'} src={a.url} etiqueta={`${a.kind === 'video' ? 'Video' : 'Audio'} de «${version(e.version)}»`} onError={() => setFallo(true)} />
         : <div className="q-ficha-arte q-ficha-arte-corta"><span className="q-ficha-sin-arte">{a ? <>El digitalizado de esta emisión no cargó.<button type="button" className="q-boton q-boton-chico q-ficha-reintentar" onClick={reintentar}>Reintentar</button></> : 'Integrametrics no tiene el digitalizado de esta versión'}</span></div>}
       <div className="q-ficha-cuerpo">
-        <span className="q-ficha-marca q-ficha-foco">{e.nombre}{e.nueva ? ' · versión nueva' : ''}</span>
+        <span className="q-ficha-marca q-ficha-foco">{muestra && <span className={`q-muestra ${muestra}`} aria-hidden="true" />}{e.nombre}{e.nueva ? ' · versión nueva' : ''}</span>
         <h4>«{version(e.version)}»</h4>
         <dl className="q-ficha-datos">
           <div><dt>Programa</dt><dd>{e.programa ? version(e.programa) : 'Sin programa registrado'}</dd></div>
@@ -56,7 +56,7 @@ export default function Emisiones({ a, etiqueta }) {
           </li>
         ))}
       </ol>
-      <aside className="q-emisiones-ficha" aria-label="Emisión elegida">{e && <Ficha key={e.id} e={e} />}</aside>
+      <aside className="q-emisiones-ficha" aria-label="Emisión elegida">{e && <Ficha key={e.id} e={e} muestra={a.muestra} />}</aside>
     </div>
   );
 }

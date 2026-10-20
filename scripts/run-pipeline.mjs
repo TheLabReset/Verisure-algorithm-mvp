@@ -3,6 +3,8 @@
 //   export.csv     → grilla emisión por emisión, con las dimensiones que comparte con el BI del cliente
 //   medios.json    → cada emisión de cada marca (canal, programa, versión, tipo, hora), armado desde export.csv
 //   meta.json      → { generated, source, firstDay, lastDay, days, registros, mode }
+//   vigiladas.json → lo de las marcas vigiladas (src/cliente.js), con la misma forma del contrato más sus emisiones:
+//                    solo la capa 1 lo lee. Nada de ellas entra a los archivos de arriba
 //
 // Dos modos:
 //   • BACKFILL  (PIPELINE_START): reconstruye todo el rango y reescribe el contrato y el CSV.
@@ -17,6 +19,7 @@ import { buildAlgorithm, mergeAlgorithm } from '../src/fuentes/agregado.js'
 import { registrosToCSV } from '../src/fuentes/exportCsv.js'
 import { fetchRegistros, fetchRegistrosDigital } from '../src/fuentes/integrametrics.js'
 import { armarMedios } from './armar-medios.mjs'
+import { mediosDesdeCsv, mezclarMedios } from '../src/fuentes/medios.js'
 import { CLIENTE } from '../src/cliente.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -29,6 +32,9 @@ const BRANDS = (process.env.PIPELINE_BRANDS || [CLIENTE.marcaFuente, ...CLIENTE.
   .split(',').map((s) => s.trim()).filter(Boolean)
 const SEC_RE = new RegExp(CLIENTE.subsectores.map((s) => s.split(' ')[0]).filter((x, i, a) => a.indexOf(x) === i).join('|'), 'i')
 const BRAND_RE = new RegExp(BRANDS.join('|'), 'i')
+// Las vigiladas van por su nombre exacto, en cualquier subsector: se bajan en el mismo pedido y se separan al llegar
+const VIGILADAS = new Set((CLIENTE.vigiladas || []).map((v) => v.marcaFuente))
+const esVigilada = (r) => VIGILADAS.has(String(r.maname || '').trim())
 
 // ATL: cada registro trae ~150 campos (decenas de audiencia vacíos). Guardamos SOLO
 // los que consumen la agregación/export → el año pasa de ~150 MB a lo justo.
@@ -73,7 +79,7 @@ async function fetchDigitalWindow(start, end, token, fetchImpl) {
   while (d <= end && guard < 400) {
     const rows = await fetchRegistrosDigital({ token, startDate: `${d} 00:00:00`, endDate: `${d} 23:59:59`, fetchImpl })
     if (Array.isArray(rows)) {
-      for (const r of rows) if (SEC_RE.test(r.ssname || '') && BRAND_RE.test(r.maname || '')) out.push(slim(KEEP_DIG)(r))
+      for (const r of rows) if (esVigilada(r) || (SEC_RE.test(r.ssname || '') && BRAND_RE.test(r.maname || ''))) out.push(slim(KEEP_DIG)(r))
     }
     const dt = new Date(`${d}T00:00:00Z`); dt.setUTCDate(dt.getUTCDate() + 1); d = dt.toISOString().slice(0, 10)
     guard += 1
@@ -85,10 +91,16 @@ async function loadData({ token, fetchImpl, hoy, inicio, ventana, ultimoDia }) {
   if (!token) throw new Error('falta INTEGRAMETRICS_TOKEN: sin token no hay data nueva, y el contrato commiteado no se toca')
   const { start, end, isBackfill } = resolveWindow({ hoy, inicio, ventana, ultimoDia })
   const rawAtl = await fetchRegistros({
-    token, startDate: `${start} 00:00:00`, endDate: `${end} 23:59:59`, filters: { maname: BRANDS }, fetchImpl,
+    token, startDate: `${start} 00:00:00`, endDate: `${end} 23:59:59`, filters: { maname: [...BRANDS, ...VIGILADAS] }, fetchImpl,
   })
+  const atl = rawAtl.map(slim(KEEP_ATL))
   const digital = await fetchDigitalWindow(start, end, token, fetchImpl)
-  return { registros: rawAtl.map(slim(KEEP_ATL)), digital, source: 'live', isBackfill, start, end }
+  // las vigiladas se separan acá: el contrato, el CSV del BI y medios.json siguen siendo solo de la marca y su competencia
+  return {
+    registros: atl.filter((r) => !esVigilada(r)), digital: digital.filter((r) => !esVigilada(r)),
+    vigiladas: { registros: atl.filter(esVigilada), digital: digital.filter(esVigilada) },
+    source: 'live', isBackfill, start, end,
+  }
 }
 
 // Reemplaza en el CSV commiteado las filas cuya fecha ∈ [start,end] por las frescas
@@ -108,7 +120,7 @@ function mergeCsv(out, freshCsv, start, end) {
 // Una corrida completa. Todo se inyecta (token, fetch, carpeta, fechas) para poder probarla de punta a punta
 export async function correrPipeline({ token, fetchImpl = fetch, out = OUT, hoy, inicio, ventana = 7, stamp = null, log = console.log } = {}) {
   const base = leerDe(out, 'algorithm.json')
-  const { registros, digital, source, isBackfill, start, end } = await loadData({ token, fetchImpl, hoy, inicio, ventana, ultimoDia: base?.meta?.lastDay })
+  const { registros, digital, vigiladas, source, isBackfill, start, end } = await loadData({ token, fetchImpl, hoy, inicio, ventana, ultimoDia: base?.meta?.lastDay })
   if (!registros.length) throw new Error('pipeline: sin registros en la ventana, nada que publicar')
 
   const fresh = buildAlgorithm(registros, digital, { source, generated: stamp })
@@ -126,13 +138,23 @@ export async function correrPipeline({ token, fetchImpl = fetch, out = OUT, hoy,
   // Canales, programas, horas y días: salen del CSV ya mergeado, sin otra llamada a la API
   const medios = armarMedios(out)
 
+  // Vigiladas: la misma agregación y el mismo merge idempotente, en su propio archivo; sus emisiones salen de sus
+  // registros (no tienen CSV) y se reemplazan por ventana, como el CSV
+  const baseVig = leerDe(out, 'vigiladas.json')
+  const freshVig = buildAlgorithm(vigiladas.registros, vigiladas.digital, { source, generated: stamp })
+  const vig = baseVig ? mergeAlgorithm(baseVig, freshVig) : freshVig
+  vig.meta = { ...vig.meta, generated: algorithm.meta.generated, ventana: { desde: start, hasta: end }, marcas: [...VIGILADAS] }
+  vig.medios = mezclarMedios(baseVig?.medios, mediosDesdeCsv(registrosToCSV(vigiladas.registros)), start, end)
+  write('vigiladas.json', vig)
+
   const meta = { generated: algorithm.meta.generated, source, firstDay: algorithm.meta.firstDay, lastDay: algorithm.meta.lastDay, days: algorithm.meta.days.length, registros: registros.length, mode: isBackfill ? 'backfill' : 'incremental' }
   write('meta.json', meta)
 
   log(`✅ pipeline (${source} · ${meta.mode}) · ${algorithm.meta.firstDay}→${algorithm.meta.lastDay}`)
   log(`   ${algorithm.meta.days.length} días · ${algorithm.pieces.length} piezas · ${algorithm.ooh.length} OOH · ${algorithm.events.length} estrenos`)
   log(`   medios.json · ${Object.values(medios.emisiones).reduce((s, x) => s + x.length, 0)} emisiones`)
-  return { algorithm, medios, meta }
+  log(`   vigiladas.json · ${vigiladas.registros.length} registros ATL y ${vigiladas.digital.length} digitales en la ventana · ${vig.pieces.length} piezas ATL, ${vig.digital.pieces.length} digitales y ${vig.ooh.length} paneles en total`)
+  return { algorithm, medios, meta, vigiladas: vig }
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {

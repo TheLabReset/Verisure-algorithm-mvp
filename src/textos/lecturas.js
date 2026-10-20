@@ -194,10 +194,9 @@ export function abanicoDigitalLectura(a, P) {
 }
 
 // ── 1.2 OOH ──
-export function oohLectura(o, P) {
+export function oohLectura(o, P, r = CLIENTE.competencia[0]) {
   const titulo = 'Dónde están los paneles';
   if (!o.paneles.length) return { titulo, lectura: `Integrametrics no detectó paneles de las marcas que se siguen en ${periodoTexto(P)}.` };
-  const [r] = CLIENTE.competencia;
   const nr = o.porMarca[r.marcaFuente], np = o.porMarca[CLIENTE.marcaFuente];
   // todas las ciudades donde está la competencia fuera de Lima; si la propia no tiene ninguna, se dice
   const fuera = o.fueraDeLima.filter((c) => c.nombre !== 'Sin coordenadas' && c[r.marcaFuente] > 0);
@@ -344,6 +343,7 @@ export function queMirarLectura(v) {
 // frente a qué compara cada alerta («el mismo tramo de junio», «mayo de 2026») y de qué período habla
 const comp = (a) => (a.periodo && comparacionTexto(a.periodo)) || 'la comparación';
 const per = (a) => (a.periodo ? periodoTexto(a.periodo) : 'el período');
+const MEDIO_TARJETA = { digital: ' digital', tv: ' en TV y cable', radio: ' en radio', ooh: ' en vía pública' };
 const ALERTAS = {
   'estreno-competencia': (a) => ({
     titulo: `${a.marca} estrenó ${enLetras(a.cuantos, true)} ${segun(a.cuantos, 'pieza', 'piezas')} en ${per(a)}`,
@@ -386,6 +386,12 @@ const ALERTAS = {
     titulo: `${a.marca} tiene paneles en ${lista(a.zonas)}, donde no tenía en los 90 días anteriores`,
     dato: `${numero(a.cuantos)} ${segun(a.cuantos, 'panel detectado', 'paneles detectados')} en ${per(a)}.`,
     mirar: `Qué versión lleva cada panel y si se cruza con las zonas de ${CLIENTE.nombre}.`,
+  }),
+  // una marca vigilada (solo capa 1) con una versión que se ve por primera vez en el período, en su tarjeta
+  'aparicion-vigilada': (a) => ({
+    titulo: `${a.marca} estrenó ${enLetras(a.cuantos, true)} ${segun(a.cuantos, 'pieza', 'piezas')}${MEDIO_TARJETA[a.tarjeta]} en ${per(a)}`,
+    dato: `${a.cuantos > 1 ? 'La más reciente: ' : ''}${cita(a.ultima.version)}, del ${fechaCorta(a.ultima.fecha)}.`,
+    mirar: `El mensaje y si se cruza con lo que tiene al aire ${CLIENTE.nombre}.`,
   }),
   'digital-competencia': (a) => ({
     titulo: `${a.marca} usa ${enLetras(a.cuantas)} ${segun(a.cuantas, 'mensaje digital nuevo', 'mensajes digitales nuevos')} en el período`,
@@ -441,8 +447,19 @@ export { mesTexto, comparacionTexto, periodoTexto, solesCompacto };
 const semanaDe = (S) => tramoFechas(S.desde, S.hasta);
 const ventanaCorta = (S) => tramoFechas(S.desde, S.hasta).replace(/^(del|el) /, '');
 const COMP = CLIENTE.competencia[0].nombre;
+// las lecturas de la capa 1 sirven también para una marca vigiladas: se les pasa su nombre
+const COMP_PRINCIPAL = COMP;
 
-export function digitalSemanaLectura(d) {
+// Las marcas vigiladas en el resumen de la capa 1: de quién son las apariciones, o de quiénes no hubo
+export function aparicionesNota(apariciones, marcas) {
+  if (!apariciones.length) return lista(marcas.map((m) => m.nombre));
+  const quienes = [...new Set(apariciones.map((a) => a.nombre))];
+  return `de ${lista(quienes)}`;
+}
+// el botón del aviso de una vigilada: elige su marca en el filtro de la tarjeta
+export const ACCION_VIGILADA = { digital: 'Ver sus piezas', tv: 'Ver sus emisiones', radio: 'Ver sus emisiones', ooh: 'Ver sus paneles' };
+
+export function digitalSemanaLectura(d, COMP = COMP_PRINCIPAL) {
   if (!d.piezas) return { titulo: `${COMP} no tiene piezas digitales registradas`, lectura: `Integrametrics no registra piezas digitales de ${COMP} hasta el ${fechaCorta(d.semana.hasta)}.` };
   const [m, segundo] = d.mensajes;
   const k = d.mensajes.length, nuevos = d.mensajes.filter((x) => x.nuevo).length;
@@ -463,7 +480,7 @@ export function digitalSemanaLectura(d) {
   return { titulo, lectura: `${primero}${cola}` };
 }
 
-export function atlSemanaLectura(a, medio) {
+export function atlSemanaLectura(a, medio, COMP = COMP_PRINCIPAL) {
   if (a.sinRegistros) return { titulo: `${COMP} no tiene emisiones en ${medio} registradas`, lectura: `Integrametrics no registra emisiones de ${COMP} en ${medio} hasta el ${fechaCorta(a.semana.hasta)}.` };
   const n = a.emisiones.length;
   const [motivo] = a.porMotivo;
