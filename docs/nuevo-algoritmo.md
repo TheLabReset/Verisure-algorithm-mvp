@@ -98,7 +98,7 @@ Los archivos van en este orden. Después de cada uno se corre `npm run prueba`.
 
 | # | Archivo | Qué se cambia |
 |---|---|---|
-| 1 | `src/cliente.js` | Nombre, rubro, ciudad, la búsqueda principal y cómo se llama a quien compra (en singular y en plural). Es el único archivo que nombra a la marca: una prueba falla si aparece escrita en otro lado. |
+| 1 | `src/cliente.js` | Nombre, rubro, ciudad, la búsqueda principal y cómo se llama a quien compra (en singular y en plural). Es el único archivo que nombra a la marca: una prueba falla si aparece escrita en otro lado. Las marcas vigiladas (`vigiladas`, solo capa 1) van con su nombre exacto en la fuente; una nueva se agrega al final de la lista, para que las demás conserven su color, y hasta cuatro tienen color propio en `tokens.css`. |
 | 2 | `src/muestra/configuracion.js` | Los parámetros del generador, cada uno con su origen (confirmé o asumo). Ver la lista de abajo. |
 | 3 | `src/capas/estructura.js` | Los capítulos de cada capa y su pregunta. Se agrega o se quita un capítulo; las capas no cambian. |
 | 4 | `src/textos/` | El vocabulario del embudo (ver la fase 4). |

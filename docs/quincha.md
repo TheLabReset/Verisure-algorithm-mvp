@@ -124,6 +124,8 @@ Están en `src/sistema/graficos`. Son SVG propios, y cada marca lleva su valor e
 
 **En reserva**, porque hoy no los usa ninguna pantalla de este algoritmo: `Bala` (contra un objetivo) y `Multiplos`. Lo que se use o no depende de cada algoritmo; la plantilla los tiene todos.
 
+**Las marcas vigiladas.** Las marcas que se vigilan solo en la capa 1 tienen su color: `--vigilada-1` a `--vigilada-4`, en el orden de la lista de `src/cliente.js` (el color sigue a la marca, no a su lugar en una tarjeta). Son violetas porque es lo único libre: el amarillo es la competencia, el rojo la marca propia, el verde «mejora», el menta, el naranja y el azul son medios y plataformas, y los grises son la comparación y el resto. Van en el mapa, la leyenda, el botón del filtro y la ficha, siempre con el nombre al lado: el color nunca identifica solo.
+
 **Relleno con borde.** Un color de marca claro (el amarillo de una competencia) no llega a 3 : 1 sobre blanco. Entra igual si el relleno lleva borde de tinta: `--resalte` es el relleno, `--resalte-borde` el borde (tinta en claro, `transparent` en oscuro, donde el relleno ya contrasta solo) y `--resalte-anillo` el anillo de los puntos. Las líneas no llevan borde, así que `--serie-1` es el mismo tono oscurecido. El chequeo lo sabe: si un color de datos tiene su `--X-borde`, mide el borde contra el fondo.
 
 El mapa base es lo único que viene de afuera: los mosaicos de OpenStreetMap (sin clave, para un uso liviano, con atribución). `--mapa-filtro` es un token como cualquier otro: gris tenue en claro e invertido en oscuro, definido en los dos bloques oscuros.
@@ -155,7 +157,9 @@ Reglas de forma:
 | El color de datos frente al gris del resto | 2:1 |
 | Dos escalones vecinos de una rampa | 1,2:1 |
 
-La última fila es la regla de la casa: **nunca dos grises vecinos que se confundan**. Nació de una corrección real, porque los dos últimos grises de un gráfico no se distinguían.
+6. **Colores de marca que no se confunden.** Cada `--vigilada-N` se mide en OKLab (distancia ×100) en los dos temas: 14 o más con visión normal frente a todo color que significa otra cosa (las dos marcas, medios, mejora, empeora, grises, tinta); 9 o más con daltonismo (protanopía, deuteranopía y tritanopía) frente a las dos marcas, que comparten el mapa con ellas; y 10 o más entre vigiladas, porque el panel muestra una a la vez y siempre con su nombre. En claro se separan 15 entre sí; en oscuro, 10,8, que es lo que da el violeta sobre la tarjeta oscura sin cambiar el tono de cada marca.
+
+La última fila de la tabla es la regla de la casa: **nunca dos grises vecinos que se confundan**. Nació de una corrección real, porque los dos últimos grises de un gráfico no se distinguían.
 
 El chequeo tiene su propia prueba (`pruebas/sistema.test.mjs`): se le siembra un error de cada tipo y tiene que atraparlo. Un chequeo que no se prueba no sirve.
 
