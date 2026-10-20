@@ -127,6 +127,7 @@ test('render: las marcas vigiladas, con la competencia elegida y con la vigilada
       const html = pintar('senales', v, { marca });
       for (const m of textoRoto(texto(html), nombres)) malos.add(`${JSON.stringify(filtros)} ${marca ?? 'competencia'}: ${m}`);
       if (/aria-label="Marca"/.test(html)) conFiltro += 1;
+      for (const g of html.match(/<div class="q-grupo" role="group" aria-label="Marca">[^]*?<\/div>/g) || []) assert.doesNotMatch(g, /q-muestra/, 'el filtro «Marca» va sin bolita de color');
       // su color en la leyenda del mapa y en la ficha de la emisión o del panel (no solo en el botón del filtro)
       if (marca && /q-leyenda[^]*?q-muestra-vigilada-1/.test(html) && /q-ficha-marca q-ficha-foco"><span class="q-muestra q-muestra-vigilada-1"/.test(html)) conColor += 1;
       if (!marca && html.includes('q-aviso-accion')) conAviso += 1;
