@@ -27,8 +27,9 @@ const ventanaDe = (x) => (x?.reciente ? ventanaTexto(x.semana.desde, x.semana.ha
 // ── El filtro «Marca» de cada tarjeta: la competencia y las vigiladas que salieron en el período ──
 const muestraDe = (m) => `q-muestra-vigilada-${m.color}`;
 // cuenta(id): lo de esa vigilada en la tarjeta; sin ninguna con algo, no hay filtro
+// El filtro va sin muestra de color: el color de la vigilada se lee en el mapa y en las fichas, donde se pinta
 function opcionesMarca(vig, cuenta, cuentaCompetencia) {
-  const extras = (vig?.marcas || []).filter((m) => cuenta(m.id) > 0).map((m) => ({ valor: m.id, texto: `${m.nombre} · ${numero(cuenta(m.id))}`, muestra: muestraDe(m) }));
+  const extras = (vig?.marcas || []).filter((m) => cuenta(m.id) > 0).map((m) => ({ valor: m.id, texto: `${m.nombre} · ${numero(cuenta(m.id))}` }));
   if (!extras.length) return null;
   return [{ valor: COMPETENCIA.marcaFuente, texto: cuentaCompetencia ? `${COMPETENCIA.nombre} · ${numero(cuentaCompetencia)}` : COMPETENCIA.nombre }, ...extras];
 }
