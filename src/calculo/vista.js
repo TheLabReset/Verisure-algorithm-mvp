@@ -400,10 +400,13 @@ function queMirar(v, P) {
         if (nuevos.length) out.push({ id: 'medio-nuevo', nivel: 'revisar', tarjeta: 'medios', fuente: 'Integrametrics', marca: m.nombre, medios: nuevos });
       }
       // un medio donde la competencia invierte más que la marca propia (o donde la propia no está), si le pesa en su
-      // inversión ATL y le saca al menos UMBRALES.medioAdelante % de ventaja; lo que ya se avisó como medio nuevo no se repite
+      // inversión ATL y le saca al menos UMBRALES.medioAdelante % de ventaja. Avisa el cambio: si en la comparación ya
+      // iba adelante en ese medio, no se repite (sería ruido fijo); tampoco lo ya avisado como medio nuevo
+      const adelanteEn = (rival, propia, k) => rival?.medios?.[k] > 0 && rival.inversion > 0 && Math.round((rival.medios[k] / rival.inversion) * 100) >= UMBRALES.medioNuevo && rival.medios[k] >= (propia?.medios?.[k] || 0) * (1 + UMBRALES.medioAdelante / 100);
+      const yaAntes = (k) => Boolean(v.lee.atlPrevio) && adelanteEn(v.lee.atlPrevio.find((x) => x.id === m.id), v.lee.atlPrevio.find((x) => x.id === propiaAtl?.id), k);
       const yaNuevos = new Set(out.filter((a) => a.id === 'medio-nuevo' && a.marca === m.nombre).flatMap((a) => a.medios.map((x) => x.nombre)));
-      const adelante = Object.entries(m.medios).map(([k, x]) => ({ nombre: MEDIOS[k] || k, monto: x, propia: propiaAtl?.medios?.[k] || 0, pct: Math.round((x / m.inversion) * 100) }))
-        .filter((x) => x.monto > 0 && x.pct >= UMBRALES.medioNuevo && x.monto >= x.propia * (1 + UMBRALES.medioAdelante / 100) && !yaNuevos.has(x.nombre)).sort((a, z) => z.monto - a.monto);
+      const adelante = Object.entries(m.medios).map(([k, x]) => ({ clave: k, nombre: MEDIOS[k] || k, monto: x, propia: propiaAtl?.medios?.[k] || 0, pct: Math.round((x / m.inversion) * 100) }))
+        .filter((x) => adelanteEn(m, propiaAtl, x.clave) && !yaAntes(x.clave) && !yaNuevos.has(x.nombre)).sort((a, z) => z.monto - a.monto);
       if (adelante.length && propiaAtl) out.push({ id: 'medio-adelante', nivel: 'revisar', tarjeta: 'medios', fuente: 'Integrametrics', marca: m.nombre, propia: propiaAtl.nombre, medios: adelante });
     }
     const propia = v.lee.atl.marcas.find((m) => m.propia);
@@ -446,6 +449,14 @@ function queMirar(v, P) {
   const deCompetencia = (a) => ['estreno-competencia', 'sube-competencia', 'baja-competencia', 'competencia-sin-pauta', 'pico-competencia', 'medio-nuevo', 'medio-adelante', 'paneles-competencia', 'digital-competencia'].includes(a.id);
   // cada alerta lleva su período, para que su texto diga frente a qué compara
   return out.map((a) => ({ ...a, competencia: deCompetencia(a), periodo: P })).sort((a, z) => Number(z.competencia) - Number(a.competencia));
+}
+
+// Las empresas que se buscan en Google: cuál es la marca propia y cuál la competencia que se sigue (para su color)
+function conMarcasDeBusqueda(b) {
+  if (!b?.competencia) return b;
+  const def = (id) => (CLIENTE.busquedas.competencia || []).find((x) => x.id === id) || {};
+  const marcas = b.competencia.marcas.map((m) => ({ ...m, propia: Boolean(def(m.id).propia), foco: CLIENTE.competencia.some((c) => c.nombre === def(m.id).nombre) }));
+  return { ...b, competencia: { ...b.competencia, marcas } };
 }
 
 export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaLeido = null, busquedas: busquedasLeidas = null, vigiladas: vigiladasLeidas = null } = {}) {
@@ -547,7 +558,7 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
       shareSemanal: shareDelAnio(contrato, { atl: ok('atl'), digital: ok('digital') }),
       // la mezcla de la competencia principal mes a mes: necesita las dos fuentes, si no el 100 % mentiría
       mezcla: ok('atl') && ok('digital') ? { marca: nombreMarca(COMPETENCIA[0]), ...mezclaMensual(contrato.daily, contrato.digital?.daily || [], COMPETENCIA[0], contrato.meta.firstDay, contrato.meta.lastDay) } : null,
-      busquedas: ok('trends') ? leerBusquedas(busquedas, { hasta: P.hasta }) : null,
+      busquedas: ok('trends') ? conMarcasDeBusqueda(leerBusquedas(busquedas, { hasta: P.hasta })) : null,
     },
     sugiere: {},
   };

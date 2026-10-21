@@ -42,13 +42,13 @@ export const CLIENTE = {
       { id: 'imou', nombre: 'Imou', terminos: ['camara imou'] },
       { id: 'hikvision', nombre: 'Hikvision', terminos: ['camara hikvision'] },
     ],
-    // Las empresas de seguridad por su nombre, en todas las categorías de Trends. Prosegur y Liderman suman búsquedas de
-    // empleo (en la categoría de seguridad Liderman no aparece); Portero Seguro no tiene búsquedas suficientes y «boxer»
+    // Las empresas de seguridad por su nombre, en todas las categorías de Trends. `nota`: lo que suman sus búsquedas además
+    // de la marca (en la categoría de seguridad Liderman no aparece); Portero Seguro no tiene búsquedas suficientes y «boxer»
     // se confunde con motos y ropa: quedan fuera
     competencia: [
-      { id: 'prosegur', nombre: 'Prosegur', terminos: ['prosegur'], empleo: true },
+      { id: 'prosegur', nombre: 'Prosegur', terminos: ['prosegur'], nota: 'empleo y transporte de valores' },
       { id: 'verisure', nombre: 'Verisure', terminos: ['verisure'], propia: true },
-      { id: 'liderman', nombre: 'Liderman', terminos: ['liderman'], empleo: true },
+      { id: 'liderman', nombre: 'Liderman', terminos: ['liderman'], nota: 'empleo' },
     ],
     sinMedir: ['Portero Seguro'],
   },

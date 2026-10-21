@@ -1,7 +1,7 @@
 // Baja Google Trends a public/data/busquedas.json: la categoría (cámaras DIY frente a la marca), las marcas de cámaras y las
 // empresas del rubro (la competencia por su nombre).
 // Lo corre el pipeline una vez por semana (Trends es semanal); también a mano: node scripts/bajar-busquedas.mjs
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bajarGrupo } from '../src/fuentes/trends.js';
@@ -14,7 +14,15 @@ export async function bajarBusquedas({ hoy = new Date().toISOString().slice(0, 1
   const estado = {};
   const opciones = { geo, desde, hasta: hoy, fetchImpl, estado };
   const datos = { consultado: hoy, geo, fuente: 'Google Trends', categoria: await bajarGrupo(categoria, opciones), marcasDiy: await bajarGrupo(marcasDiy, opciones),
-    ...(competencia?.length ? { competencia: await bajarGrupo(competencia, opciones) } : {}) };
+  };
+  // el grupo de la competencia es aparte: si Trends lo corta, se publica lo demás y se queda el grupo anterior (la
+  // tarjeta dice su propia fecha); sin grupo anterior, la tarjeta queda sin el filtro
+  if (competencia?.length) {
+    try { datos.competencia = await bajarGrupo(competencia, opciones); } catch (e) {
+      console.error(`⚠ Google Trends no trajo la competencia: ${e.message}`);
+      try { const antes = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')).competencia : null; if (antes) datos.competencia = antes; } catch { /* sin grupo anterior */ }
+    }
+  }
   writeFileSync(OUT, JSON.stringify(datos));
   return datos;
 }

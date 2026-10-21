@@ -131,7 +131,7 @@ function OohConMarca({ v, P, tPaneles }) {
 }
 
 // Búsquedas en Google: las marcas de cámaras DIY o las empresas del rubro (cada grupo es otra consulta de Trends,
-// en su propia escala). En las empresas, la propia va en su rojo, la competencia en tinta y el resto en gris
+// en su propia escala). En las empresas, la competencia va resaltada (su color), la propia en su rojo y el resto en gris
 function BusquedasTarjeta({ b, desdeUnAnio }) {
   const [grupo, setGrupo] = useState('camaras');
   const c = b.competencia, conCompetencia = Boolean(c?.marcas.length), ver = conCompetencia ? grupo : 'camaras';
@@ -139,13 +139,12 @@ function BusquedasTarjeta({ b, desdeUnAnio }) {
     <div className="q-control q-control-tarjeta"><span>Búsquedas</span><Grupo etiqueta="Búsquedas" valor={ver} onCambiar={setGrupo} opciones={[{ valor: 'camaras', texto: 'Cámaras DIY' }, { valor: 'competencia', texto: 'Competencia' }]} /></div>
   );
   if (ver === 'competencia') {
-    const tono = (id) => { const d = CLIENTE.busquedas.competencia.find((x) => x.id === id) || {}; return d.propia ? 'propia' : CLIENTE.competencia.some((x) => x.nombre === d.nombre) ? 'tinta' : 'resto'; };
     return (
-      <Bloque universo="busquedas" {...competenciaBusquedasLectura(c)} alcance={`semanas al ${fechaCorta(b.hasta)}`}
+      <Bloque universo="busquedas" {...competenciaBusquedasLectura(c)} alcance={`semanas al ${fechaCorta(c.hasta)}`}
         ayuda={<p>{competenciaBusquedasAyuda(b.semanas)}</p>} pie={<span>{competenciaBusquedasPie(b.consultado)}</span>}>
         {filtro}
         <Lineas etiqueta={`Búsquedas semanales de ${CLIENTE.rubroPlural} en Google Trends, un año hasta el período`} formato={(n) => numero(n)} alto={280}
-          series={c.marcas.map((m) => ({ nombre: m.nombre, tono: tono(m.id), leyenda: m.crecimiento == null ? m.nombre : `${m.nombre} ${signo(m.crecimiento)}`, serie: desdeUnAnio(c.series.find((x) => x.id === m.id)?.serie || []) }))} />
+          series={c.marcas.map((m) => ({ nombre: m.nombre, resaltada: m.foco, tono: m.propia ? 'propia' : undefined, leyenda: m.crecimiento == null ? m.nombre : `${m.nombre} ${signo(m.crecimiento)}`, serie: desdeUnAnio(c.series.find((x) => x.id === m.id)?.serie || []) }))} />
       </Bloque>
     );
   }

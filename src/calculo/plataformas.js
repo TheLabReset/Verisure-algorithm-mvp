@@ -3,6 +3,8 @@
 // Hoy lo alimenta la data de ejemplo (src/muestra/ejemplo.js); cuando se conecten las cuentas y el Google Sheets
 // del CRM, el pipeline publica la misma forma y este cálculo no cambia.
 
+import { DIAS_MINIMOS } from './periodo.js';
+
 const suma = (xs) => xs.reduce((s, x) => s + (x || 0), 0);
 const razon = (a, b) => (b ? a / b : null);
 const lunesDe = (iso) => { const d = new Date(`${iso}T00:00:00Z`); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return d.toISOString().slice(0, 10); };
@@ -55,36 +57,49 @@ export const SEMANAS_OBJETIVO = 12;
 // Frente a los objetivos del mes. Lo que se acumula (inversión, leads, bookings) se compara con lo que toca a los días
 // elegidos: dentro de un mes, el objetivo del mes y la parte de sus días (20 de 31 días = 65 %); si el tramo cruza meses,
 // la suma de lo que toca a cada día (el objetivo de su mes entre los días del mes) y el 100 %. El L2B tiene un mínimo y
-// los costos un tope, en cualquier tramo. «bien» si llega; «mal» si le falta más de MARGEN_AVANCE % de lo que toca
-// (o se pasa del tope en más de MARGEN_AVANCE %); entre los dos, sin tono. Un mes sin objetivo deja todo en null
+// los costos un tope, en cualquier tramo. «bien» si llega; «mal» si le falta más de MARGEN_AVANCE puntos de lo que toca
+// (o se pasa del tope en más de MARGEN_AVANCE puntos); entre los dos, sin tono. El tono se decide con los mismos
+// porcentajes redondeados que se ven en pantalla, para que el color y el número digan lo mismo. Un mes sin objetivo
+// deja todo en null
 export const MARGEN_AVANCE = 5;
 const ACUMULA = ['inversion', 'leads', 'bookings'], MINIMO = ['l2b'], TOPE = ['cpl', 'cpb'];
 const diasDelMes = (mes) => new Date(Date.UTC(+mes.slice(0, 4), +mes.slice(5, 7), 0)).getUTCDate();
 const fechasDe = (desde, hasta) => { const r = []; for (let d = new Date(`${desde}T00:00:00Z`); d.toISOString().slice(0, 10) <= hasta; d.setUTCDate(d.getUTCDate() + 1)) r.push(d.toISOString().slice(0, 10)); return r; };
-export function frenteAObjetivos(total, objetivos, desde, hasta) {
+export function frenteAObjetivos(total, objetivos, desde, hasta, conData = null) {
   if (!total || !objetivos?.length) return null;
   const porMes = new Map(objetivos.map((o) => [o.mes, o]));
-  const fechas = fechasDe(desde, hasta), meses = [...new Set(fechas.map((f) => f.slice(0, 7)))];
-  if (meses.some((m) => !porMes.has(m))) return null;
+  // lo que toca se cuenta sobre los días con data (un día sin registros es un hueco, no un día que tocaba)
+  const calendario = fechasDe(desde, hasta), fechas = conData ? calendario.filter((f) => conData.has(f)) : calendario;
+  const meses = [...new Set(calendario.map((f) => f.slice(0, 7)))];
+  if (!fechas.length || meses.some((m) => !porMes.has(m))) return null;
   const unMes = meses.length === 1, mes = meses[0];
-  const tocaDias = unMes ? (fechas.length / diasDelMes(mes)) * 100 : 100;
-  const tono = (falta) => (falta <= 0 ? 'bien' : falta > MARGEN_AVANCE ? 'mal' : null);
+  const tocaDias = unMes ? (fechas.length / diasDelMes(mes)) * 100 : 100, toca = Math.round(tocaDias);
+  // con menos de DIAS_MINIMOS días con data, un día raro manda: se muestra el avance sin color, como el resto del panel
+  const pocos = fechas.length < DIAS_MINIMOS;
+  // falta: puntos que le faltan a lo que se ve (redondeado) para llegar a lo que toca, también redondeado
+  const tono = (falta) => (pocos ? null : falta <= 0 ? 'bien' : falta > MARGEN_AVANCE ? 'mal' : null);
+  // un objetivo en 0 o vacío en cualquier mes del tramo deja esa cifra sin avance (no se compara contra medio objetivo)
+  const conObjetivo = (k) => meses.every((m) => porMes.get(m)[k] > 0);
   const salida = {};
   for (const k of ACUMULA) {
+    if (!conObjetivo(k) || total[k] == null) { salida[k] = null; continue; }
     const objetivo = unMes ? porMes.get(mes)[k] : fechas.reduce((s, f) => s + porMes.get(f.slice(0, 7))[k] / diasDelMes(f.slice(0, 7)), 0);
-    if (!objetivo || total[k] == null) { salida[k] = null; continue; }
-    const avance = (total[k] / objetivo) * 100;
-    salida[k] = { objetivo, avance, tono: tono(100 - (avance / tocaDias) * 100) };
+    const avance = (total[k] / objetivo) * 100, visto = Math.round(avance);
+    // la inversión es un presupuesto: pasarse de lo que toca en más del margen también es rojo
+    const t = k === 'inversion' && visto - toca > MARGEN_AVANCE && !pocos ? 'mal' : tono(toca - visto);
+    salida[k] = { objetivo, avance, tono: t };
   }
   // el mínimo y el tope: el de cada día pesa igual (si cambian de un mes a otro)
   const promedio = (k) => fechas.reduce((s, f) => s + porMes.get(f.slice(0, 7))[k], 0) / fechas.length;
   for (const k of [...MINIMO, ...TOPE]) {
+    if (!conObjetivo(k)) { salida[k] = null; continue; }
     const objetivo = promedio(k);
-    if (!objetivo || total[k] == null) { salida[k] = null; continue; }
-    const avance = (total[k] / objetivo) * 100;
-    salida[k] = { objetivo, avance, tono: tono(MINIMO.includes(k) ? 100 - avance : avance - 100) };
+    // un costo sin leads o sin bookings y con inversión es el peor caso: sin avance, en rojo
+    if (total[k] == null) { salida[k] = TOPE.includes(k) && total.inversion > 0 && !pocos ? { objetivo, avance: null, tono: 'mal' } : null; continue; }
+    const avance = (total[k] / objetivo) * 100, visto = Math.round(avance);
+    salida[k] = { objetivo, avance, tono: tono(MINIMO.includes(k) ? 100 - visto : visto - 100) };
   }
-  return { ...salida, dias: fechas.length, unMes, mesCompleto: unMes && fechas.length === diasDelMes(mes), toca: tocaDias };
+  return { ...salida, dias: fechas.length, sinData: calendario.length - fechas.length, unMes, mesCompleto: unMes && calendario.length === diasDelMes(mes) && fechas.length === calendario.length, toca, pocos };
 }
 
 export function leerPlataformas(datos, P) {
@@ -141,7 +156,7 @@ export function leerPlataformas(datos, P) {
   return {
     ejemplo: Boolean(datos.ejemplo), moneda: datos.moneda, fuente: datos.fuente,
     total, totalPrevio: antes.length ? cifras(todas(antes)) : null,
-    objetivos: frenteAObjetivos(total, datos.objetivos, P.desde, P.hasta),
+    objetivos: frenteAObjetivos(total, datos.objetivos, P.desde, P.hasta, new Set(dias.map((d) => d.fecha))),
     plataformas,
     diaria: dias.map((d) => ({ fecha: d.fecha, ...cifras(todas([d])), porPlataforma: Object.fromEntries(datos.plataformas.map((p) => [p.id, d[p.id]])) })),
     tipos,

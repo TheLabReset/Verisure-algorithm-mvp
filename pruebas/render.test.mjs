@@ -161,8 +161,8 @@ test('búsquedas: con el grupo de competencia aparece el filtro; sin él, la tar
   assert.doesNotMatch(pintar('senales', sin), /aria-label="Búsquedas"/, 'sin el grupo, no hay filtro');
   // los textos: la competencia primero, las que suman empleo en el pie y la que no se mide en la ayuda
   const l = competenciaBusquedasLectura(c);
-  assert.ok(l.titulo.startsWith(c.marcas[0].nombre));
-  if (l.lectura) assert.ok(l.lectura.startsWith(CLIENTE.competencia[0].nombre), 'la lectura empieza por la competencia');
-  for (const x of CLIENTE.busquedas.competencia.filter((y) => y.empleo)) assert.match(competenciaBusquedasPie('2026-10-20'), new RegExp(x.nombre));
+  assert.ok(l.titulo.includes(CLIENTE.competencia[0].nombre) && !/más buscad/.test(l.titulo), 'el título nombra a la competencia y no dice quién lidera');
+  assert.ok(l.lectura.length > 0 && !/\d+ %/.test(l.lectura), 'la lectura dice hacia dónde se mueven, sin repetir los porcentajes de la leyenda');
+  for (const x of CLIENTE.busquedas.competencia.filter((y) => y.nota)) assert.match(competenciaBusquedasPie('2026-10-20'), new RegExp(`${x.nombre}[^.;]*${x.nota}`));
   for (const n of CLIENTE.busquedas.sinMedir) assert.match(competenciaBusquedasAyuda(12), new RegExp(n));
 });

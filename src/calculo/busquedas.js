@@ -36,7 +36,8 @@ export function leerBusquedas(datos, { semanas = VENTANA, hasta = null } = {}) {
     const marcas = g.series.map((s) => ({ id: s.id, nombre: s.nombre, ahora: promedio(s, vg.ahora), antes: vg.antes ? promedio(s, vg.antes) : null }))
       // el crecimiento sale de los promedios redondeados, los mismos que muestra el gráfico
       .map((s) => ({ ...s, crecimiento: crecimiento(s.antes == null ? null : Math.round(s.antes), Math.round(s.ahora)) })).sort((a, b) => b.ahora - a.ahora);
-    return { marcas, series: g.series.map((s) => ({ id: s.id, nombre: s.nombre, serie: g.semanas.map((fecha, i) => ({ fecha, valor: g.parcial[i] ? null : s.valores[i] })) })) };
+    // hasta: el último día de la última semana completa de este grupo (puede no coincidir con el de la categoría)
+    return { marcas, hasta: finDe(g.semanas[vg.ahora.at(-1)]), series: g.series.map((s) => ({ id: s.id, nombre: s.nombre, serie: g.semanas.map((fecha, i) => ({ fecha, valor: g.parcial[i] ? null : s.valores[i] })) })) };
   };
   const diyLeido = deMarcas(diy), marcas = diyLeido.marcas, serieMarcas = diyLeido.series;
   // las empresas del rubro por su nombre (la propia y la competencia), si el archivo las trae

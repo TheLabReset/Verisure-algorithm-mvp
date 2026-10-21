@@ -113,7 +113,8 @@ export default function Activacion({ capa, vista: v }) {
   const ultimas = (semanas) => semanas.slice(-SEMANAS_A_LA_VISTA).reverse();
   // cada cifra frente a su objetivo del mes: el objetivo al lado («190 / 320») y el avance, en color solo si se aleja
   const o = x.objetivos;
-  const frente = (k, formato) => (o?.[k] ? { objetivo: formato(o[k].objetivo), avance: { texto: porcentaje(o[k].avance), tono: o[k].tono } } : {});
+  const sinBase = { cpl: 'sin leads', cpb: 'sin bookings' };
+  const frente = (k, formato) => (o?.[k] ? { objetivo: formato(o[k].objetivo), avance: { texto: o[k].avance == null ? sinBase[k] : porcentaje(o[k].avance), tono: o[k].tono } } : {});
   // las filas de mejor y peor desempeño de una tabla, en el orden en que se pintan
   const marcas = (lista, unidad) => {
     const e = extremos(lista), fila = (f) => (f ? { fila: lista.indexOf(f) } : null);

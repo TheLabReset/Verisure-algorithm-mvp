@@ -6,6 +6,7 @@ import { CLIENTE } from '../cliente.js';
 import { tramoMeses, periodoTexto, comparacionTexto, puntosFrente, enLetras, segun, lista, capital, horasTexto, DIAS_SEMANA, version, mesTexto, medioEnFrase, tramoFechas, tipoAviso, tipoAvisoPlural, plataformasTexto, shareDeMarca, frenteATexto } from './comun.js';
 import { dolares, fechaSinAnio } from '../sistema/formato.js';
 import { MARGEN_OBJETIVO, VECES_PROMEDIO, MARGEN_AVANCE } from '../calculo/plataformas.js';
+import { DIAS_MINIMOS } from '../calculo/periodo.js';
 
 const propiaDe = (u) => u.marcas.find((m) => m.propia);
 const rivalDe = (u) => u.marcas.find((m) => !m.propia);
@@ -513,22 +514,26 @@ export function trendsMarcasLectura(b) {
   const lectura = sinAntes ? 'Google Trends todavía no tiene las mismas semanas de un año antes para comparar.' : crecen.length ? `${capital(lista(crecen))} ${crecen.length === 1 ? 'crece' : 'crecen'} frente a las mismas semanas de un año antes.` : `Ninguna crece más de ${porcentaje(10)} frente a las mismas semanas de un año antes.`;
   return { titulo, lectura };
 }
-// Las empresas del rubro por su nombre: la más buscada y cómo se mueve cada una, la competencia primero
-const busquedaDe = (id) => (CLIENTE.busquedas.competencia || []).find((x) => x.id === id) || {};
+// Las empresas del rubro por su nombre: sin decir quién lidera (sus búsquedas suman empleo y otros servicios), solo
+// hacia dónde se mueve cada una frente a un año antes, en el orden de CLIENTE (la competencia primero)
 export function competenciaBusquedasLectura(c) {
-  const [primera] = c?.marcas || [];
-  if (!primera) return { titulo: `Las ${CLIENTE.rubroPlural} en Google`, lectura: `Google Trends no trajo las ${CLIENTE.rubroPlural}.` };
-  const titulo = `${primera.nombre} es la más buscada entre las ${CLIENTE.rubroPlural}`;
-  if (c.marcas.every((m) => m.crecimiento == null)) return { titulo, lectura: 'Google Trends todavía no tiene las mismas semanas de un año antes para comparar.' };
-  const rival = c.marcas.find((m) => m.nombre === CLIENTE.competencia[0].nombre) || c.marcas.find((m) => !busquedaDe(m.id).propia);
-  const propia = c.marcas.find((m) => busquedaDe(m.id).propia);
-  const mueve = (m) => (m?.crecimiento == null ? null : Math.abs(m.crecimiento) < 1 ? `${m.nombre} se mantiene` : `${m.nombre} ${m.crecimiento > 0 ? 'sube' : 'baja'} ${numero(Math.abs(m.crecimiento))} %`);
-  const cambios = [mueve(rival), mueve(propia)].filter(Boolean);
-  return { titulo, lectura: cambios.length ? `${capital(lista(cambios))} frente a las mismas semanas de un año antes.` : '' };
+  const defs = CLIENTE.busquedas.competencia || [];
+  const titulo = `Las búsquedas de ${lista(defs.map((d) => d.nombre))} en Google`;
+  if (!c?.marcas.length) return { titulo, lectura: `Google Trends no trajo las ${CLIENTE.rubroPlural}.` };
+  const enOrden = defs.map((d) => c.marcas.find((m) => m.id === d.id)).filter(Boolean);
+  if (enOrden.every((m) => m.crecimiento == null)) return { titulo, lectura: enOrden.some((m) => m.antes != null) ? 'Un año antes no hubo búsquedas suficientes para comparar.' : 'Google Trends todavía no tiene las mismas semanas de un año antes para comparar.' };
+  const grupo = (f) => enOrden.filter((m) => m.crecimiento != null && f(m.crecimiento));
+  const suben = grupo((x) => x >= 1), bajan = grupo((x) => x <= -1), quietas = grupo((x) => Math.abs(x) < 1);
+  const n = enOrden.filter((m) => m.crecimiento != null).length;
+  const verbo = (xs, uno, varios) => `${lista(xs.map((m) => m.nombre))} ${xs.length > 1 ? varios : uno}`;
+  const partes = suben.length === n ? [`Las ${enLetras(n)} suben`] : bajan.length === n ? [`Las ${enLetras(n)} bajan`]
+    : [suben.length && verbo(suben, 'sube', 'suben'), bajan.length && verbo(bajan, 'baja', 'bajan'), quietas.length && verbo(quietas, 'se mantiene', 'se mantienen')].filter(Boolean);
+  return { titulo, lectura: `${capital(lista(partes))} frente a las mismas semanas de un año antes.` };
 }
 export function competenciaBusquedasPie(consultado) {
-  const empleo = (CLIENTE.busquedas.competencia || []).filter((x) => x.empleo).map((x) => x.nombre);
-  return `Google Trends, Perú · consultado el ${fechaCorta(consultado)}.${empleo.length ? ` ${lista(empleo)} ${empleo.length > 1 ? 'incluyen' : 'incluye'} búsquedas de empleo.` : ''}`;
+  const notas = (CLIENTE.busquedas.competencia || []).filter((x) => x.nota);
+  const frase = notas.map((x, i) => (i === 0 ? `${x.nombre} incluye búsquedas de ${x.nota}` : `${x.nombre}, de ${x.nota}`)).join('; ');
+  return `Google Trends, Perú · consultado el ${fechaCorta(consultado)}.${frase ? ` ${frase}.` : ''}`;
 }
 export function competenciaBusquedasAyuda(semanas) {
   const fuera = CLIENTE.busquedas.sinMedir || [];
@@ -582,10 +587,17 @@ const usd = (n) => dolares(n);
 // El pie del resumen de las plataformas con objetivos: contra qué fechas van las flechas y qué dice el color, con los
 // días elegidos (lo que toca cambia con el período)
 export function objetivosPie(o, P) {
-  const flechas = P.compararDesde ? `Flechas: frente a ${P.compararDesde === P.compararHasta ? tramoFechas(P.compararDesde, P.compararHasta) : `los días ${tramoFechas(P.compararDesde, P.compararHasta)}`}. ` : '';
-  const estos = o.dias === 1 ? 'a este día' : `a estos ${numero(o.dias)} días`;
-  const meta = o.mesCompleto ? 'al objetivo del mes' : o.unMes ? `a lo que toca ${estos} (${porcentaje(o.toca)} del objetivo del mes)` : `a lo que toca ${estos}`;
-  return `${flechas}Verde si llega ${meta} o cumple su mínimo o su tope; rojo si le falta más de ${porcentaje(MARGEN_AVANCE)}.`;
+  const mesEntero = (a, b) => a.slice(8) === '01' && b.slice(0, 7) === a.slice(0, 7) && new Date(Date.UTC(+b.slice(0, 4), +b.slice(5, 7), 0)).getUTCDate() === +b.slice(8);
+  const contra = !P.compararDesde ? '' : P.compararDesde === P.compararHasta ? `a${tramoFechas(P.compararDesde, P.compararHasta).replace(/^el /, 'l ')}`
+    : mesEntero(P.compararDesde, P.compararHasta) ? `a ${mesLargo(+P.compararDesde.slice(5, 7))}` : `a los días ${tramoFechas(P.compararDesde, P.compararHasta)}`;
+  const flechas = contra ? `Flechas: frente ${contra}. ` : '';
+  const conData = o.sinData ? ' con data' : '';
+  const estos = o.dias === 1 ? `a este día${conData}` : `a estos ${numero(o.dias)} días${conData}`;
+  const objetivo = o.unMes ? '' : `El objetivo es lo que toca ${estos}. `;
+  if (o.pocos) return `${flechas}${objetivo}Con menos de ${numero(DIAS_MINIMOS)} días con data, el avance va sin color.`;
+  const rojo = o.toca > MARGEN_AVANCE ? `; rojo bajo ${porcentaje(o.toca - MARGEN_AVANCE)}` : '';
+  const color = o.mesCompleto || !o.unMes ? `Verde desde ${porcentaje(100)}${rojo}.` : `Verde desde ${porcentaje(o.toca)}, lo que toca ${estos}${rojo}.`;
+  return `${flechas}${objetivo}${color} En L2B y costos, ${porcentaje(100)} es el mínimo o el tope; en inversión, pasarse también es rojo.`;
 }
 
 // La comparación del resumen se dice con sus fechas, al pie: frente a qué tramo se mide cada cambio

@@ -102,7 +102,7 @@
 .q-chispa-propia circle { fill: var(--propia); }
 .q-resumen-rotulo { font-size: var(--t-14); color: var(--texto-2); }
 .q-resumen .q-cifra-valor { font-size: var(--c-32); }
-.q-resumen-objetivo { font-size: var(--t-16); font-weight: var(--peso-lectura); color: var(--texto-3); white-space: nowrap; }
+.q-resumen-objetivo { display: inline-block; margin-left: 0.25em; font-size: var(--t-14); font-weight: var(--peso-lectura); color: var(--texto-3); white-space: nowrap; }
 .q-resumen-avance { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
 .q-resumen-neutro .q-cifra-valor { white-space: normal; }
 .q-avance { font-size: var(--t-24); font-weight: var(--peso-cifra); color: var(--texto-1); font-variant-numeric: tabular-nums; }

@@ -478,7 +478,7 @@ export function Resumen({ titulo, items, pie, frases = [], ejemplo = false, lect
           return (
             <li key={i.rotulo}>
               <span className="q-resumen-rotulo">{i.serie != null && <span className={`q-punto q-p${i.serie}`} aria-hidden="true" />}{i.rotulo}</span>
-              <span className={`q-cifra-valor${i.valor == null ? ' q-cifra-sin-dato' : ''}`} data-clave={i.dataClave}>{i.valor ?? NO_MEDIDO}{i.objetivo && <span className="q-resumen-objetivo"> / {i.objetivo}</span>}</span>
+              <span className={`q-cifra-valor${i.valor == null ? ' q-cifra-sin-dato' : ''}`} data-clave={i.dataClave}>{i.valor ?? NO_MEDIDO}{i.objetivo && <span className="q-resumen-objetivo">/ {i.objetivo}</span>}</span>
               {i.avance ? (
                 <span className="q-resumen-avance">
                   <span className={`q-avance${i.avance.tono ? ` q-avance-${i.avance.tono}` : ''}`} aria-label={`${i.avance.texto} del objetivo`}>{i.avance.texto}</span>
