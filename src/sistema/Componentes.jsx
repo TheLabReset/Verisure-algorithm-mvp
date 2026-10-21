@@ -463,11 +463,13 @@ export function Chispa({ valores, etiqueta, tono }) {
 
 // comparado: contra qué fechas se miden los cambios de las cifras; va al pie, dentro de la tarjeta (los cambios solo dicen
 // cuánto y hacia dónde, nunca repiten la cifra anterior)
-export function Resumen({ titulo, items, pie, frases = [], ejemplo = false, lectura, comparado }) {
+// neutro: las flechas van en gris porque el color queda para el objetivo (objetivo: «/ 320» al lado de la cifra; avance: el
+// porcentaje del objetivo, con su tono)
+export function Resumen({ titulo, items, pie, frases = [], ejemplo = false, lectura, comparado, neutro = false }) {
   const cargando = useContext(CargandoContexto);
   if (cargando) return <section className="q-resumen" id="resumen"><h2 className="q-resumen-titulo">{titulo}</h2><Estado tipo="cargando" /></section>;
   return (
-    <section className="q-resumen" aria-labelledby="resumen-t" id="resumen" data-ejemplo={ejemplo || undefined}>
+    <section className={`q-resumen${neutro ? ' q-resumen-neutro' : ''}`} aria-labelledby="resumen-t" id="resumen" data-ejemplo={ejemplo || undefined}>
       <div className="q-resumen-cab"><h2 id="resumen-t" className="q-resumen-titulo">{titulo}</h2>{ejemplo && <span className="q-ejemplo"><FlaskConical size={13} aria-hidden="true" />Data de ejemplo</span>}</div>
       {lectura && <p className="q-resumen-lectura">{lectura}</p>}
       <ul className={`q-resumen-cifras${items.some((i) => i.chispa) ? ' q-resumen-con-chispa' : ''}`}>
@@ -476,8 +478,13 @@ export function Resumen({ titulo, items, pie, frases = [], ejemplo = false, lect
           return (
             <li key={i.rotulo}>
               <span className="q-resumen-rotulo">{i.serie != null && <span className={`q-punto q-p${i.serie}`} aria-hidden="true" />}{i.rotulo}</span>
-              <span className={`q-cifra-valor${i.valor == null ? ' q-cifra-sin-dato' : ''}`} data-clave={i.dataClave}>{i.valor ?? NO_MEDIDO}</span>
-              {i.delta ? <Delta {...i.delta} /> : i.nota ? <span className="q-delta">{i.nota}</span> : <span aria-hidden="true" />}
+              <span className={`q-cifra-valor${i.valor == null ? ' q-cifra-sin-dato' : ''}`} data-clave={i.dataClave}>{i.valor ?? NO_MEDIDO}{i.objetivo && <span className="q-resumen-objetivo"> / {i.objetivo}</span>}</span>
+              {i.avance ? (
+                <span className="q-resumen-avance">
+                  <span className={`q-avance${i.avance.tono ? ` q-avance-${i.avance.tono}` : ''}`} aria-label={`${i.avance.texto} del objetivo`}>{i.avance.texto}</span>
+                  {i.delta && <Delta {...i.delta} />}
+                </span>
+              ) : i.delta ? <Delta {...i.delta} /> : i.nota ? <span className="q-delta">{i.nota}</span> : <span aria-hidden="true" />}
               {i.chispa && <Chispa valores={i.chispa} etiqueta={i.chispaEtiqueta} tono={i.chispaTono} />}
               {i.ir && <a className="q-resumen-ir" href={'#' + i.ir}>{u && <u.icono size={13} aria-hidden="true" />}{i.irTexto}</a>}
             </li>

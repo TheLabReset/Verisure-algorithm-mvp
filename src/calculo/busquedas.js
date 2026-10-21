@@ -29,12 +29,18 @@ export function leerBusquedas(datos, { semanas = VENTANA, hasta = null } = {}) {
     ahora: promedio(s, v.ahora), antes: v.antes ? promedio(s, v.antes) : null,
   })).map((s) => ({ ...s, crecimiento: crecimiento(s.antes, s.ahora) }));
   const camaras = series.find((s) => s.id === 'camaras'), marca = series.find((s) => s.propia);
-  const vd = diy?.semanas?.length ? ventanas(diy, semanas, hasta) : null;
-  const marcas = vd ? diy.series.map((s) => ({ id: s.id, nombre: s.nombre, ahora: promedio(s, vd.ahora), antes: vd.antes ? promedio(s, vd.antes) : null }))
-    // el crecimiento sale de los promedios redondeados, los mismos que muestra el gráfico
-    .map((s) => ({ ...s, crecimiento: crecimiento(s.antes == null ? null : Math.round(s.antes), Math.round(s.ahora)) })).sort((a, b) => b.ahora - a.ahora) : [];
-  // las marcas de cámaras semana a semana, en su propia escala (otra consulta de Trends)
-  const serieMarcas = diy?.semanas?.length ? diy.series.map((s) => ({ id: s.id, nombre: s.nombre, serie: diy.semanas.map((fecha, i) => ({ fecha, valor: diy.parcial[i] ? null : s.valores[i] })) })) : [];
+  // un grupo de marcas (otra consulta de Trends, en su propia escala): el promedio de cada una y su serie semanal
+  const deMarcas = (g) => {
+    const vg = g?.semanas?.length ? ventanas(g, semanas, hasta) : null;
+    if (!vg || !vg.ahora.length) return { marcas: [], series: [] };
+    const marcas = g.series.map((s) => ({ id: s.id, nombre: s.nombre, ahora: promedio(s, vg.ahora), antes: vg.antes ? promedio(s, vg.antes) : null }))
+      // el crecimiento sale de los promedios redondeados, los mismos que muestra el gráfico
+      .map((s) => ({ ...s, crecimiento: crecimiento(s.antes == null ? null : Math.round(s.antes), Math.round(s.ahora)) })).sort((a, b) => b.ahora - a.ahora);
+    return { marcas, series: g.series.map((s) => ({ id: s.id, nombre: s.nombre, serie: g.semanas.map((fecha, i) => ({ fecha, valor: g.parcial[i] ? null : s.valores[i] })) })) };
+  };
+  const diyLeido = deMarcas(diy), marcas = diyLeido.marcas, serieMarcas = diyLeido.series;
+  // las empresas del rubro por su nombre (la propia y la competencia), si el archivo las trae
+  const comp = deMarcas(datos.competencia);
   const semanaDe = (i) => cat.semanas[i];
   return {
     consultado: datos.consultado,
@@ -46,5 +52,6 @@ export function leerBusquedas(datos, { semanas = VENTANA, hasta = null } = {}) {
     razon: camaras && marca && marca.ahora ? camaras.ahora / marca.ahora : null,
     razonAntes: camaras && marca && marca.antes ? camaras.antes / marca.antes : null,
     camaras, marca, marcas, serieMarcas,
+    competencia: comp.marcas.length ? comp : null,
   };
 }

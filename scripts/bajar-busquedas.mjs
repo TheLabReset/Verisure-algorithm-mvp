@@ -1,4 +1,5 @@
-// Baja Google Trends a public/data/busquedas.json: la categoría (cámaras DIY frente a la marca) y las marcas de cámaras.
+// Baja Google Trends a public/data/busquedas.json: la categoría (cámaras DIY frente a la marca), las marcas de cámaras y las
+// empresas del rubro (la competencia por su nombre).
 // Lo corre el pipeline una vez por semana (Trends es semanal); también a mano: node scripts/bajar-busquedas.mjs
 import { writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -9,10 +10,11 @@ import { CLIENTE } from '../src/cliente.js';
 const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data', 'busquedas.json');
 
 export async function bajarBusquedas({ hoy = new Date().toISOString().slice(0, 10), fetchImpl = fetch } = {}) {
-  const { geo, desde, categoria, marcasDiy } = CLIENTE.busquedas;
+  const { geo, desde, categoria, marcasDiy, competencia } = CLIENTE.busquedas;
   const estado = {};
   const opciones = { geo, desde, hasta: hoy, fetchImpl, estado };
-  const datos = { consultado: hoy, geo, fuente: 'Google Trends', categoria: await bajarGrupo(categoria, opciones), marcasDiy: await bajarGrupo(marcasDiy, opciones) };
+  const datos = { consultado: hoy, geo, fuente: 'Google Trends', categoria: await bajarGrupo(categoria, opciones), marcasDiy: await bajarGrupo(marcasDiy, opciones),
+    ...(competencia?.length ? { competencia: await bajarGrupo(competencia, opciones) } : {}) };
   writeFileSync(OUT, JSON.stringify(datos));
   return datos;
 }

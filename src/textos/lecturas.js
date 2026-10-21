@@ -5,7 +5,7 @@ import { numero, porcentaje, soles, solesCompacto, fechaCorta, mesLargo } from '
 import { CLIENTE } from '../cliente.js';
 import { tramoMeses, periodoTexto, comparacionTexto, puntosFrente, enLetras, segun, lista, capital, horasTexto, DIAS_SEMANA, version, mesTexto, medioEnFrase, tramoFechas, tipoAviso, tipoAvisoPlural, plataformasTexto, shareDeMarca, frenteATexto } from './comun.js';
 import { dolares, fechaSinAnio } from '../sistema/formato.js';
-import { MARGEN_OBJETIVO, VECES_PROMEDIO } from '../calculo/plataformas.js';
+import { MARGEN_OBJETIVO, VECES_PROMEDIO, MARGEN_AVANCE } from '../calculo/plataformas.js';
 
 const propiaDe = (u) => u.marcas.find((m) => m.propia);
 const rivalDe = (u) => u.marcas.find((m) => !m.propia);
@@ -119,7 +119,7 @@ export const todosTipoTexto = (tipo, n) => (n === 1 ? `Es ${conArticulo(tipo)}.`
 export function mezclaLectura(x) {
   const conMezcla = x.meses.filter((m) => m.digital != null);
   if (!x.anio || !conMezcla.length) return { titulo: `${x.marca} no tiene inversión registrada en el año`, lectura: null };
-  const titulo = `El ${porcentaje(x.anio.digital)} de la inversión de ${x.marca} en el año es digital`;
+  const titulo = `El ${porcentaje(x.anio.digital)} de la inversión publicitaria de ${x.marca} en el año es digital`;
   const cerrados = conMezcla.filter((m) => !m.enCurso);
   const masAtl = [...cerrados].sort((a, b) => b.atl - a.atl)[0];
   const ultimo = cerrados.at(-1);
@@ -142,7 +142,7 @@ export function mezclaPista(m) {
 export function shareSemanalLectura(s) {
   const comp = (serie) => (serie || []).filter((x) => !x.parcial && x.valor != null);
   const dig = comp(s.digital), atl = comp(s.atl);
-  const titulo = `El share de ${s.marca}, semana a semana`;
+  const titulo = `El share de inversión de ${s.marca}, semana a semana`;
   if (!dig.length && !atl.length) return { titulo, lectura: 'Sin semanas completas con data.' };
   // con digital caída (o sin semanas completas), lo que hay de ATL
   if (!dig.length) { const m = atl.reduce((a, x) => (x.valor > a.valor ? x : a)); return { titulo, lectura: `En ATL, la semana más alta de ${s.marca} llega a ${pct(m.valor)}, la del ${fechaCorta(m.fecha)}.` }; }
@@ -381,6 +381,11 @@ const ALERTAS = {
     dato: `${capital(lista(a.medios.map((m) => `${medioEnFrase(m.nombre)} con ${monto(m.monto)} (${m.pct < 1 ? 'menos del 1 %' : `el ${porcentaje(m.pct)}`} de su inversión ATL)`)))}.`,
     mirar: 'Si es una prueba puntual o el inicio de una presencia sostenida.',
   }),
+  'medio-adelante': (a) => ({
+    titulo: `${a.marca} invierte más que ${a.propia} en ${lista(a.medios.map((m) => medioEnFrase(m.nombre)))}`,
+    dato: `${capital(lista(a.medios.map((m) => `${medioEnFrase(m.nombre)}, ${monto(m.monto)} frente a ${m.propia ? monto(m.propia) : `nada de ${a.propia}`}`)))}, en ${per(a)}.`,
+    mirar: `Si ${a.medios.length > 1 ? 'esos medios llegan' : 'ese medio llega'} al público de ${a.propia}.`,
+  }),
   'paneles-competencia': (a) => ({
     // la base son los 90 días anteriores al período (Integrametrics detecta los paneles a saltos)
     titulo: `${a.marca} tiene paneles en ${lista(a.zonas)}, donde no tenía en los 90 días anteriores`,
@@ -401,7 +406,7 @@ const ALERTAS = {
     mirar: 'En qué plataformas sale y con cuántas piezas.',
   }),
   'share-digital': (a) => ({
-    titulo: `El share digital de ${CLIENTE.nombre} disminuye`,
+    titulo: `El share de inversión digital de ${CLIENTE.nombre} disminuye`,
     dato: `${porcentaje(a.share)} de la inversión digital, frente a ${porcentaje(a.antes)} en ${comp(a)}.`,
     mirar: 'Cuánto cambió la inversión digital de cada marca, la propia incluida.',
   }),
@@ -416,7 +421,7 @@ const ALERTAS = {
     mirar: 'Cuántas veces sale al aire cada pieza.',
   }),
   'share-digital-sube': (a) => ({
-    titulo: `El share digital de ${CLIENTE.nombre} aumenta`,
+    titulo: `El share de inversión digital de ${CLIENTE.nombre} aumenta`,
     dato: `${porcentaje(a.share)} de la inversión digital, frente a ${porcentaje(a.antes)} en ${comp(a)}.`,
     mirar: 'Cuánto cambió la inversión digital de cada marca, la propia incluida.',
   }),
@@ -508,6 +513,27 @@ export function trendsMarcasLectura(b) {
   const lectura = sinAntes ? 'Google Trends todavía no tiene las mismas semanas de un año antes para comparar.' : crecen.length ? `${capital(lista(crecen))} ${crecen.length === 1 ? 'crece' : 'crecen'} frente a las mismas semanas de un año antes.` : `Ninguna crece más de ${porcentaje(10)} frente a las mismas semanas de un año antes.`;
   return { titulo, lectura };
 }
+// Las empresas del rubro por su nombre: la más buscada y cómo se mueve cada una, la competencia primero
+const busquedaDe = (id) => (CLIENTE.busquedas.competencia || []).find((x) => x.id === id) || {};
+export function competenciaBusquedasLectura(c) {
+  const [primera] = c?.marcas || [];
+  if (!primera) return { titulo: `Las ${CLIENTE.rubroPlural} en Google`, lectura: `Google Trends no trajo las ${CLIENTE.rubroPlural}.` };
+  const titulo = `${primera.nombre} es la más buscada entre las ${CLIENTE.rubroPlural}`;
+  if (c.marcas.every((m) => m.crecimiento == null)) return { titulo, lectura: 'Google Trends todavía no tiene las mismas semanas de un año antes para comparar.' };
+  const rival = c.marcas.find((m) => m.nombre === CLIENTE.competencia[0].nombre) || c.marcas.find((m) => !busquedaDe(m.id).propia);
+  const propia = c.marcas.find((m) => busquedaDe(m.id).propia);
+  const mueve = (m) => (m?.crecimiento == null ? null : Math.abs(m.crecimiento) < 1 ? `${m.nombre} se mantiene` : `${m.nombre} ${m.crecimiento > 0 ? 'sube' : 'baja'} ${numero(Math.abs(m.crecimiento))} %`);
+  const cambios = [mueve(rival), mueve(propia)].filter(Boolean);
+  return { titulo, lectura: cambios.length ? `${capital(lista(cambios))} frente a las mismas semanas de un año antes.` : '' };
+}
+export function competenciaBusquedasPie(consultado) {
+  const empleo = (CLIENTE.busquedas.competencia || []).filter((x) => x.empleo).map((x) => x.nombre);
+  return `Google Trends, Perú · consultado el ${fechaCorta(consultado)}.${empleo.length ? ` ${lista(empleo)} ${empleo.length > 1 ? 'incluyen' : 'incluye'} búsquedas de empleo.` : ''}`;
+}
+export function competenciaBusquedasAyuda(semanas) {
+  const fuera = CLIENTE.busquedas.sinMedir || [];
+  return `Google Trends da un índice en Perú, no la cantidad de búsquedas: 100 es la semana con más búsquedas de la consulta. Las empresas van en la misma consulta, así que se comparan entre sí, pero no con las marcas de cámaras. El porcentaje de cada una compara el promedio de las últimas ${numero(semanas)} semanas completas frente a las mismas semanas de un año antes.${fuera.length ? ` ${lista(fuera)} no ${fuera.length > 1 ? 'tienen' : 'tiene'} búsquedas suficientes para medirse.` : ''}`;
+}
 export function tiktokLectura(t) {
   const [h] = t.hashtags;
   const marca = t.hashtags.find((x) => x.deMarca);
@@ -553,21 +579,15 @@ export function compraLectura(c, P, ventana = null) {
 
 // ── Capa 3: plataformas y CRM (hoy con data de ejemplo) ──
 const usd = (n) => dolares(n);
-// El resumen de la capa: cómo se movieron los bookings frente a la inversión, y el costo por booking
-const cambioPct = (a, b) => (a == null || !b ? null : ((a - b) / b) * 100);
-export function plataformasResumenLectura(x) {
-  const t = x.total, a = x.totalPrevio;
-  if (!a) return '';
-  const b = cambioPct(t.bookings, a.bookings), i = cambioPct(t.inversion, a.inversion), c = cambioPct(t.cpb, a.cpb);
-  if (b == null || i == null) return '';
-  // un cambio de menos de medio punto se lee como «igual»; bajo 10 %, con un decimal
-  const cifra = (n) => porcentaje(Math.abs(n), Math.abs(n) < 10 ? 1 : 0);
-  const quieto = (n) => Math.abs(n) < 0.5;
-  const conInv = quieto(i) ? 'con la misma inversión' : `con ${cifra(i)} ${i > 0 ? 'más' : 'menos'} de inversión`;
-  const primera = quieto(b) ? `Los bookings se mantienen ${conInv}.` : `Los bookings ${b > 0 ? 'suben' : 'bajan'} ${cifra(b)} ${conInv}.`;
-  const segunda = c == null ? '' : Math.abs(c) < 1 ? ' El costo por booking queda casi igual.' : ` El costo por booking ${c > 0 ? 'sube' : 'baja'} ${cifra(c)}.`;
-  return `${primera}${segunda}`;
+// El pie del resumen de las plataformas con objetivos: contra qué fechas van las flechas y qué dice el color, con los
+// días elegidos (lo que toca cambia con el período)
+export function objetivosPie(o, P) {
+  const flechas = P.compararDesde ? `Flechas: frente a ${P.compararDesde === P.compararHasta ? tramoFechas(P.compararDesde, P.compararHasta) : `los días ${tramoFechas(P.compararDesde, P.compararHasta)}`}. ` : '';
+  const estos = o.dias === 1 ? 'a este día' : `a estos ${numero(o.dias)} días`;
+  const meta = o.mesCompleto ? 'al objetivo del mes' : o.unMes ? `a lo que toca ${estos} (${porcentaje(o.toca)} del objetivo del mes)` : `a lo que toca ${estos}`;
+  return `${flechas}Verde si llega ${meta} o cumple su mínimo o su tope; rojo si le falta más de ${porcentaje(MARGEN_AVANCE)}.`;
 }
+
 // La comparación del resumen se dice con sus fechas, al pie: frente a qué tramo se mide cada cambio
 export const comparadoTexto = (P) => (!P.compararDesde ? null : `Comparado con ${P.compararDesde === P.compararHasta ? tramoFechas(P.compararDesde, P.compararHasta) : `los días ${tramoFechas(P.compararDesde, P.compararHasta)}`}.`);
 

@@ -42,6 +42,6 @@ export const semanaTexto = (s) => `semana del ${fechaCorta(s.desde)} al ${fechaC
 export const PREGUNTAS = [
   `¿Qué hizo ${CLIENTE.competencia[0].nombre} esta semana?`,
   `¿Dónde tiene paneles ${CLIENTE.competencia[0].nombre}?`,
-  `¿Cómo va el share digital frente a ${CLIENTE.competencia[0].nombre}?`,
+  `¿Cómo va el share de inversión digital frente a ${CLIENTE.competencia[0].nombre}?`,
   '¿Qué marcas de cámaras DIY crecen?',
 ];

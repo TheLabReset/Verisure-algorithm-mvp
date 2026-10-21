@@ -34,6 +34,7 @@ export const UMBRALES = {
   subidaCompetencia: 30, // % de subida de la inversión de la competencia frente a la comparación
   bajadaCompetencia: 50, // % de caída de la inversión de la competencia frente a la comparación
   medioNuevo: 5,        // % de su inversión ATL que tiene que pesar un medio nuevo para avisar: lo muy chico no se menciona
+  medioAdelante: 20,    // % más que la marca propia que tiene que invertir la competencia en un medio para avisarlo
   diasMinimos: DIAS_MINIMOS, // días con data en el período para leer una variación: con menos, un día raro manda
   subidaDiy: 15,         // % de subida de las búsquedas de cámaras frente a las mismas semanas del año anterior
 };
@@ -387,6 +388,7 @@ function queMirar(v, P) {
   if (v.lee.atl.estado === 'sin-registros') out.push({ id: 'dias-sin-dato', nivel: 'revisar', tarjeta: 'diaria', fuente: 'Integrametrics', dias: v.lee.atl.sinDato });
   if (pocos) out.push({ id: 'pocos-dias', nivel: 'revisar', tarjeta: 'share', fuente: 'Integrametrics', dias: diasConData(v.lee.atl), minimo: UMBRALES.diasMinimos });
   if (v.lee.atl.estado === 'ok' && !pocos) {
+    const propiaAtl = v.lee.atl.marcas.find((x) => x.propia);
     for (const m of comp(v.lee.atl)) {
       const valores = v.lee.atl.diaria.map((d) => d.valores[m.id]).filter((x) => x > 0);
       const med = mediana(valores);
@@ -397,6 +399,12 @@ function queMirar(v, P) {
         const nuevos = Object.entries(m.medios).filter(([k, x]) => x > 0 && !(antes[k] > 0)).map(([k, x]) => ({ nombre: MEDIOS[k] || k, monto: x, pct: Math.round((x / m.inversion) * 100) })).filter((x) => x.pct >= UMBRALES.medioNuevo);
         if (nuevos.length) out.push({ id: 'medio-nuevo', nivel: 'revisar', tarjeta: 'medios', fuente: 'Integrametrics', marca: m.nombre, medios: nuevos });
       }
+      // un medio donde la competencia invierte más que la marca propia (o donde la propia no está), si le pesa en su
+      // inversión ATL y le saca al menos UMBRALES.medioAdelante % de ventaja; lo que ya se avisó como medio nuevo no se repite
+      const yaNuevos = new Set(out.filter((a) => a.id === 'medio-nuevo' && a.marca === m.nombre).flatMap((a) => a.medios.map((x) => x.nombre)));
+      const adelante = Object.entries(m.medios).map(([k, x]) => ({ nombre: MEDIOS[k] || k, monto: x, propia: propiaAtl?.medios?.[k] || 0, pct: Math.round((x / m.inversion) * 100) }))
+        .filter((x) => x.monto > 0 && x.pct >= UMBRALES.medioNuevo && x.monto >= x.propia * (1 + UMBRALES.medioAdelante / 100) && !yaNuevos.has(x.nombre)).sort((a, z) => z.monto - a.monto);
+      if (adelante.length && propiaAtl) out.push({ id: 'medio-adelante', nivel: 'revisar', tarjeta: 'medios', fuente: 'Integrametrics', marca: m.nombre, propia: propiaAtl.nombre, medios: adelante });
     }
     const propia = v.lee.atl.marcas.find((m) => m.propia);
     const principal = v.lee.atl.marcas.find((m) => m.id === COMPETENCIA[0]);
@@ -435,7 +443,7 @@ function queMirar(v, P) {
     if (propia.cambioPts != null && propia.cambioPts >= UMBRALES.subidaShareDigital) out.push({ id: 'share-digital-sube', nivel: 'bien', tarjeta: 'share', fuente: 'Integrametrics digital', share: propia.share, antes: propia.sharePrevio });
   }
   // Lo de la competencia va primero dentro de cada nivel: es lo principal del panel
-  const deCompetencia = (a) => ['estreno-competencia', 'sube-competencia', 'baja-competencia', 'competencia-sin-pauta', 'pico-competencia', 'medio-nuevo', 'paneles-competencia', 'digital-competencia'].includes(a.id);
+  const deCompetencia = (a) => ['estreno-competencia', 'sube-competencia', 'baja-competencia', 'competencia-sin-pauta', 'pico-competencia', 'medio-nuevo', 'medio-adelante', 'paneles-competencia', 'digital-competencia'].includes(a.id);
   // cada alerta lleva su período, para que su texto diga frente a qué compara
   return out.map((a) => ({ ...a, competencia: deCompetencia(a), periodo: P })).sort((a, z) => Number(z.competencia) - Number(a.competencia));
 }
@@ -500,7 +508,7 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
       { titulo: 'Subsectores de Integrametrics', items: CLIENTE.subsectores },
       { titulo: 'Medios ATL', items: ['TV abierta', 'Cable', 'Radio', 'OTT y streaming', 'Vía pública'] },
       { titulo: 'Plataformas digitales', items: plataformasDelAnio(contrato) },
-      { titulo: 'Búsquedas en Google Trends', items: [...CLIENTE.busquedas.categoria, ...CLIENTE.busquedas.marcasDiy].map((b) => b.nombre) },
+      { titulo: 'Búsquedas en Google Trends', items: [...CLIENTE.busquedas.categoria, ...CLIENTE.busquedas.marcasDiy, ...(CLIENTE.busquedas.competencia || [])].map((b) => b.nombre).filter((n, i, xs) => xs.indexOf(n) === i) },
       { titulo: 'Por conectar', items: ['Hashtags en TikTok (Apify)', 'Conversación en Facebook (Apify)', `Meta Ads, Google Ads y TikTok Ads de ${CLIENTE.nombre}`, `CRM de ${CLIENTE.nombre} en Google Sheets`] },
     ],
     lee: {

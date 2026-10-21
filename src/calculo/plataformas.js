@@ -52,6 +52,41 @@ function partes(valores) {
 // Las semanas que se miran para decir cuántas pasaron el objetivo, como el gráfico semanal del tablero
 export const SEMANAS_OBJETIVO = 12;
 
+// Frente a los objetivos del mes. Lo que se acumula (inversión, leads, bookings) se compara con lo que toca a los días
+// elegidos: dentro de un mes, el objetivo del mes y la parte de sus días (20 de 31 días = 65 %); si el tramo cruza meses,
+// la suma de lo que toca a cada día (el objetivo de su mes entre los días del mes) y el 100 %. El L2B tiene un mínimo y
+// los costos un tope, en cualquier tramo. «bien» si llega; «mal» si le falta más de MARGEN_AVANCE % de lo que toca
+// (o se pasa del tope en más de MARGEN_AVANCE %); entre los dos, sin tono. Un mes sin objetivo deja todo en null
+export const MARGEN_AVANCE = 5;
+const ACUMULA = ['inversion', 'leads', 'bookings'], MINIMO = ['l2b'], TOPE = ['cpl', 'cpb'];
+const diasDelMes = (mes) => new Date(Date.UTC(+mes.slice(0, 4), +mes.slice(5, 7), 0)).getUTCDate();
+const fechasDe = (desde, hasta) => { const r = []; for (let d = new Date(`${desde}T00:00:00Z`); d.toISOString().slice(0, 10) <= hasta; d.setUTCDate(d.getUTCDate() + 1)) r.push(d.toISOString().slice(0, 10)); return r; };
+export function frenteAObjetivos(total, objetivos, desde, hasta) {
+  if (!total || !objetivos?.length) return null;
+  const porMes = new Map(objetivos.map((o) => [o.mes, o]));
+  const fechas = fechasDe(desde, hasta), meses = [...new Set(fechas.map((f) => f.slice(0, 7)))];
+  if (meses.some((m) => !porMes.has(m))) return null;
+  const unMes = meses.length === 1, mes = meses[0];
+  const tocaDias = unMes ? (fechas.length / diasDelMes(mes)) * 100 : 100;
+  const tono = (falta) => (falta <= 0 ? 'bien' : falta > MARGEN_AVANCE ? 'mal' : null);
+  const salida = {};
+  for (const k of ACUMULA) {
+    const objetivo = unMes ? porMes.get(mes)[k] : fechas.reduce((s, f) => s + porMes.get(f.slice(0, 7))[k] / diasDelMes(f.slice(0, 7)), 0);
+    if (!objetivo || total[k] == null) { salida[k] = null; continue; }
+    const avance = (total[k] / objetivo) * 100;
+    salida[k] = { objetivo, avance, tono: tono(100 - (avance / tocaDias) * 100) };
+  }
+  // el mínimo y el tope: el de cada día pesa igual (si cambian de un mes a otro)
+  const promedio = (k) => fechas.reduce((s, f) => s + porMes.get(f.slice(0, 7))[k], 0) / fechas.length;
+  for (const k of [...MINIMO, ...TOPE]) {
+    const objetivo = promedio(k);
+    if (!objetivo || total[k] == null) { salida[k] = null; continue; }
+    const avance = (total[k] / objetivo) * 100;
+    salida[k] = { objetivo, avance, tono: tono(MINIMO.includes(k) ? 100 - avance : avance - 100) };
+  }
+  return { ...salida, dias: fechas.length, unMes, mesCompleto: unMes && fechas.length === diasDelMes(mes), toca: tocaDias };
+}
+
 export function leerPlataformas(datos, P) {
   if (!datos?.dias?.length) return null;
   const enTramo = (a, b) => datos.dias.filter((d) => d.fecha >= a && d.fecha <= b);
@@ -106,6 +141,7 @@ export function leerPlataformas(datos, P) {
   return {
     ejemplo: Boolean(datos.ejemplo), moneda: datos.moneda, fuente: datos.fuente,
     total, totalPrevio: antes.length ? cifras(todas(antes)) : null,
+    objetivos: frenteAObjetivos(total, datos.objetivos, P.desde, P.hasta),
     plataformas,
     diaria: dias.map((d) => ({ fecha: d.fecha, ...cifras(todas([d])), porPlataforma: Object.fromEntries(datos.plataformas.map((p) => [p.id, d[p.id]])) })),
     tipos,
