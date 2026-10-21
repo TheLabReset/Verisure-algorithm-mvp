@@ -9,7 +9,7 @@ import { Lineas, BarrasYLinea } from '../sistema/graficos/Graficos.jsx';
 import { numero, porcentaje, dolares, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import { resumenTitulo } from '../textos/comun.js';
-import { pushPullLectura, plataformasResumenLectura, plataformasTiempoLectura, plataformasTablaLectura, frenteObjetivoTexto, comparadoTexto, estadoObjetivo, extremoTexto, extremosAyuda, semanaRotulo } from '../textos/lecturas.js';
+import { pushPullLectura, objetivosPie, plataformasTiempoLectura, plataformasTablaLectura, frenteObjetivoTexto, comparadoTexto, estadoObjetivo, extremoTexto, extremosAyuda, semanaRotulo } from '../textos/lecturas.js';
 import { MARGEN_OBJETIVO, SEMANAS_OBJETIVO, extremos } from '../calculo/plataformas.js';
 
 const SEMANAS_A_LA_VISTA = 12; // como el tablero del cliente: el trimestre que termina en el período
@@ -111,10 +111,10 @@ export default function Activacion({ capa, vista: v }) {
   // con un decimal bajo 10 %, como en la lectura
   const delta = (k, mejorSi) => { const c = a ? cambio(t[k], a[k]) : null; return c == null ? null : { cambio: c, mejorSi, decimales: Math.abs(c) < 10 ? 1 : 0 }; };
   const ultimas = (semanas) => semanas.slice(-SEMANAS_A_LA_VISTA).reverse();
-  // la línea de cada cifra: las últimas semanas enteras (la en curso no se compara con semanas completas)
-  const enteras = x.semanas.filter((s) => s.dias >= 7).slice(-(SEMANAS_A_LA_VISTA - 1));
-  const chispa = (k) => (enteras.length > 1 ? enteras.map((s) => s[k]) : null);
-  const chispaEtiqueta = (que) => `${que} de las últimas ${numero(enteras.length)} semanas completas`;
+  // cada cifra frente a su objetivo del mes: el objetivo al lado («190 / 320») y el avance, en color solo si se aleja
+  const o = x.objetivos;
+  const sinBase = { cpl: 'sin leads', cpb: 'sin bookings' };
+  const frente = (k, formato) => (o?.[k] ? { objetivo: formato(o[k].objetivo), avance: { texto: o[k].avance == null ? sinBase[k] : porcentaje(o[k].avance), tono: o[k].tono } } : {});
   // las filas de mejor y peor desempeño de una tabla, en el orden en que se pintan
   const marcas = (lista, unidad) => {
     const e = extremos(lista), fila = (f) => (f ? { fila: lista.indexOf(f) } : null);
@@ -126,16 +126,16 @@ export default function Activacion({ capa, vista: v }) {
     : x.diaria.map((d) => ({ fecha: d.fecha, nombre: fechaCorta(d.fecha), barra: d.bookings, linea: d.leads, parcial: false }));
   return (
     <MarcoCapa capa={capa} vista={v}>
-      <Resumen titulo={resumenTitulo(P)} ejemplo lectura={plataformasResumenLectura(x)}
-        comparado={a ? comparadoTexto(P) : null}
-        pie={<span>{x.fuente}. Inversión en dólares, como la reportan las plataformas.</span>}
+      <Resumen titulo={resumenTitulo(P)} ejemplo neutro={Boolean(o)}
+        comparado={o ? objetivosPie(o, P) : a ? comparadoTexto(P) : null}
+        pie={<span>En dólares.</span>}
         items={[
-          { rotulo: 'Inversión', universo: 'plataformas', ir: s33.id, irTexto: s33.titulo, valor: dolares(t.inversion), delta: delta('inversion', 'neutro'), chispa: chispa('inversion'), chispaEtiqueta: chispaEtiqueta('Inversión') },
-          { rotulo: 'Leads', universo: 'plataformas', ir: s31.id, irTexto: s31.titulo, valor: numero(t.leads), delta: delta('leads', 'sube'), chispa: chispa('leads'), chispaEtiqueta: chispaEtiqueta('Leads') },
-          { rotulo: 'Bookings', universo: 'plataformas', ir: s31.id, irTexto: s31.titulo, valor: numero(t.bookings), delta: delta('bookings', 'sube'), chispa: chispa('bookings'), chispaEtiqueta: chispaEtiqueta('Bookings'), chispaTono: 'propia' },
-          { rotulo: 'L2B', universo: 'plataformas', ir: s32.id, irTexto: s32.titulo, valor: pct(t.l2b), delta: a && t.l2b != null && a.l2b != null ? { cambio: t.l2b - a.l2b, mejorSi: 'sube', decimales: 1, unidad: 'pts' } : null, chispa: chispa('l2b'), chispaEtiqueta: chispaEtiqueta('L2B') },
-          { rotulo: 'Costo por lead', universo: 'plataformas', ir: s33.id, irTexto: s33.titulo, valor: costo(t.cpl), delta: delta('cpl', 'baja'), chispa: chispa('cpl'), chispaEtiqueta: chispaEtiqueta('Costo por lead') },
-          { rotulo: 'Costo por booking', universo: 'plataformas', ir: s33.id, irTexto: s33.titulo, valor: costo(t.cpb), delta: delta('cpb', 'baja'), chispa: chispa('cpb'), chispaEtiqueta: chispaEtiqueta('Costo por booking') },
+          { rotulo: 'Inversión', universo: 'plataformas', ir: s33.id, irTexto: s33.titulo, valor: dolares(t.inversion), delta: delta('inversion', 'neutro'), ...frente('inversion', dolares) },
+          { rotulo: 'Leads', universo: 'plataformas', ir: s31.id, irTexto: s31.titulo, valor: numero(t.leads), delta: delta('leads', 'sube'), ...frente('leads', (n) => numero(Math.round(n))) },
+          { rotulo: 'Bookings', universo: 'plataformas', ir: s31.id, irTexto: s31.titulo, valor: numero(t.bookings), delta: delta('bookings', 'sube'), ...frente('bookings', (n) => numero(Math.round(n))) },
+          { rotulo: 'L2B', universo: 'plataformas', ir: s32.id, irTexto: s32.titulo, valor: o?.l2b ? porcentaje(t.l2b, 1) : pct(t.l2b), delta: a && t.l2b != null && a.l2b != null ? { cambio: t.l2b - a.l2b, mejorSi: 'sube', decimales: 1, unidad: 'pts' } : null, ...frente('l2b', (n) => porcentaje(n, 1)) },
+          { rotulo: 'Costo por lead', universo: 'plataformas', ir: s33.id, irTexto: s33.titulo, valor: costo(t.cpl), delta: delta('cpl', 'baja'), ...frente('cpl', costo) },
+          { rotulo: 'Costo por booking', universo: 'plataformas', ir: s33.id, irTexto: s33.titulo, valor: costo(t.cpb), delta: delta('cpb', 'baja'), ...frente('cpb', costo) },
         ]} />
 
       <SeccionDe def={s31} vista={v}>

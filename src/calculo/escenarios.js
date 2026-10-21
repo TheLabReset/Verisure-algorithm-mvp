@@ -148,7 +148,7 @@ export const ESCENARIOS = [
     que: 'Google Trends devuelve solo las últimas veinte semanas: no hay con qué compararlas un año antes.',
     aplicar(d) {
       if (!d.busquedas) return;
-      for (const g of [d.busquedas.categoria, d.busquedas.marcasDiy].filter(Boolean)) {
+      for (const g of [d.busquedas.categoria, d.busquedas.marcasDiy, d.busquedas.competencia].filter(Boolean)) {
         const n = g.semanas.length - 20;
         g.semanas = g.semanas.slice(n); g.parcial = g.parcial.slice(n);
         for (const s of g.series) s.valores = s.valores.slice(n);

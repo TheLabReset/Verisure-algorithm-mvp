@@ -102,6 +102,13 @@
 .q-chispa-propia circle { fill: var(--propia); }
 .q-resumen-rotulo { font-size: var(--t-14); color: var(--texto-2); }
 .q-resumen .q-cifra-valor { font-size: var(--c-32); }
+.q-resumen-objetivo { display: inline-block; margin-left: 0.25em; font-size: var(--t-14); font-weight: var(--peso-lectura); color: var(--texto-3); white-space: nowrap; }
+.q-resumen-avance { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.q-resumen-neutro .q-cifra-valor { white-space: normal; }
+.q-avance { font-size: var(--t-24); font-weight: var(--peso-cifra); color: var(--texto-1); font-variant-numeric: tabular-nums; }
+.q-avance-bien { color: var(--mejora); }
+.q-avance-mal { color: var(--empeora); }
+.q-resumen-neutro .q-delta .q-delta-valor { color: var(--texto-2); }
 .q-resumen-ir { align-self: end; display: inline-flex; align-items: center; gap: var(--e-1); margin-top: var(--e-2); font-size: var(--t-13); color: var(--texto-3); text-decoration: none; width: fit-content; }
 .q-resumen-ir:hover { color: var(--texto-1); text-decoration: underline; }
 @media (max-width: 640px) {

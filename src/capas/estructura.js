@@ -40,10 +40,10 @@ export const CAPAS = [
     ],
   },
   {
-    id: 'rendimiento', numero: '4', nombre: 'Históricos', descripcion: 'El share, el año y las versiones de cada marca',
-    titulo: 'Históricos', bajada: `Cómo viene el share de ${competencia}, cómo se movió la pauta en el año y qué versiones tuvo.`,
+    id: 'rendimiento', numero: '4', nombre: 'Históricos', descripcion: 'El share de inversión, el año y las versiones de cada marca',
+    titulo: 'Históricos', bajada: `Cómo viene el share de inversión publicitaria de ${competencia}, cómo se movió la pauta en el año y qué versiones tuvo.`,
     secciones: [
-      { id: 's-4-1', numero: '4.1', titulo: 'Cómo viene el período', pregunta: `¿Qué parte de la inversión pone ${competencia} y cómo viene semana a semana?`, universos: ['digital', 'atl'], fuentes: ['digital', 'atl'] },
+      { id: 's-4-1', numero: '4.1', titulo: 'Cómo viene el período', pregunta: `¿Qué parte de la inversión publicitaria pone ${competencia} y cómo viene semana a semana?`, universos: ['digital', 'atl'], fuentes: ['digital', 'atl'] },
       { id: 's-4-2', numero: '4.2', titulo: 'Cómo viene el año', pregunta: '¿Cuándo se prende y se apaga la pauta de cada marca, y cuánto invierte mes a mes?', universos: ['digital', 'atl'], fuentes: ['digital', 'atl'] },
       { id: 's-4-3', numero: '4.3', titulo: 'Versiones en el año', pregunta: `¿Qué versiones tuvo ${competencia} en el año, en ATL y en digital?`, universos: ['atl', 'digital'], fuentes: ['atl', 'digital'] },
     ],

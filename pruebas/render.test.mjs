@@ -93,7 +93,7 @@ test('la data de ejemplo lleva su sello y no entra a los avisos', () => {
     const bloques = (act.match(/<article class="q-bloque /g) || []).length;
     const sellados = (act.match(/<article class="q-bloque [^"]*"[^>]*data-ejemplo="true"/g) || []).length;
     assert.ok(bloques > 0 && sellados === bloques, `${JSON.stringify(filtros)}: ${bloques - sellados} tarjetas de plataformas sin el sello`);
-    assert.match(act, /<section class="q-resumen"[^>]*data-ejemplo="true"/, 'el resumen de plataformas sin el sello');
+    assert.match(act, /<section class="q-resumen[^"]*"[^>]*data-ejemplo="true"/, 'el resumen de plataformas sin el sello');
     const sen = pintar('senales', v);
     for (const red of ['TikTok', 'Facebook']) {
       const tarjeta = sen.split('<article class="q-bloque ').find((t) => t.includes(`${red} vía Apify`) || t.includes(red === 'Facebook' ? 'social listening' : 'búsqueda por hashtag'));
@@ -143,4 +143,26 @@ test('render: sin el archivo de vigiladas, la capa 1 queda como antes', () => {
   const v = armarVista(DATOS.contrato, DATOS.medios, { atajo: '30d' }, {}, { mapa: DATOS.mapa, busquedas: DATOS.busquedas });
   const html = pintar('senales', v);
   assert.doesNotMatch(html, /aria-label="Marca"|Primeras apariciones de otras marcas|q-muestra-vigilada/);
+});
+
+test('búsquedas: con el grupo de competencia aparece el filtro; sin él, la tarjeta queda como antes', async () => {
+  const { CLIENTE } = await import('../src/cliente.js');
+  const { competenciaBusquedasLectura, competenciaBusquedasPie, competenciaBusquedasAyuda } = await import('../src/textos/lecturas.js');
+  const diy = DATOS.busquedas.marcasDiy;
+  // el grupo de competencia con la forma del archivo (las series de las cámaras, con los nombres de las empresas)
+  const competencia = { ...diy, series: CLIENTE.busquedas.competencia.map((c, i) => ({ ...diy.series[i], id: c.id, nombre: c.nombre })) };
+  const con = armarVista(DATOS.contrato, DATOS.medios, { atajo: '30d' }, {}, { mapa: DATOS.mapa, busquedas: { ...DATOS.busquedas, competencia } });
+  const sin = armarVista(DATOS.contrato, DATOS.medios, { atajo: '30d' }, {}, { mapa: DATOS.mapa, busquedas: { ...DATOS.busquedas, competencia: undefined } });
+  const c = con.analiza.busquedas.competencia;
+  assert.equal(c.marcas.length, CLIENTE.busquedas.competencia.length);
+  assert.ok(c.marcas.every((m, i, xs) => i === 0 || xs[i - 1].ahora >= m.ahora), 'de la más buscada a la menos');
+  assert.equal(sin.analiza.busquedas.competencia, null);
+  assert.match(pintar('senales', con), /aria-label="Búsquedas"/, 'con el grupo, el filtro Cámaras DIY | Competencia');
+  assert.doesNotMatch(pintar('senales', sin), /aria-label="Búsquedas"/, 'sin el grupo, no hay filtro');
+  // los textos: la competencia primero, las que suman empleo en el pie y la que no se mide en la ayuda
+  const l = competenciaBusquedasLectura(c);
+  assert.ok(l.titulo.includes(CLIENTE.competencia[0].nombre) && !/más buscad/.test(l.titulo), 'el título nombra a la competencia y no dice quién lidera');
+  assert.ok(l.lectura.length > 0 && !/\d+ %/.test(l.lectura), 'la lectura dice hacia dónde se mueven, sin repetir los porcentajes de la leyenda');
+  for (const x of CLIENTE.busquedas.competencia.filter((y) => y.nota)) assert.match(competenciaBusquedasPie('2026-10-20'), new RegExp(`${x.nombre}[^.;]*${x.nota}`));
+  for (const n of CLIENTE.busquedas.sinMedir) assert.match(competenciaBusquedasAyuda(12), new RegExp(n));
 });

@@ -13,7 +13,7 @@ import { MarcoCapa, SeccionDe, sinDato, avisosDe } from './comun.jsx';
 import Ooh from './Ooh.jsx';
 import Emisiones from './Emisiones.jsx';
 import { periodoTexto, version, ventanaTexto, resumenTitulo, plataformasTexto, plataformaEnFrase, capital } from '../textos/comun.js';
-import { digitalSemanaLectura, atlSemanaLectura, oohLectura, distritosLectura, textosDelAbanico, textosMarca, trendsMarcasLectura, tiktokLectura, facebookLectura, TONOS, alerta, aparicionesNota, ACCION_VIGILADA, accionVigiladaEtiqueta } from '../textos/lecturas.js';
+import { digitalSemanaLectura, atlSemanaLectura, oohLectura, distritosLectura, textosDelAbanico, textosMarca, trendsMarcasLectura, competenciaBusquedasLectura, competenciaBusquedasPie, competenciaBusquedasAyuda, tiktokLectura, facebookLectura, TONOS, alerta, aparicionesNota, ACCION_VIGILADA, accionVigiladaEtiqueta } from '../textos/lecturas.js';
 import { UMBRALES_TONO } from '../calculo/conversacion.js';
 import { CLIENTE } from '../cliente.js';
 
@@ -130,6 +130,35 @@ function OohConMarca({ v, P, tPaneles }) {
   );
 }
 
+// Búsquedas en Google: las marcas de cámaras DIY o las empresas del rubro (cada grupo es otra consulta de Trends,
+// en su propia escala). En las empresas, la competencia va resaltada (su color), la propia en su rojo y el resto en gris
+function BusquedasTarjeta({ b, desdeUnAnio }) {
+  const [grupo, setGrupo] = useState('camaras');
+  const c = b.competencia, conCompetencia = Boolean(c?.marcas.length), ver = conCompetencia ? grupo : 'camaras';
+  const filtro = conCompetencia && (
+    <div className="q-control q-control-tarjeta"><span>Búsquedas</span><Grupo etiqueta="Búsquedas" valor={ver} onCambiar={setGrupo} opciones={[{ valor: 'camaras', texto: 'Cámaras DIY' }, { valor: 'competencia', texto: 'Competencia' }]} /></div>
+  );
+  if (ver === 'competencia') {
+    return (
+      <Bloque universo="busquedas" {...competenciaBusquedasLectura(c)} alcance={`semanas al ${fechaCorta(c.hasta)}`}
+        ayuda={<p>{competenciaBusquedasAyuda(b.semanas)}</p>} pie={<span>{competenciaBusquedasPie(b.consultado)}</span>}>
+        {filtro}
+        <Lineas etiqueta={`Búsquedas semanales de ${CLIENTE.rubroPlural} en Google Trends, un año hasta el período`} formato={(n) => numero(n)} alto={280}
+          series={c.marcas.map((m) => ({ nombre: m.nombre, resaltada: m.foco, tono: m.propia ? 'propia' : undefined, leyenda: m.crecimiento == null ? m.nombre : `${m.nombre} ${signo(m.crecimiento)}`, serie: desdeUnAnio(c.series.find((x) => x.id === m.id)?.serie || []) }))} />
+      </Bloque>
+    );
+  }
+  return (
+    <Bloque universo="busquedas" {...trendsMarcasLectura(b)} alcance={`semanas al ${fechaCorta(b.hasta)}`}
+      ayuda={<p>Google Trends da un índice en Perú, no la cantidad de búsquedas: 100 es la semana con más búsquedas de la consulta. Las cinco marcas van en la misma consulta, así que se comparan entre sí. El porcentaje de cada marca compara el promedio de las últimas {numero(b.semanas)} semanas completas frente a las mismas semanas de un año antes.</p>}
+      pie={<span>Google Trends, Perú · consultado el {fechaCorta(b.consultado)}.</span>}>
+      {filtro}
+      <Lineas etiqueta="Búsquedas semanales de marcas de cámaras en Google Trends, un año hasta el período" formato={(n) => numero(n)} alto={280} elegible
+        series={b.marcas.map((m) => ({ nombre: m.nombre, leyenda: m.crecimiento == null ? m.nombre : `${m.nombre} ${signo(m.crecimiento)}`, serie: desdeUnAnio(b.serieMarcas.find((x) => x.id === m.id)?.serie || []) }))} />
+    </Bloque>
+  );
+}
+
 export default function Senales({ capa, vista: v }) {
   const [s11, s12, s13, s14, s15] = capa.secciones;
   const P = v.periodo, L = v.lee, E = v.ejemplo;
@@ -189,14 +218,7 @@ export default function Senales({ capa, vista: v }) {
       </SeccionDe>
 
       <SeccionDe def={s15} vista={v}>
-        {!b ? <Bloque titulo="Las marcas de cámaras en Google" universo="busquedas" estado={sinDato('no-cargo')} /> : (
-          <Bloque universo="busquedas" {...trendsMarcasLectura(b)} alcance={`semanas al ${fechaCorta(b.hasta)}`}
-            ayuda={<p>Google Trends da un índice en Perú, no la cantidad de búsquedas: 100 es la semana con más búsquedas de la consulta. Las cinco marcas van en la misma consulta, así que se comparan entre sí. El porcentaje de cada marca compara el promedio de las últimas {numero(b.semanas)} semanas completas frente a las mismas semanas de un año antes.</p>}
-            pie={<span>Google Trends, Perú · consultado el {fechaCorta(b.consultado)}.</span>}>
-            <Lineas etiqueta="Búsquedas semanales de marcas de cámaras en Google Trends, un año hasta el período" formato={(n) => numero(n)} alto={280} elegible
-              series={b.marcas.map((m) => ({ nombre: m.nombre, leyenda: m.crecimiento == null ? m.nombre : `${m.nombre} ${signo(m.crecimiento)}`, serie: desdeUnAnio(b.serieMarcas.find((x) => x.id === m.id)?.serie || []) }))} />
-          </Bloque>
-        )}
+        {!b ? <Bloque titulo="Las marcas de cámaras en Google" universo="busquedas" estado={sinDato('no-cargo')} /> : <BusquedasTarjeta b={b} desdeUnAnio={desdeUnAnio} />}
         <Bloque universo="conversacion" {...tiktokLectura(E.tiktok)} ejemplo ancho="mitad" ventana={ventanaTexto(E.tiktok.desde, E.tiktok.hasta)}
           ayuda={<p>La tasa de interacción es la parte de las vistas que dio me gusta, comentó o compartió. Se conectará con Apify.</p>}
           pie={<span>{E.tiktok.fuente}, del {fechaCorta(E.tiktok.desde)} al {fechaCorta(E.tiktok.hasta)}.</span>}>

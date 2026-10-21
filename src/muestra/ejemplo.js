@@ -61,6 +61,9 @@ export const PLATAFORMAS_EJEMPLO = [
     campanas: ['Alarmas · Leads in-app', 'Cámaras · Video'] },
 ];
 
+// Objetivos del mes de ejemplo: lo que se acumula (inversión, leads, bookings), el mínimo de L2B y el tope de cada costo
+export const OBJETIVOS_MES_EJEMPLO = { inversion: 72000, leads: 2300, bookings: 320, l2b: 14, cpl: 35, cpb: 240 };
+
 /** Días de `desde` a `hasta`: cada uno con inversión, leads y bookings por plataforma. Cada día tiene su semilla. */
 export function plataformasDeEjemplo(desde, hasta) {
   const dias = [];
@@ -79,5 +82,8 @@ export function plataformasDeEjemplo(desde, hasta) {
     }
     dias.push(fila);
   }
-  return { ejemplo: true, fuente: 'Meta Ads, Google Ads y TikTok Ads, con el CRM desde Google Sheets', moneda: 'USD', plataformas: PLATAFORMAS_EJEMPLO.map(({ id, nombre, tipo, objetivo, campanas }) => ({ id, nombre, tipo, objetivo, campanas })), dias };
+  // los objetivos del mes, uno por mes con data: cuando se conecte, salen de una pestaña del Google Sheets del CRM
+  const meses = [...new Set(dias.map((d) => d.fecha.slice(0, 7)))];
+  return { ejemplo: true, fuente: 'Meta Ads, Google Ads y TikTok Ads, con el CRM desde Google Sheets', moneda: 'USD', plataformas: PLATAFORMAS_EJEMPLO.map(({ id, nombre, tipo, objetivo, campanas }) => ({ id, nombre, tipo, objetivo, campanas })), dias,
+    objetivos: meses.map((mes) => ({ mes, ...OBJETIVOS_MES_EJEMPLO })) };
 }

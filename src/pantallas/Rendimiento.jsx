@@ -111,16 +111,16 @@ export default function Rendimiento({ capa, vista: v }) {
       <Resumen titulo={resumenTitulo(P)} comparado={[dig, atl].some(cambioShare) ? comparadoTexto(P) : null}
         pie={<span>Inversión estimada por Integrametrics a precio de tarifa.</span>}
         items={[
-          { rotulo: `Share digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? shareDeMarca(rival(dig), dig) : null, delta: cambioShare(dig), nota: ok(dig) && !cambioShare(dig) ? `de ${solesCompacto(dig.total)} en total` : null },
+          { rotulo: `Share de inversión digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? shareDeMarca(rival(dig), dig) : null, delta: cambioShare(dig), nota: ok(dig) && !cambioShare(dig) ? `de ${solesCompacto(dig.total)} en total` : null },
           { rotulo: `Inversión digital de ${s.marca}`, universo: 'digital', ir: s41.id, irTexto: s41.titulo, valor: ok(dig) ? solesCompacto(rival(dig).inversion) : null, nota: ok(dig) ? `${compacto(rival(dig).impresiones)} impresiones` : null },
-          { rotulo: `Share ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? shareDeMarca(rival(atl), atl) : null, delta: cambioShare(atl), nota: ok(atl) && !cambioShare(atl) ? `de ${solesCompacto(atl.total)} en total` : null },
+          { rotulo: `Share de inversión ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? shareDeMarca(rival(atl), atl) : null, delta: cambioShare(atl), nota: ok(atl) && !cambioShare(atl) ? `de ${solesCompacto(atl.total)} en total` : null },
           { rotulo: `Inversión ATL de ${s.marca}`, universo: 'atl', ir: s41.id, irTexto: s41.titulo, valor: ok(atl) ? solesCompacto(rival(atl).inversion) : null, nota: ok(atl) && v.lee.mediosDelPeriodo?.[rivalId] ? `${numero(v.lee.mediosDelPeriodo[rivalId].emisiones)} ${v.lee.mediosDelPeriodo[rivalId].emisiones === 1 ? 'emisión' : 'emisiones'} al aire` : null },
         ]} />
 
       <SeccionDe def={s41} vista={v}>
-        {!ok(dig) && !ok(atl) ? <Bloque titulo="Share of investment" universo={['digital', 'atl']} estado={sinDato(dig.estado)} /> : (
+        {!ok(dig) && !ok(atl) ? <Bloque titulo="Share de inversión" universo={['digital', 'atl']} estado={sinDato(dig.estado)} /> : (
           <Bloque universo={[...(ok(dig) ? ['digital'] : []), ...(ok(atl) ? ['atl'] : [])]} {...shareLectura(v)} avisos={avisosDe(v, 'share')}
-            ayuda={<p>Share of investment: la parte de la inversión de la categoría que pone cada marca. Digital son las redes, Google Search, YouTube y los sitios que mide Integrametrics; ATL es TV abierta, cable, radio, OTT y vía pública. Integrametrics estima cada uno con un método distinto, por eso no se suman.</p>}
+            ayuda={<p>Share de inversión: la parte de la inversión publicitaria de la categoría que pone cada marca. Digital son las redes, Google Search, YouTube y los sitios que mide Integrametrics; ATL es TV abierta, cable, radio, OTT y vía pública. Integrametrics estima cada uno con un método distinto, por eso no se suman.</p>}
             pie={<span>Inversión estimada por Integrametrics a precio de tarifa.</span>}>
             <div className="q-share-universos">
               {[['Digital', dig], ['ATL', atl]].map(([n, x]) => (
@@ -143,7 +143,7 @@ export default function Rendimiento({ capa, vista: v }) {
           </Bloque>
         )}
         {(ok(dig) || ok(atl)) && (
-          <Detalle id={`detalle-${s41.id}`} titulo="Detalle de cómo viene el período" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['la inversión y el share en soles', 'la inversión día por día']}>
+          <Detalle id={`detalle-${s41.id}`} titulo="Detalle de cómo viene el período" bajada={`Integrametrics, ${periodoTexto(P)}.`} vistas={['la inversión en soles y el share de cada marca', 'la inversión día por día']}>
             {ok(dig) && (
               <Bloque universo="digital" {...digitalLectura(v)} pie={<span>{capital(plataformasTexto(dig.plataformas || []) || 'Plataformas digitales')}.</span>}>
                 <TablaShare u={dig} P={P} etiqueta="Inversión, impresiones y share digital por marca" conImpresiones />
