@@ -49,17 +49,22 @@ export function facebookDeEjemplo(hasta) {
   return { ejemplo: true, fuente: 'Meta, social listening vía Apify', hasta, desde: masDias(hasta, -27), temas: lista, paginas };
 }
 
-// Las plataformas de la marca propia, día por día, como las cruza su tablero con el CRM: inversión (en dólares, como
-// la reportan las plataformas), leads y bookings (ventas del CRM). Push son las redes (Meta y TikTok) y Pull, la
-// búsqueda (Google Ads). Nombres de campaña genéricos del rubro; ninguna cifra sale de una cuenta real.
+// Las plataformas de la marca propia, día por día, como las cruza su tablero con el CRM: inversión (en la moneda en que
+// la reporta cada cuenta: Meta y TikTok en dólares, Google Ads en euros), leads y bookings (ventas del CRM). Push son las
+// redes (Meta y TikTok) y Pull, la búsqueda (Google Ads). Los rangos de cada plataforma van en su moneda; los objetivos de
+// costo, en dólares. Nombres de campaña genéricos del rubro; ninguna cifra sale de una cuenta real.
 export const PLATAFORMAS_EJEMPLO = [
-  { id: 'meta', nombre: 'Meta Ads', tipo: 'push', diaria: [900, 1600], cpl: [34, 48], l2b: [0.1, 0.16], objetivo: { cpl: 42, cpb: 380 },
+  { id: 'meta', nombre: 'Meta Ads', tipo: 'push', moneda: 'USD', diaria: [900, 1600], cpl: [34, 48], l2b: [0.1, 0.16], objetivo: { cpl: 42, cpb: 380 },
     campanas: ['Alarmas · Prospección Lima', 'Alarmas · Prospección regiones', 'Cámaras · Remarketing', 'Promoción del mes · Leads'] },
-  { id: 'google', nombre: 'Google Ads', tipo: 'pull', diaria: [700, 1300], cpl: [21, 32], l2b: [0.12, 0.19], objetivo: { cpl: 30, cpb: 220 },
+  { id: 'google', nombre: 'Google Ads', tipo: 'pull', moneda: 'EUR', diaria: [620, 1160], cpl: [19, 29], l2b: [0.12, 0.19], objetivo: { cpl: 30, cpb: 220 },
     campanas: ['Search · Marca', 'Search · Genérico alarmas', 'Search · Genérico cámaras', 'Performance Max · Leads'] },
-  { id: 'tiktok', nombre: 'TikTok Ads', tipo: 'push', diaria: [150, 450], cpl: [28, 56], l2b: [0.05, 0.1], objetivo: { cpl: 45, cpb: 600 },
+  { id: 'tiktok', nombre: 'TikTok Ads', tipo: 'push', moneda: 'USD', diaria: [150, 450], cpl: [28, 56], l2b: [0.05, 0.1], objetivo: { cpl: 45, cpb: 600 },
     campanas: ['Alarmas · Leads in-app', 'Cámaras · Video'] },
 ];
+
+// Dólares por euro: la referencia del Banco Central Europeo. Cuando se conecten las cuentas, el pipeline publica la del
+// día con la data, en esta misma forma
+export const TIPO_CAMBIO_EJEMPLO = { EUR: { usd: 1.1205, fecha: '2026-10-22', fuente: 'Banco Central Europeo' } };
 
 // Objetivos del mes de ejemplo: lo que se acumula (inversión, leads, bookings), el mínimo de L2B y el tope de cada costo
 export const OBJETIVOS_MES_EJEMPLO = { inversion: 72000, leads: 2300, bookings: 320, l2b: 14, cpl: 35, cpb: 240 };
@@ -84,6 +89,7 @@ export function plataformasDeEjemplo(desde, hasta) {
   }
   // los objetivos del mes, uno por mes con data: cuando se conecte, salen de una pestaña del Google Sheets del CRM
   const meses = [...new Set(dias.map((d) => d.fecha.slice(0, 7)))];
-  return { ejemplo: true, fuente: 'Meta Ads, Google Ads y TikTok Ads, con el CRM desde Google Sheets', moneda: 'USD', plataformas: PLATAFORMAS_EJEMPLO.map(({ id, nombre, tipo, objetivo, campanas }) => ({ id, nombre, tipo, objetivo, campanas })), dias,
+  return { ejemplo: true, fuente: 'Meta Ads, Google Ads y TikTok Ads, con el CRM desde Google Sheets', moneda: 'USD', tipoCambio: TIPO_CAMBIO_EJEMPLO,
+    plataformas: PLATAFORMAS_EJEMPLO.map(({ id, nombre, tipo, moneda, objetivo, campanas }) => ({ id, nombre, tipo, moneda, objetivo, campanas })), dias,
     objetivos: meses.map((mes) => ({ mes, ...OBJETIVOS_MES_EJEMPLO })) };
 }

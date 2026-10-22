@@ -6,10 +6,10 @@
 import { useState } from 'react';
 import { Bloque, Tabla, Resumen, Grupo, Detalle, vigente } from '../sistema/Componentes.jsx';
 import { Lineas, BarrasYLinea } from '../sistema/graficos/Graficos.jsx';
-import { numero, porcentaje, dolares, fechaCorta } from '../sistema/formato.js';
+import { numero, porcentaje, dolares, euros, fechaCorta } from '../sistema/formato.js';
 import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import { resumenTitulo } from '../textos/comun.js';
-import { pushPullLectura, objetivosPie, plataformasTiempoLectura, plataformasTablaLectura, frenteObjetivoTexto, comparadoTexto, estadoObjetivo, extremoTexto, extremosAyuda, semanaRotulo } from '../textos/lecturas.js';
+import { pushPullLectura, objetivosPie, monedaNota, plataformasTiempoLectura, plataformasTablaLectura, frenteObjetivoTexto, comparadoTexto, estadoObjetivo, extremoTexto, extremosAyuda, semanaRotulo } from '../textos/lecturas.js';
 import { MARGEN_OBJETIVO, SEMANAS_OBJETIVO, extremos } from '../calculo/plataformas.js';
 
 const SEMANAS_A_LA_VISTA = 12; // como el tablero del cliente: el trimestre que termina en el período
@@ -27,6 +27,9 @@ function Parte({ valor, tono }) {
   if (valor == null) return null;
   return <span className="q-parte-fila"><span>{porcentaje(valor)}</span><span className={`q-parte-barra q-parte-barra-${tono}`} style={{ width: `${Math.max(2, valor * 0.64)}px` }} /></span>;
 }
+// lo que reportó la cuenta en su moneda, bajo los dólares, cuando no reporta en dólares (Google Ads, en euros)
+const MONEDAS = { EUR: euros };
+const Original = ({ p }) => (p.inversionMoneda == null ? null : <span className="q-celda-original">{(MONEDAS[p.moneda] ?? numero)(p.inversionMoneda)}</span>);
 const Frente = ({ costo: c, objetivo, estado }) => {
   const t = frenteObjetivoTexto(c, objetivo);
   return t ? <span className={`q-frente-objetivo q-frente-${estado ?? 'nada'}`}>{t}</span> : null;
@@ -49,7 +52,7 @@ function TablaPlataformas({ x }) {
               {g.filas.map((p) => (
                 <tr key={p.id}>
                   <th scope="row">{p.nombre}</th>
-                  <td className="q-num"><span className="q-celda-cifra">{dolares(p.inversion)}<Parte valor={p.parteInversion} tono="pone" /></span></td>
+                  <td className="q-num"><span className="q-celda-cifra">{dolares(p.inversion)}<Parte valor={p.parteInversion} tono="pone" /><Original p={p} /></span></td>
                   <td className="q-num">{numero(p.leads)}</td>
                   <td className="q-num"><span className="q-celda-cifra">{numero(p.bookings)}<Parte valor={p.parteBookings} tono="trae" /></span></td>
                   <td className="q-num">{pct(p.l2b)}</td>
@@ -73,7 +76,7 @@ function TablaPlataformas({ x }) {
                   <span className="q-ficha-plataforma-cpb"><span>Costo por booking</span><b>{costo(p.cpb)}</b><Frente costo={p.cpb} objetivo={p.objetivo.cpb} estado={p.estadoCpb} /></span>
                 </div>
                 <dl className="q-ficha-plataforma-datos">
-                  <div><dt>Inversión</dt><dd>{dolares(p.inversion)}<Parte valor={p.parteInversion} tono="pone" /></dd></div>
+                  <div><dt>Inversión</dt><dd>{dolares(p.inversion)}<Parte valor={p.parteInversion} tono="pone" /><Original p={p} /></dd></div>
                   <div><dt>Bookings</dt><dd>{numero(p.bookings)}<Parte valor={p.parteBookings} tono="trae" /></dd></div>
                   <div><dt>Leads</dt><dd>{numero(p.leads)}</dd></div>
                   <div><dt>L2B</dt><dd>{pct(p.l2b)}</dd></div>
@@ -128,7 +131,7 @@ export default function Activacion({ capa, vista: v }) {
     <MarcoCapa capa={capa} vista={v}>
       <Resumen titulo={resumenTitulo(P)} ejemplo neutro={Boolean(o)}
         comparado={o ? objetivosPie(o, P) : a ? comparadoTexto(P) : null}
-        pie={<span>En dólares.</span>}
+        pie={<span>{monedaNota(x.cambios)}</span>}
         items={[
           { rotulo: 'Inversión', universo: 'plataformas', ir: s33.id, irTexto: s33.titulo, valor: dolares(t.inversion), delta: delta('inversion', 'neutro'), ...frente('inversion', dolares) },
           { rotulo: 'Leads', universo: 'plataformas', ir: s31.id, irTexto: s31.titulo, valor: numero(t.leads), delta: delta('leads', 'sube'), ...frente('leads', (n) => numero(Math.round(n))) },
@@ -174,7 +177,7 @@ export default function Activacion({ capa, vista: v }) {
       <SeccionDe def={s33} vista={v}>
         <Bloque universo="plataformas" {...plataformasTablaLectura(x)} ejemplo
           ayuda={<p>Bajo la inversión y los bookings, la parte de cada plataforma en el total: en gris lo que pone, en rojo lo que trae. Cada costo se compara con el objetivo de su plataforma: en objetivo si queda en él o por debajo; si no, cuánto lo pasa: hasta {porcentaje(MARGEN_OBJETIVO)} o más. Las semanas por encima se cuentan en las últimas {numero(SEMANAS_OBJETIVO)} semanas completas.</p>}
-          pie={<span>{x.fuente}.</span>}>
+          pie={<span>{x.fuente}. {monedaNota(x.cambios)}</span>}>
           <TablaPlataformas x={x} />
         </Bloque>
         <Detalle id={`detalle-${s33.id}`} titulo="Detalle de cada plataforma" bajada="Data de ejemplo, por conectar." vistas={['el costo por booking de cada una, semana a semana', 'cada plataforma semana a semana', 'sus campañas']}>
@@ -184,14 +187,14 @@ export default function Activacion({ capa, vista: v }) {
               elegidaInicial={Math.max(0, x.plataformas.findIndex((p) => p.estadoCpb === 'lejos'))}
               series={x.plataformas.map((p) => ({ nombre: p.nombre, leyenda: `${p.nombre} (objetivo ${costo(p.objetivo.cpb)})`, serie: p.semanas.slice(-SEMANAS_A_LA_VISTA).map((s) => ({ fecha: s.desde, valor: s.cpb == null ? null : Math.round(s.cpb) })) }))} />
           </Bloque>
-          <Bloque universo="plataformas" titulo={`${plat.nombre}, semana a semana`} ejemplo pie={<span>{x.fuente}.</span>} ayuda={<p>{extremosAyuda('semana')}</p>}>
+          <Bloque universo="plataformas" titulo={`${plat.nombre}, semana a semana`} ejemplo pie={<span>{x.fuente}.{monedaNota(x.cambios, plat.nombre) && ` ${monedaNota(x.cambios, plat.nombre)}`}</span>} ayuda={<p>{extremosAyuda('semana')}</p>}>
             <div className="q-control q-control-tarjeta"><span>Plataforma</span><Grupo etiqueta="Plataforma" valor={plat.id} onCambiar={setPlataforma} opciones={opciones} /></div>
             <Tabla etiqueta={`${plat.nombre} por semana`} numericas={[1, 2, 3, 4, 5, 6]}
               columnas={['Semana', 'Inversión', 'Leads', 'Bookings', 'L2B', 'Costo por lead', 'Costo por booking']}
               {...marcas(ultimas(plat.semanas), 'semana')}
               filas={ultimas(plat.semanas).map((s) => [semanaRotulo(s), dolares(s.inversion), numero(s.leads), numero(s.bookings), pct(s.l2b), conTono(costo(s.cpl), s.estadoCpl), conTono(costo(s.cpb), s.estadoCpb)])} />
           </Bloque>
-          <Bloque universo="plataformas" titulo={`Las campañas de ${plat.nombre}`} ejemplo pie={<span>Campañas del período, de más a menos inversión.</span>}>
+          <Bloque universo="plataformas" titulo={`Las campañas de ${plat.nombre}`} ejemplo pie={<span>Campañas del período, de más a menos inversión.{monedaNota(x.cambios, plat.nombre) && ` ${monedaNota(x.cambios, plat.nombre)}`}</span>}>
             <div className="q-control q-control-tarjeta"><span>Plataforma</span><Grupo etiqueta="Plataforma" valor={plat.id} onCambiar={setPlataforma} opciones={opciones} /></div>
             <Tabla etiqueta={`Campañas de ${plat.nombre}`} numericas={[1, 2, 3, 4, 5, 6]}
               columnas={['Campaña', 'Inversión', 'Leads', 'Bookings', 'L2B', 'Costo por lead', 'Costo por booking']}

@@ -586,6 +586,16 @@ export function compraLectura(c, P, ventana = null) {
 const usd = (n) => dolares(n);
 // El pie del resumen de las plataformas con objetivos: contra qué fechas van las flechas y qué dice el color, con los
 // días elegidos (lo que toca cambia con el período)
+// La moneda del panel y, si alguna cuenta reporta en otra, a cuánto se pasa: «En dólares. Google Ads reporta en euros:
+// cada euro, a 1,1205 dólares (Banco Central Europeo, 22 de octubre).» Con la cuenta elegida, solo si es la que cambia
+export function monedaNota(cambios, plataforma = null) {
+  const de = cambios.filter((c) => !plataforma || c.plataformas.includes(plataforma));
+  if (plataforma && !de.length) return null;
+  const nombre = { EUR: ['euros', 'euro'] };
+  const tramos = de.map((c) => `${lista(c.plataformas)} reporta${c.plataformas.length > 1 ? 'n' : ''} en ${nombre[c.moneda]?.[0] ?? c.moneda}: cada ${nombre[c.moneda]?.[1] ?? c.moneda}, a ${numero(c.usd, 4)} dólares (${c.fuente}, ${fechaSinAnio(c.fecha)}).`);
+  return ['En dólares.', ...tramos].join(' ');
+}
+
 export function objetivosPie(o, P) {
   const mesEntero = (a, b) => a.slice(8) === '01' && b.slice(0, 7) === a.slice(0, 7) && new Date(Date.UTC(+b.slice(0, 4), +b.slice(5, 7), 0)).getUTCDate() === +b.slice(8);
   const contra = !P.compararDesde ? '' : P.compararDesde === P.compararHasta ? `a${tramoFechas(P.compararDesde, P.compararHasta).replace(/^el /, 'l ')}`

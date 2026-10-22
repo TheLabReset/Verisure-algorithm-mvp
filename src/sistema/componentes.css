@@ -788,6 +788,7 @@
 .q-tabla-plataformas .q-fila-grupo th { padding: var(--e-2) var(--e-2); background: var(--superficie-capitulo); color: var(--texto-2); font-size: var(--t-13); font-weight: var(--peso-rotulo); letter-spacing: 0.04em; text-transform: uppercase; }
 .q-tabla-plataformas tfoot th, .q-tabla-plataformas tfoot td { border-top: 1px solid var(--texto-1); border-bottom: 0; color: var(--texto-1); font-weight: var(--peso-rotulo); }
 .q-celda-cifra { display: inline-flex; flex-direction: column; align-items: flex-end; gap: var(--e-1); color: var(--texto-1); }
+.q-celda-original { font-size: var(--t-13); color: var(--texto-2); }
 .q-parte-fila { display: inline-flex; align-items: center; gap: var(--e-2); font-size: var(--t-13); color: var(--texto-3); }
 .q-parte-barra { display: inline-block; height: 6px; border-radius: 2px; }
 .q-parte-barra-pone { background: var(--serie-resto); }
@@ -819,6 +820,7 @@
 .q-ficha-plataforma-datos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3) var(--e-4); margin: 0; padding-top: var(--e-3); border-top: 1px solid var(--borde); }
 .q-ficha-plataforma-datos > div { display: grid; gap: 2px; min-width: 0; }
 .q-ficha-plataforma-ancho { grid-column: 1 / -1; }
+.q-ficha-plataforma-datos dd .q-celda-original { flex-basis: 100%; }
 .q-ficha-plataforma-datos dt { font-size: var(--t-13); color: var(--texto-3); }
 .q-ficha-plataforma-datos dd { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--e-1) var(--e-2); color: var(--texto-1); font-variant-numeric: tabular-nums; }
 /* echado o en una tablet chica: la ficha es ancha y los cinco datos caben en una fila */

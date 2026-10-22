@@ -33,6 +33,8 @@ export function compacto(n) {
 
 // Dólares, como en las plataformas: «$1 234», la cifra pegada al signo
 export const dolares = (n, decimales = 0) => (finito(n) ? `$${numero(n, decimales)}` : NO_MEDIDO);
+// Euros, como los reporta Google Ads: «32 180 €», la cifra antes del signo
+export const euros = (n, decimales = 0) => (finito(n) ? `${numero(n, decimales)}${' '}€` : NO_MEDIDO);
 // Soles, como reporta Integrametrics: «S/ 7 352 547»; compactos para cifras grandes: «S/ 7,4 M»
 export const soles = (n, decimales = 0) => (finito(n) ? `S/ ${numero(n, decimales)}` : NO_MEDIDO);
 export const solesCompacto = (n) => (finito(n) ? `S/ ${compacto(n)}` : NO_MEDIDO);
