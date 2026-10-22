@@ -61,3 +61,38 @@ test('la tabla de plataformas: las partes suman 100, Push y Pull suman lo suyo y
   assert.ok(x.tipos.every((g) => g.semanas.every((s) => s.dias <= 7)), 'una semana de Push o Pull cuenta filas en vez de días');
   for (const p of x.plataformas) assert.ok(p.semanasSobreObjetivo.de > 0 && p.semanasSobreObjetivo.encima <= p.semanasSobreObjetivo.de);
 });
+
+// Google Ads reporta en euros; el panel suma en dólares con el tipo de cambio que viene con la data
+test('moneda: la inversión en euros se pasa a dólares al entrar, y el total se rederiva desde la data cruda', () => {
+  const datos = plataformasDeEjemplo('2026-10-01', '2026-10-21');
+  const tasa = datos.tipoCambio.EUR.usd;
+  const x = leerPlataformas(datos, { desde: '2026-10-01', hasta: '2026-10-21' });
+  const crudo = (id) => datos.dias.reduce((s, d) => s + d[id].inversion, 0);
+  const google = x.plataformas.find((p) => p.id === 'google'), meta = x.plataformas.find((p) => p.id === 'meta');
+  assert.equal(google.moneda, 'EUR');
+  assert.equal(google.inversionMoneda, crudo('google'));
+  assert.ok(Math.abs(google.inversion - crudo('google') * tasa) < 1e-6);
+  assert.equal(meta.inversion, crudo('meta'));
+  assert.equal(meta.inversionMoneda, null);
+  assert.ok(Math.abs(x.total.inversion - (crudo('meta') + crudo('tiktok') + crudo('google') * tasa)) < 1e-6);
+  // el costo por lead de Google ya sale en dólares
+  const leads = datos.dias.reduce((s, d) => s + d.google.leads, 0);
+  assert.ok(Math.abs(google.cpl - (crudo('google') * tasa) / leads) < 1e-9);
+  assert.deepEqual(x.cambios.map((c) => [c.moneda, c.plataformas]), [['EUR', ['Google Ads']]]);
+  // la data cruda no cambia
+  assert.equal(datos.dias[0].google.inversionMoneda, undefined);
+});
+
+test('moneda: sin tipo de cambio para los euros no se suma nada', () => {
+  const datos = plataformasDeEjemplo('2026-10-01', '2026-10-21');
+  assert.equal(leerPlataformas({ ...datos, tipoCambio: {} }, { desde: '2026-10-01', hasta: '2026-10-21' }), null);
+  assert.equal(leerPlataformas({ ...datos, tipoCambio: { EUR: { usd: 0 } } }, { desde: '2026-10-01', hasta: '2026-10-21' }), null);
+});
+
+test('moneda: la nota dice la tasa, la fuente y la fecha, y solo va con la cuenta que cambia', async () => {
+  const { monedaNota } = await import('../src/textos/lecturas.js');
+  const cambios = [{ moneda: 'EUR', usd: 1.1205, fecha: '2026-10-22', fuente: 'Banco Central Europeo', plataformas: ['Google Ads'] }];
+  assert.equal(monedaNota(cambios), 'En dólares. Google Ads reporta en euros: cada euro, a 1,1205 dólares (Banco Central Europeo, 22 de octubre).');
+  assert.equal(monedaNota(cambios, 'Meta Ads'), null);
+  assert.equal(monedaNota([]), 'En dólares.');
+});

@@ -102,8 +102,29 @@ export function frenteAObjetivos(total, objetivos, desde, hasta, conData = null)
   return { ...salida, dias: fechas.length, sinData: calendario.length - fechas.length, unMes, mesCompleto: unMes && calendario.length === diasDelMes(mes) && fechas.length === calendario.length, toca, pocos };
 }
 
-export function leerPlataformas(datos, P) {
-  if (!datos?.dias?.length) return null;
+// Cada cuenta reporta en su moneda (Google Ads, en euros); el panel suma en una sola, la de `datos.moneda`. La inversión de
+// una cuenta en otra moneda se pasa con `datos.tipoCambio` (dólares por euro) al entrar, y su cifra original queda en
+// `inversionMoneda`: leads y bookings no cambian, y los costos ya salen en la moneda del panel. Sin tipo de cambio para
+// esa moneda no se suma nada: un total que mezcla euros y dólares sería falso
+function enUnaMoneda(datos) {
+  const ajenas = datos.plataformas.filter((p) => p.moneda && p.moneda !== datos.moneda);
+  if (!ajenas.length) return { datos, cambios: [] };
+  const tasa = (m) => datos.tipoCambio?.[m]?.usd;
+  if (datos.moneda !== 'USD' || ajenas.some((p) => !(tasa(p.moneda) > 0))) return null;
+  const dias = datos.dias.map((d) => {
+    const fila = { ...d };
+    for (const p of ajenas) if (d[p.id]) fila[p.id] = { ...d[p.id], inversion: d[p.id].inversion * tasa(p.moneda), inversionMoneda: d[p.id].inversion };
+    return fila;
+  });
+  const cambios = [...new Set(ajenas.map((p) => p.moneda))].map((moneda) => ({ moneda, ...datos.tipoCambio[moneda], plataformas: ajenas.filter((p) => p.moneda === moneda).map((p) => p.nombre) }));
+  return { datos: { ...datos, dias }, cambios };
+}
+
+export function leerPlataformas(crudos, P) {
+  if (!crudos?.dias?.length) return null;
+  const unificado = enUnaMoneda(crudos);
+  if (!unificado) return null;
+  const { datos, cambios } = unificado;
   const enTramo = (a, b) => datos.dias.filter((d) => d.fecha >= a && d.fecha <= b);
   const dias = enTramo(P.desde, P.hasta);
   if (!dias.length) return null;
@@ -130,8 +151,10 @@ export function leerPlataformas(datos, P) {
     const previo = antes.length ? cifras(deUna(antes, p.id)) : null;
     // las campañas: el reparto de cada día entre ellas, sumado en el período
     const campanas = p.campanas.map((nombre, i) => cifras(dias.map((d) => ({ inversion: d[p.id].inversion * d[p.id].campanas[i], leads: d[p.id].leads * d[p.id].campanas[i], bookings: d[p.id].bookings * d[p.id].campanas[i] })))).map((c, i) => ({ nombre: p.campanas[i], ...c }));
+    // lo que reportó la cuenta, en su moneda, cuando no es la del panel
+    const inversionMoneda = p.moneda && p.moneda !== datos.moneda ? deUna(dias, p.id).reduce((s, f) => s + f.inversionMoneda, 0) : null;
     return {
-      ...p, ...ahora, previo,
+      ...p, ...ahora, inversionMoneda, previo,
       estadoCpl: frenteAlObjetivo(ahora.cpl, p.objetivo.cpl), estadoCpb: frenteAlObjetivo(ahora.cpb, p.objetivo.cpb),
       semanas: semanasDe((d) => [d[p.id]]).map((s) => ({ ...s, estadoCpl: frenteAlObjetivo(s.cpl, p.objetivo.cpl), estadoCpb: frenteAlObjetivo(s.cpb, p.objetivo.cpb) })),
       campanas: campanas.sort((a, b) => b.inversion - a.inversion),
@@ -154,7 +177,7 @@ export function leerPlataformas(datos, P) {
     g.parteInversion = suma(de.map((p) => p.parteInversion)); g.parteBookings = suma(de.map((p) => p.parteBookings));
   });
   return {
-    ejemplo: Boolean(datos.ejemplo), moneda: datos.moneda, fuente: datos.fuente,
+    ejemplo: Boolean(datos.ejemplo), moneda: datos.moneda, fuente: datos.fuente, cambios,
     total, totalPrevio: antes.length ? cifras(todas(antes)) : null,
     objetivos: frenteAObjetivos(total, datos.objetivos, P.desde, P.hasta, new Set(dias.map((d) => d.fecha))),
     plataformas,
