@@ -2,7 +2,7 @@
 // OOH: el digitalizado arriba (audio o video), el motivo y los datos de la emisión. Se filtra por tipo de aviso.
 // No calcula: pinta lo que arma src/calculo/senales.js.
 import { useMemo, useState } from 'react';
-import { Grupo, Reproductor, vigente } from '../sistema/Componentes.jsx';
+import { Grupo, Reproductor, SelloNuevo, vigente } from '../sistema/Componentes.jsx';
 import { numero, soles, fechaCorta } from '../sistema/formato.js';
 import { version, tipoAviso } from '../textos/comun.js';
 import { FRANJAS } from '../calculo/vista.js';
@@ -17,8 +17,8 @@ function Ficha({ e, muestra }) {
       {a && !fallo ? <Reproductor key={`${e.id}-${intento}`} tipo={a.kind === 'video' ? 'video' : 'audio'} src={a.url} etiqueta={`${a.kind === 'video' ? 'Video' : 'Audio'} de «${version(e.version)}»`} onError={() => setFallo(true)} />
         : <div className="q-ficha-arte q-ficha-arte-corta"><span className="q-ficha-sin-arte">{a ? <>El digitalizado de esta emisión no cargó.<button type="button" className="q-boton q-boton-chico q-ficha-reintentar" onClick={reintentar}>Reintentar</button></> : 'Integrametrics no tiene el digitalizado de esta versión'}</span></div>}
       <div className="q-ficha-cuerpo">
-        <span className="q-ficha-marca q-ficha-foco">{muestra && <span className={`q-muestra ${muestra}`} aria-hidden="true" />}{e.nombre}{e.nueva ? ' · versión nueva' : ''}</span>
-        <h4>«{version(e.version)}»</h4>
+        <span className="q-ficha-marca q-ficha-foco">{muestra && <span className={`q-muestra ${muestra}`} aria-hidden="true" />}{e.nombre}</span>
+        <h4>«{version(e.version)}»{e.nueva && <SelloNuevo texto="Nuevo" />}</h4>
         <dl className="q-ficha-datos">
           <div><dt>Programa</dt><dd>{e.programa ? version(e.programa) : 'Sin programa registrado'}</dd></div>
           <div><dt>Canal</dt><dd>{e.canal === 'DESCONOCIDO' ? 'Canal sin registrar' : version(e.canal)}</dd></div>
@@ -51,7 +51,7 @@ export default function Emisiones({ a, etiqueta }) {
           <li key={x.id}>
             <button type="button" aria-pressed={x.id === e?.id} onClick={() => setElegida(x.id)}>
               <span className="q-emision-cuando">{fechaCorta(x.fecha)}<small>{x.hora}</small></span>
-              <span className="q-emision-que"><b>{x.programa ? version(x.programa) : version(x.canal)}</b><small>{x.programa ? `${version(x.canal)} · ` : ''}{tipoAviso(x.tipo)}{x.nueva ? ' · nueva' : ''}</small></span>
+              <span className="q-emision-que"><b>{x.programa ? version(x.programa) : version(x.canal)}{x.nueva && <SelloNuevo texto="Nuevo" />}</b><small>{x.programa ? `${version(x.canal)} · ` : ''}{tipoAviso(x.tipo)}</small></span>
             </button>
           </li>
         ))}

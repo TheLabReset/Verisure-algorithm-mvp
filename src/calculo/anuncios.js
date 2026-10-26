@@ -77,6 +77,7 @@ export function agruparAnuncios(marcas) {
     if (!porNombre.has(clave)) porNombre.set(clave, { nombre, propia: false, anuncios: [] });
     const g = porNombre.get(clave);
     g.propia = g.propia || !!m.propia;
+    g.nuevo = g.nuevo || !!m.nuevo; // un mensaje que se ve por primera vez en el período
     g.anuncios.push(...conAlgo);
   }
   const todos = [...porNombre.values()];

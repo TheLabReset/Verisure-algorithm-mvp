@@ -18,9 +18,10 @@ import { leerBusquedas } from './busquedas.js';
 import { hechosDeLaSemana } from './semana.js';
 import { digitalDeLaSemana, atlDeLaSemana, compraDeMedios, APARTADOS_ATL } from './senales.js';
 import { emisionesDe } from '../fuentes/medios.js';
-import { tiktokDeEjemplo, facebookDeEjemplo, plataformasDeEjemplo } from '../muestra/ejemplo.js';
+import { tiktokDeEjemplo, facebookDeEjemplo, plataformasDeEjemplo, piezasDeEjemplo } from '../muestra/ejemplo.js';
 import { leerTiktok, leerFacebook } from './conversacion.js';
 import { leerPlataformas } from './plataformas.js';
+import { leerPiezas } from './piezas.js';
 
 export { mesesDisponibles };
 
@@ -466,6 +467,7 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
     && Array.isArray(vigiladasLeidas.digital?.pieces) && vigiladasLeidas.medios?.emisiones && vigiladasLeidas.medios?.dic ? vigiladasLeidas : null;
   const busquedas = busquedasLeidas?.categoria?.semanas?.length && Array.isArray(busquedasLeidas.categoria.series) ? busquedasLeidas : null;
   const meta = contrato.meta;
+  const plataformasEj = plataformasDeEjemplo(meta.firstDay, meta.lastDay);
   const caidas = new Set(estado.fuentesCaidas || []);
   const atraso = estado.hoy ? diasEntre(meta.lastDay, estado.hoy) : 0;
   const atrasada = atraso > UMBRALES.atrasoFuente;
@@ -549,7 +551,8 @@ export function armarVista(contrato, medios, filtros, estado = {}, { mapa: mapaL
     ejemplo: {
       tiktok: leerTiktok(tiktokDeEjemplo(P.hasta)),
       facebook: leerFacebook(facebookDeEjemplo(P.hasta)),
-      plataformas: leerPlataformas(plataformasDeEjemplo(meta.firstDay, meta.lastDay), P),
+      plataformas: leerPlataformas(plataformasEj, P),
+      piezas: leerPiezas(piezasDeEjemplo(plataformasEj), plataformasEj, P),
     },
     analiza: {
       temporada: temporada(contrato), franjas: ORDEN_FRANJAS,

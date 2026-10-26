@@ -19,6 +19,7 @@ export const UNIVERSOS = {
   atl: { icono: Tv, nombre: 'ATL' },
   digital: { icono: MonitorSmartphone, nombre: 'Digital' },
   plataformas: { icono: Layers, nombre: 'Plataformas y CRM' },
+  piezas: { icono: Layers, nombre: 'Plataformas' }, // lo que reporta cada plataforma, sin CRM
 };
 
 export function Chip({ tipo = 'neutro', icono: Icono, children, titulo }) {
@@ -28,6 +29,12 @@ export function Chip({ tipo = 'neutro', icono: Icono, children, titulo }) {
       {children}
     </span>
   );
+}
+
+// Una insignia de estado: icono y palabra, el color nunca va solo. tono: 'grave' (fondo rojo suave), 'alerta' (rojo),
+// 'tinta', 'bien' (fondo verde suave) o 'neutro'
+export function Insignia({ tono = 'neutro', icono: Icono, children }) {
+  return <span className={`q-insignia q-insignia-${tono}`}>{Icono && <Icono size={13} aria-hidden="true" strokeWidth={2.4} />}{children}</span>;
 }
 
 export const ChipUniverso = ({ universo, children }) => {
@@ -1056,8 +1063,11 @@ function MarcaFormato({ formato }) {
   return I ? <span className="q-carta-formato" aria-hidden="true"><I size={14} /></span> : null;
 }
 
+// El sello de lo nuevo: una palabra en tinta, con borde, como el sello de la data de ejemplo
+export const SelloNuevo = ({ texto }) => <span className="q-sello-nuevo">{texto}</span>;
+
 // ── El mazo: las tres piezas más recientes apiladas; con el mouse o el foco se abren en abanico ──
-function Mazo({ g, onAbrir, propio, t }) {
+function Mazo({ g, onAbrir, propio, t, nuevos }) {
   const [rotas, setRotas] = useState(() => new Set());
   // una pieza en video se ve por su primer cuadro (el navegador lo pinta con preload="metadata"); sin imagen ni video, el texto
   const verse = (a) => (a.imagen || a.medio?.kind === 'video') && !rotas.has(a.id);
@@ -1068,6 +1078,7 @@ function Mazo({ g, onAbrir, propio, t }) {
   return (
     <button type="button" className="q-mazo" onClick={() => onAbrir(g.nombre)} data-anunciante={g.nombre} aria-haspopup="dialog">
       <span className="q-mazo-pila" aria-hidden="true">
+        {nuevos && g.nuevo && <span className="q-sello-nuevo q-sello-nuevo-carta">{t.nuevo}</span>}
         {pila.map((a, i) => {
           const conImg = verse(a) && conImagen.length;
           const rota = () => setRotas((r) => new Set(r).add(a.id));
@@ -1081,6 +1092,7 @@ function Mazo({ g, onAbrir, propio, t }) {
         })}
       </span>
       <span className="q-mazo-nombre">{g.nombre}{propio && <span className="q-mazo-propio">{t.propio}</span>}</span>
+      {nuevos && g.nuevo && <span className="solo-lector">{t.nuevo}</span>}
       <span className="q-mazo-dato"><b>{t.cuenta(n)}</b>{t.detalle(g) && ` · ${t.detalle(g)}`}</span>
       <span className="q-mazo-ver">{t.ver(n)}<ArrowRight size={14} aria-hidden="true" /></span>
     </button>
@@ -1090,13 +1102,15 @@ function Mazo({ g, onAbrir, propio, t }) {
 // ── Abanico de anuncios: un mazo por anunciante (la marca propia aparte) y la ventana con todos ──
 // `abierta` vive en quien lo usa, para que otro control pueda abrir la misma ventana. Los textos llegan en `t`.
 // propioAlFinal: cuando lo principal es la competencia, la marca propia va última, para comparar.
-export function Abanico({ lista, abierta, onAbrir, t, nota, propioAlFinal = false }) {
-  const todos = (propioAlFinal ? [...lista.grupos, lista.propio] : [lista.propio, ...lista.grupos]).filter(Boolean);
+// nuevos: los grupos nuevos (g.nuevo) van primero, con su sello sobre la carta; el resto conserva su orden
+export function Abanico({ lista, abierta, onAbrir, t, nota, propioAlFinal = false, nuevos = false }) {
+  const base = (propioAlFinal ? [...lista.grupos, lista.propio] : [lista.propio, ...lista.grupos]).filter(Boolean);
+  const todos = nuevos ? [...base.filter((g) => g.nuevo), ...base.filter((g) => !g.nuevo)] : base;
   const grupo = todos.find((g) => g.nombre === abierta) ?? null;
   const volver = () => document.querySelector(`[data-anunciante="${window.CSS.escape(abierta ?? '')}"]`)?.focus();
   return (
     <div className="q-anuncios">
-      <div className="q-mazos">{todos.map((g) => <Mazo key={g.nombre} g={g} onAbrir={onAbrir} propio={g === lista.propio} t={t} />)}</div>
+      <div className="q-mazos">{todos.map((g) => <Mazo key={g.nombre} g={g} onAbrir={onAbrir} propio={g === lista.propio} t={t} nuevos={nuevos} />)}</div>
       {t.sinContenido && <p className="q-nota-bloque" data-sin-contenido>{t.sinContenido}</p>}
       <VentanaAnuncios grupo={grupo} onCerrar={() => onAbrir(null)} volver={volver} t={t} nota={nota} />
     </div>

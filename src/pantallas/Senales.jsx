@@ -70,7 +70,7 @@ function DigitalSemana({ d, anio, avisos, nombre = COMPETENCIA.nombre, filtro })
       pie={<span>{capital(plataformasTexto(d.plataformas || []) || 'Plataformas digitales')} · Integrametrics digital.</span>}>
       {filtro}
       {d.piezas ? <>
-        <Abanico key={nombre} lista={lista} abierta={abierta} onAbrir={setAbierta} t={t} nota={`vistas por primera vez ${ventanaTexto(d.semana.desde, d.semana.hasta)}`} />
+        <Abanico key={nombre} lista={lista} abierta={abierta} onAbrir={setAbierta} t={t} nuevos nota={`vistas por primera vez ${ventanaTexto(d.semana.desde, d.semana.hasta)}`} />
         <Tabla etiqueta={`Mensajes digitales de ${nombre}`} numericas={[1]}
           columnas={['Mensaje', 'Piezas', 'Plataformas', 'Visto por primera vez']}
           filas={d.mensajes.map((m) => [version(m.mensaje), numero(m.piezas), m.plataformas.map(plataformaEnFrase).join(', ') || 'sin dato', m.nuevo && !d.sinHistoria ? `${fechaCorta(m.primeraVez)}, nuevo` : fechaCorta(m.primeraVez)])} />

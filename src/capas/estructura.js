@@ -37,6 +37,7 @@ export const CAPAS = [
       { id: 's-3-1', numero: '3.1', titulo: 'Leads y bookings en el tiempo', pregunta: '¿Cuántos leads y bookings llegan cada semana o cada día?', universos: ['plataformas'], fuentes: ['plataformas'] },
       { id: 's-3-2', numero: '3.2', titulo: 'Push y Pull', pregunta: '¿Cómo convierten las redes frente a la búsqueda, semana a semana?', universos: ['plataformas'], fuentes: ['plataformas'] },
       { id: 's-3-3', numero: '3.3', titulo: 'Cada plataforma frente a su objetivo', pregunta: '¿Cuánto invierte, cuántos leads y bookings trae y a qué costo cada plataforma, frente a su objetivo?', universos: ['plataformas'], fuentes: ['plataformas'] },
+      { id: 's-3-4', numero: '3.4', titulo: 'Piezas y campañas', pregunta: '¿Qué campañas, conjuntos y piezas rinden dentro de cada plataforma, y cuáles piden mirarse?', universos: ['piezas'], fuentes: ['plataformas'] },
     ],
   },
   {

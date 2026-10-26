@@ -84,7 +84,9 @@ export function digitalDeLaSemana(contrato, S, { marcas = COMPETENCIA, respaldo 
     activo: true, enlace: null, imagen: p.asset?.kind === 'image' ? p.asset.url : null,
     medio: p.asset && p.asset.kind !== 'image' && p.asset.kind !== 'link' ? p.asset : null, html: htmlDe(p.asset), formato: { video: 'Video', image: 'Imagen' }[p.asset?.kind] ?? null, arte: null,
   });
-  const abanico = agruparAnuncios(mensajes.map((m) => ({ nombre: m.mensaje, anuncios: porMensaje.get(m.id).piezas.map(carta) })));
+  // un mensaje es nuevo solo si hay historia antes de la semana: en la primera semana de la data todo se ve por primera vez
+  const conHistoria = !(primerDia && W.desde <= primerDia);
+  const abanico = agruparAnuncios(mensajes.map((m) => ({ nombre: m.mensaje, nuevo: m.nuevo && conHistoria, anuncios: porMensaje.get(m.id).piezas.map(carta) })));
   // las plataformas de la semana, de más a menos piezas (el código de la fuente: el texto lo escribe la pantalla)
   const cuenta = new Map();
   for (const p of enLaSemana) if (p.plataforma) cuenta.set(p.plataforma, (cuenta.get(p.plataforma) || 0) + 1);

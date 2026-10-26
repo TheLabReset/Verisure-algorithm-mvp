@@ -471,6 +471,8 @@
 .q-carta-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--elevada); color: var(--texto-1); box-shadow: var(--sombra-flota); }
 .q-carta-texto { display: flex; align-items: center; padding: var(--e-3); }
 .q-carta-texto span { font-size: var(--t-13); color: var(--texto-2); overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 7; line-clamp: 7; overflow: hidden; }
+.q-sello-nuevo { display: inline-flex; align-items: center; margin-left: var(--e-2); padding: 1px var(--e-2); border-radius: var(--r-control); background: var(--texto-1); color: var(--superficie); font-family: var(--f-texto); font-size: var(--t-13); font-weight: var(--peso-rotulo); text-transform: uppercase; letter-spacing: 0.06em; vertical-align: middle; }
+.q-sello-nuevo-carta { position: absolute; z-index: 5; top: var(--e-2); left: var(--e-2); margin: 0; }
 .q-mazo-nombre { font-family: var(--f-titulo); font-size: var(--t-19); font-weight: var(--peso-titulo); }
 .q-mazo-propio { display: block; font-family: var(--f-texto); font-size: var(--t-13); font-weight: var(--peso-rotulo); color: var(--texto-3); text-transform: uppercase; letter-spacing: 0.04em; }
 .q-mazo-dato { font-size: var(--t-14); color: var(--texto-2); }
@@ -828,3 +830,22 @@
   .q-ficha-plataforma-datos { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .q-ficha-plataforma-ancho { grid-column: auto; }
 }
+
+/* ── Insignia de estado: icono y palabra ── */
+.q-insignia { display: inline-flex; align-items: center; gap: var(--e-1); padding: 2px var(--e-2); border-radius: var(--r-control); font-size: var(--t-13); font-weight: var(--peso-rotulo); white-space: nowrap; background: var(--superficie-capitulo); color: var(--texto-2); }
+.q-insignia-grave { background: var(--empeora); color: var(--superficie); }
+.q-insignia-alerta { background: var(--empeora-suave); color: var(--empeora); }
+.q-insignia-tinta { background: var(--atencion); color: var(--superficie); }
+.q-insignia-bien { background: var(--mejora-suave); color: var(--mejora); }
+
+/* ── Piezas y campañas (capa 3): la tabla por campaña ── */
+.q-tabla-arbol .q-arbol-campana th, .q-tabla-arbol .q-arbol-campana td { background: var(--superficie-capitulo); font-weight: var(--peso-rotulo); }
+.q-tabla-arbol .q-arbol-conjunto th { padding-left: var(--e-5); }
+.q-tabla-arbol .q-arbol-pieza th { padding-left: var(--e-10); font-weight: normal; }
+.q-tabla-arbol .q-arbol-pausada th .q-arbol-nombre, .q-tabla-arbol .q-arbol-pausada td { color: var(--texto-3); }
+.q-arbol-nombre { display: block; }
+.q-arbol-abrir { display: inline-flex; align-items: flex-start; gap: var(--e-1); padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.q-arbol-abrir svg { margin-top: 2px; flex: none; }
+.q-arbol-campana .q-arbol-sub { padding-left: var(--e-5); }
+.q-arbol-sub { display: block; font-size: var(--t-13); font-weight: normal; color: var(--texto-3); }
+.q-arbol-dato { font-size: var(--t-14); color: var(--texto-2); min-width: 16em; }
