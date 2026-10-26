@@ -2,20 +2,20 @@
 // leads), sin CRM: los bookings no llegan a nivel de pieza. Cada campaña, conjunto y pieza lleva un estado con umbrales
 // fijos y a la vista. Lo oficial: el aprendizaje (unos 50 resultados en 7 días en Meta y TikTok; TikTok pide 7 días) y la
 // fatiga de Meta (el costo por resultado llega al doble de su historia). Lo que es costumbre de la industria, y se dice
-// así en la ayuda: juzgar gastos sin resultados al llegar a 3 veces el costo por lead, y «cara» o «rinde» a 1,5 veces
-// el promedio de su plataforma, para arriba o para abajo. Puro.
+// así en la ayuda: juzgar gastos sin resultados al llegar a 3 veces el costo por lead, y «costosa» a 1,5 veces el promedio
+// de su plataforma; por debajo, rinde. Puro.
 
 export const UMBRALES_PIEZAS = {
   diasAprendizaje: 7, // una pieza con menos días al aire todavía aprende: no se juzga (TikTok, oficial)
   resultadosSemana: 50, // un conjunto de Meta o TikTok con menos leads en 7 días tiene el aprendizaje limitado (oficial)
   vecesGasto: 3, // para juzgar, la pieza tiene que haber gastado 3 veces el costo por lead de su plataforma (costumbre)
-  vecesCara: 1.5, // cara si su lead cuesta 1,5 veces el promedio de su plataforma; rinde si cuesta 1,5 veces menos
-  vecesFatiga: 2, // se cansó si su lead de los últimos 7 días cuesta el doble que antes (Meta, oficial)
+  vecesCostosa: 1.5, // costosa si su lead cuesta 1,5 veces el promedio de su plataforma o más; por debajo, rinde
+  vecesSaturada: 2, // saturada si su lead de los últimos 7 días cuesta el doble que antes (la fatiga creativa de Meta, oficial)
   diasReciente: 7,
 };
 // el orden en que se leen: primero lo que pide mirar
-export const ESTADOS = ['sin-leads', 'cara', 'cansada', 'rinde', 'en-linea', 'aprendiendo', 'poca-data'];
-const PARA_REVISAR = ['sin-leads', 'cara', 'cansada'];
+export const ESTADOS = ['sin-leads', 'costosa', 'saturada', 'rinde', 'aprendizaje', 'poca-data'];
+export const PARA_REVISAR = ['sin-leads', 'costosa', 'saturada'];
 
 const suma = (xs) => xs.reduce((s, x) => s + (x || 0), 0);
 const dias = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
@@ -30,14 +30,11 @@ function cifras(filas) {
 // El estado de una pieza, un conjunto o una campaña frente al promedio de su plataforma (base: su costo por lead)
 function estadoDe(x, base, { edad = null, fatiga = null } = {}) {
   const U = UMBRALES_PIEZAS;
-  if (edad != null && edad < U.diasAprendizaje) return 'aprendiendo';
+  if (edad != null && edad < U.diasAprendizaje) return 'aprendizaje';
   if (!base || x.inversion < U.vecesGasto * base) return 'poca-data';
   if (!x.leads) return 'sin-leads';
-  if (fatiga != null && fatiga >= U.vecesFatiga) return 'cansada';
-  const r = x.cpl / base;
-  if (r >= U.vecesCara) return 'cara';
-  if (r <= 1 / U.vecesCara) return 'rinde';
-  return 'en-linea';
+  if (fatiga != null && fatiga >= U.vecesSaturada) return 'saturada';
+  return x.cpl / base >= U.vecesCostosa ? 'costosa' : 'rinde';
 }
 
 // datos: lo de src/muestra/ejemplo.js (piezasDeEjemplo); plataformas: la data de las plataformas, que trae la moneda de
@@ -58,8 +55,9 @@ export function leerPiezas(datos, plataformas, P) {
     // fatiga: el costo por lead de los últimos 7 días frente al de toda su vida antes de esos días
     const reciente = cifras(filasDe(p.id, p.plataforma, recienteDesde, P.hasta)), antes = cifras(filasDe(p.id, p.plataforma, p.inicio, masDias(recienteDesde, -1)));
     const fatiga = reciente.cpl && antes.cpl && antes.leads >= 10 ? reciente.cpl / antes.cpl : null;
+    const saturacion = fatiga == null ? null : { antes: antes.cpl, ahora: reciente.cpl };
     const ultimo = p.fin && p.fin < P.hasta ? p.fin : P.hasta;
-    return { ...p, nivel: 'pieza', plataformaNombre: nombrePlataforma[p.plataforma], ...ahora, edad: dias(p.inicio, ultimo) + 1, alAire: !p.fin || p.fin >= P.hasta, fatiga, conjuntoNombre: datos.conjuntos.find((c) => c.id === p.conjunto)?.nombre };
+    return { ...p, nivel: 'pieza', plataformaNombre: nombrePlataforma[p.plataforma], ...ahora, edad: dias(p.inicio, ultimo) + 1, alAire: !p.fin || p.fin >= P.hasta, fatiga, saturacion, conjuntoNombre: datos.conjuntos.find((c) => c.id === p.conjunto)?.nombre };
   }).filter(Boolean);
   if (!piezas.length) return null;
 
@@ -85,13 +83,16 @@ export function leerPiezas(datos, plataformas, P) {
 
   // primero lo que sigue al aire (se puede tocar), y dentro, lo que pide mirarse y lo que más gasta
   const orden = (a, b) => (a.alAire === false) - (b.alAire === false) || ESTADOS.indexOf(a.estado) - ESTADOS.indexOf(b.estado) || b.inversion - a.inversion;
+  // campañas y conjuntos: primero los que tienen más piezas que piden mirarse
+  const revisarEn = (g) => PARA_REVISAR.reduce((t, e) => t + g.cuenta[e], 0);
+  const ordenGrupo = (a, b) => revisarEn(b) - revisarEn(a) || orden(a, b);
   const total = suma(piezas.map((p) => p.inversion));
   const porEstado = Object.fromEntries(ESTADOS.map((e) => { const de = piezas.filter((p) => p.estado === e); return [e, { n: de.length, inversion: suma(de.map((p) => p.inversion)) }]; }));
   const revisar = piezas.filter((p) => PARA_REVISAR.includes(p.estado));
   return {
     ejemplo: Boolean(datos.ejemplo), fuente: datos.fuente,
     bases: Object.values(bases), total,
-    piezas: piezas.sort(orden), conjuntos: conjuntos.sort(orden), campanas: campanas.sort(orden),
+    piezas: piezas.sort(orden), conjuntos: conjuntos.sort(ordenGrupo), campanas: campanas.sort(ordenGrupo),
     porEstado, revisar: { n: revisar.length, inversion: suma(revisar.map((p) => p.inversion)) },
     alAire: piezas.filter((p) => p.alAire).length,
   };

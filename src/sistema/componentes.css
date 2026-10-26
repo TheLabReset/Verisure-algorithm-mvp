@@ -431,15 +431,6 @@
 .q-barra-demo button { border: 0; background: transparent; color: var(--sobre-barra); padding: var(--e-1) var(--e-2); border-radius: var(--r-control); font: inherit; cursor: pointer; }
 .q-barra-demo button[aria-pressed="true"] { background: var(--sobre-barra); color: var(--barra); }
 :root[data-presentar] .q-barra-demo { display: none; }
-/* ── Opciones de diseño (solo en la rama de exploración): abajo a la derecha ── */
-.q-opciones { position: fixed; z-index: 31; right: max(var(--e-4), env(safe-area-inset-right, 0px)); bottom: max(var(--e-4), env(safe-area-inset-bottom, 0px));
-  display: flex; flex-direction: column; align-items: stretch; gap: var(--e-2); padding: var(--e-1); border-radius: var(--r-bloque); background: var(--barra); color: var(--sobre-barra-2); font-size: var(--t-13); box-shadow: var(--sombra-flota); max-width: calc(100vw - 2 * var(--e-4)); box-sizing: border-box; }
-.q-opciones button { border: 0; background: transparent; color: var(--sobre-barra); padding: var(--e-1) var(--e-2); border-radius: var(--r-control); font: inherit; cursor: pointer; text-align: left; }
-.q-opciones button[aria-pressed="true"] { background: var(--sobre-barra); color: var(--barra); }
-.q-opciones-boton { display: inline-flex; align-items: center; gap: var(--e-1); font-weight: var(--peso-rotulo); }
-.q-opciones-punto { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-1); }
-.q-opciones-punto > span { flex-basis: 100%; padding: 0 var(--e-2); color: var(--sobre-barra-2); }
-:root[data-presentar] .q-opciones { display: none; }
 .q-barra-demo-escenario { font: inherit; color: var(--sobre-barra); background: transparent; border: 1px solid color-mix(in oklab, var(--sobre-barra) 40%, transparent); border-radius: var(--r-control); padding: var(--e-1) var(--e-2); max-width: 14rem; }
 .q-barra-demo-escenario option { color: var(--texto-1); background: var(--superficie); }
 /* en el celular no flota: va al final de la página, sin tapar el contenido */
@@ -480,10 +471,8 @@
 .q-carta-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--elevada); color: var(--texto-1); box-shadow: var(--sombra-flota); }
 .q-carta-texto { display: flex; align-items: center; padding: var(--e-3); }
 .q-carta-texto span { font-size: var(--t-13); color: var(--texto-2); overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 7; line-clamp: 7; overflow: hidden; }
-.q-sello-nuevo { display: inline-flex; align-items: center; margin-left: var(--e-2); padding: 1px var(--e-2); border: 1px solid var(--texto-1); border-radius: var(--r-control); font-family: var(--f-texto); font-size: var(--t-13); font-weight: var(--peso-rotulo); color: var(--texto-1); vertical-align: middle; letter-spacing: 0.02em; }
-.q-sello-nuevo-carta { position: absolute; z-index: 5; top: var(--e-2); left: var(--e-2); margin: 0; border-color: var(--texto-1); background: var(--texto-1); color: var(--superficie); text-transform: uppercase; letter-spacing: 0.06em; }
-.q-mazos-grupo { margin: 0; font-size: var(--t-14); font-weight: var(--peso-rotulo); color: var(--texto-2); }
-.q-mazos-grupo .q-sello-nuevo { margin-left: 0; }
+.q-sello-nuevo { display: inline-flex; align-items: center; margin-left: var(--e-2); padding: 1px var(--e-2); border-radius: var(--r-control); background: var(--texto-1); color: var(--superficie); font-family: var(--f-texto); font-size: var(--t-13); font-weight: var(--peso-rotulo); text-transform: uppercase; letter-spacing: 0.06em; vertical-align: middle; }
+.q-sello-nuevo-carta { position: absolute; z-index: 5; top: var(--e-2); left: var(--e-2); margin: 0; }
 .q-mazo-nombre { font-family: var(--f-titulo); font-size: var(--t-19); font-weight: var(--peso-titulo); }
 .q-mazo-propio { display: block; font-family: var(--f-texto); font-size: var(--t-13); font-weight: var(--peso-rotulo); color: var(--texto-3); text-transform: uppercase; letter-spacing: 0.04em; }
 .q-mazo-dato { font-size: var(--t-14); color: var(--texto-2); }
@@ -843,46 +832,20 @@
 }
 
 /* ── Insignia de estado: icono y palabra ── */
-.q-insignia { display: inline-flex; align-items: center; gap: var(--e-1); padding: 1px var(--e-2); border-radius: var(--r-control); font-size: var(--t-13); font-weight: var(--peso-rotulo); white-space: nowrap; color: var(--texto-2); }
-.q-insignia-grave { background: var(--empeora-suave); color: var(--empeora); }
-.q-insignia-alerta { color: var(--empeora); }
-.q-insignia-tinta { color: var(--atencion); background: var(--superficie-capitulo); }
+.q-insignia { display: inline-flex; align-items: center; gap: var(--e-1); padding: 2px var(--e-2); border-radius: var(--r-control); font-size: var(--t-13); font-weight: var(--peso-rotulo); white-space: nowrap; background: var(--superficie-capitulo); color: var(--texto-2); }
+.q-insignia-grave { background: var(--empeora); color: var(--superficie); }
+.q-insignia-alerta { background: var(--empeora-suave); color: var(--empeora); }
+.q-insignia-tinta { background: var(--atencion); color: var(--superficie); }
 .q-insignia-bien { background: var(--mejora-suave); color: var(--mejora); }
 
-/* ── Piezas y campañas (capa 3) ── */
-.q-pe-sin-leads { fill: var(--empeora); background: var(--empeora); }
-.q-pe-cara { fill: color-mix(in oklab, var(--empeora) 45%, var(--superficie)); background: color-mix(in oklab, var(--empeora) 45%, var(--superficie)); }
-.q-pe-cansada { fill: var(--atencion); background: var(--atencion); }
-.q-pe-rinde { fill: var(--mejora); background: var(--mejora); }
-.q-pe-en-linea { fill: var(--serie-resto); background: var(--serie-resto); }
-.q-pe-aprendiendo, .q-pe-poca-data { fill: color-mix(in oklab, var(--serie-resto) 40%, var(--superficie)); background: color-mix(in oklab, var(--serie-resto) 40%, var(--superficie)); }
-.q-svg .q-punto.q-punto-sin-leads { fill: var(--empeora); }
-.q-svg .q-punto.q-punto-cara { fill: color-mix(in oklab, var(--empeora) 45%, var(--superficie)); stroke: var(--empeora); }
-.q-svg .q-punto.q-punto-cansada { fill: var(--atencion); }
-.q-svg .q-punto.q-punto-rinde { fill: var(--mejora); }
-.q-svg .q-punto.q-punto-en-linea, .q-svg .q-punto.q-punto-aprendiendo, .q-svg .q-punto.q-punto-poca-data { fill: var(--serie-resto); stroke: var(--superficie); }
-.q-piezas-tarjetas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--e-3); }
-.q-pieza { display: grid; gap: var(--e-1); align-content: start; padding: var(--e-4); border: 1px solid var(--borde); border-radius: var(--r-bloque); background: var(--superficie); min-width: 0; }
-.q-pieza-pausada { background: transparent; border-style: dashed; }
-.q-pieza-pausada h4, .q-pieza-pausada .q-pieza-cifra b { color: var(--texto-2); }
-.q-pieza-cab { display: flex; justify-content: space-between; align-items: center; gap: var(--e-2); margin-bottom: var(--e-1); }
-.q-pieza-formato { display: inline-flex; align-items: center; gap: var(--e-1); font-size: var(--t-13); color: var(--texto-3); }
-.q-pieza h4, .q-piezas-ficha h4 { margin: 0; font-family: var(--f-titulo); font-size: var(--t-16); font-weight: var(--peso-titulo); }
-.q-pieza-pausa { font-family: var(--f-texto); font-size: var(--t-13); font-weight: normal; color: var(--texto-3); }
-.q-pieza-donde, .q-pieza-pie { margin: 0; font-size: var(--t-13); color: var(--texto-3); }
-.q-pieza-cifra { margin: var(--e-2) 0 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--e-2); }
-.q-pieza-cifra b { font-family: var(--f-tabla); font-size: var(--t-24); font-variant-numeric: tabular-nums; }
-.q-pieza-cifra span { font-size: var(--t-13); color: var(--texto-3); }
-.q-pieza-dato { margin: 0; font-size: var(--t-14); color: var(--texto-1); }
+/* ── Piezas y campañas (capa 3): la tabla por campaña ── */
 .q-tabla-arbol .q-arbol-campana th, .q-tabla-arbol .q-arbol-campana td { background: var(--superficie-capitulo); font-weight: var(--peso-rotulo); }
 .q-tabla-arbol .q-arbol-conjunto th { padding-left: var(--e-5); }
 .q-tabla-arbol .q-arbol-pieza th { padding-left: var(--e-10); font-weight: normal; }
+.q-tabla-arbol .q-arbol-pausada th .q-arbol-nombre, .q-tabla-arbol .q-arbol-pausada td { color: var(--texto-3); }
 .q-arbol-nombre { display: block; }
 .q-arbol-abrir { display: inline-flex; align-items: flex-start; gap: var(--e-1); padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .q-arbol-abrir svg { margin-top: 2px; flex: none; }
 .q-arbol-campana .q-arbol-sub { padding-left: var(--e-5); }
 .q-arbol-sub { display: block; font-size: var(--t-13); font-weight: normal; color: var(--texto-3); }
-.q-arbol-dato { font-size: var(--t-13); color: var(--texto-2); min-width: 14em; }
-.q-piezas-mapa { display: grid; gap: var(--e-4); }
-@media (min-width: 900px) { .q-piezas-mapa { grid-template-columns: minmax(0, 1fr) 18rem; align-items: start; } }
-.q-piezas-ficha { display: grid; gap: var(--e-1); align-content: start; justify-items: start; padding: var(--e-4); border: 1px solid var(--borde); border-radius: var(--r-bloque); }
+.q-arbol-dato { font-size: var(--t-14); color: var(--texto-2); min-width: 16em; }

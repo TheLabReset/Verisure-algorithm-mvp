@@ -98,7 +98,8 @@ export function plataformasDeEjemplo(desde, hasta) {
 // que reporta la plataforma: inversión, impresiones, alcance nuevo, clics y leads. Estos leads son los de la plataforma
 // (formularios y conversiones), no los del CRM: no se cruzan con bookings. Las piezas rotan: cada conjunto estrena una
 // cada tres semanas y cada una dura según cómo le va. Cada pieza tiene un comportamiento de ejemplo (rinde, cara, se
-// cansa, gasta sin leads) para que la maqueta muestre todos los estados; ninguna cifra sale de una cuenta real.
+// satura, gasta sin leads) para que la maqueta muestre todos los estados. Google, la búsqueda, es la que mejor rinde, como
+// suele pasar en el rubro; TikTok, la que más prueba y más falla. Ninguna cifra sale de una cuenta real.
 export const CONJUNTOS_EJEMPLO = {
   meta: [['Hogares Lima · 25 a 54'], ['Arequipa y Trujillo', 'Resto del país'], ['Visitas a la web · 30 días'], ['Amplio · Advantage+']],
   google: [['Marca exacta'], ['Alarmas para casa', 'Alarmas para negocio'], ['Cámaras para casa'], ['Recursos · Alarmas']],
@@ -111,10 +112,14 @@ const PIEZAS_TIPO = {
 };
 // comportamiento: cuánto se lleva del conjunto, su costo por lead frente al de la plataforma y su CTR; cuánto vive
 const COMPORTAMIENTO = {
-  rinde: { peso: 1.6, cpl: 0.62, ctr: 1.6, vida: 70 }, normal: { peso: 1, cpl: 1, ctr: 1.1, vida: 49 }, cara: { peso: 0.8, cpl: 1.75, ctr: 0.7, vida: 35 },
-  cansada: { peso: 1.3, cpl: 0.8, ctr: 1.5, vida: 63 }, 'sin-leads': { peso: 0.55, cpl: null, ctr: 0.45, vida: 16 },
+  rinde: { peso: 1.6, cpl: 0.62, ctr: 1.6, vida: 70 }, normal: { peso: 1, cpl: 1, ctr: 1.1, vida: 49 }, costosa: { peso: 0.8, cpl: 1.75, ctr: 0.7, vida: 35 },
+  saturada: { peso: 1.3, cpl: 0.8, ctr: 1.5, vida: 63 }, 'sin-leads': { peso: 0.55, cpl: null, ctr: 0.45, vida: 16 },
 };
-const ORDEN_COMPORTAMIENTO = ['normal', 'rinde', 'cara', 'cansada', 'normal', 'sin-leads', 'rinde', 'normal'];
+const ORDEN_COMPORTAMIENTO = {
+  google: ['rinde', 'normal', 'rinde', 'rinde', 'normal', 'costosa', 'rinde', 'normal'],
+  meta: ['normal', 'rinde', 'costosa', 'saturada', 'rinde', 'sin-leads', 'rinde', 'normal'],
+  tiktok: ['normal', 'costosa', 'saturada', 'rinde', 'sin-leads', 'normal', 'costosa', 'rinde'],
+};
 const CPM_EJEMPLO = { meta: 6.5, google: 38, tiktok: 4 }; // Google Search: se paga por clic, el CPM es alto
 const CADA = 21; // días entre estrenos de un conjunto
 // el nombre de una pieza: su idea y el mes en que salió; en Google, la letra del anuncio adaptable
@@ -132,7 +137,7 @@ export function piezasDeEjemplo(datos) {
       const conjunto = { id: `${p.id}-${ci}-${k}`, plataforma: p.id, campana: p.campanas[ci], nombre: nombreConjunto, campanaIndice: ci, de: lista.length };
       conjuntos.push(conjunto);
       for (let g = 0; g < total; g++) {
-        const comp = ORDEN_COMPORTAMIENTO[(n + g * 3) % ORDEN_COMPORTAMIENTO.length];
+        const orden = ORDEN_COMPORTAMIENTO[p.id], comp = orden[(n + g * 3) % orden.length];
         const [formato, base] = PIEZAS_TIPO[p.id][(n + g) % PIEZAS_TIPO[p.id].length];
         const inicio = masDias(dia0, g * CADA + (n % 5)), fin = masDias(inicio, COMPORTAMIENTO[comp].vida);
         if (fin < desde || inicio > hasta) continue;
@@ -148,8 +153,8 @@ export function piezasDeEjemplo(datos) {
       const pl = d[c.plataforma], inversionConjunto = pl.inversion * pl.campanas[c.campanaIndice] / c.de;
       const alAire = piezas.filter((x) => x.conjunto === c.id && x.inicio <= d.fecha && (!x.fin || x.fin >= d.fecha));
       const edad = (x) => Math.round((Date.parse(d.fecha) - Date.parse(x.inicio)) / 864e5);
-      // una pieza que se cansa se lleva más al principio y su costo sube desde la tercera semana
-      const cansancio = (x) => (x.comportamiento === 'cansada' ? Math.max(0, edad(x) - 21) / 28 : 0);
+      // una pieza que se satura se lleva más al principio y su costo sube desde la tercera semana
+      const cansancio = (x) => (x.comportamiento === 'saturada' ? Math.max(0, edad(x) - 21) / 28 : 0);
       const peso = (x) => COMPORTAMIENTO[x.comportamiento].peso * (edad(x) < 3 ? 0.6 : 1) * (1 - Math.min(0.5, cansancio(x) * 0.4));
       const suma = alAire.reduce((s, x) => s + peso(x), 0);
       for (const x of alAire) {

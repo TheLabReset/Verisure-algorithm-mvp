@@ -446,10 +446,7 @@ export function textosDelAbanico(anio, { uno = 'versión', varios = 'versiones',
     texto: () => '',
     titulo: (x) => (x.titulo === x.titulo.toUpperCase() ? version(x.titulo) : x.titulo),
     sinContenido: null,
-    // lo nuevo: el sello y, si los nuevos van aparte, el rótulo de cada fila
-    nuevo: 'Nuevo',
-    nuevos: (n) => `${numero(n)} ${segun(n, 'motivo nuevo', 'motivos nuevos')}`,
-    siguen: (n) => `${numero(n)} ${segun(n, 'motivo que ya venía', 'motivos que ya venían')}`,
+    nuevo: 'Nuevo', // el sello de un grupo que se ve por primera vez
   };
 }
 
@@ -679,47 +676,53 @@ export const extremosAyuda = (unidad) => {
 export const estadoObjetivo = (e) => ({ bien: 'En objetivo', cerca: `Hasta ${porcentaje(MARGEN_OBJETIVO)} por encima`, lejos: `Más de ${porcentaje(MARGEN_OBJETIVO)} por encima` }[e] ?? null);
 export { fechaSinAnio };
 
-// ── Piezas y campañas (capa 3): lo que reporta cada plataforma, con un estado por pieza ──
+// ── Piezas y campañas (capa 3): lo que reporta cada plataforma, con un estado por fila ──
 export const ESTADO_PIEZA = {
-  'sin-leads': 'Sin leads', cara: 'Cara', cansada: 'Se cansó', rinde: 'Rinde', 'en-linea': 'En línea', aprendiendo: 'Aprende', 'poca-data': 'Poca inversión',
+  'sin-leads': 'Sin leads', costosa: 'Costosa', saturada: 'Saturada', rinde: 'Rinde', aprendizaje: 'Aprendizaje', 'poca-data': 'Poca inversión',
 };
 const NIVEL_PIEZA = { pieza: ['pieza', 'piezas', true], conjunto: ['conjunto', 'conjuntos', false], campana: ['campaña', 'campañas', true] };
-const veces = (r) => numero(r, r < 10 ? 1 : 0);
-// La frase de cada fila: el dato que explica su estado, corto
-export function piezaDato(p) {
-  const masCaro = p.base && p.cpl ? (p.cpl / p.base - 1) * 100 : null;
-  switch (p.estado) {
-    case 'sin-leads': return p.nivel === 'pieza' ? `Ni un lead en ${numero(p.edad)} ${segun(p.edad, 'día', 'días')} al aire` : `${dolares(p.inversion)} sin un lead`;
-    case 'cara': return `Su lead cuesta ${porcentaje(masCaro)} más que el promedio`;
-    case 'rinde': return `Su lead cuesta ${porcentaje(-masCaro)} menos que el promedio`;
-    case 'cansada': return `Su lead cuesta ${veces(p.fatiga)} veces lo de sus primeras semanas`;
-    case 'aprendiendo': return `${numero(p.edad)} ${segun(p.edad, 'día', 'días')} al aire: todavía aprende`;
-    case 'poca-data': return 'Todavía gastó poco para juzgarla';
-    default: return 'Cerca del promedio de su plataforma';
+const dias = (n) => `${numero(n)} ${segun(n, 'día', 'días')}`;
+// Por qué tiene su estado, en una frase con sus cifras: qué pasó, sin juicio (el juicio es el estado)
+// En una campaña o un conjunto, si alguna de sus piezas pide mirarse, eso es lo que pasó
+const PARTES_PIEZA = [['sin-leads', 'gastó sin traer leads', 'gastaron sin traer leads'], ['costosa', 'salió costosa', 'salieron costosas'], ['saturada', 'se saturó', 'se saturaron']];
+const frasePiezas = (cuenta) => {
+  const partes = PARTES_PIEZA.map(([e, s1, p1]) => [cuenta[e] || 0, s1, p1]).filter(([k]) => k > 0);
+  return partes.length ? `${capital(lista(partes.map(([k, s1, p1], i) => `${enLetras(k, true)}${i === 0 ? ` ${segun(k, 'pieza', 'piezas')}` : ''} ${segun(k, s1, p1)}`)))}.` : null;
+};
+export function piezaDato(f) {
+  if (f.nivel !== 'pieza' && f.cuenta && f.estado !== 'sin-leads') { const t = frasePiezas(f.cuenta); if (t) return t; }
+  switch (f.estado) {
+    case 'sin-leads': return f.nivel === 'pieza' ? `Gastó ${dolares(f.inversion)} en ${dias(f.edad)} y no trajo leads.` : `Gastó ${dolares(f.inversion)} y no trajo leads.`;
+    case 'saturada': return `Su lead costaba ${dolares(f.saturacion.antes)}; en la última semana, ${dolares(f.saturacion.ahora)}.`;
+    case 'aprendizaje': return f.alAire === false ? `Estuvo ${dias(f.edad)} al aire.` : `Lleva ${dias(f.edad)} al aire.`;
+    case 'poca-data': return `Gastó ${dolares(f.inversion)}: todavía es poco para juzgar${f.nivel === 'conjunto' ? 'lo' : 'la'}.`;
+    default: return `Cada lead costó ${dolares(f.cpl)}; el promedio de ${f.plataformaNombre} fue ${dolares(f.base)}.`;
   }
 }
-// El título y la lectura: cuántas piden mirarse y cuánto se llevan; las que rinden, para comparar
+// Una pieza que ya no está al aire lo dice bajo su nombre
+export const piezaPausa = (f) => (f.nivel === 'pieza' && f.fin && !f.alAire ? `Pausada el ${fechaCorta(f.fin)}` : null);
+// El título y la lectura: cuántas piden mirarse y qué parte de la inversión se llevaron, frente a las que rindieron
 export function piezasLectura(x, nivel = 'pieza') {
   const [uno, varios, fem] = NIVEL_PIEZA[nivel];
   const filas = nivel === 'pieza' ? x.piezas : nivel === 'conjunto' ? x.conjuntos : x.campanas;
   const n = (e) => filas.filter((f) => f.estado === e).length;
-  const caro = fem ? ['salió cara', 'salieron caras'] : ['salió caro', 'salieron caros'], cansado = ['se cansó', 'se cansaron'];
-  const partes = [['sin-leads', 'gastó sin traer leads', 'gastaron sin traer leads'], ['cara', ...caro], ['cansada', ...cansado]]
+  const costoso = fem ? ['salió costosa', 'salieron costosas'] : ['salió costoso', 'salieron costosos'], saturado = fem ? ['se saturó', 'se saturaron'] : ['se saturó', 'se saturaron'];
+  const partes = [['sin-leads', 'gastó sin traer leads', 'gastaron sin traer leads'], ['costosa', ...costoso], ['saturada', ...saturado]]
     .map(([e, s1, p1]) => [n(e), s1, p1]).filter(([k]) => k > 0);
-  const revisar = filas.filter((f) => ['sin-leads', 'cara', 'cansada'].includes(f.estado));
-  const inv = revisar.reduce((s1, f) => s1 + f.inversion, 0), rinden = n('rinde');
+  const suma = (e) => filas.filter((f) => e.includes(f.estado)).reduce((t, f) => t + f.inversion, 0);
+  const revisar = suma(['sin-leads', 'costosa', 'saturada']), rinden = suma(['rinde']);
+  const pct = (v) => porcentaje((v / x.total) * 100);
   const titulo = partes.length
     ? capital(lista(partes.slice(0, 2).map(([k, s1, p1], i) => `${enLetras(k, fem)}${i === 0 ? ` ${segun(k, uno, varios)}` : ''} ${segun(k, s1, p1)}`)))
-    : `${fem ? 'Ninguna' : 'Ningún'} ${uno} gastó sin traer leads ni ${caro[0]}`;
-  const lectura = [
-    revisar.length ? `${segun(revisar.length, fem ? 'Esa se llevó' : 'Ese se llevó', fem ? 'Entre todas se llevaron' : 'Entre todos se llevaron')} ${dolares(inv)}, el ${porcentaje((inv / x.total) * 100)} de la inversión.` : null,
-    rinden ? `${capital(enLetras(rinden, fem))} ${segun(rinden, 'rindió', 'rindieron')} con un lead mucho más barato que el promedio.` : null,
-  ].filter(Boolean).join(' ');
+    : `${fem ? 'Ninguna' : 'Ningún'} ${uno} gastó sin traer leads ni ${costoso[0]}`;
+  const lectura = !x.total ? '' : revisar
+    ? `Se llevaron el ${pct(revisar)} de la inversión. ${fem ? 'Las' : 'Los'} que rindieron, el ${pct(rinden)}.`
+    : `${fem ? 'Las' : 'Los'} que rindieron se llevaron el ${pct(rinden)} de la inversión.`;
   return { titulo, lectura };
 }
 export function piezasAyuda(U) {
   return `Leads de la plataforma, no del CRM: a este nivel no hay bookings. Cada fila se compara con el costo por lead de su plataforma en el período. `
-    + `Aprende: menos de ${U.diasAprendizaje} días al aire (TikTok lo pide en su guía). Se cansó: su lead de los últimos ${U.diasReciente} días cuesta ${numero(U.vecesFatiga)} veces el de antes (el criterio de fatiga de Meta). `
+    + `Aprendizaje: menos de ${U.diasAprendizaje} días al aire, todavía no se juzga (TikTok lo pide en su guía). Saturada: su lead de los últimos ${U.diasReciente} días cuesta ${numero(U.vecesSaturada)} veces el de antes (el criterio de fatiga de Meta). `
     + `Aprendizaje limitado: un conjunto de Meta o TikTok con menos de ${U.resultadosSemana} leads en ${U.diasReciente} días (Meta y TikTok). `
-    + `Por costumbre de la industria, no de las plataformas: se juzga recién cuando gastó ${U.vecesGasto} veces el costo por lead de su plataforma; sin leads hasta ahí, va Sin leads; cara o rinde si su lead cuesta ${numero(U.vecesCara, 1)} veces más o menos que el promedio.`;
+    + `Por costumbre de la industria, no de las plataformas: se juzga recién cuando gastó ${U.vecesGasto} veces el costo por lead de su plataforma. Si hasta ahí no trajo leads, va Sin leads; si su lead cuesta ${numero(U.vecesCostosa, 1)} veces el promedio o más, Costosa; por debajo, Rinde.`;
 }

@@ -7,7 +7,7 @@ import { numero, soles, fechaCorta } from '../sistema/formato.js';
 import { version, tipoAviso } from '../textos/comun.js';
 import { FRANJAS } from '../calculo/vista.js';
 
-function Ficha({ e, muestra, sello }) {
+function Ficha({ e, muestra }) {
   const [fallo, setFallo] = useState(false), [intento, setIntento] = useState(0);
   const a = e.asset;
   // un digitalizado que no cargó se puede pedir de nuevo: el reproductor se arma otra vez
@@ -17,8 +17,8 @@ function Ficha({ e, muestra, sello }) {
       {a && !fallo ? <Reproductor key={`${e.id}-${intento}`} tipo={a.kind === 'video' ? 'video' : 'audio'} src={a.url} etiqueta={`${a.kind === 'video' ? 'Video' : 'Audio'} de «${version(e.version)}»`} onError={() => setFallo(true)} />
         : <div className="q-ficha-arte q-ficha-arte-corta"><span className="q-ficha-sin-arte">{a ? <>El digitalizado de esta emisión no cargó.<button type="button" className="q-boton q-boton-chico q-ficha-reintentar" onClick={reintentar}>Reintentar</button></> : 'Integrametrics no tiene el digitalizado de esta versión'}</span></div>}
       <div className="q-ficha-cuerpo">
-        <span className="q-ficha-marca q-ficha-foco">{muestra && <span className={`q-muestra ${muestra}`} aria-hidden="true" />}{e.nombre}{e.nueva && !sello ? ' · versión nueva' : ''}</span>
-        <h4>«{version(e.version)}»{e.nueva && sello && <SelloNuevo texto="Nuevo" />}</h4>
+        <span className="q-ficha-marca q-ficha-foco">{muestra && <span className={`q-muestra ${muestra}`} aria-hidden="true" />}{e.nombre}</span>
+        <h4>«{version(e.version)}»{e.nueva && <SelloNuevo texto="Nuevo" />}</h4>
         <dl className="q-ficha-datos">
           <div><dt>Programa</dt><dd>{e.programa ? version(e.programa) : 'Sin programa registrado'}</dd></div>
           <div><dt>Canal</dt><dd>{e.canal === 'DESCONOCIDO' ? 'Canal sin registrar' : version(e.canal)}</dd></div>
@@ -32,7 +32,7 @@ function Ficha({ e, muestra, sello }) {
   );
 }
 
-export default function Emisiones({ a, etiqueta, sello = null }) {
+export default function Emisiones({ a, etiqueta }) {
   const [tipoElegido, setTipo] = useState('todos');
   const [elegida, setElegida] = useState(null);
   const opciones = [{ valor: 'todos', texto: `Todos · ${numero(a.emisiones.length)}` }, ...a.porTipo.map((t) => ({ valor: t.nombre, texto: `${tipoAviso(t.nombre)} · ${numero(t.emisiones)}` }))];
@@ -51,12 +51,12 @@ export default function Emisiones({ a, etiqueta, sello = null }) {
           <li key={x.id}>
             <button type="button" aria-pressed={x.id === e?.id} onClick={() => setElegida(x.id)}>
               <span className="q-emision-cuando">{fechaCorta(x.fecha)}<small>{x.hora}</small></span>
-              <span className="q-emision-que"><b>{x.programa ? version(x.programa) : version(x.canal)}{x.nueva && sello && <SelloNuevo texto="Nuevo" />}</b><small>{x.programa ? `${version(x.canal)} · ` : ''}{tipoAviso(x.tipo)}{x.nueva && !sello ? ' · nueva' : ''}</small></span>
+              <span className="q-emision-que"><b>{x.programa ? version(x.programa) : version(x.canal)}{x.nueva && <SelloNuevo texto="Nuevo" />}</b><small>{x.programa ? `${version(x.canal)} · ` : ''}{tipoAviso(x.tipo)}</small></span>
             </button>
           </li>
         ))}
       </ol>
-      <aside className="q-emisiones-ficha" aria-label="Emisión elegida">{e && <Ficha key={e.id} e={e} muestra={a.muestra} sello={sello} />}</aside>
+      <aside className="q-emisiones-ficha" aria-label="Emisión elegida">{e && <Ficha key={e.id} e={e} muestra={a.muestra} />}</aside>
     </div>
   );
 }
