@@ -10,8 +10,8 @@ const datos = plataformasDeEjemplo('2026-01-01', '2026-10-22');
 const crudas = piezasDeEjemplo(datos);
 const P = { desde: '2026-09-23', hasta: '2026-10-22' };
 
-test('piezas: cada día, lo que gastan las piezas de una plataforma es lo que gastó la plataforma', () => {
-  for (const d of [datos.dias[10], datos.dias[150], datos.dias.at(-1)]) {
+test('piezas: todos los días, lo que gastan las piezas de una plataforma es lo que gastó la plataforma', () => {
+  for (const d of datos.dias) {
     const fila = crudas.dias.find((x) => x.fecha === d.fecha);
     for (const p of ['meta', 'google', 'tiktok']) {
       const piezas = Object.entries(fila).filter(([k]) => k.startsWith(`${p}-`)).reduce((s, [, v]) => s + v.inversion, 0);
@@ -49,25 +49,49 @@ test('piezas: cada estado respeta su umbral', () => {
 });
 
 test('piezas: los textos hablan del período en pasado, concuerdan en género y dicen qué pasó', () => {
-  const x = { total: 1000, piezas: [{ estado: 'sin-leads', inversion: 100 }, { estado: 'costosa', inversion: 50 }, { estado: 'costosa', inversion: 50 }, { estado: 'rinde', inversion: 600 }], conjuntos: [{ estado: 'costosa', inversion: 30 }], campanas: [] };
-  assert.equal(piezasLectura(x).titulo, 'Una pieza gastó sin traer leads y dos salieron costosas');
+  const x = { total: 1000, piezas: [{ estado: 'sin-leads', inversion: 100 }, { estado: 'costosa', inversion: 50 }, { estado: 'costosa', inversion: 50 }, { estado: 'saturada', inversion: 20 }, { estado: 'rinde', inversion: 600 }], conjuntos: [{ estado: 'costosa', inversion: 30 }], campanas: [{ estado: 'rinde', inversion: 1 }] };
+  // el título nombra todos los estados que la lectura suma
+  assert.equal(piezasLectura(x).titulo, 'Una pieza gastó sin traer leads, dos salieron costosas y una se saturó');
+  assert.match(piezasLectura(x).lectura, /^Se llevaron el 22\s% de la inversión\. Las que rindieron, el 60\s%\.$/);
   assert.equal(piezasLectura(x, 'conjunto').titulo, 'Un conjunto salió costoso');
   assert.equal(piezasLectura(x, 'campana').titulo, 'Ninguna campaña gastó sin traer leads ni salió costosa');
-  assert.match(piezasLectura(x).lectura, /^Se llevaron el 20\s% de la inversión\. Las que rindieron, el 60\s%\.$/);
-  const base = { nivel: 'pieza', plataformaNombre: 'Meta Ads', base: 30, inversion: 1490, edad: 17 };
+  // nada que juzgar: lo dice, sin «el 0 %»
+  const nada = { total: 100, piezas: [{ estado: 'aprendizaje', inversion: 60 }, { estado: 'poca-data', inversion: 40 }] };
+  assert.equal(piezasLectura(nada).titulo, 'Todavía ninguna pieza se puede juzgar en el período');
+  const base = { nivel: 'pieza', plataformaNombre: 'Meta Ads', base: 30, inversion: 1490, edad: 17, diasConGasto: 7 };
   assert.equal(piezaDato({ ...base, estado: 'costosa', cpl: 45 }), 'Cada lead costó $45; el promedio de Meta Ads fue $30.');
-  assert.equal(piezaDato({ ...base, estado: 'sin-leads' }), 'Gastó $1490 en 17 días y no trajo leads.');
+  // los días de «sin leads» son los del período, no los de toda su vida
+  assert.equal(piezaDato({ ...base, estado: 'sin-leads' }), 'Gastó $1490 en 7 días y no trajo leads.');
   assert.equal(piezaDato({ ...base, estado: 'saturada', saturacion: { antes: 20, ahora: 49 } }), 'Su lead costaba $20; en la última semana, $49.');
   assert.equal(piezaDato({ ...base, estado: 'aprendizaje', edad: 1 }), 'Lleva 1 día al aire.');
   assert.equal(piezaDato({ ...base, estado: 'aprendizaje', edad: 5, alAire: false }), 'Estuvo 5 días al aire.');
   assert.equal(piezaDato({ ...base, nivel: 'conjunto', estado: 'poca-data', inversion: 40 }), 'Gastó $40: todavía es poco para juzgarlo.');
 });
 
-test('piezas: una campaña con piezas que piden mirarse lo dice en su por qué, y va primero', () => {
+test('piezas: una campaña dice primero su propio costo y después lo de sus piezas', () => {
   const g = { nivel: 'campana', estado: 'rinde', plataformaNombre: 'Meta Ads', cpl: 26, base: 31, cuenta: { 'sin-leads': 1, costosa: 2, saturada: 0, rinde: 3 } };
-  assert.equal(piezaDato(g), 'Una pieza gastó sin traer leads y dos salieron costosas.');
+  assert.equal(piezaDato(g), 'Cada lead costó $26; el promedio de Meta Ads fue $31. Una de sus piezas gastó sin traer leads y dos salieron costosas.');
   assert.equal(piezaDato({ ...g, cuenta: { rinde: 4 } }), 'Cada lead costó $26; el promedio de Meta Ads fue $31.');
-  const x = leerPiezas(crudas, datos, P);
-  const revisar = (c) => c.cuenta['sin-leads'] + c.cuenta.costosa + c.cuenta.saturada;
-  for (let i = 1; i < x.campanas.length; i++) assert.ok(revisar(x.campanas[i - 1]) >= revisar(x.campanas[i]));
+});
+
+test('piezas: el estado coincide con las cifras que se ven y un grupo sin piezas juzgables no se juzga', () => {
+  const U = UMBRALES_PIEZAS;
+  for (const P2 of [P, { desde: '2026-10-16', hasta: '2026-10-22' }, { desde: '2026-01-01', hasta: '2026-01-07' }, { desde: '2026-06-01', hasta: '2026-06-30' }]) {
+    const x = leerPiezas(crudas, datos, P2);
+    for (const f of [...x.piezas, ...x.conjuntos, ...x.campanas]) {
+      const r = f.cpl == null ? null : Math.round(f.cpl) / Math.round(f.base);
+      if (f.estado === 'costosa') assert.ok(r >= U.vecesCostosa, `${f.nombre} ${r}`);
+      if (f.estado === 'rinde') assert.ok(r < U.vecesCostosa, `${f.nombre} ${r}`);
+    }
+    for (const g of [...x.conjuntos, ...x.campanas]) {
+      const juzgables = x.piezas.filter((p) => (g.nivel === 'conjunto' ? p.conjunto === g.id : p.campana === g.id) && !['aprendizaje', 'poca-data'].includes(p.estado));
+      if (!juzgables.length) assert.ok(['aprendizaje', 'poca-data'].includes(g.estado), g.nombre);
+      if (g.limitado) assert.ok(g.alAire, g.nombre);
+    }
+    for (const p of x.piezas) if (p.estado === 'saturada') assert.ok(p.saturacion.ahora >= p.saturacion.antes);
+    // las campañas que piden mirarse van primero
+    const pide = (c) => ['sin-leads', 'costosa', 'saturada'].includes(c.estado) || c.cuenta['sin-leads'] + c.cuenta.costosa + c.cuenta.saturada > 0;
+    const primeraQueNo = x.campanas.findIndex((c) => !pide(c));
+    if (primeraQueNo >= 0) assert.ok(x.campanas.slice(primeraQueNo).every((c) => !pide(c)), P2.desde);
+  }
 });

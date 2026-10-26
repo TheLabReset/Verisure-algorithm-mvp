@@ -19,6 +19,7 @@ export const UNIVERSOS = {
   atl: { icono: Tv, nombre: 'ATL' },
   digital: { icono: MonitorSmartphone, nombre: 'Digital' },
   plataformas: { icono: Layers, nombre: 'Plataformas y CRM' },
+  piezas: { icono: Layers, nombre: 'Plataformas' }, // lo que reporta cada plataforma, sin CRM
 };
 
 export function Chip({ tipo = 'neutro', icono: Icono, children, titulo }) {

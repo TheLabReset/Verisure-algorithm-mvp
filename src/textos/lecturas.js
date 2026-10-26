@@ -1,7 +1,7 @@
 // Lecturas de cada tarjeta. Observan, no ordenan; dos frases como máximo; cada comparación dice frente a qué.
 // Lo principal es la competencia: cada lectura empieza por ella y la marca propia va para comparar, salvo cuando
 // la tarjeta es sobre la marca propia. Toda cifra llega calculada desde src/calculo; acá solo se escribe.
-import { numero, porcentaje, soles, solesCompacto, fechaCorta, mesLargo } from '../sistema/formato.js';
+import { numero, porcentaje, parte, soles, solesCompacto, fechaCorta, mesLargo } from '../sistema/formato.js';
 import { CLIENTE } from '../cliente.js';
 import { tramoMeses, periodoTexto, comparacionTexto, puntosFrente, enLetras, segun, lista, capital, horasTexto, DIAS_SEMANA, version, mesTexto, medioEnFrase, tramoFechas, tipoAviso, tipoAvisoPlural, plataformasTexto, shareDeMarca, frenteATexto } from './comun.js';
 import { dolares, fechaSinAnio } from '../sistema/formato.js';
@@ -683,21 +683,26 @@ export const ESTADO_PIEZA = {
 const NIVEL_PIEZA = { pieza: ['pieza', 'piezas', true], conjunto: ['conjunto', 'conjuntos', false], campana: ['campaña', 'campañas', true] };
 const dias = (n) => `${numero(n)} ${segun(n, 'día', 'días')}`;
 // Por qué tiene su estado, en una frase con sus cifras: qué pasó, sin juicio (el juicio es el estado)
-// En una campaña o un conjunto, si alguna de sus piezas pide mirarse, eso es lo que pasó
-const PARTES_PIEZA = [['sin-leads', 'gastó sin traer leads', 'gastaron sin traer leads'], ['costosa', 'salió costosa', 'salieron costosas'], ['saturada', 'se saturó', 'se saturaron']];
-const frasePiezas = (cuenta) => {
-  const partes = PARTES_PIEZA.map(([e, s1, p1]) => [cuenta[e] || 0, s1, p1]).filter(([k]) => k > 0);
-  return partes.length ? `${capital(lista(partes.map(([k, s1, p1], i) => `${enLetras(k, true)}${i === 0 ? ` ${segun(k, 'pieza', 'piezas')}` : ''} ${segun(k, s1, p1)}`)))}.` : null;
+// Lo que pasó con las piezas que piden mirarse: «una pieza gastó sin traer leads y dos salieron costosas». En una
+// campaña o un conjunto va después de su propia frase: «Una de sus piezas se saturó.»
+const PARTES_PIEZA = (fem) => [['sin-leads', 'gastó sin traer leads', 'gastaron sin traer leads'], ['costosa', ...(fem ? ['salió costosa', 'salieron costosas'] : ['salió costoso', 'salieron costosos'])], ['saturada', 'se saturó', 'se saturaron']];
+const partesPiezas = (cuenta, sujeto, fem = true) => {
+  const partes = PARTES_PIEZA(fem).map(([e, s1, p1]) => [cuenta[e] || 0, s1, p1]).filter(([k]) => k > 0);
+  return partes.length ? lista(partes.map(([k, s1, p1], i) => `${enLetras(k, fem)}${i === 0 ? sujeto(k) : ''} ${segun(k, s1, p1)}`)) : null;
 };
+// Por qué tiene su estado, en una frase con sus cifras: qué pasó, sin juicio (el juicio es el estado)
 export function piezaDato(f) {
-  if (f.nivel !== 'pieza' && f.cuenta && f.estado !== 'sin-leads') { const t = frasePiezas(f.cuenta); if (t) return t; }
-  switch (f.estado) {
-    case 'sin-leads': return f.nivel === 'pieza' ? `Gastó ${dolares(f.inversion)} en ${dias(f.edad)} y no trajo leads.` : `Gastó ${dolares(f.inversion)} y no trajo leads.`;
-    case 'saturada': return `Su lead costaba ${dolares(f.saturacion.antes)}; en la última semana, ${dolares(f.saturacion.ahora)}.`;
-    case 'aprendizaje': return f.alAire === false ? `Estuvo ${dias(f.edad)} al aire.` : `Lleva ${dias(f.edad)} al aire.`;
-    case 'poca-data': return `Gastó ${dolares(f.inversion)}: todavía es poco para juzgar${f.nivel === 'conjunto' ? 'lo' : 'la'}.`;
-    default: return `Cada lead costó ${dolares(f.cpl)}; el promedio de ${f.plataformaNombre} fue ${dolares(f.base)}.`;
-  }
+  const propia = (() => {
+    switch (f.estado) {
+      case 'sin-leads': return f.nivel === 'pieza' ? `Gastó ${dolares(f.inversion)} en ${dias(f.diasConGasto)} y no trajo leads.` : `Gastó ${dolares(f.inversion)} y no trajo leads.`;
+      case 'saturada': return `Su lead costaba ${dolares(f.saturacion.antes)}; en la última semana, ${dolares(f.saturacion.ahora)}.`;
+      case 'aprendizaje': return f.nivel !== 'pieza' ? 'Todas sus piezas tienen menos de una semana al aire.' : f.alAire === false ? `Estuvo ${dias(f.edad)} al aire.` : `Lleva ${dias(f.edad)} al aire.`;
+      case 'poca-data': return f.nivel !== 'pieza' ? `Gastó ${dolares(f.inversion)}: todavía es poco para juzgar${f.nivel === 'conjunto' ? 'lo' : 'la'}.` : `Gastó ${dolares(f.inversion)}: todavía es poco para juzgarla.`;
+      default: return `Cada lead costó ${dolares(f.cpl)}; el promedio de ${f.plataformaNombre} fue ${dolares(f.base)}.`;
+    }
+  })();
+  const piezas = f.nivel !== 'pieza' && f.cuenta && !['sin-leads', 'aprendizaje', 'poca-data'].includes(f.estado) ? partesPiezas(f.cuenta, (k) => ` de sus piezas`) : null;
+  return piezas ? `${propia} ${capital(piezas)}.` : propia;
 }
 // Una pieza que ya no está al aire lo dice bajo su nombre
 export const piezaPausa = (f) => (f.nivel === 'pieza' && f.fin && !f.alAire ? `Pausada el ${fechaCorta(f.fin)}` : null);
@@ -705,19 +710,17 @@ export const piezaPausa = (f) => (f.nivel === 'pieza' && f.fin && !f.alAire ? `P
 export function piezasLectura(x, nivel = 'pieza') {
   const [uno, varios, fem] = NIVEL_PIEZA[nivel];
   const filas = nivel === 'pieza' ? x.piezas : nivel === 'conjunto' ? x.conjuntos : x.campanas;
-  const n = (e) => filas.filter((f) => f.estado === e).length;
-  const costoso = fem ? ['salió costosa', 'salieron costosas'] : ['salió costoso', 'salieron costosos'], saturado = fem ? ['se saturó', 'se saturaron'] : ['se saturó', 'se saturaron'];
-  const partes = [['sin-leads', 'gastó sin traer leads', 'gastaron sin traer leads'], ['costosa', ...costoso], ['saturada', ...saturado]]
-    .map(([e, s1, p1]) => [n(e), s1, p1]).filter(([k]) => k > 0);
-  const suma = (e) => filas.filter((f) => e.includes(f.estado)).reduce((t, f) => t + f.inversion, 0);
+  const cuenta = Object.fromEntries(['sin-leads', 'costosa', 'saturada', 'rinde'].map((e) => [e, filas.filter((f) => f.estado === e).length]));
+  const suma = (es) => filas.filter((f) => es.includes(f.estado)).reduce((t, f) => t + f.inversion, 0);
   const revisar = suma(['sin-leads', 'costosa', 'saturada']), rinden = suma(['rinde']);
-  const pct = (v) => porcentaje((v / x.total) * 100);
-  const titulo = partes.length
-    ? capital(lista(partes.slice(0, 2).map(([k, s1, p1], i) => `${enLetras(k, fem)}${i === 0 ? ` ${segun(k, uno, varios)}` : ''} ${segun(k, s1, p1)}`)))
-    : `${fem ? 'Ninguna' : 'Ningún'} ${uno} gastó sin traer leads ni ${costoso[0]}`;
+  const pct = (v) => { const t = parte((v / x.total) * 100); return t.startsWith('menos') ? t : `el ${t}`; };
+  // nada que se pueda juzgar: todas aprenden o gastaron poco
+  if (!revisar && !cuenta.rinde) return { titulo: `Todavía ${fem ? 'ninguna' : 'ningún'} ${uno} se puede juzgar en el período`, lectura: `Tienen menos de una semana al aire o gastaron poco.` };
+  const frase = partesPiezas(cuenta, (k) => ` ${segun(k, uno, varios)}`, fem);
+  const titulo = frase ? capital(frase) : `${fem ? 'Ninguna' : 'Ningún'} ${uno} gastó sin traer leads ni salió ${fem ? 'costosa' : 'costoso'}`;
   const lectura = !x.total ? '' : revisar
-    ? `Se llevaron el ${pct(revisar)} de la inversión. ${fem ? 'Las' : 'Los'} que rindieron, el ${pct(rinden)}.`
-    : `${fem ? 'Las' : 'Los'} que rindieron se llevaron el ${pct(rinden)} de la inversión.`;
+    ? `Se llevaron ${pct(revisar)} de la inversión. ${rinden ? `${fem ? 'Las' : 'Los'} que rindieron, ${pct(rinden)}.` : `${fem ? 'Ninguna' : 'Ninguno'} rindió.`}`
+    : `${fem ? 'Las' : 'Los'} que rindieron se llevaron ${pct(rinden)} de la inversión.`;
   return { titulo, lectura };
 }
 export function piezasAyuda(U) {

@@ -139,7 +139,10 @@ export function piezasDeEjemplo(datos) {
       for (let g = 0; g < total; g++) {
         const orden = ORDEN_COMPORTAMIENTO[p.id], comp = orden[(n + g * 3) % orden.length];
         const [formato, base] = PIEZAS_TIPO[p.id][(n + g) % PIEZAS_TIPO[p.id].length];
-        const inicio = masDias(dia0, g * CADA + (n % 5)), fin = masDias(inicio, COMPORTAMIENTO[comp].vida);
+        // dura su vida, pero nunca menos que hasta el estreno siguiente: el conjunto no se queda sin piezas al aire, y la
+        // inversión de las piezas suma la de su plataforma todos los días
+        const inicio = masDias(dia0, g * CADA + (n % 5)), siguiente = masDias(dia0, (g + 1) * CADA + (n % 5));
+        const fin = [masDias(inicio, COMPORTAMIENTO[comp].vida), masDias(siguiente, 1)].sort().at(-1);
         if (fin < desde || inicio > hasta) continue;
         piezas.push({ id: `${conjunto.id}-${g}`, plataforma: p.id, conjunto: conjunto.id, campana: conjunto.campana, nombre: `${nombreBase(p.id, base, g)} · ${MESES_EJEMPLO[+inicio.slice(5, 7) - 1]}`, formato, inicio, fin: fin <= hasta ? fin : null, comportamiento: comp });
       }

@@ -58,7 +58,7 @@ function TablaArbol({ x }) {
 export default function Piezas({ def, vista: v, cambios }) {
   const x = v.ejemplo.piezas;
   const [plat, setPlat] = useState('todas');
-  if (!x) return <SeccionDe def={def} vista={v}><Bloque titulo="Piezas y campañas" universo="plataformas" estado={sinDato('sin-datos')} /></SeccionDe>;
+  if (!x) return <SeccionDe def={def} vista={v}><Bloque titulo="Piezas y campañas" universo="piezas" estado={sinDato('sin-datos')} /></SeccionDe>;
   const opciones = [{ valor: 'todas', texto: 'Todas' }, ...x.bases.map((b) => ({ valor: b.id, texto: b.nombre }))];
   const plataforma = vigente(plat, opciones) === 'todas' ? null : plat;
   const de = (lista) => lista.filter((f) => !plataforma || f.plataforma === plataforma);
@@ -68,13 +68,13 @@ export default function Piezas({ def, vista: v, cambios }) {
   const pie = `${x.fuente}: sus leads no son los del CRM. ${monedaNota(cambios)}`;
   return (
     <SeccionDe def={def} vista={v}>
-      <Bloque universo="plataformas" titulo={textos.titulo} lectura={textos.lectura} ejemplo
+      <Bloque universo="piezas" titulo={textos.titulo} lectura={textos.lectura} ejemplo
         ayuda={<p>{piezasAyuda(UMBRALES_PIEZAS)}</p>} pie={<span>{pie}</span>}>
         <div className="q-control q-control-tarjeta"><span>Plataforma</span><Grupo etiqueta="Plataforma" valor={plataforma ?? 'todas'} onCambiar={setPlat} opciones={opciones} /></div>
         <TablaArbol key={plataforma ?? 'todas'} x={sub} />
       </Bloque>
       <Detalle id={`detalle-${def.id}`} titulo="Detalle de las piezas" bajada="Data de ejemplo, por conectar." vistas={['cada pieza con su estado y sus cifras']}>
-        <Bloque universo="plataformas" titulo="Todas las piezas del período" ejemplo pie={<span>{pie}</span>}>
+        <Bloque universo="piezas" titulo="Todas las piezas del período" ejemplo pie={<span>{pie}</span>}>
           <Tabla etiqueta="Cada pieza con su estado" numericas={[2, 3, 4]}
             columnas={['Pieza', 'Estado', 'Inversión', 'Leads', 'Costo por lead', 'Por qué']}
             filas={sub.piezas.map((f) => [{ texto: f.nombre, sub: `${f.plataformaNombre} · ${f.conjuntoNombre}` }, ESTADO_PIEZA[f.estado], dolares(f.inversion), numero(f.leads), costo(f.cpl), piezaDato(f)])} />
