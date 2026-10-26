@@ -730,7 +730,11 @@ export function Apiladas({ columnas, partes, formato = (p) => porcentaje(p), eti
 // x en escala logarítmica (cada marca del eje vale 10 veces la anterior): las cifras de interacción van de miles a
 // decenas de miles. y de 0 a 100 con la raya de 50 (neutro). Cada punto se elige con clic o con el teclado; el
 // elegido lleva anillo. La marca propia va en su color, más grande y con su nombre en negrita.
-export function Dispersion({ puntos, elegido, onElegir, rotuloX, rotuloY, formatoX = numero, formatoY = numero, notas = {}, etiqueta }) {
+// ejeY: la escala del eje vertical si no es 0 a 100 con la raya en 50 ({ min, max, neutro, marcas, formato }); un punto
+// fuera de la escala se dibuja en el borde. p.clase pinta el punto con el color de su estado; p.sinRotulo lo deja sin nombre y
+// p.rotuloOpcional lo nombra solo si cabe (el nombre sigue en la pista y en la tabla)
+export function Dispersion({ puntos, elegido, onElegir, rotuloX, rotuloY, formatoX = numero, formatoY = numero, notas = {}, etiqueta, ejeY = {} }) {
+  const { min: minY = 0, max: maxY = 100, neutro: neutroY = 50, marcas: marcasY = [0, 25, 50, 75, 100], formato: formatoMarcaY = (v) => v } = ejeY;
   const tabla = { columnas: ['Marca', rotuloX, rotuloY], filas: puntos.map((p) => [p.nombre, formatoX(p.x), formatoY(p.y)]) };
   return (
     <Grafico etiqueta={etiqueta} tabla={tabla} className="q-dispersion">
@@ -740,7 +744,7 @@ export function Dispersion({ puntos, elegido, onElegir, rotuloX, rotuloY, format
         const lo = Math.floor(Math.log10(Math.min(...puntos.map((p) => p.x))));
         const hi = Math.max(lo + 1, Math.ceil(Math.log10(Math.max(...puntos.map((p) => p.x)))));
         const x = (v) => m.l + ((Math.log10(v) - lo) / (hi - lo)) * (ancho - m.l - m.r);
-        const y = lineal(0, 100, alto - m.b, m.t);
+        const yLineal = lineal(minY, maxY, alto - m.b, m.t), y = (v) => yLineal(Math.max(minY, Math.min(maxY, v)));
         // Rótulos: a la derecha del punto; si chocan con uno ya puesto, a la izquierda, luego abajo, luego arriba
         const puestos = [];
         const cajaDe = (p, lado) => {
@@ -754,17 +758,19 @@ export function Dispersion({ puntos, elegido, onElegir, rotuloX, rotuloY, format
         const choca = (c) => c.x1 > ancho - 2 || c.x0 < m.l || puestos.some((o) => c.x0 < o.x1 && c.x1 > o.x0 && c.y0 < o.y1 && c.y1 > o.y0)
           || puntos.some((q) => { const qx = x(q.x), qy = y(q.y); return qx > c.x0 - 5 && qx < c.x1 + 5 && qy > c.y0 - 5 && qy < c.y1 + 5; });
         const rotulos = new Map();
-        [...puntos].sort((a, b) => (b.propia ? 1 : 0) - (a.propia ? 1 : 0) || a.x - b.x).forEach((p) => {
-          const c = ['der', 'izq', 'aba', 'arr'].map((l) => cajaDe(p, l)).find((k) => !choca(k)) || cajaDe(p, 'der');
+        [...puntos].filter((p) => !p.sinRotulo).sort((a, b) => (b.propia ? 1 : 0) - (a.propia ? 1 : 0) || a.x - b.x).forEach((p) => {
+          // un rótulo opcional que no cabe sin pisar a otro no se pone: el nombre queda en la pista y en la tabla
+          const c = ['der', 'izq', 'aba', 'arr'].map((l) => cajaDe(p, l)).find((k) => !choca(k)) || (p.rotuloOpcional ? null : cajaDe(p, 'der'));
+          if (!c) return;
           puestos.push(c); rotulos.set(p.id, c);
         });
         const elegir = (id) => onElegir && onElegir(id);
         return (
           <Svg ancho={ancho} alto={alto} etiqueta={etiqueta}>
-            {[0, 25, 50, 75, 100].map((v) => (
+            {marcasY.map((v) => (
               <g key={'y' + v}>
-                <line className={v === 50 ? 'q-neutro' : 'q-rejilla'} x1={m.l} x2={ancho - m.r} y1={y(v)} y2={y(v)} />
-                <text className="q-eje" x={m.l - 8} y={y(v) + 4} textAnchor="end">{v}</text>
+                <line className={v === neutroY ? 'q-neutro' : 'q-rejilla'} x1={m.l} x2={ancho - m.r} y1={y(v)} y2={y(v)} />
+                <text className="q-eje" x={m.l - 8} y={y(v) + 4} textAnchor="end">{formatoMarcaY(v)}</text>
               </g>
             ))}
             {Array.from({ length: hi - lo + 1 }, (_, k) => 10 ** (lo + k)).map((v) => (
@@ -772,7 +778,7 @@ export function Dispersion({ puntos, elegido, onElegir, rotuloX, rotuloY, format
             ))}
             <text className="q-eje" x={m.l} y={m.t - 12}>↑ {rotuloY}</text>
             <text className="q-eje" x={ancho - m.r} y={alto - 6} textAnchor="end">{rotuloX} →</text>
-            {notas.neutro && <text className="q-nota" x={ancho - m.r} y={y(50) - 6} textAnchor="end">{notas.neutro}</text>}
+            {notas.neutro && <text className="q-nota" x={ancho - m.r} y={y(neutroY) - 6} textAnchor="end">{notas.neutro}</text>}
             {notas.arriba && <text className="q-nota" x={ancho - m.r} y={m.t + 12} textAnchor="end">{notas.arriba}</text>}
             {notas.abajo && <text className="q-nota" x={m.l + 6} y={alto - m.b - 8}>{notas.abajo}</text>}
             {puntos.map((p) => {
@@ -783,8 +789,8 @@ export function Dispersion({ puntos, elegido, onElegir, rotuloX, rotuloY, format
                   onClick={() => elegir(p.id)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); elegir(p.id); } }}>
                   <circle className="q-blanco" cx={x(p.x)} cy={y(p.y)} r={16} data-pista={`${p.nombre}\n${rotuloX}: ${formatoX(p.x)}\n${rotuloY}: ${formatoY(p.y)}`} />
                   <circle className="q-anillo" cx={x(p.x)} cy={y(p.y)} r={p.propia ? 12 : 10} />
-                  <circle className={p.propia ? 'q-punto q-punto-propio' : 'q-punto'} cx={x(p.x)} cy={y(p.y)} r={p.propia ? 7 : 5} data-valor={p.x} />
-                  <text className={`q-rotulo-fila${p.propia || sel ? ' q-fuerte' : ''}`} x={r.tx} y={r.ty} textAnchor={r.ancla}>{p.nombre}</text>
+                  <circle className={[p.propia ? 'q-punto q-punto-propio' : 'q-punto', p.clase].filter(Boolean).join(' ')} cx={x(p.x)} cy={y(p.y)} r={p.propia ? 7 : 5} data-valor={p.x} />
+                  {r && <text className={`q-rotulo-fila${p.propia || sel ? ' q-fuerte' : ''}`} x={r.tx} y={r.ty} textAnchor={r.ancla}>{p.nombre}</text>}
                 </g>
               );
             })}

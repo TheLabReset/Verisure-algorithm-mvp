@@ -12,6 +12,7 @@ import { numero, compacto, fechaCorta, porcentaje, variacion } from '../sistema/
 import { MarcoCapa, SeccionDe, sinDato, avisosDe } from './comun.jsx';
 import Ooh from './Ooh.jsx';
 import Emisiones from './Emisiones.jsx';
+import { useOpcion } from '../opciones.jsx';
 import { periodoTexto, version, ventanaTexto, resumenTitulo, plataformasTexto, plataformaEnFrase, capital } from '../textos/comun.js';
 import { digitalSemanaLectura, atlSemanaLectura, oohLectura, distritosLectura, textosDelAbanico, textosMarca, trendsMarcasLectura, competenciaBusquedasLectura, competenciaBusquedasPie, competenciaBusquedasAyuda, tiktokLectura, facebookLectura, TONOS, alerta, aparicionesNota, ACCION_VIGILADA, accionVigiladaEtiqueta } from '../textos/lecturas.js';
 import { UMBRALES_TONO } from '../calculo/conversacion.js';
@@ -62,6 +63,7 @@ function useMarca(opciones) {
 // Digital: un mazo por mensaje con sus piezas nuevas, y la lista de mensajes con sus plataformas
 function DigitalSemana({ d, anio, avisos, nombre = COMPETENCIA.nombre, filtro }) {
   const [abierta, setAbierta] = useState(null);
+  const sello = useOpcion('nuevo');
   const t = textosDelAbanico(anio, { uno: 'pieza', varios: 'piezas' });
   const lista = { ...d.abanico, grupos: d.abanico.grupos.map((g) => ({ ...g, nombre: version(g.nombre) })) };
   return (
@@ -70,7 +72,7 @@ function DigitalSemana({ d, anio, avisos, nombre = COMPETENCIA.nombre, filtro })
       pie={<span>{capital(plataformasTexto(d.plataformas || []) || 'Plataformas digitales')} · Integrametrics digital.</span>}>
       {filtro}
       {d.piezas ? <>
-        <Abanico key={nombre} lista={lista} abierta={abierta} onAbrir={setAbierta} t={t} nota={`vistas por primera vez ${ventanaTexto(d.semana.desde, d.semana.hasta)}`} />
+        <Abanico key={nombre} lista={lista} abierta={abierta} onAbrir={setAbierta} t={t} sello={sello} nota={`vistas por primera vez ${ventanaTexto(d.semana.desde, d.semana.hasta)}`} />
         <Tabla etiqueta={`Mensajes digitales de ${nombre}`} numericas={[1]}
           columnas={['Mensaje', 'Piezas', 'Plataformas', 'Visto por primera vez']}
           filas={d.mensajes.map((m) => [version(m.mensaje), numero(m.piezas), m.plataformas.map(plataformaEnFrase).join(', ') || 'sin dato', m.nuevo && !d.sinHistoria ? `${fechaCorta(m.primeraVez)}, nuevo` : fechaCorta(m.primeraVez)])} />
@@ -80,13 +82,14 @@ function DigitalSemana({ d, anio, avisos, nombre = COMPETENCIA.nombre, filtro })
 }
 
 function AtlSemana({ a, medio, universo, avisos, titulo, nombre = COMPETENCIA.nombre, filtro }) {
+  const sello = useOpcion('nuevo');
   if (!a) return <Bloque titulo={titulo} universo={universo} estado={sinDato('no-cargo')} />;
   return (
     <Bloque universo={universo} {...atlSemanaLectura(a, medio, nombre)} ventana={ventanaDe(a)} avisos={avisos}
       ayuda={<p>Cada fila es una emisión. Una emisión de cadena nacional repetida en sus señales regionales cuenta una sola vez. El digitalizado es el de la versión que Integrametrics guardó.</p>}
       pie={<span>Integrametrics, emisión por emisión{a.emisiones.length > 1 ? ` · las ${numero(a.emisiones.length)} están en la lista` : ''}.</span>}>
       {filtro}
-      {a.emisiones.length ? <Emisiones key={nombre} a={a} etiqueta={`Emisiones de ${nombre} en ${medio}`} /> : <p className="q-nota-bloque">Sin emisiones registradas.</p>}
+      {a.emisiones.length ? <Emisiones key={nombre} a={a} sello={sello} etiqueta={`Emisiones de ${nombre} en ${medio}`} /> : <p className="q-nota-bloque">Sin emisiones registradas.</p>}
     </Bloque>
   );
 }

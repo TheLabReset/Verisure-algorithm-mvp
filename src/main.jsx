@@ -8,9 +8,10 @@ import './sistema/base.css';
 import './sistema/componentes.css';
 import './sistema/graficos/graficos.css';
 import App from './App.jsx';
+import { ConOpciones } from './opciones.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <ConOpciones><App /></ConOpciones>
   </React.StrictMode>,
 );

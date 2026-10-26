@@ -93,3 +93,80 @@ export function plataformasDeEjemplo(desde, hasta) {
     plataformas: PLATAFORMAS_EJEMPLO.map(({ id, nombre, tipo, moneda, objetivo, campanas }) => ({ id, nombre, tipo, moneda, objetivo, campanas })), dias,
     objetivos: meses.map((mes) => ({ mes, ...OBJETIVOS_MES_EJEMPLO })) };
 }
+
+// ── Piezas: cada campaña con sus conjuntos (grupos de anuncios en TikTok y Google) y sus piezas, día por día, con lo
+// que reporta la plataforma: inversión, impresiones, alcance nuevo, clics y leads. Estos leads son los de la plataforma
+// (formularios y conversiones), no los del CRM: no se cruzan con bookings. Las piezas rotan: cada conjunto estrena una
+// cada tres semanas y cada una dura según cómo le va. Cada pieza tiene un comportamiento de ejemplo (rinde, cara, se
+// cansa, gasta sin leads) para que la maqueta muestre todos los estados; ninguna cifra sale de una cuenta real.
+export const CONJUNTOS_EJEMPLO = {
+  meta: [['Hogares Lima · 25 a 54'], ['Arequipa y Trujillo', 'Resto del país'], ['Visitas a la web · 30 días'], ['Amplio · Advantage+']],
+  google: [['Marca exacta'], ['Alarmas para casa', 'Alarmas para negocio'], ['Cámaras para casa'], ['Recursos · Alarmas']],
+  tiktok: [['Amplio · 18 a 44'], ['Intereses hogar y tecnología']],
+};
+const PIEZAS_TIPO = {
+  meta: [['Video', 'Testimonio de cliente'], ['Imagen', 'Promoción del mes'], ['Video', 'Instalación en un día'], ['Carrusel', 'El kit completo'], ['Video', 'La central responde'], ['Imagen', 'Cámara con alarma']],
+  google: [['Texto', 'Anuncio adaptable'], ['Texto', 'Anuncio adaptable'], ['Texto', 'Anuncio adaptable']],
+  tiktok: [['Video', 'Creador · Mi casa'], ['Video', 'Abriendo el kit'], ['Video', 'Antes y después'], ['Video', 'Un día en la central']],
+};
+// comportamiento: cuánto se lleva del conjunto, su costo por lead frente al de la plataforma y su CTR; cuánto vive
+const COMPORTAMIENTO = {
+  rinde: { peso: 1.6, cpl: 0.62, ctr: 1.6, vida: 70 }, normal: { peso: 1, cpl: 1, ctr: 1.1, vida: 49 }, cara: { peso: 0.8, cpl: 1.75, ctr: 0.7, vida: 35 },
+  cansada: { peso: 1.3, cpl: 0.8, ctr: 1.5, vida: 63 }, 'sin-leads': { peso: 0.55, cpl: null, ctr: 0.45, vida: 16 },
+};
+const ORDEN_COMPORTAMIENTO = ['normal', 'rinde', 'cara', 'cansada', 'normal', 'sin-leads', 'rinde', 'normal'];
+const CPM_EJEMPLO = { meta: 6.5, google: 38, tiktok: 4 }; // Google Search: se paga por clic, el CPM es alto
+const CADA = 21; // días entre estrenos de un conjunto
+// el nombre de una pieza: su idea y el mes en que salió; en Google, la letra del anuncio adaptable
+const MESES_EJEMPLO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'dic'];
+const nombreBase = (plataforma, base, g) => (plataforma === 'google' ? `${base} ${'ABC'[g % 3]}` : base);
+
+export function piezasDeEjemplo(datos) {
+  const dias = datos.dias, desde = dias[0].fecha, hasta = dias.at(-1).fecha;
+  const piezas = [], conjuntos = [];
+  // las piezas de cada conjunto: una generación cada CADA días, desde antes del primer día para que siempre haya al aire
+  const dia0 = masDias(desde, -45), total = Math.ceil((Date.parse(hasta) - Date.parse(dia0)) / 864e5 / CADA) + 1;
+  let n = 0;
+  for (const p of PLATAFORMAS_EJEMPLO) {
+    CONJUNTOS_EJEMPLO[p.id].forEach((lista, ci) => lista.forEach((nombreConjunto, k) => {
+      const conjunto = { id: `${p.id}-${ci}-${k}`, plataforma: p.id, campana: p.campanas[ci], nombre: nombreConjunto, campanaIndice: ci, de: lista.length };
+      conjuntos.push(conjunto);
+      for (let g = 0; g < total; g++) {
+        const comp = ORDEN_COMPORTAMIENTO[(n + g * 3) % ORDEN_COMPORTAMIENTO.length];
+        const [formato, base] = PIEZAS_TIPO[p.id][(n + g) % PIEZAS_TIPO[p.id].length];
+        const inicio = masDias(dia0, g * CADA + (n % 5)), fin = masDias(inicio, COMPORTAMIENTO[comp].vida);
+        if (fin < desde || inicio > hasta) continue;
+        piezas.push({ id: `${conjunto.id}-${g}`, plataforma: p.id, conjunto: conjunto.id, campana: conjunto.campana, nombre: `${nombreBase(p.id, base, g)} · ${MESES_EJEMPLO[+inicio.slice(5, 7) - 1]}`, formato, inicio, fin: fin <= hasta ? fin : null, comportamiento: comp });
+      }
+      n++;
+    }));
+  }
+  // cada día: la inversión de la campaña (el reparto del día) entre sus conjuntos y entre las piezas al aire
+  const porDia = dias.map((d) => {
+    const fila = { fecha: d.fecha };
+    for (const c of conjuntos) {
+      const pl = d[c.plataforma], inversionConjunto = pl.inversion * pl.campanas[c.campanaIndice] / c.de;
+      const alAire = piezas.filter((x) => x.conjunto === c.id && x.inicio <= d.fecha && (!x.fin || x.fin >= d.fecha));
+      const edad = (x) => Math.round((Date.parse(d.fecha) - Date.parse(x.inicio)) / 864e5);
+      // una pieza que se cansa se lleva más al principio y su costo sube desde la tercera semana
+      const cansancio = (x) => (x.comportamiento === 'cansada' ? Math.max(0, edad(x) - 21) / 28 : 0);
+      const peso = (x) => COMPORTAMIENTO[x.comportamiento].peso * (edad(x) < 3 ? 0.6 : 1) * (1 - Math.min(0.5, cansancio(x) * 0.4));
+      const suma = alAire.reduce((s, x) => s + peso(x), 0);
+      for (const x of alAire) {
+        const r = azar(semillaDe(`${x.id}|${d.fecha}`)), comp = COMPORTAMIENTO[x.comportamiento];
+        const inversion = suma ? inversionConjunto * peso(x) / suma : 0;
+        const cplBase = (x.plataforma === 'google' ? 0.9 : 0.85) * entre(r, ...PLATAFORMAS_EJEMPLO.find((q) => q.id === x.plataforma).cpl);
+        // las primeras jornadas cuestan más: la plataforma todavía está aprendiendo
+        const cpl = comp.cpl == null ? null : cplBase * comp.cpl * (1 + cansancio(x) * 1.2) * (edad(x) < 5 ? 1.3 : 1);
+        const leads = cpl == null ? 0 : Math.max(0, Math.round(inversion / cpl + (r() - 0.5)));
+        const impresiones = Math.round((inversion / CPM_EJEMPLO[x.plataforma]) * 1000 * entre(r, 0.9, 1.1));
+        const ctr = (comp.ctr / 100) * (1 - Math.min(0.6, cansancio(x) * 0.7)) * entre(r, 0.85, 1.15);
+        // alcance nuevo: cada día la pieza llega a menos gente que no la había visto (la frecuencia sube con la edad)
+        const alcance = Math.round(impresiones / (1 + edad(x) * (x.plataforma === 'google' ? 0.005 : 0.06)));
+        fila[x.id] = { inversion, impresiones, alcance, clics: Math.round(impresiones * ctr), leads };
+      }
+    }
+    return fila;
+  });
+  return { ejemplo: true, fuente: 'Meta Ads, Google Ads y TikTok Ads, lo que reporta cada plataforma', conjuntos, piezas, dias: porDia };
+}

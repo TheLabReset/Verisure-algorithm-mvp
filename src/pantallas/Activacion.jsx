@@ -11,6 +11,7 @@ import { MarcoCapa, SeccionDe, sinDato } from './comun.jsx';
 import { resumenTitulo } from '../textos/comun.js';
 import { pushPullLectura, objetivosPie, monedaNota, plataformasTiempoLectura, plataformasTablaLectura, frenteObjetivoTexto, comparadoTexto, estadoObjetivo, extremoTexto, extremosAyuda, semanaRotulo } from '../textos/lecturas.js';
 import { MARGEN_OBJETIVO, SEMANAS_OBJETIVO, extremos } from '../calculo/plataformas.js';
+import Piezas from './Piezas.jsx';
 
 const SEMANAS_A_LA_VISTA = 12; // como el tablero del cliente: el trimestre que termina en el período
 const TONO = { bien: 'mejora', cerca: null, lejos: 'empeora' };
@@ -102,7 +103,7 @@ function TablaPlataformas({ x }) {
 }
 
 export default function Activacion({ capa, vista: v }) {
-  const [s31, s32, s33] = capa.secciones;
+  const [s31, s32, s33, s34] = capa.secciones;
   const P = v.periodo, x = v.ejemplo.plataformas;
   const [elegida, setPlataforma] = useState('meta');
   const [escala, setEscala] = useState('semanas');
@@ -202,6 +203,8 @@ export default function Activacion({ capa, vista: v }) {
           </Bloque>
         </Detalle>
       </SeccionDe>
+
+      <Piezas def={s34} vista={v} cambios={x.cambios} />
     </MarcoCapa>
   );
 }

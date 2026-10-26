@@ -446,6 +446,10 @@ export function textosDelAbanico(anio, { uno = 'versión', varios = 'versiones',
     texto: () => '',
     titulo: (x) => (x.titulo === x.titulo.toUpperCase() ? version(x.titulo) : x.titulo),
     sinContenido: null,
+    // lo nuevo: el sello y, si los nuevos van aparte, el rótulo de cada fila
+    nuevo: 'Nuevo',
+    nuevos: (n) => `${numero(n)} ${segun(n, 'motivo nuevo', 'motivos nuevos')}`,
+    siguen: (n) => `${numero(n)} ${segun(n, 'motivo que ya venía', 'motivos que ya venían')}`,
   };
 }
 
@@ -674,3 +678,48 @@ export const extremosAyuda = (unidad) => {
 
 export const estadoObjetivo = (e) => ({ bien: 'En objetivo', cerca: `Hasta ${porcentaje(MARGEN_OBJETIVO)} por encima`, lejos: `Más de ${porcentaje(MARGEN_OBJETIVO)} por encima` }[e] ?? null);
 export { fechaSinAnio };
+
+// ── Piezas y campañas (capa 3): lo que reporta cada plataforma, con un estado por pieza ──
+export const ESTADO_PIEZA = {
+  'sin-leads': 'Sin leads', cara: 'Cara', cansada: 'Se cansó', rinde: 'Rinde', 'en-linea': 'En línea', aprendiendo: 'Aprende', 'poca-data': 'Poca inversión',
+};
+const NIVEL_PIEZA = { pieza: ['pieza', 'piezas', true], conjunto: ['conjunto', 'conjuntos', false], campana: ['campaña', 'campañas', true] };
+const veces = (r) => numero(r, r < 10 ? 1 : 0);
+// La frase de cada fila: el dato que explica su estado, corto
+export function piezaDato(p) {
+  const masCaro = p.base && p.cpl ? (p.cpl / p.base - 1) * 100 : null;
+  switch (p.estado) {
+    case 'sin-leads': return p.nivel === 'pieza' ? `Ni un lead en ${numero(p.edad)} ${segun(p.edad, 'día', 'días')} al aire` : `${dolares(p.inversion)} sin un lead`;
+    case 'cara': return `Su lead cuesta ${porcentaje(masCaro)} más que el promedio`;
+    case 'rinde': return `Su lead cuesta ${porcentaje(-masCaro)} menos que el promedio`;
+    case 'cansada': return `Su lead cuesta ${veces(p.fatiga)} veces lo de sus primeras semanas`;
+    case 'aprendiendo': return `${numero(p.edad)} ${segun(p.edad, 'día', 'días')} al aire: todavía aprende`;
+    case 'poca-data': return 'Todavía gastó poco para juzgarla';
+    default: return 'Cerca del promedio de su plataforma';
+  }
+}
+// El título y la lectura: cuántas piden mirarse y cuánto se llevan; las que rinden, para comparar
+export function piezasLectura(x, nivel = 'pieza') {
+  const [uno, varios, fem] = NIVEL_PIEZA[nivel];
+  const filas = nivel === 'pieza' ? x.piezas : nivel === 'conjunto' ? x.conjuntos : x.campanas;
+  const n = (e) => filas.filter((f) => f.estado === e).length;
+  const caro = fem ? ['salió cara', 'salieron caras'] : ['salió caro', 'salieron caros'], cansado = ['se cansó', 'se cansaron'];
+  const partes = [['sin-leads', 'gastó sin traer leads', 'gastaron sin traer leads'], ['cara', ...caro], ['cansada', ...cansado]]
+    .map(([e, s1, p1]) => [n(e), s1, p1]).filter(([k]) => k > 0);
+  const revisar = filas.filter((f) => ['sin-leads', 'cara', 'cansada'].includes(f.estado));
+  const inv = revisar.reduce((s1, f) => s1 + f.inversion, 0), rinden = n('rinde');
+  const titulo = partes.length
+    ? capital(lista(partes.slice(0, 2).map(([k, s1, p1], i) => `${enLetras(k, fem)}${i === 0 ? ` ${segun(k, uno, varios)}` : ''} ${segun(k, s1, p1)}`)))
+    : `${fem ? 'Ninguna' : 'Ningún'} ${uno} gastó sin traer leads ni ${caro[0]}`;
+  const lectura = [
+    revisar.length ? `${segun(revisar.length, fem ? 'Esa se llevó' : 'Ese se llevó', fem ? 'Entre todas se llevaron' : 'Entre todos se llevaron')} ${dolares(inv)}, el ${porcentaje((inv / x.total) * 100)} de la inversión.` : null,
+    rinden ? `${capital(enLetras(rinden, fem))} ${segun(rinden, 'rindió', 'rindieron')} con un lead mucho más barato que el promedio.` : null,
+  ].filter(Boolean).join(' ');
+  return { titulo, lectura };
+}
+export function piezasAyuda(U) {
+  return `Leads de la plataforma, no del CRM: a este nivel no hay bookings. Cada fila se compara con el costo por lead de su plataforma en el período. `
+    + `Aprende: menos de ${U.diasAprendizaje} días al aire (TikTok lo pide en su guía). Se cansó: su lead de los últimos ${U.diasReciente} días cuesta ${numero(U.vecesFatiga)} veces el de antes (el criterio de fatiga de Meta). `
+    + `Aprendizaje limitado: un conjunto de Meta o TikTok con menos de ${U.resultadosSemana} leads en ${U.diasReciente} días (Meta y TikTok). `
+    + `Por costumbre de la industria, no de las plataformas: se juzga recién cuando gastó ${U.vecesGasto} veces el costo por lead de su plataforma; sin leads hasta ahí, va Sin leads; cara o rinde si su lead cuesta ${numero(U.vecesCara, 1)} veces más o menos que el promedio.`;
+}
