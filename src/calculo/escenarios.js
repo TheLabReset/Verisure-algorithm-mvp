@@ -55,7 +55,7 @@ export const ESCENARIOS = [
   },
   {
     id: 'competencia-apagada', titulo: 'La competencia se apaga',
-    que: 'La competencia no tiene registros en el último mes: ni pauta, ni estrenos, ni paneles.',
+    que: 'La competencia no tiene registros en el último mes: ni pauta, ni estrenos, ni elementos.',
     aplicar(d) { const m = ultimoMes(d); apagar(d, RIVAL, (f) => mesDe(f) === m); },
   },
   {
@@ -87,13 +87,13 @@ export const ESCENARIOS = [
     },
   },
   {
-    id: 'sin-paneles', titulo: 'Sin paneles',
-    que: 'Integrametrics no registra ningún panel en todo el año.',
+    id: 'sin-paneles', titulo: 'Sin elementos',
+    que: 'Integrametrics no registra ningún elemento en todo el año.',
     aplicar(d) { d.contrato.ooh = []; },
   },
   {
-    id: 'muchos-paneles', titulo: 'Diez veces más paneles',
-    que: 'Cada panel se repite diez veces alrededor de su sitio, y aparecen paneles en otras ciudades.',
+    id: 'muchos-paneles', titulo: 'Diez veces más elementos',
+    que: 'Cada elemento se repite diez veces alrededor de su sitio, y aparecen elementos en otras ciudades.',
     aplicar(d) {
       const base = d.contrato.ooh;
       const ciudades = [['Cusco', -13.5226, -71.9673], ['Piura', -5.1945, -80.6328], ['Chiclayo', -6.7714, -79.8409], ['Huancayo', -12.0651, -75.2049], ['Iquitos', -3.7437, -73.2516]];

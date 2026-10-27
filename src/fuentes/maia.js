@@ -54,7 +54,7 @@ export const responder = ({ clave, modelo, contexto, pregunta, historial, fetchI
 export function pedidoReporte(semana) {
   return `Escribe la lectura de MAIA para la semana del ${semana.desde} al ${semana.hasta}. Estos son los hechos de la semana, ya calculados:
 ${semana.hechos.map((h) => `- ${h.titulo}. ${h.dato}`).join('\n')}
-Escribe tres párrafos cortos como máximo: primero lo que hizo ${competencia}, después ${CLIENTE.nombre} y al final las búsquedas de cámaras DIY si hay hechos. Explica qué significa cada hecho con la data del contexto (meses anteriores, versiones, paneles). No repitas la lista; no uses títulos ni viñetas.`;
+Escribe tres párrafos cortos como máximo: primero lo que hizo ${competencia}, después ${CLIENTE.nombre} y al final las búsquedas de cámaras DIY si hay hechos. Explica qué significa cada hecho con la data del contexto (meses anteriores, versiones, elementos OOH). No repitas la lista; no uses títulos ni viñetas.`;
 }
 export const redactarReporte = ({ clave, modelo, contexto, semana, fetchImpl }) =>
   pedirClaude({ clave, modelo, contexto, mensajes: [{ role: 'user', content: pedidoReporte(semana) }], maxTokens: 900, fetchImpl });

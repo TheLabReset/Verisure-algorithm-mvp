@@ -17,7 +17,7 @@ export const CAPAS = [
       { id: 's-1-1', numero: '1.1', titulo: 'Digital', pregunta: `¿Qué piezas y mensajes digitales nuevos tuvo ${yOtras} en el período?`, universos: ['digital'], fuentes: ['digital'] },
       { id: 's-1-2', numero: '1.2', titulo: 'TV y cable', pregunta: `¿Qué emitió ${yOtras} en TV y cable, en qué programas y con qué tipo de aviso?`, universos: ['atl'], fuentes: ['atl'] },
       { id: 's-1-3', numero: '1.3', titulo: 'Radio', pregunta: `¿Qué emitió ${yOtras} en radio, en qué emisoras y programas?`, universos: ['atl'], fuentes: ['atl'] },
-      { id: 's-1-4', numero: '1.4', titulo: 'OOH', pregunta: '¿Dónde están los paneles de cada marca y qué pieza lleva cada uno?', universos: ['atl'], fuentes: ['atl'] },
+      { id: 's-1-4', numero: '1.4', titulo: 'OOH', pregunta: '¿Dónde están los elementos de cada marca y qué pieza lleva cada uno?', universos: ['atl'], fuentes: ['atl'] },
       { id: 's-1-5', numero: '1.5', titulo: 'Tendencias', pregunta: '¿Qué marcas de cámaras se buscan en Google y qué se comenta en TikTok y Facebook?', universos: ['busquedas', 'conversacion'], fuentes: ['trends', 'apify'] },
     ],
   },

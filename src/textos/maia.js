@@ -22,7 +22,7 @@ const HECHOS = {
     dato: `${lista(h.nombres.slice(0, 3).map((n) => `«${version(n)}»`))}${h.nombres.length > 3 ? ` y ${numero(h.nombres.length - 3)} más` : ''}.`,
   }),
   paneles: (h) => ({
-    titulo: `Se detectaron ${numero(h.cuantos)} ${segun(h.cuantos, 'panel', 'paneles')} de ${h.marca}`,
+    titulo: `Se detectaron ${numero(h.cuantos)} ${segun(h.cuantos, 'elemento', 'elementos')} de ${h.marca}`,
     dato: h.distritos.length ? `En ${lista(h.distritos.slice(0, 4))}${h.distritos.length > 4 ? ` y ${numero(h.distritos.length - 4)} zonas más` : ''}.` : 'Sin distrito registrado.',
   }),
   diy: (h) => ({
@@ -41,7 +41,7 @@ export const semanaTexto = (s) => `semana del ${fechaCorta(s.desde)} al ${fechaC
 
 export const PREGUNTAS = [
   `¿Qué hizo ${CLIENTE.competencia[0].nombre} esta semana?`,
-  `¿Dónde tiene paneles ${CLIENTE.competencia[0].nombre}?`,
+  `¿Dónde tiene elementos ${CLIENTE.competencia[0].nombre}?`,
   `¿Cómo va el share de inversión digital frente a ${CLIENTE.competencia[0].nombre}?`,
   '¿Qué marcas de cámaras DIY crecen?',
 ];
