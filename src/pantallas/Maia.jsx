@@ -50,7 +50,7 @@ function Reporte({ semana, reporte, corte, sinAtl }) {
 }
 
 function Consulta({ corte }) {
-  const [log, setLog] = useState([{ rol: 'maia', texto: `Pregúntame por la data del panel: lo que hizo la competencia, sus paneles, el share de inversión o las búsquedas de cámaras. La data de Integrametrics llega al ${fecha(corte)}.` }]);
+  const [log, setLog] = useState([{ rol: 'maia', texto: `Pregúntame por la data del panel: lo que hizo la competencia, sus elementos OOH, el share de inversión o las búsquedas de cámaras. La data de Integrametrics llega al ${fecha(corte)}.` }]);
   const [texto, setTexto] = useState('');
   const [pensando, setPensando] = useState(false);
   const fin = useRef(null);

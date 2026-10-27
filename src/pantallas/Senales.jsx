@@ -123,9 +123,9 @@ function OohConMarca({ v, P, tPaneles }) {
   return (
     <Bloque universo="atl" {...oohLectura(o, P, m ? { nombre: m.nombre, marcaFuente: m.id } : undefined)} avisos={avisosConMarca(v, 'ooh', marca, desdeAviso, opciones)}
       ayuda={<p>Cada círculo es una ubicación: las caras de una misma torre van juntas. El distrito sale de las coordenadas de Integrametrics y los límites de OpenStreetMap.</p>}
-      pie={<span>Paneles detectados en el período · mapa base © colaboradores de OpenStreetMap.</span>}>
+      pie={<span>Elementos detectados en el período · mapa base © colaboradores de OpenStreetMap.</span>}>
       <FiltroMarca opciones={opciones} valor={marca} onCambiar={setMarca} contenedor={contenedor} />
-      {o.paneles.length > 0 ? <Ooh key={marca} o={o} t={tPaneles} nota={`detectados en ${periodoTexto(P)}`} /> : <p className="q-nota-bloque">Sin paneles detectados en el período.</p>}
+      {o.paneles.length > 0 ? <Ooh key={marca} o={o} t={tPaneles} nota={`detectados en ${periodoTexto(P)}`} /> : <p className="q-nota-bloque">Sin elementos detectados en el período.</p>}
     </Bloque>
   );
 }
@@ -164,7 +164,7 @@ export default function Senales({ capa, vista: v }) {
   const P = v.periodo, L = v.lee, E = v.ejemplo;
   const anio = P.desde.slice(0, 4);
   const [panelDe, setPanelDe] = useState(null);
-  const tPaneles = textosDelAbanico(anio, { uno: 'panel', varios: 'paneles' });
+  const tPaneles = textosDelAbanico(anio, { uno: 'elemento', varios: 'elementos' });
   const d = L.digitalSemana, tv = L.tvSemana, radio = L.radioSemana, b = v.analiza.busquedas;
   const conTrends = Boolean(b?.marcas.some((m) => m.antes != null)); // el detalle muestra un año antes solo si Trends lo trae
   const enPeriodo = (x) => x && !x.reciente;
@@ -177,7 +177,7 @@ export default function Senales({ capa, vista: v }) {
           { rotulo: `Piezas digitales nuevas de ${COMPETENCIA.nombre}`, universo: 'digital', ir: s11.id, irTexto: s11.titulo, valor: d ? numero(enPeriodo(d) ? d.piezas : 0) : null, nota: d && enPeriodo(d) ? `${numero(d.mensajes.length)} ${d.mensajes.length === 1 ? 'mensaje' : 'mensajes'}` : d?.piezas ? `la última, del ${fechaCorta(d.semana.hasta)}` : null },
           { rotulo: `Emisiones en TV y cable de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s12.id, irTexto: s12.titulo, valor: tv ? numero(enPeriodo(tv) ? tv.emisiones.length : 0) : null, nota: tv && !enPeriodo(tv) && tv.emisiones.length ? `la última, del ${fechaCorta(tv.semana.hasta)}` : tv && enPeriodo(tv) ? `${numero(tv.canales)} ${tv.canales === 1 ? 'canal' : 'canales'}` : null },
           { rotulo: `Emisiones en radio de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s13.id, irTexto: s13.titulo, valor: radio ? numero(enPeriodo(radio) ? radio.emisiones.length : 0) : null, nota: radio && !enPeriodo(radio) && radio.emisiones.length ? `la última, del ${fechaCorta(radio.semana.hasta)}` : radio && enPeriodo(radio) ? `${numero(radio.canales)} ${radio.canales === 1 ? 'emisora' : 'emisoras'}` : null },
-          { rotulo: `Paneles de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s14.id, irTexto: s14.titulo, valor: L.ooh ? numero(L.ooh.porMarca[COMPETENCIA.marcaFuente]) : null, nota: L.ooh ? `${numero(L.ooh.porMarca[CLIENTE.marcaFuente])} de ${CLIENTE.nombre}` : null },
+          { rotulo: `Elementos de ${COMPETENCIA.nombre}`, universo: 'atl', ir: s14.id, irTexto: s14.titulo, valor: L.ooh ? numero(L.ooh.porMarca[COMPETENCIA.marcaFuente]) : null, nota: L.ooh ? `${numero(L.ooh.porMarca[CLIENTE.marcaFuente])} de ${CLIENTE.nombre}` : null },
           // las marcas vigiladas: cuántas versiones se vieron por primera vez en el período, y a qué tarjeta ir
           ...(L.vigiladas ? [(() => {
             const ap = L.vigiladas.apariciones, c = L.vigiladas.contadas, s = { digital: s11, tv: s12, radio: s13, ooh: s14 }[ap[0]?.tarjeta];
@@ -199,17 +199,17 @@ export default function Senales({ capa, vista: v }) {
       </SeccionDe>
 
       <SeccionDe def={s14} vista={v}>
-        {!L.ooh ? <Bloque titulo="Dónde están los paneles" universo="atl" estado={sinDato('no-cargo')} /> : <>
+        {!L.ooh ? <Bloque titulo="Dónde están los elementos" universo="atl" estado={sinDato('no-cargo')} /> : <>
           <OohConMarca v={v} P={P} tPaneles={tPaneles} />
           {L.ooh.paneles.length > 0 && (
-            <Detalle id={`detalle-${s14.id}`} titulo="Detalle de OOH" bajada={`Paneles de ${COMPETENCIA.nombre} y ${CLIENTE.nombre} detectados en ${periodoTexto(P)}.`} vistas={['paneles por distrito', 'la pieza de cada panel']}>
+            <Detalle id={`detalle-${s14.id}`} titulo="Detalle de OOH" bajada={`Elementos de ${COMPETENCIA.nombre} y ${CLIENTE.nombre} detectados en ${periodoTexto(P)}.`} vistas={['elementos por distrito', 'la pieza de cada panel']}>
               <Bloque universo="atl" {...distritosLectura(L.ooh)}
                 pie={<span>Lima y el Callao por distrito; fuera de Lima, por ciudad.</span>}>
-                <Tabla etiqueta="Paneles por distrito y marca" numericas={[1, 2, 3]} barra={{ columna: 3, valores: [...L.ooh.porDistrito, ...L.ooh.fueraDeLima].map((x) => x.total) }}
+                <Tabla etiqueta="Elementos por distrito y marca" numericas={[1, 2, 3]} barra={{ columna: 3, valores: [...L.ooh.porDistrito, ...L.ooh.fueraDeLima].map((x) => x.total) }}
                   columnas={['Distrito o ciudad', ...MARCAS.map(textosMarca.nombreMarca), 'Total']}
                   filas={[...L.ooh.porDistrito, ...L.ooh.fueraDeLima].map((x) => [x.nombre, ...MARCAS.map((m) => numero(x[m])), numero(x.total)])} />
               </Bloque>
-              <Bloque universo="atl" titulo="La pieza de cada panel">
+              <Bloque universo="atl" titulo="La pieza de cada elemento">
                 <Abanico lista={L.ooh.abanico} abierta={panelDe} onAbrir={setPanelDe} t={{ ...tPaneles, titulo: (x) => x.titulo }} nota={`detectados en ${periodoTexto(P)}`} propioAlFinal />
               </Bloque>
             </Detalle>

@@ -199,7 +199,7 @@ function ooh(contrato, mapa, P, MARCAS = MARCAS_SEGUIDAS) {
     id: String(p.key), marca: p.maname, nombre: nombreMarca(p.maname), propia: p.maname === PROPIA, vigilada: colorVigilada(p.maname), lat: p.lat, lng: p.lng,
     version: p.vname || null, direccion: p.direccion || null, localidad: p.localidad || null, tipo: p.tipo || null,
     desde: dia(p.firstFecha), hasta: dia(p.lastFecha || p.firstFecha), inversion: p.spend || 0, asset: p.asset || null,
-    pieza: pieza({ ...p, firstEmission: p.firstFecha }, { titulo: p.direccion || p.localidad || 'Panel sin dirección', texto: p.vname ? `«${p.vname}»` : '', plataformas: [p.tipo, p.localidad].filter(Boolean) }),
+    pieza: pieza({ ...p, firstEmission: p.firstFecha }, { titulo: p.direccion || p.localidad || 'Elemento sin dirección', texto: p.vname ? `«${p.vname}»` : '', plataformas: [p.tipo, p.localidad].filter(Boolean) }),
   });
   const lista = paneles.map(conPieza);
   // distrito y ciudad de cada panel, ya asignados por coordenadas

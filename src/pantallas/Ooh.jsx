@@ -15,21 +15,21 @@ function Ficha({ ubicacion, paneles, onVerTodos }) {
   const [intento, setIntento] = useState(0); // al reintentar, la foto o el video se piden de nuevo
   const [ampliada, setAmpliada] = useState(false);
   const p = paneles[Math.min(i, paneles.length - 1)];
-  if (!p) return <p className="q-nota-bloque">Elige un punto del mapa para ver su panel.</p>;
+  if (!p) return <p className="q-nota-bloque">Elige un punto del mapa para ver su elemento.</p>;
   const a = p.asset;
-  const alt = `Foto del panel de ${p.nombre}${p.version ? `, versión ${version(p.version)}` : ''}`;
+  const alt = `Foto del elemento de ${p.nombre}${p.version ? `, versión ${version(p.version)}` : ''}`;
   return (
     <div className="q-ficha-panel" aria-live="polite">
       {a?.kind === 'image' && <VisorFoto abierto={ampliada} onCerrar={() => setAmpliada(false)} src={a.url} alt={alt} titulo={panelTitulo(p)} bajada={p.nombre} />}
       {/* un video lleva su barra de controles debajo: el recuadro crece para que el video no la tape */}
       <div className={`q-ficha-arte${a?.kind === 'video' && fallo !== p.id ? ' q-ficha-arte-video' : ''}`}>
-        {fallo === p.id ? <span className="q-ficha-sin-arte">{a.kind === 'video' ? 'El video' : 'La foto'} de este panel no cargó.<button type="button" className="q-boton q-boton-chico q-ficha-reintentar" onClick={() => { setFallo(null); setIntento((n) => n + 1); }}>Reintentar</button></span>
+        {fallo === p.id ? <span className="q-ficha-sin-arte">{a.kind === 'video' ? 'El video' : 'La foto'} de este elemento no cargó.<button type="button" className="q-boton q-boton-chico q-ficha-reintentar" onClick={() => { setFallo(null); setIntento((n) => n + 1); }}>Reintentar</button></span>
           : a?.kind === 'image' ? <>
             <img key={intento} src={a.url} alt={alt} referrerPolicy="no-referrer" onError={() => setFallo(p.id)} />
-            <button type="button" className="q-ficha-ampliar" onClick={() => setAmpliada(true)} aria-label="Ampliar la foto del panel"><span className="q-ficha-ampliar-icono" aria-hidden="true"><Maximize2 size={16} /></span></button>
+            <button type="button" className="q-ficha-ampliar" onClick={() => setAmpliada(true)} aria-label="Ampliar la foto del elemento"><span className="q-ficha-ampliar-icono" aria-hidden="true"><Maximize2 size={16} /></span></button>
           </>
-          : a?.kind === 'video' ? <Reproductor key={`${p.id}-${intento}`} tipo="video" src={a.url} etiqueta={`Video del panel de ${p.nombre}`} onError={() => setFallo(p.id)} />
-          : <span className="q-ficha-sin-arte">Integrametrics no captó la foto de este panel</span>}
+          : a?.kind === 'video' ? <Reproductor key={`${p.id}-${intento}`} tipo="video" src={a.url} etiqueta={`Video del elemento de ${p.nombre}`} onError={() => setFallo(p.id)} />
+          : <span className="q-ficha-sin-arte">Integrametrics no captó la foto de este elemento</span>}
       </div>
       <div className="q-ficha-cuerpo">
         <span className={`q-ficha-marca${ubicacion.foco || ubicacion.vigilada ? ' q-ficha-foco' : ''}`}>{ubicacion.vigilada && <span className={`q-muestra q-muestra-vigilada-${ubicacion.vigilada}`} aria-hidden="true" />}{p.nombre}</span>
@@ -47,7 +47,7 @@ function Ficha({ ubicacion, paneles, onVerTodos }) {
             {paneles.map((x, k) => <button key={x.id} type="button" className="q-chip q-chip-boton" aria-pressed={k === i} onClick={() => setI(k)}>{k + 1}</button>)}
           </div>
         )}
-        <button type="button" className="q-boton q-boton-quieto q-ficha-todos" onClick={onVerTodos} data-ver-paneles={p.nombre}>Ver todos los paneles de {p.nombre}</button>
+        <button type="button" className="q-boton q-boton-quieto q-ficha-todos" onClick={onVerTodos} data-ver-paneles={p.nombre}>Ver todos los elementos de {p.nombre}</button>
       </div>
     </div>
   );
@@ -83,14 +83,14 @@ export default function Ooh({ o, t, nota }) {
       <div className="q-ooh-mapa">
         <Suspense fallback={<div className="q-mapa q-mapa-cargando">Cargando el mapa…</div>}>
           <MapaPaneles key={o.zonas.map((z) => z.nombre).join()} ubicaciones={ubicaciones} elegida={id} onElegir={setElegida} encuadre={encuadre} contornos={o.contornos}
-            etiqueta={`Mapa de paneles OOH en ${actual?.nombre ?? 'Lima'}`} textoGrupo={grupoPanelesTexto} rotulo={rotulo} />
+            etiqueta={`Mapa de elementos OOH en ${actual?.nombre ?? 'Lima'}`} textoGrupo={grupoPanelesTexto} rotulo={rotulo} />
         </Suspense>
         <ul className="q-leyenda" aria-hidden="true">
           {[...new Map(o.ubicaciones.map((x) => [x.nombre, x])).values()].sort((a, b) => Number(Boolean(b.foco || b.vigilada)) - Number(Boolean(a.foco || a.vigilada))).map((x) => <li key={x.nombre}><span className={`q-muestra ${x.vigilada ? `q-muestra-vigilada-${x.vigilada}` : x.foco ? 'q-muestra-mapa-foco' : x.propia ? 'q-muestra-mapa-propia' : 'q-muestra-mapa-resto'}`} />{x.nombre}</li>)}
           <li className="q-nota">El tamaño de cada círculo sigue a su inversión estimada.</li>
         </ul>
       </div>
-      <aside className="q-ooh-ficha" aria-label="Panel elegido">
+      <aside className="q-ooh-ficha" aria-label="Elemento elegido">
         {u && <Ficha key={u.id} ubicacion={u} paneles={paneles} onVerTodos={() => setVentana(u.nombre)} />}
       </aside>
       <VentanaAnuncios grupo={grupo} onCerrar={() => setVentana(null)} t={{ ...t, titulo: (x) => x.titulo }} nota={nota}

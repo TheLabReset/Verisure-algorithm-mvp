@@ -196,31 +196,31 @@ export function abanicoDigitalLectura(a, P) {
 
 // ── 1.2 OOH ──
 export function oohLectura(o, P, r = CLIENTE.competencia[0]) {
-  const titulo = 'Dónde están los paneles';
-  if (!o.paneles.length) return { titulo, lectura: `Integrametrics no detectó paneles de las marcas que se siguen en ${periodoTexto(P)}.` };
+  const titulo = 'Dónde están los elementos';
+  if (!o.paneles.length) return { titulo, lectura: `Integrametrics no detectó elementos de las marcas que se siguen en ${periodoTexto(P)}.` };
   const nr = o.porMarca[r.marcaFuente], np = o.porMarca[CLIENTE.marcaFuente];
   // todas las ciudades donde está la competencia fuera de Lima; si la propia no tiene ninguna, se dice
   const fuera = o.fueraDeLima.filter((c) => c.nombre !== 'Sin coordenadas' && c[r.marcaFuente] > 0);
   const propiaFuera = o.fueraDeLima.some((c) => c.nombre !== 'Sin coordenadas' && c[CLIENTE.marcaFuente] > 0);
   // quien no tiene paneles se dice en palabras, no como «0 paneles»
-  const deR = nr ? `${r.nombre} tiene ${numero(nr)} ${segun(nr, 'panel detectado', 'paneles detectados')} en ${periodoTexto(P)}` : `${r.nombre} no tiene paneles detectados en ${periodoTexto(P)}`;
+  const deR = nr ? `${r.nombre} tiene ${numero(nr)} ${segun(nr, 'elemento detectado', 'elementos detectados')} en ${periodoTexto(P)}` : `${r.nombre} no tiene elementos detectados en ${periodoTexto(P)}`;
   const deP = nr ? (np ? ` y ${CLIENTE.nombre} ${numero(np)}` : `; ${CLIENTE.nombre}, ninguno`) : `; ${CLIENTE.nombre} tiene ${numero(np)}`;
-  return { titulo, lectura: `${deR}${deP}.${fuera.length ? ` Fuera de Lima, ${r.nombre} tiene paneles en ${lista(fuera.map((c) => `${c.nombre} (${numero(c[r.marcaFuente])})`))}${np && !propiaFuera ? `; ${CLIENTE.nombre}, en ninguna ciudad` : ''}.` : ''}` };
+  return { titulo, lectura: `${deR}${deP}.${fuera.length ? ` Fuera de Lima, ${r.nombre} tiene elementos en ${lista(fuera.map((c) => `${c.nombre} (${numero(c[r.marcaFuente])})`))}${np && !propiaFuera ? `; ${CLIENTE.nombre}, en ninguna ciudad` : ''}.` : ''}` };
 }
 export function distritosLectura(o) {
-  const titulo = 'Paneles por distrito';
+  const titulo = 'Elementos por distrito';
   const d = o.porDistrito;
-  if (!d.length) return { titulo, lectura: 'Sin paneles en Lima en el período.' };
+  if (!d.length) return { titulo, lectura: 'Sin elementos en Lima en el período.' };
   // la competencia primero: su distrito con más paneles; si no tiene en Lima, el de la marca propia
   const [r] = CLIENTE.competencia;
   const quien = d.some((x) => x[r.marcaFuente] > 0) ? r : d.some((x) => x[CLIENTE.marcaFuente] > 0) ? { nombre: CLIENTE.nombre, marcaFuente: CLIENTE.marcaFuente } : null;
-  if (!quien) return { titulo, lectura: 'Sin paneles de las marcas en Lima en el período.' };
+  if (!quien) return { titulo, lectura: 'Sin elementos de las marcas en Lima en el período.' };
   const k = quien.marcaFuente, tope = Math.max(...d.map((x) => x[k] || 0));
   const empatados = d.filter((x) => x[k] === tope);
-  const nadaR = quien !== r ? `${r.nombre} no tiene paneles en Lima. ` : '';
-  return { titulo, lectura: `${nadaR}${empatados.length > 3 ? `${quien.nombre} tiene como máximo ${numero(tope)} ${segun(tope, 'panel', 'paneles')} por distrito, en ${enLetras(empatados.length)} distritos` : `${lista(empatados.map((x) => x.nombre))} ${empatados.length > 1 ? 'son los distritos' : 'es el distrito'} con más paneles de ${quien.nombre} (${numero(tope)}${empatados.length > 1 ? ' cada uno' : ''})`}.` };
+  const nadaR = quien !== r ? `${r.nombre} no tiene elementos en Lima. ` : '';
+  return { titulo, lectura: `${nadaR}${empatados.length > 3 ? `${quien.nombre} tiene como máximo ${numero(tope)} ${segun(tope, 'elemento', 'elementos')} por distrito, en ${enLetras(empatados.length)} distritos` : `${lista(empatados.map((x) => x.nombre))} ${empatados.length > 1 ? 'son los distritos' : 'es el distrito'} con más elementos de ${quien.nombre} (${numero(tope)}${empatados.length > 1 ? ' cada uno' : ''})`}.` };
 }
-export const panelTitulo = (p) => p.direccion || [p.tipo && version(p.tipo), p.distrito || p.localidad].filter(Boolean).join(' en ') || 'Panel sin dirección';
+export const panelTitulo = (p) => p.direccion || [p.tipo && version(p.tipo), p.distrito || p.localidad].filter(Boolean).join(' en ') || 'Elemento sin dirección';
 // Un círculo del mapa que junta varias ubicaciones de una marca: su título y su pista, y cómo se nombra cada una en la lista
 export function grupoPanelesTexto(us) {
   const caras = us.reduce((s, u) => s + u.paneles.length, 0), inversion = us.reduce((s, u) => s + u.inversion, 0);
@@ -370,7 +370,7 @@ const ALERTAS = {
   'pocos-dias': (a) => ({
     titulo: `El período tiene ${enLetras(a.dias)} ${segun(a.dias, 'día', 'días')} con data`,
     dato: `Las subidas, bajadas y cambios de share se leen desde el día ${numero(a.minimo)}; antes, un solo día raro las movería.`,
-    mirar: 'Los estrenos y los paneles nuevos, que sí se leen desde el primer día.',
+    mirar: 'Los estrenos y los elementos nuevos, que sí se leen desde el primer día.',
   }),
   'pico-competencia': (a) => ({
     titulo: `${a.marca} tuvo un día de inversión ATL fuera de lo normal`,
@@ -389,9 +389,9 @@ const ALERTAS = {
   }),
   'paneles-competencia': (a) => ({
     // la base son los 90 días anteriores al período (Integrametrics detecta los paneles a saltos)
-    titulo: `${a.marca} tiene paneles en ${lista(a.zonas)}, donde no tenía en los 90 días anteriores`,
-    dato: `${numero(a.cuantos)} ${segun(a.cuantos, 'panel detectado', 'paneles detectados')} en ${per(a)}.`,
-    mirar: `Qué versión lleva cada panel y si se cruza con las zonas de ${CLIENTE.nombre}.`,
+    titulo: `${a.marca} tiene elementos en ${lista(a.zonas)}, donde no tenía en los 90 días anteriores`,
+    dato: `${numero(a.cuantos)} ${segun(a.cuantos, 'elemento detectado', 'elementos detectados')} en ${per(a)}.`,
+    mirar: `Qué versión lleva cada elemento y si se cruza con las zonas de ${CLIENTE.nombre}.`,
   }),
   // una marca vigilada (solo capa 1) con una versión que se ve por primera vez en el período, en su tarjeta
   'aparicion-vigilada': (a) => ({
@@ -467,7 +467,7 @@ export function aparicionesNota(apariciones, marcas, contadas) {
   return `de ${lista([...new Set(apariciones.map((a) => a.nombre))])}${parcial}`;
 }
 // el botón del aviso de una vigilada: elige su marca en el filtro de la tarjeta (con su nombre para el lector de pantalla)
-export const ACCION_VIGILADA = { digital: 'Ver sus piezas', tv: 'Ver sus emisiones', radio: 'Ver sus emisiones', ooh: 'Ver sus paneles' };
+export const ACCION_VIGILADA = { digital: 'Ver sus piezas', tv: 'Ver sus emisiones', radio: 'Ver sus emisiones', ooh: 'Ver sus elementos' };
 export const accionVigiladaEtiqueta = (tarjeta, nombre) => `${ACCION_VIGILADA[tarjeta].replace('sus', 'las')} de ${nombre}`;
 
 export function digitalSemanaLectura(d, COMP = COMP_PRINCIPAL) {
