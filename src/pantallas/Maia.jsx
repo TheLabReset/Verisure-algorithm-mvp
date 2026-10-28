@@ -3,7 +3,7 @@
 // pipeline. La consulta va a la función de Netlify. Si MAIA no está conectada, el panel lo dice: no simula respuestas.
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUp } from 'lucide-react';
-import { PanelLateral, Grupo } from '../sistema/Componentes.jsx';
+import { PanelLateral, Grupo, BotonFiltro } from '../sistema/Componentes.jsx';
 import { fecha } from '../sistema/formato.js';
 import { GRUPOS_MAIA, hechoTexto, semanaTexto, PREGUNTAS } from '../textos/maia.js';
 import { preguntarMaia } from '../fuentes/maia-navegador.js';
@@ -74,7 +74,7 @@ function Consulta({ corte }) {
         <li ref={fin} aria-hidden="true" />
       </ol>
       <div className="q-maia-sugeridas" role="group" aria-label="Preguntas sugeridas">
-        {PREGUNTAS.map((p) => <button key={p} type="button" className="q-chip q-chip-boton" onClick={() => enviar(p)} disabled={pensando}>{p}</button>)}
+        {PREGUNTAS.map((p) => <BotonFiltro key={p} onClick={() => enviar(p)} disabled={pensando}>{p}</BotonFiltro>)}
       </div>
       <form className="q-maia-form" onSubmit={(e) => { e.preventDefault(); enviar(texto); }}>
         <label className="solo-lector" htmlFor="maia-pregunta">Tu pregunta para MAIA</label>

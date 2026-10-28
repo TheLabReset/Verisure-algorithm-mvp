@@ -101,6 +101,7 @@ Se muestra solo lo que tenemos. En «Qué se monitorea» quedan a la vista las f
 | [`docs/activacion.md`](docs/activacion.md) | Qué configurar para tener la data al día y MAIA respondiendo, y las fuentes que se activan a pedido |
 | [`docs/guia-algoritmo.md`](docs/guia-algoritmo.md) | Cómo se diseña un algoritmo: capas, tarjeta, gráficos y datos honestos |
 | [`docs/quincha.md`](docs/quincha.md) | El sistema de diseño y su chequeo |
+| [`docs/guia-rapida.md`](docs/guia-rapida.md) | Qué se usa para cada cosa: la etiqueta única y su catálogo de estados, componentes, formatos de cifras y textos que se repiten |
 | [`docs/abanico.md`](docs/abanico.md) | Cómo se muestran las piezas: el abanico y su ventana |
 | [`docs/marca-verisure.md`](docs/marca-verisure.md) | La marca en el panel: colores, logo, tipografía, fuentes y supuestos |
 | [`docs/INTEGRAMETRICS-HALLAZGOS.md`](docs/INTEGRAMETRICS-HALLAZGOS.md) | Lo que se aprendió de la API de Integrametrics |

@@ -63,19 +63,22 @@ Tres papeles: **títulos y cifras** (`--f-titulo`), **texto** (`--f-texto`) y **
 
 Las cifras van en números tabulares. Si la tipografía de texto tiene el cero cruzado, se reemplazan solo los dígitos.
 
-**Escala** (`--t-13` a `--t-36`, en px): 13 para ejes, pies y chips; 14 para tablas; 16 para la lectura; 19 para el título de tarjeta; 24 para el capítulo; 28 y 36 para la cabecera de capa. Cifras: 24 y 32 (`--c-24`, `--c-32`). Pesos de la letra variable: 400 lectura, 560 rótulos, 640 cifras, 700 títulos. Se subió un escalón en octubre de 2026: la de antes (12, 13, 15, 17, 20) dejaba niveles muy pegados y lo secundario chico, más con Sofia Sans, que es más baja que una letra común (altura de x 0,49 contra 0,53 de Arial).
+**Escala** (`--t-13` a `--t-36`, en px): 13 para ejes, pies y etiquetas; 14 para tablas; 16 para la lectura; 19 para el título de tarjeta; 24 para el capítulo; 28 y 36 para la cabecera de capa. Cifras: 24 y 32 (`--c-24`, `--c-32`). Pesos de la letra variable: 400 lectura, 560 rótulos, 640 cifras, 700 títulos. Se subió un escalón en octubre de 2026: la de antes (12, 13, 15, 17, 20) dejaba niveles muy pegados y lo secundario chico, más con Sofia Sans, que es más baja que una letra común (altura de x 0,49 contra 0,53 de Arial).
 
 **Una letra condensada solo desde 24 px.** Más chica se aprieta. El título de tarjeta va en `--f-tarjeta`: la de texto si la de títulos es condensada, la de títulos si no lo es. El modo presentar sube toda la escala con `--escala-presentar`.
 
 ## 4. Componentes
 
-Están en `src/sistema/Componentes.jsx`. No calculan: reciben cifras ya armadas por `src/calculo` y textos ya escritos por `src/textos`.
+Están en `src/sistema/Componentes.jsx`. No calculan: reciben cifras ya armadas por `src/calculo` y textos ya escritos por `src/textos`. Para elegir rápido qué usar (componente, etiqueta, formato o texto), [guia-rapida.md](guia-rapida.md).
 
 | Componente | Para qué |
 |---|---|
 | `NavegacionCapas` | Las cuatro pestañas; la activa con fondo teñido y una marca redonda abajo |
 | `IndiceCapa` | «En esta capa», al costado, marca el capítulo que se está leyendo |
-| `FuentesCapa`, `ChipFuente` | Cada fuente con su fecha de corte y su estado (punto y texto) |
+| `FuentesCapa` | Cada fuente con su fecha de corte y su estado (punto y texto) |
+| `Etiqueta` | La única etiqueta chica, en cinco variantes (`borde`, `llena`, `tinta`, `texto`, `rotulo`); tono e icono salen del catálogo `src/sistema/estados.js`. Cuándo va cada una: [guia-rapida.md](guia-rapida.md) |
+| `ChipUniverso`, `ChipFuente`, `SelloEjemplo`, `SelloNuevo`, `SelloDatos`, `Tono`, `Semaforo` | Atajos de `Etiqueta`: el universo de una cifra, una fuente con problema, «Data de ejemplo», «Nuevo» (con `q-sobre-carta`, sobre un mazo), la fecha de la data en la barra, el tono de un tema y el costo frente a su objetivo |
+| `BotonFiltro` | Un botón chico que elige (preguntas sugeridas, caras de una ubicación): un control, no una etiqueta |
 | `Resumen`, `Frase` | Las cifras de la capa y, debajo, una frase por plataforma contra su objetivo. `lectura` va bajo el título; `comparado`, al pie, dice contra qué fechas se miden los cambios |
 | `Delta` | El cambio de una cifra: solo % o puntos (`unidad: 'pts'`), con flecha y color; `mejorSi`: `sube`, `baja` o `neutro` (gris) |
 | `Chispa` | La línea chica de una cifra del resumen: las últimas semanas enteras, sin ejes |
@@ -86,7 +89,6 @@ Están en `src/sistema/Componentes.jsx`. No calculan: reciben cifras ya armadas 
 | `SelectorPeriodo` | El período: atajos y dos fechas, en un panel alineado con su botón que nunca sale de la pantalla. Una fecha fuera de la data o un «Desde» después del «Hasta» se marca y se dice por qué |
 | `Reproductor` | Audio y video con botón grande, barra de avance de 44 px de toque y tiempo a la vista. Suena uno a la vez: el play de uno pausa a los demás. El video tiene pantalla completa; en una tarjeta angosta lleva arriba play, el tiempo y la pantalla completa, y abajo la barra, y los saltos de 10 segundos aparecen en pantalla completa. El audio conserva sus saltos |
 | `PiezaHtml` | Un anuncio HTML de portal en un marco aislado, reducido a la tarjeta, con pantalla completa. Solo pasan archivos del almacenamiento de Integrametrics |
-| `Semaforo` | Un costo frente a su objetivo: en objetivo, cerca o por encima, con ícono y palabra |
 | `Tabla` | Números a la derecha, barra junto a la cifra, subtítulo, tono contra el objetivo y fila destacada. `mejor` y `peor` marcan dos filas en verde y rojo claro (`--mejora-suave`, `--empeora-suave`), sin texto a la vista (lo pidió el equipo: se sobreentiende); el texto queda para el lector de pantalla y la ayuda de la tarjeta lo explica |
 | `Flujo` | Una fila por plataforma, un paso por columna (de la inversión a la inscripción) |
 | `VisorFoto` | Una foto entera en una ventana, con zoom (botones, rueda, doble clic o dos dedos) y arrastre: para las fotos de panel, que llegan verticales |
@@ -158,6 +160,7 @@ Reglas de forma:
 | Dos escalones vecinos de una rampa | 1,2:1 |
 
 6. **Colores de marca que no se confunden.** Cada `--vigilada-N` se mide en OKLab (distancia ×100) en los dos temas: 14 o más con visión normal frente a todo color que significa otra cosa (las dos marcas, medios, mejora, empeora, grises, tinta); 9 o más con daltonismo (protanopía, deuteranopía y tritanopía) frente a las dos marcas, que comparten el mapa con ellas; y 10 o más entre vigiladas, porque el panel muestra una a la vez y siempre con su nombre. En claro se separan 15 entre sí; en oscuro, 10,8, que es lo que da el violeta sobre la tarjeta oscura sin cambiar el tono de cada marca.
+7. **Una sola etiqueta:** ninguna regla fuera de `.q-etiqueta` arma una pastilla (letra de 12 o 13 px, relleno, radio y fondo o borde) y ninguna clase se llama chip, badge, insignia, pastilla, pill o tag. Un botón chico (`q-boton-…`) y lo que flota no cuentan.
 
 La última fila de la tabla es la regla de la casa: **nunca dos grises vecinos que se confundan**. Nació de una corrección real, porque los dos últimos grises de un gráfico no se distinguían.
 
