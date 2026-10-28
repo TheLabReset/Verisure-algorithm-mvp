@@ -8,7 +8,7 @@ import { ESCENARIOS, aplicarEscenario } from './calculo/escenarios.js';
 import { CAPAS } from './capas/estructura.js';
 import { fecha } from './sistema/formato.js';
 import { ventanaTexto, comparacionTexto, avisoFechas } from './textos/comun.js';
-import { NavegacionCapas, SelectorPeriodo, BarraDemo, CargandoContexto, Estado, Resguardo, unSoloMedio } from './sistema/Componentes.jsx';
+import { NavegacionCapas, SelectorPeriodo, BarraDemo, CargandoContexto, Estado, Resguardo, unSoloMedio, SelloDatos } from './sistema/Componentes.jsx';
 import Senales from './pantallas/Senales.jsx';
 import Inteligencia from './pantallas/Inteligencia.jsx';
 import Activacion from './pantallas/Activacion.jsx';
@@ -128,7 +128,7 @@ export default function App() {
             <span className="q-marca-producto"><b>The Algorithm</b><span>By The Lab</span></span>
           </a>
           <div className="q-barra-controles">
-            {data.contrato && <span className="q-sello-datos">Datos al {fecha(data.contrato.meta.lastDay)}</span>}
+            {data.contrato && <SelloDatos>Datos al {fecha(data.contrato.meta.lastDay)}</SelloDatos>}
             {vista && <BotonMaia onClick={() => setMaiaAbierta(true)} />}
             <button type="button" className="q-boton q-boton-quieto q-boton-presentar" aria-pressed={presentar} onClick={() => setPresentar((x) => !x)}>
               <Presentation size={16} aria-hidden="true" /><span>Presentar</span>

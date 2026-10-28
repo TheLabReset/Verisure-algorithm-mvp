@@ -2,19 +2,15 @@
 // (src/calculo/piezas.js). Una tabla por campaña que se abre en sus conjuntos y sus piezas, como el administrador de
 // anuncios: las campañas con algo que mirar empiezan abiertas. No calcula: pinta la vista.
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, TriangleAlert, ArrowUp, BatteryLow, CircleCheck, Hourglass, CircleDashed } from 'lucide-react';
-import { Bloque, Tabla, Grupo, Detalle, Insignia, vigente } from '../sistema/Componentes.jsx';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { Bloque, Tabla, Grupo, Detalle, Etiqueta, vigente } from '../sistema/Componentes.jsx';
 import { numero, dolares } from '../sistema/formato.js';
 import { SeccionDe, sinDato } from './comun.jsx';
 import { ESTADO_PIEZA, piezaDato, piezaPausa, piezasLectura, piezasAyuda, monedaNota } from '../textos/lecturas.js';
 import { PARA_REVISAR, UMBRALES_PIEZAS } from '../calculo/piezas.js';
 
-// cada estado en su pastilla: icono y palabra sobre su fondo, el color nunca va solo
-const INSIGNIA = {
-  'sin-leads': ['grave', TriangleAlert], costosa: ['alerta', ArrowUp], saturada: ['tinta', BatteryLow], rinde: ['bien', CircleCheck],
-  aprendizaje: ['neutro', Hourglass], 'poca-data': ['neutro', CircleDashed],
-};
-const EstadoFila = ({ f }) => { const [tono, icono] = INSIGNIA[f.estado]; return <Insignia tono={tono} icono={icono}>{ESTADO_PIEZA[f.estado]}</Insignia>; };
+// cada estado en su pastilla llena: tono e icono salen del catálogo (src/sistema/estados.js), la palabra de src/textos
+const EstadoFila = ({ f }) => <Etiqueta variante="llena" estado={f.estado}>{ESTADO_PIEZA[f.estado]}</Etiqueta>;
 const costo = (n) => (n == null ? 'sin leads' : dolares(n));
 
 function TablaArbol({ x }) {

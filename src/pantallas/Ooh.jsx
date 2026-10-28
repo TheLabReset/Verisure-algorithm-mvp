@@ -2,7 +2,7 @@
 // Lo de la competencia se elige primero. La ficha abre la ventana con todos los paneles de esa marca.
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { MapPin, Maximize2 } from 'lucide-react';
-import { Grupo, VentanaAnuncios, VisorFoto, Reproductor } from '../sistema/Componentes.jsx';
+import { Grupo, VentanaAnuncios, VisorFoto, Reproductor, BotonFiltro } from '../sistema/Componentes.jsx';
 import { numero, soles, fechaCorta } from '../sistema/formato.js';
 import { segun, version } from '../textos/comun.js';
 import { panelTitulo, grupoPanelesTexto, ubicacionEnLista } from '../textos/lecturas.js';
@@ -44,7 +44,7 @@ function Ficha({ ubicacion, paneles, onVerTodos }) {
         {paneles.length > 1 && (
           <div className="q-ficha-caras" role="group" aria-label="Caras de esta ubicación">
             <span>{numero(paneles.length)} caras en esta ubicación</span>
-            {paneles.map((x, k) => <button key={x.id} type="button" className="q-chip q-chip-boton" aria-pressed={k === i} onClick={() => setI(k)}>{k + 1}</button>)}
+            {paneles.map((x, k) => <BotonFiltro key={x.id} activo={k === i} onClick={() => setI(k)}>{k + 1}</BotonFiltro>)}
           </div>
         )}
         <button type="button" className="q-boton q-boton-quieto q-ficha-todos" onClick={onVerTodos} data-ver-paneles={p.nombre}>Ver todos los elementos de {p.nombre}</button>
