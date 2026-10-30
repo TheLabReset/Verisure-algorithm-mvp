@@ -102,3 +102,38 @@ test('maia-contexto.json está al día con la capa de cálculo', async () => {
   const commiteado = JSON.parse(readFileSync(new URL('../public/data/maia-contexto.json', import.meta.url), 'utf8'));
   assert.deepEqual(commiteado, JSON.parse(JSON.stringify(armarContexto())), 'corre npm run contexto');
 });
+
+// Vercel: el mismo sitio y la misma MAIA, sin tocar lo de Netlify
+import * as vercelMaia from '../api/maia.mjs';
+
+test('Vercel: la SPA no tapa /api, la data no se cachea y MAIA lee la clave del entorno del proceso', async () => {
+  const v = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+  assert.equal(v.outputDirectory, 'dist');
+  assert.equal(v.buildCommand, 'npm run build');
+  const spa = v.rewrites.find((r) => r.destination === '/index.html');
+  const cubre = (ruta) => new RegExp(`^${spa.source.replace('(.*)', '.*')}$`).test(ruta);
+  assert.ok(cubre('/senales') && !cubre('/api/maia'), 'la reescritura de la SPA no puede tomar /api/maia');
+  const data = v.headers.find((h) => h.source === '/data/(.*)');
+  assert.match(data.headers[0].value, /max-age=0, must-revalidate/);
+  // sin el entorno de Netlify, la función lee process.env
+  delete globalThis.Netlify;
+  const antes = process.env.ANTHROPIC_API_KEY;
+  delete process.env.ANTHROPIC_API_KEY;
+  try {
+    globalThis.fetch = () => { throw new Error('no debía llamar'); };
+    assert.equal((await vercelMaia.POST(pedido({ pregunta: 'hola' }))).status, 503);
+    assert.equal((await vercelMaia.GET(new Request('https://panel.ejemplo/api/maia'))).status, 405);
+    process.env.ANTHROPIC_API_KEY = 'clave-vercel';
+    const vistos = [];
+    globalThis.fetch = async (url, init = {}) => {
+      vistos.push({ u: String(url), init });
+      if (String(url).endsWith('/data/maia-contexto.json')) return new Response(JSON.stringify({ corte: {}, meses: [] }));
+      return new Response(JSON.stringify({ content: [{ type: 'text', text: 'ok' }] }));
+    };
+    const r = await leer(await vercelMaia.POST(pedido({ pregunta: 'hola' })));
+    assert.equal(r.cuerpo.respuesta, 'ok');
+    assert.equal(new Headers(vistos.at(-1).init.headers).get('x-api-key'), 'clave-vercel');
+  } finally {
+    if (antes === undefined) delete process.env.ANTHROPIC_API_KEY; else process.env.ANTHROPIC_API_KEY = antes;
+  }
+});

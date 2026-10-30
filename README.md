@@ -82,13 +82,21 @@ La data cubre del 1 de enero al 13 de julio de 2026. El panel dice cuántos día
 El pipeline corre en GitHub Actions ([`.github/workflows/pipeline.yml`](.github/workflows/pipeline.yml)): cada día un incremental de 7 días y el contexto de MAIA; cada domingo un backfill desde enero; cada lunes, Google Trends y la lectura de MAIA.
 
 - **Falla en rojo sin `INTEGRAMETRICS_TOKEN`**, y los lunes sin `ANTHROPIC_API_KEY`. Antes quedaba verde sin hacer nada y la data se quedó en julio sin que nadie lo notara. Las dos van en Settings, Secrets and variables, Actions.
-- **MAIA en el sitio:** la consulta usa `ANTHROPIC_API_KEY` en las variables de entorno de Netlify (y `MAIA_MODELO` si se quiere otro modelo; por omisión, `claude-opus-5-5`). Sin la clave, el panel dice que MAIA no está conectada: no simula respuestas.
+- **MAIA en el sitio:** la consulta usa `ANTHROPIC_API_KEY` en las variables de entorno del hosting (Netlify o Vercel) (y `MAIA_MODELO` si se quiere otro modelo; por omisión, `claude-opus-5-5`). Sin la clave, el panel dice que MAIA no está conectada: no simula respuestas.
 - **Google Trends** no tiene API pública: se usa la de su página, que a veces responde 429. El script reintenta con espera; si igual falla, el paso queda en rojo (asumo que responde desde los runners de GitHub; no está probado).
 - **GitHub apaga los crones de un repo público sin actividad por 60 días.** Pasó: el último commit fue el 14 de julio y el cron dejó de correr el 12 de septiembre. Con el commit diario del pipeline el repo tiene actividad todos los días; si igual se apaga, se vuelve a activar en la pestaña Actions. Si después de reactivarlo el cron sigue sin correr (pasó el 17 de octubre), se cambia algo en `.github/workflows/pipeline.yml`, por ejemplo el minuto, para que GitHub registre el horario de nuevo; mientras tanto, la data se actualiza a mano con «Run workflow».
 - **Reintentos:** un corte de red o un error 5xx o 429 de Integrametrics se reintenta dos veces (a los 3 y a los 10 segundos); un 4xx no. Antes una sola falla cortaba la corrida entera, que hace su commit al final.
 - **Minutos (medido el 16 de octubre de 2026):** cada corrida tiene unos 35 segundos fijos (preparar, instalar, pruebas y commit) y bajar la data toma entre 1,3 y 1,5 segundos por día de la ventana: 108 días tardaron 2 min 38 s y 111 días, 2 min 27 s. Se deduce: el incremental diario (7 días) dura menos de 1 minuto y GitHub cobra 1; el backfill del domingo (de enero a la fecha, unos 290 días hoy) dura unos 7 minutos y cobra 8, y crece hasta unos 9 en diciembre. Unos 65 minutos al mes, más uno o dos los lunes por Trends y MAIA. Hoy el repo es público y no paga minutos; si pasa a privado, ese es el presupuesto (ver [`docs/produccion-actions.md`](docs/produccion-actions.md)).
 - **Caché:** la data (`/data/*`) va con `max-age=0, must-revalidate`: el navegador pregunta cada vez si hay una versión nueva y, si no la hay, Netlify responde 304 sin mandar el archivo. Con una hora de caché, el panel seguía mostrando la data vieja después de una actualización.
 - **Acceso:** con `BASIC_AUTH_USER` y `BASIC_AUTH_PASSWORD` en Netlify, la función `netlify/edge-functions/auth.js` pide clave para todo el sitio, incluida la data.
+
+## Hosting: Vercel y Netlify
+
+El sitio se publica igual en los dos; ninguno depende del otro.
+
+- **Vercel** ([`vercel.json`](vercel.json)): build `npm run build`, salida `dist`, la SPA sin tapar `/api`, la data sin caché (`/data/*`, `max-age=0, must-revalidate`) y `assets/` con caché de un año. MAIA es [`api/maia.mjs`](api/maia.mjs), que reusa la función de Netlify. Para activarlo: en Vercel, *Add New → Project*, importar este repo (Vercel lee `vercel.json`) y cargar `ANTHROPIC_API_KEY` en *Settings → Environment Variables* (y `MAIA_MODELO` si se quiere otro modelo). Cada push a `main`, incluido el commit diario del pipeline, publica solo.
+- **Netlify** ([`netlify.toml`](netlify.toml)): queda como estaba, con su función de MAIA y el Basic Auth.
+- **Acceso en Vercel:** el Basic Auth es una función de Netlify y no corre en Vercel. Si el panel tiene que pedir clave allí, se usa la protección de despliegues de Vercel o se porta `auth.js` a un middleware.
 
 ## Lo que falta conectar
 
