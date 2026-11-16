@@ -77,10 +77,11 @@ export function shareLectura(v) {
   let conVerbo = false;
   const mov = ([n, u]) => {
     const m = rivalDe(u);
-    if (m.cambioPts === 0) return m.inversion > 0 || m.inversionPrevia > 0 ? `sigue en ${shareDe(m, u)} en ${n}` : `sigue sin inversión en ${n}`;
-    // entrar o salir de un universo se dice en palabras, no como un «0 %»
-    if (!(m.inversion > 0)) return `no tiene inversión en ${n} (tenía ${shareDe(m, u, true)})`;
+    // entrar o salir de un universo se dice en palabras, no como un «0 %», aunque el cambio redondee a 0 puntos
+    // (tenía menos de 1 % y ahora nada: «no tiene inversión», no «sigue en 0 %»)
+    if (!(m.inversion > 0)) return m.inversionPrevia > 0 ? `no tiene inversión en ${n} (tenía ${shareDe(m, u, true)})` : `sigue sin inversión en ${n}`;
     if (!(m.inversionPrevia > 0)) return `entra a ${n} con ${shareDe(m, u)}`;
+    if (m.cambioPts === 0) return `sigue en ${shareDe(m, u)} en ${n}`;
     const t = `${conVerbo ? '' : 'pasa '}de ${shareDe(m, u, true)} a ${shareDe(m, u)} en ${n}`;
     conVerbo = true;
     return t;
