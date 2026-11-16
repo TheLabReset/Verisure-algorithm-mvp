@@ -1,0 +1,28 @@
+# Sonda de solo lectura: qué marcas de un rubro registra Integrametrics en digital y cómo vienen escritas.
+# Corre al empujar la rama sonda/universidades (nunca en main). No hace commit ni imprime inversión.
+# Costo: unos 182 días de digital, un pedido por día; se estima entre 3 y 6 minutos por corrida.
+name: Sonda de marcas (solo lectura)
+on:
+  push:
+    branches: ['sonda/universidades']
+permissions:
+  contents: read
+concurrency:
+  group: sonda-marcas
+  cancel-in-progress: true
+jobs:
+  sonda:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      INTEGRAMETRICS_TOKEN: ${{ secrets.INTEGRAMETRICS_TOKEN }}
+    steps:
+      - name: Exigir el token
+        run: |
+          if [ -z "$INTEGRAMETRICS_TOKEN" ]; then echo "::error::Falta INTEGRAMETRICS_TOKEN"; exit 1; fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Marcas de educación en digital, últimos seis meses
+        run: node .github/sonda/sonda-marcas.mjs
