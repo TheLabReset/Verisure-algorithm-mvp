@@ -24,5 +24,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Marcas de educación en digital, últimos seis meses
+      - name: Marcas de educación en digital, de enero a mediados de mayo
+        env:
+          SONDA_DESDE: '2026-01-01'
+          SONDA_HASTA: '2026-05-16'
         run: node .github/sonda/sonda-marcas.mjs
