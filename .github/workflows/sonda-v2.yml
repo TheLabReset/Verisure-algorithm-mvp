@@ -1,0 +1,25 @@
+# Sonda de solo lectura: la misma data por la API v1 y por la v2 de Integrametrics. Corre al empujar la rama sonda/v2.
+# No hace commit ni imprime montos. Un mes de datos: unos 62 pedidos a la v1 y unos pocos a la v2; se estima 1 a 3 minutos.
+name: Sonda v1 contra v2 (solo lectura)
+on:
+  push:
+    branches: ['sonda/v2']
+permissions:
+  contents: read
+concurrency:
+  group: sonda-v2
+  cancel-in-progress: true
+jobs:
+  sonda:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      INTEGRAMETRICS_TOKEN: ${{ secrets.INTEGRAMETRICS_TOKEN }}
+      INTEGRAMETRICS_TOKEN_V2: ${{ secrets.INTEGRAMETRICS_TOKEN_V2 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: v1 contra v2, octubre de 2026
+        run: node .github/sonda/sonda-v2.mjs
